@@ -8,8 +8,10 @@ class User < ApplicationRecord
     :jwt_authenticatable, jwt_revocation_strategy: self
 
   belongs_to :organization
-  has_many :assigned_work_orders, class_name: "WorkOrder", foreign_key: :assignee_id, dependent: :nullify
+  has_many :assigned_work_orders,  class_name: "WorkOrder", foreign_key: :assignee_id,   dependent: :nullify
   has_many :requested_work_orders, class_name: "WorkOrder", foreign_key: :requester_id, dependent: :nullify
+  has_many :verified_work_orders,  class_name: "WorkOrder", foreign_key: :verified_by_id, dependent: :nullify
+  has_many :comments, dependent: :destroy
 
   validates :role, inclusion: { in: ROLES }
   validates :first_name, :last_name, presence: true

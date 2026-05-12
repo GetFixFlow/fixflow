@@ -17,6 +17,12 @@ gem "discard", "~> 0.4"
 # QR code generation
 gem "rqrcode", "~> 2.2"
 
+# Work order state machine
+gem "aasm", "~> 5.5"
+
+# Audit trail for work order state changes
+gem "paper_trail", "~> 15.0"
+
 # CORS
 gem "rack-cors"
 

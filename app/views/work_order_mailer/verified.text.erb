@@ -1,0 +1,14 @@
+Hi <%= @requester.full_name %>,
+
+Great news! Your maintenance request has been completed and verified.
+
+Work Order: <%= @work_order.work_order_number %>
+Title:      <%= @work_order.title %>
+Verified:   <%= @work_order.verified_at&.strftime("%Y-%m-%d %H:%M UTC") || "Unknown" %>
+
+Completion Notes:
+<%= @work_order.completion_notes %>
+
+Thank you for using FixFlow.
+
+— FixFlow

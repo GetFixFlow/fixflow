@@ -1,0 +1,12 @@
+Hi <%= @assignee.full_name %>,
+
+A work order has been assigned to you.
+
+Work Order: <%= @work_order.work_order_number %>
+Title:      <%= @work_order.title %>
+Priority:   <%= @work_order.priority.upcase %>
+Due Date:   <%= @work_order.due_date&.strftime("%Y-%m-%d") || "Not set" %>
+
+Please log in to FixFlow to view the full details and begin work.
+
+— FixFlow

@@ -1,6 +1,8 @@
 class Part < ApplicationRecord
   belongs_to :organization
   belongs_to :location, optional: true
+  has_many :work_order_parts, dependent: :destroy
+  has_many :work_orders, through: :work_order_parts
 
   validates :name, presence: true
   validates :quantity_on_hand, numericality: { greater_than_or_equal_to: 0 }

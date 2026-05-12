@@ -34,13 +34,25 @@ Rails.application.routes.draw do
       resources :work_orders do
         member do
           patch :assign
-          patch :transition
-          post :complete
+          patch :start
+          patch :complete
+          patch :verify
+          patch :reject
+          patch :hold
+          patch :cancel
         end
+        resources :comments,    only: %i[index create destroy]
+        resources :attachments, only: %i[index create destroy]
+        resources :parts, only: %i[create destroy], controller: "work_order_parts"
         collection do
           get :overdue
           get :unassigned
         end
+      end
+
+      scope "requests", as: "work_requests" do
+        post "/",       to: "work_requests#create", as: ""
+        get  "/:token", to: "work_requests#show",   as: "status"
       end
 
       resources :preventive_maintenances, path: "pm_schedules" do
