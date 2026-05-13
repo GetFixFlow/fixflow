@@ -38,3 +38,9 @@
       :class: Iot::CleanupReadingsJob
       :queue: scheduled
       :description: "Delete raw sensor readings older than retention period"
+
+    db_backup:
+      :cron: "0 3 * * *"
+      :class: DatabaseBackupJob
+      :queue: scheduled
+      :description: "Daily database backup to MinIO"

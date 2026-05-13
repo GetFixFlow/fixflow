@@ -3,8 +3,9 @@ module Api
     class IotController < Api::V1::BaseController
       # ── Authentication ─────────────────────────────────────────────────────
       # ingest uses API-key auth; all other actions use JWT (base default)
-      skip_before_action :authenticate_user!, only: :ingest
-      before_action :authenticate_api_key!, only: :ingest
+      skip_before_action :authenticate_user!,   only: :ingest
+      skip_before_action :set_current_context,  only: :ingest
+      before_action :authenticate_api_key!,     only: :ingest
       before_action :set_asset, only: %i[readings latest]
 
       # ── POST /api/v1/iot/ingest ────────────────────────────────────────────
@@ -104,6 +105,7 @@ module Api
 
         if api_key
           @api_organization = api_key.organization
+          ActsAsTenant.current_tenant = @api_organization
           api_key.touch_last_used
         else
           render json: { error: "Unauthorized" }, status: :unauthorized

@@ -28,14 +28,7 @@ module Fixflow
 
     config.active_job.queue_adapter = :sidekiq
 
-    config.middleware.insert_before 0, Rack::Cors do
-      allow do
-        origins ENV.fetch("CORS_ORIGINS", "http://localhost:3001").split(",")
-        resource "*",
-          headers: :any,
-          methods: [ :get, :post, :put, :patch, :delete, :options, :head ],
-          expose: [ "Authorization" ]
-      end
-    end
+    # Rack::Attack middleware for rate limiting
+    config.middleware.use Rack::Attack
   end
 end

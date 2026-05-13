@@ -7,6 +7,7 @@ class IotRule < ApplicationRecord
 
   # ─── Associations ──────────────────────────────────────────────────────────
 
+  acts_as_tenant :organization
   belongs_to :asset
   belongs_to :organization
   belongs_to :created_by,  class_name: "User", optional: true

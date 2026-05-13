@@ -1,4 +1,5 @@
 class Part < ApplicationRecord
+  acts_as_tenant :organization
   belongs_to :organization
   belongs_to :location, optional: true
   has_many :work_order_parts, dependent: :destroy

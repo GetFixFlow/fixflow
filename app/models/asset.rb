@@ -1,5 +1,6 @@
 class Asset < ApplicationRecord
   include Discard::Model
+  acts_as_tenant :organization
 
   STATUSES = %w[operational degraded down decommissioned].freeze
 
@@ -28,10 +29,9 @@ class Asset < ApplicationRecord
 
   def generate_asset_tag
     return if asset_tag.present?
-    last_tag = self.class.unscoped
-      .where("asset_tag LIKE 'FF-%'")
-      .order(asset_tag: :desc)
-      .pick(:asset_tag)
+    last_tag = ActsAsTenant.without_tenant do
+      self.class.unscoped.where("asset_tag LIKE 'FF-%'").order(asset_tag: :desc).pick(:asset_tag)
+    end
     seq = last_tag ? last_tag.delete_prefix("FF-").to_i + 1 : 1
     self.asset_tag = format("FF-%06d", seq)
   end

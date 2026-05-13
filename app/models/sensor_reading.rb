@@ -6,6 +6,7 @@ class SensorReading < ApplicationRecord
 
   # ─── Associations ──────────────────────────────────────────────────────────
 
+  acts_as_tenant :organization
   belongs_to :asset
   belongs_to :organization, optional: true
   has_many   :iot_alerts

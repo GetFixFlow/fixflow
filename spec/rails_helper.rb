@@ -26,7 +26,9 @@ RSpec.configure do |config|
   end
 
   config.around(:each) do |example|
-    DatabaseCleaner.cleaning { example.run }
+    DatabaseCleaner.cleaning do
+      ActsAsTenant.without_tenant { example.run }
+    end
   end
 end
 

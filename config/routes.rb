@@ -105,6 +105,30 @@ Rails.application.routes.draw do
       resources :users, only: %i[index show update destroy] do
         collection { get :me }
       end
+
+      # ── Dashboard ─────────────────────────────────────────────────────────
+      get "dashboard", to: "dashboard#index"
+
+      # ── Reports ───────────────────────────────────────────────────────────
+      namespace :reports do
+        get "work_orders/summary",                to: "work_orders#summary"
+        get "work_orders/mttr",                   to: "work_orders#mttr"
+        get "work_orders/backlog",                to: "work_orders#backlog"
+        get "work_orders/technician_performance", to: "work_orders#technician_performance"
+
+        get "assets/health",                      to: "assets#health"
+        get "assets/cost_analysis",               to: "assets#cost_analysis"
+        get "assets/:id/history",                 to: "assets#history", as: :asset_history
+
+        get "pm/compliance",                      to: "pm#compliance"
+        get "pm/schedule_forecast",               to: "pm#schedule_forecast"
+
+        get "iot/alert_summary",                  to: "iot#alert_summary"
+        get "iot/sensor_trends",                  to: "iot#sensor_trends"
+      end
+
+      # ── Activity logs ─────────────────────────────────────────────────────
+      resources :activity_logs, only: [:index]
     end
   end
 end

@@ -1,4 +1,5 @@
 class WorkOrder < ApplicationRecord
+  acts_as_tenant :organization
   include AASM
 
   has_paper_trail only: %i[status assignee_id verified_by_id completed_at verified_at]
@@ -51,46 +52,51 @@ class WorkOrder < ApplicationRecord
 
     event :assign do
       transitions from: %i[open on_hold pending_parts in_progress], to: :assigned
-      after { NotifyAssigneeJob.perform_later(id) }
+      after { NotifyAssigneeJob.perform_later(id); log_activity("assigned") }
     end
 
     event :start do
       transitions from: :assigned, to: :in_progress
       before { self.started_at ||= Time.current }
+      after  { log_activity("started") }
     end
 
     event :hold do
       transitions from: :in_progress, to: :on_hold
+      after { log_activity("put_on_hold") }
     end
 
     event :need_parts do
       transitions from: :in_progress, to: :pending_parts
+      after { log_activity("waiting_for_parts") }
     end
 
     event :resume do
       transitions from: %i[on_hold pending_parts], to: :in_progress
+      after { log_activity("resumed") }
     end
 
     event :complete do
       transitions from: :in_progress, to: :completed, guard: :completion_notes_present?
       before { self.completed_at = Time.current }
-      after  { NotifyManagerJob.perform_later(id) }
+      after  { NotifyManagerJob.perform_later(id); log_activity("completed") }
     end
 
     event :verify do
       transitions from: :completed, to: :verified, guard: :verifier_differs_from_assignee?
       before { self.verified_at = Time.current }
-      after  { NotifyRequesterJob.perform_later(id) }
+      after  { NotifyRequesterJob.perform_later(id); log_activity("verified") }
     end
 
     event :reject do
       transitions from: :completed, to: :in_progress
       before { self.completed_at = nil }
-      after  { NotifyAssigneeJob.perform_later(id) }
+      after  { NotifyAssigneeJob.perform_later(id); log_activity("rejected") }
     end
 
     event :cancel do
       transitions from: %i[open assigned in_progress on_hold pending_parts completed], to: :cancelled
+      after { log_activity("cancelled") }
     end
   end
 
@@ -111,12 +117,19 @@ class WorkOrder < ApplicationRecord
 
   private
 
+  def log_activity(action)
+    ActivityLogService.log(
+      action:   "work_order.#{action}",
+      resource: self,
+      metadata: { status: status, work_order_number: work_order_number }
+    )
+  end
+
   def generate_work_order_number
     return if work_order_number.present?
-    last = self.class.unscoped
-      .where("work_order_number LIKE 'WO-%'")
-      .order(work_order_number: :desc)
-      .pick(:work_order_number)
+    last = ActsAsTenant.without_tenant do
+      self.class.unscoped.where("work_order_number LIKE 'WO-%'").order(work_order_number: :desc).pick(:work_order_number)
+    end
     seq = last ? last.delete_prefix("WO-").to_i + 1 : 1
     self.work_order_number = format("WO-%06d", seq)
   end

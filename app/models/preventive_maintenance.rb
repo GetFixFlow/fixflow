@@ -1,4 +1,6 @@
 class PreventiveMaintenance < ApplicationRecord
+  acts_as_tenant :organization
+
   # ─── Enums ────────────────────────────────────────────────────────────────
 
   enum :frequency_type, {

@@ -3,6 +3,7 @@ class ApiKey < ApplicationRecord
 
   # ─── Associations ──────────────────────────────────────────────────────────
 
+  acts_as_tenant :organization
   belongs_to :organization
 
   # ─── Validations ───────────────────────────────────────────────────────────
