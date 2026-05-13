@@ -28,6 +28,7 @@ gem "rack-cors"
 
 # Background jobs
 gem "sidekiq", "~> 7.3"
+gem "sidekiq-scheduler", "~> 5.0"
 gem "redis", "~> 5.0"
 
 # IoT / MQTT

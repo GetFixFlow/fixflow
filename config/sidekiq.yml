@@ -2,9 +2,10 @@
 :queues:
   - [critical, 3]
   - [iot, 2]
-  - [default, 1]
+  - [notifications, 2]
   - [scheduled, 1]
   - [mailers, 1]
+  - [default, 1]
 
 :scheduler:
   :schedule:
@@ -13,3 +14,15 @@
       :class: PmSchedulerJob
       :queue: scheduled
       :description: "Generate PM work orders for due schedules"
+
+    pm_due_soon:
+      :cron: "0 8 * * *"
+      :class: PmDueSoonNotificationJob
+      :queue: notifications
+      :description: "Notify technicians and managers of PMs due in 7 days"
+
+    pm_overdue:
+      :cron: "0 9 * * *"
+      :class: PmOverdueNotificationJob
+      :queue: notifications
+      :description: "Notify managers of overdue PMs and degrade assets"

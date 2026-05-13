@@ -1,0 +1,16 @@
+Hi <%= @manager.full_name %>,
+
+The following preventive maintenance schedules are overdue and require immediate attention:
+
+<% @pm_list.each do |pm| %>
+  - <%= pm.name %>
+    Asset:       <%= pm.asset&.name || "N/A" %>
+    Priority:    <%= pm.priority.upcase %>
+    Was Due:     <%= pm.next_due_at&.strftime("%Y-%m-%d") || "Unknown" %>
+    Days Overdue: <%= pm.next_due_at ? (Date.today - pm.next_due_at.to_date).to_i : "N/A" %>
+
+<% end %>
+
+Please log in to FixFlow to review and take action on these overdue PM schedules.
+
+— FixFlow

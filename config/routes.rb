@@ -55,9 +55,19 @@ Rails.application.routes.draw do
         get  "/:token", to: "work_requests#show",   as: "status"
       end
 
-      resources :preventive_maintenances, path: "pm_schedules" do
-        member { post :trigger }
-        collection { get :due }
+      resources :preventive_maintenances do
+        collection do
+          get :dashboard
+        end
+        member do
+          patch :pause
+          patch :resume
+          patch :trigger
+          get   :preview
+        end
+        resources :executions, only: %i[index], controller: "pm_executions" do
+          member { patch :skip }
+        end
       end
 
       resources :parts do
