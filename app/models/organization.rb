@@ -5,7 +5,9 @@ class Organization < ApplicationRecord
   has_many :work_orders, dependent: :destroy
   has_many :preventive_maintenances, dependent: :destroy
   has_many :parts, dependent: :destroy
-  has_many :iot_rules, dependent: :destroy
+  has_many :iot_rules,         dependent: :destroy
+  has_many :sensor_readings,   dependent: :destroy
+  has_many :api_keys,          dependent: :destroy
 
   validates :name, presence: true
   validates :subdomain, presence: true, uniqueness: true,

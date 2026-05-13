@@ -7,8 +7,10 @@ class Asset < ApplicationRecord
   belongs_to :location, optional: true
   has_many :work_orders, dependent: :nullify
   has_many :preventive_maintenances, dependent: :destroy
-  has_many :sensor_readings, dependent: :destroy
-  has_many :iot_rules, dependent: :destroy
+  has_many :sensor_readings,   dependent: :destroy
+  has_many :sensor_aggregates, dependent: :destroy
+  has_many :iot_rules,         dependent: :destroy
+  has_many :iot_alerts,        dependent: :destroy
   has_many_attached :photos
 
   validates :name, presence: true

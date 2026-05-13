@@ -1,6 +1,9 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # ActionCable
+  mount ActionCable.server => "/cable"
+
   devise_for :users,
     path: "api/v1/auth",
     path_names: { sign_in: "sign_in", sign_out: "sign_out", registration: "sign_up" },
@@ -12,8 +15,7 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       get "auth/me", to: "auth/profile#show"
-
-      get "health", to: "health#show"
+      get "health",  to: "health#show"
 
       resources :organizations, only: %i[show update]
 
@@ -56,9 +58,7 @@ Rails.application.routes.draw do
       end
 
       resources :preventive_maintenances do
-        collection do
-          get :dashboard
-        end
+        collection { get :dashboard }
         member do
           patch :pause
           patch :resume
@@ -71,21 +71,36 @@ Rails.application.routes.draw do
       end
 
       resources :parts do
-        member do
-          patch :adjust_stock
-        end
+        member     { patch :adjust_stock }
         collection { get :low_stock }
       end
 
-      resources :iot_rules do
-        collection do
-          post :ingest, to: "iot#ingest"
+      # ── IoT data ingestion (API key auth) ─────────────────────────────────
+      post "iot/ingest",              to: "iot#ingest"
+
+      # ── IoT data retrieval (JWT auth) ─────────────────────────────────────
+      get "iot/assets/:id/readings",  to: "iot#readings",  as: :iot_asset_readings
+      get "iot/assets/:id/latest",    to: "iot#latest",    as: :iot_asset_latest
+
+      # ── IoT alerts ────────────────────────────────────────────────────────
+      resources :iot_alerts, only: %i[index show] do
+        member do
+          patch :acknowledge
+          patch :resolve
         end
       end
 
-      namespace :iot do
-        post :ingest
+      # ── IoT rules management ──────────────────────────────────────────────
+      resources :iot_rules do
+        member do
+          patch :pause
+          patch :resume
+          post  :test
+        end
       end
+
+      # ── API key management (admin only) ───────────────────────────────────
+      resources :api_keys, only: %i[index create destroy]
 
       resources :users, only: %i[index show update destroy] do
         collection { get :me }

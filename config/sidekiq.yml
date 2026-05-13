@@ -26,3 +26,15 @@
       :class: PmOverdueNotificationJob
       :queue: notifications
       :description: "Notify managers of overdue PMs and degrade assets"
+
+    iot_aggregate:
+      :cron: "0 * * * *"
+      :class: Iot::AggregateReadingsJob
+      :queue: scheduled
+      :description: "Aggregate last hour of sensor readings into hourly summaries"
+
+    iot_cleanup:
+      :cron: "0 2 * * *"
+      :class: Iot::CleanupReadingsJob
+      :queue: scheduled
+      :description: "Delete raw sensor readings older than retention period"

@@ -13,6 +13,8 @@ class WorkOrder < ApplicationRecord
   belongs_to :organization
   belongs_to :asset,                   optional: true
   belongs_to :preventive_maintenance,  optional: true
+  belongs_to :iot_rule,                optional: true
+  belongs_to :iot_alert,               optional: true
   belongs_to :assignee,     class_name: "User", optional: true
   belongs_to :requester,    class_name: "User", optional: true
   belongs_to :verified_by,  class_name: "User", optional: true
