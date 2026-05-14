@@ -31,3 +31,15 @@
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 
+# macOS
+.DS_Store
+
+# Frontend
+apps/web/node_modules/
+apps/web/dist/
+apps/web/.env.development
+apps/web/.env.production
+
+# Ruby vendor
+/vendor/
+
