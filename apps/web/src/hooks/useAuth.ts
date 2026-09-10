@@ -10,7 +10,7 @@ export function useCurrentUser() {
   const { isAuthenticated } = useAuthStore()
   return useQuery({
     queryKey: ['me'],
-    queryFn: () => authApi.me().then((r) => r.data.data),
+    queryFn: () => authApi.me().then((r) => r.data),
     enabled: isAuthenticated,
   })
 }
@@ -21,8 +21,7 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: (payload: LoginPayload) => authApi.login(payload),
-    onSuccess: (response) => {
-      const { token, user } = response.data.data
+    onSuccess: ({ token, user }) => {
       setAuth(user, token)
       toast.success(`Welcome back, ${user.full_name}!`)
       navigate('/dashboard')

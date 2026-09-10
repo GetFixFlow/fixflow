@@ -28,6 +28,13 @@ module Fixflow
 
     config.active_job.queue_adapter = :sidekiq
 
+    # Devise's Warden hooks (sign_in/sign_out) write to the session even though
+    # this is a JWT-authenticated API — api_only strips session middleware by
+    # default, so add back the minimal pieces Devise needs.
+    config.session_store :cookie_store, key: "_fixflow_session"
+    config.middleware.use ActionDispatch::Cookies
+    config.middleware.use config.session_store, config.session_options
+
     # Rack::Attack middleware for rate limiting
     config.middleware.use Rack::Attack
   end

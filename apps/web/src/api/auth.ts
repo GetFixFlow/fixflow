@@ -3,14 +3,17 @@ import type { LoginPayload, RegisterPayload, User } from '@/types'
 
 export const authApi = {
   login: (payload: LoginPayload) =>
-    apiClient.post<{ data: { token: string; user: User } }>('/users/sign_in', {
-      user: payload,
-    }),
+    apiClient
+      .post<{ message: string; user: User }>('/auth/sign_in', { user: payload })
+      .then((response) => ({
+        user: response.data.user,
+        token: response.headers['authorization']?.replace(/^Bearer /, '') ?? '',
+      })),
 
   register: (payload: RegisterPayload) =>
-    apiClient.post<{ data: User }>('/users', { user: payload }),
+    apiClient.post<{ message: string; user: User }>('/auth/sign_up', { user: payload }),
 
-  logout: () => apiClient.delete('/users/sign_out'),
+  logout: () => apiClient.delete('/auth/sign_out'),
 
-  me: () => apiClient.get<{ data: User }>('/users/me'),
+  me: () => apiClient.get<User>('/auth/me'),
 }

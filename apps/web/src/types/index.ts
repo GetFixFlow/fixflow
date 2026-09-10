@@ -220,6 +220,98 @@ export interface IotAlert {
   created_at: string
 }
 
+// Extended IoT types for Session 13
+
+export type IoTOperator = 'gt' | 'lt' | 'gte' | 'lte' | 'eq' | 'outside_range'
+export type IoTRuleStatus = 'active' | 'paused' | 'archived'
+export type AlertSeverityFilter = 'critical' | 'high' | 'medium' | 'low'
+export type IoTAlertStatusFilter = 'open' | 'acknowledged' | 'resolved' | 'suppressed'
+
+// Extended IotRule with full spec fields
+export interface IotRuleExtended extends IotRule {
+  metric_name: string
+  metric_unit?: string
+  operator: IoTOperator
+  threshold_min?: number
+  threshold_max?: number
+  sustained_minutes?: number
+  status: IoTRuleStatus
+  auto_create_wo: boolean
+  wo_priority?: Priority
+  wo_assignee_id?: number
+  wo_assignee?: User
+  wo_title_template?: string
+  wo_description_template?: string
+  cooldown_minutes?: number
+  trigger_count?: number
+  last_triggered_at?: string
+  asset?: Asset
+}
+
+// Extended IotAlert with full spec fields
+export interface IotAlertExtended extends IotAlert {
+  metric_name: string
+  metric_unit?: string
+  threshold_value: number
+  threshold_operator?: IoTOperator
+  work_order_id?: number
+  work_order_number?: string
+  work_order?: WorkOrder
+  acknowledged_by?: User
+  acknowledged_note?: string
+  resolved_note?: string
+  location_path?: string
+  rule_name?: string
+  duration_minutes?: number
+}
+
+export interface IoTDashboardStats {
+  active_sensors: number
+  monitored_assets: number
+  readings_per_hour: number
+  readings_per_hour_change: number
+  open_alerts: number
+  critical_alerts: number
+  high_alerts: number
+  medium_alerts: number
+  active_rules: number
+  triggered_rules: number
+  recent_alerts: IotAlertExtended[]
+  hourly_readings: { hour: string; count: number; alerts: number }[]
+  asset_status: { asset_id: number; asset_name: string; asset_tag: string; metrics: AssetMetricStatus[] }[]
+}
+
+export interface AssetMetricStatus {
+  metric_name: string
+  metric_unit?: string
+  latest_value?: number
+  latest_reading_at?: string
+  is_breached: boolean
+  is_stale: boolean
+  threshold?: number
+  threshold_operator?: IoTOperator
+  rule_id?: number
+  pct_of_threshold?: number
+}
+
+export interface ApiKeyCreateRequest {
+  name: string
+  description?: string
+  expires_at?: string
+  scopes: string[]
+}
+
+export interface ApiKeyWithSecret extends ApiKey {
+  key: string // shown once only
+  description?: string
+  scopes?: string[]
+}
+
+export interface ApiKeyFull extends ApiKey {
+  description?: string
+  scopes?: string[]
+}
+
 // ── Parts / Inventory ─────────────────────────────────────────────────────────
 
 export interface Part {
@@ -254,33 +346,36 @@ export interface ActivityLog {
 
 export interface DashboardStats {
   work_orders: {
-    total: number
     open: number
     in_progress: number
-    completed_this_month: number
     overdue: number
-    by_priority: Record<string, number>
-    by_status: Record<string, number>
+    completed_today: number
+    completed_this_week: number
+    critical_open: number
+    avg_resolution_hours: number
   }
   assets: {
     total: number
     operational: number
-    maintenance: number
-    offline: number
+    degraded: number
+    down: number
+    decommissioned: number
     health_score: number
   }
   preventive_maintenance: {
-    total: number
-    active: number
     due_this_week: number
     overdue: number
-    compliance_rate: number
+    compliance_rate_30d: number
+    next_due: { id: number; name: string; asset: string; due_date: string }[]
   }
   iot: {
+    active_rules: number
     open_alerts: number
     critical_alerts: number
-    readings_today: number
+    readings_last_hour: number
   }
+  recent_activity: { type: string; description: string; user?: string; timestamp: string }[]
+  generated_at: string
 }
 
 export interface WorkOrderSummary {

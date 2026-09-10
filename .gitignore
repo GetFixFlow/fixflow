@@ -43,3 +43,6 @@ apps/web/.env.production
 # Ruby vendor
 /vendor/
 
+# Claude Code local state
+/.claude/
+

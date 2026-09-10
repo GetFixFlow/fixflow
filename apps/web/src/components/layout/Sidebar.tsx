@@ -30,7 +30,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Preventive Maintenance', to: '/preventive-maintenance', icon: Wrench },
   { label: 'IoT Alerts', to: '/iot', icon: Radio, roles: ['admin', 'manager', 'technician'] },
   { label: 'Reports', to: '/reports', icon: BarChart3, roles: ['admin', 'manager'] },
-  { label: 'Settings', to: '/settings', icon: Settings, roles: ['admin'] },
+  { label: 'Settings', to: '/settings/profile', icon: Settings },
 ]
 
 export function Sidebar() {

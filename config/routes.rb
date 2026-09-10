@@ -127,6 +127,12 @@ Rails.application.routes.draw do
         get "iot/sensor_trends",                  to: "iot#sensor_trends"
       end
 
+      # ── AI ────────────────────────────────────────────────────────────────
+      namespace :ai do
+        get "config", to: "config#show"
+        post "assist", to: "assist#create"
+      end
+
       # ── Activity logs ─────────────────────────────────────────────────────
       resources :activity_logs, only: [:index]
     end

@@ -15,7 +15,7 @@ gem "acts_as_tenant", "~> 1.0"
 gem "ancestry", "~> 4.0"
 
 # Soft delete for assets
-gem "discard", "~> 0.4"
+gem "discard", "~> 1.4"
 
 # QR code generation
 gem "rqrcode", "~> 2.2"
@@ -57,6 +57,13 @@ gem "pagy", "~> 9.0"
 gem "prawn", "~> 2.5"
 gem "prawn-table", "~> 0.2"
 
+# PDF text extraction (AI features)
+gem "pdf-reader", "~> 2.12"
+
+# AI (Anthropic Claude API — official SDK, gem renamed from the community
+# "anthropic" gem at v1.0.0; the community gem now lives at "ruby-anthropic")
+gem "anthropic", "~> 1.0"
+
 # API serialization
 gem "blueprinter", "~> 1.1"
 
@@ -96,4 +103,5 @@ group :test do
   gem "database_cleaner-active_record", "~> 2.2"
   gem "simplecov",                  require: false
   gem "pundit-matchers",            "~> 3.1"
+  gem "webmock",                    "~> 3.24"
 end

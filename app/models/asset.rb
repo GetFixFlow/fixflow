@@ -13,6 +13,7 @@ class Asset < ApplicationRecord
   has_many :iot_rules,         dependent: :destroy
   has_many :iot_alerts,        dependent: :destroy
   has_many_attached :photos
+  has_many_attached :documents
 
   validates :name, presence: true
   validates :status, inclusion: { in: STATUSES }

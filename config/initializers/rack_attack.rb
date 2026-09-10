@@ -16,6 +16,16 @@ class Rack::Attack
     req.get_header("HTTP_X_API_KEY") if req.path == "/api/v1/iot/ingest"
   end
 
+  # AI endpoints: 5 req / min per authenticated caller (LLM calls are costly).
+  # Keyed by the bearer token itself (not decoded/trusted — just a cache key)
+  # so distinct users behind the same IP get independent limits; falls back to
+  # IP for unauthenticated requests (which will 401 anyway).
+  throttle("api/ai", limit: 5, period: 1.minute) do |req|
+    next unless req.path.start_with?("/api/v1/ai")
+
+    req.get_header("HTTP_AUTHORIZATION").presence || req.ip
+  end
+
   # ── Blocklist ──────────────────────────────────────────────────────────────
 
   blocklist("block bad ips") do |req|

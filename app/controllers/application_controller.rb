@@ -1,6 +1,6 @@
 class ApplicationController < ActionController::API
   include Pagy::Backend
-  include SecureHeaders::DSL if defined?(SecureHeaders)
+  include SecureHeaders if defined?(SecureHeaders)
 
   before_action :set_request_id
 

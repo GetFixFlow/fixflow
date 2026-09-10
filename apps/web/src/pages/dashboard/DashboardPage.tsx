@@ -15,9 +15,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
 } from 'recharts'
 import { useDashboard } from '@/hooks/useDashboard'
 import { useAuthStore } from '@/stores/authStore'
@@ -26,8 +23,6 @@ import { StatCardSkeleton } from '@/components/ui/Skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Badge, statusBadge } from '@/components/ui/Badge'
-
-const PIE_COLORS = ['#2563eb', '#16a34a', '#d97706', '#dc2626', '#7c3aed']
 
 export function DashboardPage() {
   const { data, isLoading } = useDashboard()
@@ -46,15 +41,12 @@ export function DashboardPage() {
 
   if (!data) return null
 
-  const woByStatus = Object.entries(data.work_orders.by_status || {}).map(([name, value]) => ({
-    name: name.replace('_', ' '),
-    value,
-  }))
-
-  const woByPriority = Object.entries(data.work_orders.by_priority || {}).map(([name, value]) => ({
-    name,
-    value,
-  }))
+  const assetsByStatus = [
+    { name: 'operational', value: data.assets.operational },
+    { name: 'degraded', value: data.assets.degraded },
+    { name: 'down', value: data.assets.down },
+    { name: 'decommissioned', value: data.assets.decommissioned },
+  ].filter((entry) => entry.value > 0)
 
   return (
     <div className="space-y-6">
@@ -80,7 +72,7 @@ export function DashboardPage() {
         />
         <StatCard
           title="PM Compliance"
-          value={`${data.preventive_maintenance.compliance_rate}%`}
+          value={`${data.preventive_maintenance.compliance_rate_30d}%`}
           subtitle={`${data.preventive_maintenance.overdue} overdue schedules`}
           icon={Wrench}
         />
@@ -101,9 +93,9 @@ export function DashboardPage() {
               <CheckCircle className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Completed this month</p>
+              <p className="text-sm text-gray-500">Completed this week</p>
               <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                {data.work_orders.completed_this_month}
+                {data.work_orders.completed_this_week}
               </p>
             </div>
           </CardContent>
@@ -141,11 +133,11 @@ export function DashboardPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>Work Orders by Status</CardTitle>
+              <CardTitle>Asset Status Breakdown</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={woByStatus}>
+                <BarChart data={assetsByStatus}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                   <YAxis tick={{ fontSize: 12 }} />
@@ -158,30 +150,28 @@ export function DashboardPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Work Orders by Priority</CardTitle>
+              <CardTitle>Recent Activity</CardTitle>
             </CardHeader>
-            <CardContent className="flex items-center justify-center">
-              <ResponsiveContainer width="100%" height={220}>
-                <PieChart>
-                  <Pie
-                    data={woByPriority}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={90}
-                    dataKey="value"
-                    label={({ name, percent }) =>
-                      `${name ?? ''} ${(((percent as number | undefined) ?? 0) * 100).toFixed(0)}%`
-                    }
-                    labelLine={false}
-                  >
-                    {woByPriority.map((_, index) => (
-                      <Cell key={index} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
+            <CardContent>
+              {data.recent_activity.length === 0 ? (
+                <p className="text-sm text-gray-500">No recent activity</p>
+              ) : (
+                <ul className="space-y-3">
+                  {data.recent_activity.map((activity, index) => (
+                    <li key={index} className="flex items-center justify-between text-sm">
+                      <div>
+                        <span className="font-medium text-gray-900 dark:text-gray-100">
+                          {activity.description}
+                        </span>
+                        <span className="ml-2 text-gray-500">{activity.type.replace(/_/g, ' ')}</span>
+                      </div>
+                      <span className="text-xs text-gray-400">
+                        {new Date(activity.timestamp).toLocaleString()}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -196,8 +186,9 @@ export function DashboardPage() {
           <div className="flex flex-wrap gap-3">
             {Object.entries({
               operational: data.assets.operational,
-              maintenance: data.assets.maintenance,
-              offline: data.assets.offline,
+              degraded: data.assets.degraded,
+              down: data.assets.down,
+              decommissioned: data.assets.decommissioned,
             }).map(([status, count]) => (
               <div key={status} className="flex items-center gap-2">
                 <Badge variant={statusBadge(status)}>{status}</Badge>

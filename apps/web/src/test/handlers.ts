@@ -32,6 +32,14 @@ export const handlers = [
     })
   }),
 
+  http.get('/api/v1/ai/config', () => {
+    return HttpResponse.json({
+      success: true,
+      data: { enabled: true, model: 'claude-sonnet-4-6' },
+      meta: { request_id: 'test-req-id', timestamp: new Date().toISOString() },
+    })
+  }),
+
   http.get('/api/v1/dashboard', () => {
     return HttpResponse.json({
       success: true,
