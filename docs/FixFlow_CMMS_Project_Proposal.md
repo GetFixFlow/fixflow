@@ -347,7 +347,7 @@ The core project remains free forever. Revenue funds full-time maintenance and d
 
 **Rationale:** Communicates the core workflow (fix things, manage the flow of maintenance work) without being overly technical. Easy to remember, domain-friendly, and works as a brand.
 
-**Repository:** `github.com/fixflow/fixflow`
+**Repository:** `github.com/GetFixFlow/fixflow`
 
 **Tagline:** *Maintenance management that works as hard as your team*
 

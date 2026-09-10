@@ -1,15 +1,32 @@
+<p align="center">
+  <img src="docs/logo.png" alt="FixFlow logo" width="220">
+</p>
+
 # FixFlow CMMS
 
-> The self-hostable, IoT-ready maintenance management system built for the teams that enterprise software forgot.
+> Open-source Computerized Maintenance Management System — self-hostable, IoT-ready, built for the teams that enterprise software forgot.
 
-**v0.1** · Rails 8 API · PostgreSQL · React PWA (frontend repo: `fixflow-web`)
+**v0.1** · Rails 8 API · React 18 PWA · PostgreSQL · Redis
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **API** | Ruby on Rails 8 (API mode) |
+| **Frontend** | React 18 + TypeScript + Vite + Tailwind CSS |
+| **Database** | PostgreSQL 16 |
+| **Cache / Jobs** | Redis 7 + Sidekiq |
+| **File Storage** | MinIO (S3-compatible) |
+| **Auth** | Devise + devise-jwt (Bearer JWT) |
+| **State** | TanStack Query v5 + Zustand v5 |
+| **IoT** | REST webhook + MQTT ingestion |
 
 ---
 
-## Quick Start (Docker)
+## Quick Start (Docker — recommended)
 
 ```bash
-git clone https://github.com/fixflow/fixflow.git
+git clone https://github.com/GetFixFlow/fixflow.git
 cd fixflow
 cp .env.example .env
 # Edit .env — set RAILS_MASTER_KEY and DEVISE_JWT_SECRET_KEY at minimum
@@ -26,14 +43,15 @@ MinIO console: `http://localhost:9001` (user: minioadmin / minioadmin)
 
 ### Prerequisites
 - Ruby 3.3+
+- Node.js 20+
 - PostgreSQL 16
 - Redis 7
 - Bundler 2.5+
 
-### Setup
+### API (Rails)
 
 ```bash
-git clone https://github.com/fixflow/fixflow.git
+git clone https://github.com/GetFixFlow/fixflow.git
 cd fixflow
 bundle install
 cp .env.example .env
@@ -45,6 +63,25 @@ bundle exec rails db:seed     # optional: seeds demo data
 bundle exec rails server      # API on :3000
 bundle exec sidekiq           # Background workers
 ```
+
+### Frontend (React)
+
+```bash
+cd apps/web
+npm install --legacy-peer-deps
+cp .env.example .env.local
+# Set VITE_API_URL=http://localhost:3000/api/v1
+
+npm run dev     # Dev server on :3001
+```
+
+### Frontend Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `VITE_API_URL` | `http://localhost:3000/api/v1` | Rails API base URL |
+| `VITE_WS_URL` | `ws://localhost:3000/cable` | ActionCable WebSocket URL |
+| `VITE_APP_ENV` | `development` | Application environment |
 
 ---
 
@@ -149,10 +186,21 @@ IoT Devices ──MQTT/REST──► FixFlow API (Rails 8)
 
 ## Running Tests
 
+### API (RSpec)
+
 ```bash
 bundle exec rspec
 bundle exec rspec spec/requests/   # request specs only
 bundle exec rspec spec/models/     # model specs only
+```
+
+### Frontend (Vitest)
+
+```bash
+cd apps/web
+npm run test          # run all tests
+npm run test:ui       # Vitest UI
+npm run test:coverage # coverage report
 ```
 
 ---
@@ -181,4 +229,4 @@ bundle exec rspec spec/models/     # model specs only
 
 ## License
 
-GNU AGPLv3
+AGPLv3 — see [LICENSE](LICENSE).
