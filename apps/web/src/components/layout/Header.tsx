@@ -1,4 +1,5 @@
 import { Bell, Moon, Sun, Search } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import * as Avatar from '@radix-ui/react-avatar'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { useAuthStore } from '@/stores/authStore'
@@ -9,6 +10,7 @@ import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
 
 export function Header() {
+  const navigate = useNavigate()
   const { user } = useAuthStore()
   const { darkMode, toggleDarkMode, sidebarCollapsed, setCommandPaletteOpen } = useUiStore()
   const { newAlerts } = useRealtimeStore()
@@ -73,7 +75,7 @@ export function Header() {
               <DropdownMenu.Separator className="my-1 h-px bg-gray-200 dark:bg-gray-700" />
               <DropdownMenu.Item
                 className="flex cursor-pointer rounded-sm px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 focus:outline-none"
-                onSelect={() => (window.location.href = '/profile')}
+                onSelect={() => navigate('/settings/profile')}
               >
                 Profile
               </DropdownMenu.Item>
