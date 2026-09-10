@@ -9,7 +9,6 @@ module Api
       def index
         roots = current_organization.locations
           .roots
-          .includes(children: { children: { children: :children } })
           .order(:name)
         render json: { locations: LocationBlueprint.render_as_hash(roots, view: :tree) }
       end
@@ -18,7 +17,6 @@ module Api
       def tree
         roots = current_organization.locations
           .roots
-          .includes(children: { children: { children: :children } })
           .order(:name)
         render json: { locations: LocationBlueprint.render_as_hash(roots, view: :tree) }
       end
