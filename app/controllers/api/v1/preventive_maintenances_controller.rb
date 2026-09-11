@@ -40,20 +40,20 @@ module Api
 
       # GET /api/v1/preventive_maintenances/:id
       def show
-        render json: PreventiveMaintenanceBlueprint.render_as_hash(@pm, view: :extended)
+        render json: { data: PreventiveMaintenanceBlueprint.render_as_hash(@pm, view: :extended) }
       end
 
       # POST /api/v1/preventive_maintenances
       def create
         pm = current_organization.preventive_maintenances.create!(pm_params)
-        render json: PreventiveMaintenanceBlueprint.render_as_hash(pm, view: :extended),
+        render json: { data: PreventiveMaintenanceBlueprint.render_as_hash(pm, view: :extended) },
           status: :created
       end
 
       # PATCH /api/v1/preventive_maintenances/:id
       def update
         @pm.update!(pm_params)
-        render json: PreventiveMaintenanceBlueprint.render_as_hash(@pm, view: :extended)
+        render json: { data: PreventiveMaintenanceBlueprint.render_as_hash(@pm, view: :extended) }
       end
 
       # DELETE /api/v1/preventive_maintenances/:id → archive
@@ -66,16 +66,16 @@ module Api
 
       # PATCH /api/v1/preventive_maintenances/:id/pause
       def pause
-        return render_error("PM schedule is already paused", status: :unprocessable_entity) if @pm.status_paused?
+        return render_error("PM schedule is already paused", :unprocessable_entity) if @pm.status_paused?
         @pm.update!(status: :paused)
-        render json: PreventiveMaintenanceBlueprint.render_as_hash(@pm)
+        render json: { data: PreventiveMaintenanceBlueprint.render_as_hash(@pm) }
       end
 
       # PATCH /api/v1/preventive_maintenances/:id/resume
       def resume
-        return render_error("PM schedule is already active", status: :unprocessable_entity) if @pm.status_active?
+        return render_error("PM schedule is already active", :unprocessable_entity) if @pm.status_active?
         @pm.update!(status: :active)
-        render json: PreventiveMaintenanceBlueprint.render_as_hash(@pm)
+        render json: { data: PreventiveMaintenanceBlueprint.render_as_hash(@pm) }
       end
 
       # PATCH /api/v1/preventive_maintenances/:id/trigger
@@ -86,7 +86,7 @@ module Api
           work_order: WorkOrderBlueprint.render_as_hash(work_order)
         }, status: :created
       rescue => e
-        render_error(e.message, status: :unprocessable_entity)
+        render_error(e.message, :unprocessable_entity)
       end
 
       # GET /api/v1/preventive_maintenances/:id/preview

@@ -66,7 +66,7 @@ RSpec.describe "Api::V1::WorkOrders", type: :request do
     it "returns the work order with extended view" do
       get "/api/v1/work_orders/#{work_order.id}", headers: auth_headers_for(manager)
       expect(response).to have_http_status(:ok)
-      expect(json_body["id"]).to eq(work_order.id)
+      expect(json_body["data"]["id"]).to eq(work_order.id)
     end
 
     it "returns 404 for another org's work order" do
@@ -88,7 +88,7 @@ RSpec.describe "Api::V1::WorkOrders", type: :request do
         post "/api/v1/work_orders", params: valid_params, headers: auth_headers_for(manager)
       }.to change(WorkOrder, :count).by(1)
       expect(response).to have_http_status(:created)
-      expect(json_body["title"]).to eq("Replace HVAC filter")
+      expect(json_body["data"]["title"]).to eq("Replace HVAC filter")
     end
 
     it "sets requester to current user" do
@@ -115,7 +115,7 @@ RSpec.describe "Api::V1::WorkOrders", type: :request do
         params: { work_order: { title: "Updated title" } },
         headers: auth_headers_for(manager)
       expect(response).to have_http_status(:ok)
-      expect(json_body["title"]).to eq("Updated title")
+      expect(json_body["data"]["title"]).to eq("Updated title")
     end
 
     it "allows assignee to update their own work order" do
@@ -145,7 +145,7 @@ RSpec.describe "Api::V1::WorkOrders", type: :request do
         params: { assignee_id: technician.id },
         headers: auth_headers_for(manager)
       expect(response).to have_http_status(:ok)
-      expect(json_body["status"]).to eq("assigned")
+      expect(json_body["data"]["status"]).to eq("assigned")
     end
 
     it "enqueues NotifyAssigneeJob" do
@@ -178,7 +178,7 @@ RSpec.describe "Api::V1::WorkOrders", type: :request do
     it "transitions assigned → in_progress" do
       patch "/api/v1/work_orders/#{work_order.id}/start", headers: auth_headers_for(technician)
       expect(response).to have_http_status(:ok)
-      expect(json_body["status"]).to eq("in_progress")
+      expect(json_body["data"]["status"]).to eq("in_progress")
     end
 
     it "returns 422 when starting from wrong state" do
@@ -196,7 +196,7 @@ RSpec.describe "Api::V1::WorkOrders", type: :request do
         params: { completion_notes: "Replaced all gaskets" },
         headers: auth_headers_for(technician)
       expect(response).to have_http_status(:ok)
-      expect(json_body["status"]).to eq("completed")
+      expect(json_body["data"]["status"]).to eq("completed")
     end
 
     it "returns 422 without completion notes" do
@@ -212,7 +212,7 @@ RSpec.describe "Api::V1::WorkOrders", type: :request do
     it "transitions completed → verified" do
       patch "/api/v1/work_orders/#{work_order.id}/verify", headers: auth_headers_for(manager)
       expect(response).to have_http_status(:ok)
-      expect(json_body["status"]).to eq("verified")
+      expect(json_body["data"]["status"]).to eq("verified")
     end
 
     it "returns 403 for technician" do
@@ -236,7 +236,7 @@ RSpec.describe "Api::V1::WorkOrders", type: :request do
         params: { rejection_reason: "Work incomplete" },
         headers: auth_headers_for(manager)
       expect(response).to have_http_status(:ok)
-      expect(json_body["status"]).to eq("in_progress")
+      expect(json_body["data"]["status"]).to eq("in_progress")
     end
 
     it "returns 403 for technician" do
@@ -252,7 +252,7 @@ RSpec.describe "Api::V1::WorkOrders", type: :request do
     it "transitions in_progress → on_hold" do
       patch "/api/v1/work_orders/#{work_order.id}/hold", headers: auth_headers_for(technician)
       expect(response).to have_http_status(:ok)
-      expect(json_body["status"]).to eq("on_hold")
+      expect(json_body["data"]["status"]).to eq("on_hold")
     end
   end
 
@@ -264,7 +264,7 @@ RSpec.describe "Api::V1::WorkOrders", type: :request do
         params: { cancellation_reason: "Duplicate request" },
         headers: auth_headers_for(manager)
       expect(response).to have_http_status(:ok)
-      expect(json_body["status"]).to eq("cancelled")
+      expect(json_body["data"]["status"]).to eq("cancelled")
     end
 
     it "returns 403 for technician" do

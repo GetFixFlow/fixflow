@@ -42,6 +42,7 @@ Rails.application.routes.draw do
           patch :reject
           patch :hold
           patch :cancel
+          patch :transition
         end
         resources :comments,    only: %i[index create destroy]
         resources :attachments, only: %i[index create destroy]

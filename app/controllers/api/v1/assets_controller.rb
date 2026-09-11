@@ -21,19 +21,19 @@ module Api
 
       # GET /api/v1/assets/:id
       def show
-        render json: AssetBlueprint.render_as_hash(@asset, view: :extended)
+        render json: { data: AssetBlueprint.render_as_hash(@asset, view: :extended) }
       end
 
       # POST /api/v1/assets
       def create
         asset = current_organization.assets.create!(asset_params)
-        render json: AssetBlueprint.render_as_hash(asset), status: :created
+        render json: { data: AssetBlueprint.render_as_hash(asset) }, status: :created
       end
 
       # PATCH /api/v1/assets/:id
       def update
         @asset.update!(asset_params)
-        render json: AssetBlueprint.render_as_hash(@asset)
+        render json: { data: AssetBlueprint.render_as_hash(@asset) }
       end
 
       # DELETE /api/v1/assets/:id — soft delete

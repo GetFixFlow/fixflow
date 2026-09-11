@@ -16,7 +16,7 @@ module Api
       def skip
         exec = @pm.pm_executions.find(params[:id])
 
-        return render_error("Execution is not pending", status: :unprocessable_entity) unless exec.status_pending?
+        return render_error("Execution is not pending", :unprocessable_entity) unless exec.status_pending?
 
         exec.update!(
           status:      :skipped,
@@ -24,7 +24,7 @@ module Api
         )
         @pm.increment!(:times_skipped)
 
-        render json: PmExecutionBlueprint.render_as_hash(exec)
+        render json: { data: PmExecutionBlueprint.render_as_hash(exec) }
       end
 
       private

@@ -22,7 +22,7 @@ module Api
         )
 
         # raw_key is returned exactly ONCE and never stored
-        render json: ApiKeyBlueprint.render_as_hash(key).merge(key: raw_key), status: :created
+        render json: { data: ApiKeyBlueprint.render_as_hash(key).merge(key: raw_key) }, status: :created
       end
 
       # DELETE /api/v1/api_keys/:id  — revoke

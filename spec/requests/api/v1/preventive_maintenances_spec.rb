@@ -67,7 +67,7 @@ RSpec.describe "Api::V1::PreventiveMaintenances", type: :request do
     it "returns the PM with extended view" do
       get "/api/v1/preventive_maintenances/#{pm.id}", headers: auth_headers_for(manager)
       expect(response).to have_http_status(:ok)
-      expect(json_body["id"]).to eq(pm.id)
+      expect(json_body["data"]["id"]).to eq(pm.id)
       expect(json_body).to have_key("template")
     end
 
@@ -106,7 +106,7 @@ RSpec.describe "Api::V1::PreventiveMaintenances", type: :request do
         post "/api/v1/preventive_maintenances", params: valid_params, headers: auth_headers_for(manager)
       }.to change(PreventiveMaintenance, :count).by(1)
       expect(response).to have_http_status(:created)
-      expect(json_body["name"]).to eq("Monthly Inspection")
+      expect(json_body["data"]["name"]).to eq("Monthly Inspection")
     end
 
     it "forbids technician from creating PM schedules" do
@@ -140,7 +140,7 @@ RSpec.describe "Api::V1::PreventiveMaintenances", type: :request do
         params: { preventive_maintenance: { name: "Updated PM Name" } },
         headers: auth_headers_for(manager)
       expect(response).to have_http_status(:ok)
-      expect(json_body["name"]).to eq("Updated PM Name")
+      expect(json_body["data"]["name"]).to eq("Updated PM Name")
     end
 
     it "forbids technician from updating" do
@@ -177,7 +177,7 @@ RSpec.describe "Api::V1::PreventiveMaintenances", type: :request do
     it "pauses an active PM" do
       patch "/api/v1/preventive_maintenances/#{pm.id}/pause", headers: auth_headers_for(manager)
       expect(response).to have_http_status(:ok)
-      expect(json_body["status"]).to eq("paused")
+      expect(json_body["data"]["status"]).to eq("paused")
     end
 
     it "returns 422 when already paused" do
@@ -193,7 +193,7 @@ RSpec.describe "Api::V1::PreventiveMaintenances", type: :request do
     it "resumes a paused PM" do
       patch "/api/v1/preventive_maintenances/#{pm.id}/resume", headers: auth_headers_for(manager)
       expect(response).to have_http_status(:ok)
-      expect(json_body["status"]).to eq("active")
+      expect(json_body["data"]["status"]).to eq("active")
     end
 
     it "returns 422 when already active" do
@@ -292,7 +292,7 @@ RSpec.describe "Api::V1::PreventiveMaintenances", type: :request do
           params: { skip_reason: "Equipment in use" },
           headers: auth_headers_for(technician)
         expect(response).to have_http_status(:ok)
-        expect(json_body["status"]).to eq("skipped")
+        expect(json_body["data"]["status"]).to eq("skipped")
       end
 
       it "returns 422 when execution is not pending" do

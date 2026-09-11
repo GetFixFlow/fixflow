@@ -38,18 +38,22 @@ module Api
             trend:       trend_data(scope, from, to, group_by_param)
           }
 
-          respond_to do |format|
-            format.json { render json: data }
-            format.csv do
-              require_export_permission!
-              send_data ExportService.work_orders_csv(data[:trend]),
-                filename: "work_orders_#{Date.today}.csv", type: "text/csv"
-            end
-            format.pdf do
-              require_export_permission!
-              send_data PdfReportService.work_order_summary(data, org_name: current_organization.name),
-                filename: "work_orders_#{Date.today}.pdf", type: "application/pdf"
-            end
+          # Dispatch on the explicit `format` param rather than `respond_to`'s
+          # Accept-header negotiation — ActionController::API doesn't register
+          # a default format the way ActionController::Base does, so an
+          # ordinary browser/axios Accept header (e.g. "application/json,
+          # text/plain, */*") can raise ActionController::UnknownFormat.
+          case params[:format]
+          when "csv"
+            require_export_permission!
+            send_data ExportService.work_orders_csv(data[:trend]),
+              filename: "work_orders_#{Date.today}.csv", type: "text/csv"
+          when "pdf"
+            require_export_permission!
+            send_data PdfReportService.work_order_summary(data, org_name: current_organization.name),
+              filename: "work_orders_#{Date.today}.pdf", type: "application/pdf"
+          else
+            render json: data
           end
         end
 

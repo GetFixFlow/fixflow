@@ -21,7 +21,7 @@ module Api
 
       # GET /api/v1/iot_alerts/:id
       def show
-        render json: IotAlertBlueprint.render_as_hash(@alert)
+        render json: { data: IotAlertBlueprint.render_as_hash(@alert) }
       end
 
       # PATCH /api/v1/iot_alerts/:id/acknowledge
@@ -33,7 +33,7 @@ module Api
           notes:            params[:notes]
         )
         @alert.iot_rule.increment!(:times_acknowledged)
-        render json: IotAlertBlueprint.render_as_hash(@alert)
+        render json: { data: IotAlertBlueprint.render_as_hash(@alert) }
       end
 
       # PATCH /api/v1/iot_alerts/:id/resolve
@@ -43,7 +43,7 @@ module Api
           resolved_at: Time.current,
           notes:       params[:notes].presence || @alert.notes
         )
-        render json: IotAlertBlueprint.render_as_hash(@alert)
+        render json: { data: IotAlertBlueprint.render_as_hash(@alert) }
       end
 
       private

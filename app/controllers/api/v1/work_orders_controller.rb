@@ -1,7 +1,7 @@
 module Api
   module V1
     class WorkOrdersController < Api::V1::BaseController
-      before_action :set_work_order, only: %i[show update destroy assign start complete verify reject hold cancel]
+      before_action :set_work_order, only: %i[show update destroy assign start complete verify reject hold cancel transition]
       before_action :require_manager!, only: %i[verify reject]
 
       ALLOWED_SORTS = %w[priority due_date created_at updated_at work_order_number].freeze
@@ -19,7 +19,7 @@ module Api
 
       # GET /api/v1/work_orders/:id
       def show
-        render json: WorkOrderBlueprint.render_as_hash(@work_order, view: :extended)
+        render json: { data: WorkOrderBlueprint.render_as_hash(@work_order, view: :extended) }
       end
 
       # POST /api/v1/work_orders
@@ -27,14 +27,14 @@ module Api
         work_order = current_organization.work_orders.create!(
           work_order_params.merge(requester: current_user)
         )
-        render json: WorkOrderBlueprint.render_as_hash(work_order), status: :created
+        render json: { data: WorkOrderBlueprint.render_as_hash(work_order) }, status: :created
       end
 
       # PATCH /api/v1/work_orders/:id
       def update
         authorize_update!
         @work_order.update!(work_order_params)
-        render json: WorkOrderBlueprint.render_as_hash(@work_order)
+        render json: { data: WorkOrderBlueprint.render_as_hash(@work_order) }
       end
 
       # DELETE /api/v1/work_orders/:id  →  cancel (preserves audit trail)
@@ -99,6 +99,66 @@ module Api
         fire_transition!(:cancel)
       end
 
+      # PATCH /api/v1/work_orders/:id/transition
+      #
+      # Unified lifecycle endpoint used by the frontend (one mutation for every
+      # status change) — dispatches to the same AASM events + authorization
+      # rules as the individual assign/start/complete/... actions above.
+      def transition
+        event = params[:event].to_s
+        wo_payload = params[:work_order] || {}
+
+        case event
+        when "assign_self"
+          return if performed?
+          @work_order.assignee = current_user
+          fire_transition!(:assign)
+        when "assign"
+          require_manager!
+          return if performed?
+          fire_transition!(:assign)
+        when "start"
+          authorize_assignee_or_manager!
+          return if performed?
+          fire_transition!(:start)
+        when "hold"
+          authorize_assignee_or_manager!
+          return if performed?
+          fire_transition!(:hold)
+        when "need_parts", "pending_parts"
+          authorize_assignee_or_manager!
+          return if performed?
+          fire_transition!(:need_parts)
+        when "resume"
+          authorize_assignee_or_manager!
+          return if performed?
+          fire_transition!(:resume)
+        when "complete"
+          authorize_assignee_or_manager!
+          return if performed?
+          @work_order.completion_notes = wo_payload[:completion_notes] || params[:completion_notes]
+          @work_order.actual_hours     = wo_payload[:actual_hours]     || params[:actual_hours]
+          fire_transition!(:complete)
+        when "verify"
+          require_manager!
+          return if performed?
+          @work_order.verified_by = current_user
+          fire_transition!(:verify)
+        when "reject"
+          require_manager!
+          return if performed?
+          @work_order.rejection_reason = wo_payload[:rejection_reason] || params[:rejection_reason]
+          fire_transition!(:reject)
+        when "cancel"
+          require_manager!
+          return if performed?
+          @work_order.cancellation_reason = wo_payload[:cancellation_reason] || params[:cancellation_reason]
+          fire_transition!(:cancel)
+        else
+          render_error("Unknown transition event: #{event}", :unprocessable_entity, code: "INVALID_TRANSITION")
+        end
+      end
+
       # GET /api/v1/work_orders/overdue
       def overdue
         pagy, work_orders = pagy(current_organization.work_orders.overdue.order(:due_date))
@@ -129,14 +189,14 @@ module Api
         unless @work_order.public_send(:"may_#{event}?")
           return render_error(
             "Cannot #{event.to_s.tr('_', ' ')} a work order with status '#{@work_order.status}'",
-            status: :unprocessable_entity
+            :unprocessable_entity
           )
         end
 
         @work_order.public_send(:"#{event}!")
 
         if @work_order.valid?
-          render json: WorkOrderBlueprint.render_as_hash(@work_order, view: :extended)
+          render json: { data: WorkOrderBlueprint.render_as_hash(@work_order, view: :extended) }
         else
           render json: { errors: @work_order.errors.full_messages }, status: :unprocessable_entity
         end
@@ -149,13 +209,13 @@ module Api
       def authorize_update!
         return if current_user.manager_or_above?
         return if @work_order.assignee_id == current_user.id
-        render_error("You can only update work orders assigned to you", status: :forbidden)
+        render_error("You can only update work orders assigned to you", :forbidden)
       end
 
       def authorize_assignee_or_manager!
         return if current_user.manager_or_above?
         return if @work_order.assignee_id == current_user.id
-        render_error("Forbidden", status: :forbidden)
+        render_error("Forbidden", :forbidden)
       end
 
       # ─── Filtering ───────────────────────────────────────────────────────

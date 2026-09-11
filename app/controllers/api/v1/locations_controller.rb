@@ -23,7 +23,7 @@ module Api
 
       # GET /api/v1/locations/:id
       def show
-        render json: LocationBlueprint.render_as_hash(@location, view: :extended)
+        render json: { data: LocationBlueprint.render_as_hash(@location, view: :extended) }
       end
 
       # POST /api/v1/locations
@@ -31,7 +31,7 @@ module Api
         location = current_organization.locations.build(location_params)
         validate_parent_org!(location) && return if location.parent_id
         location.save!
-        render json: LocationBlueprint.render_as_hash(location), status: :created
+        render json: { data: LocationBlueprint.render_as_hash(location) }, status: :created
       end
 
       # PATCH /api/v1/locations/:id
@@ -42,7 +42,7 @@ module Api
           validate_parent_org!(@location) && return
         end
         @location.save!
-        render json: LocationBlueprint.render_as_hash(@location)
+        render json: { data: LocationBlueprint.render_as_hash(@location) }
       end
 
       # DELETE /api/v1/locations/:id
@@ -65,7 +65,7 @@ module Api
       def validate_no_cycle!(location)
         new_parent_id = location.parent_id.to_i
         if new_parent_id == location.id || location.descendant_ids.include?(new_parent_id)
-          render_error("Circular reference: a location cannot be its own ancestor", status: :unprocessable_entity)
+          render_error("Circular reference: a location cannot be its own ancestor", :unprocessable_entity)
           true
         end
       end
@@ -74,7 +74,7 @@ module Api
       def validate_parent_org!(location)
         parent = Location.find_by(id: location.parent_id)
         unless parent&.organization_id == current_organization.id
-          render_error("Parent location does not belong to your organization", status: :unprocessable_entity)
+          render_error("Parent location does not belong to your organization", :unprocessable_entity)
           return true
         end
         false

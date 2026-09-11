@@ -87,8 +87,8 @@ RSpec.describe "Api::V1::Assets", type: :request do
       get "/api/v1/assets/#{asset.id}", headers: auth_headers_for(tech), as: :json
 
       expect(response).to have_http_status(:ok)
-      expect(json_body["id"]).to eq(asset.id)
-      expect(json_body["asset_tag"]).to be_present
+      expect(json_body["data"]["id"]).to eq(asset.id)
+      expect(json_body["data"]["asset_tag"]).to be_present
       expect(json_body["open_work_orders_count"]).to eq(0)
     end
 
@@ -110,8 +110,8 @@ RSpec.describe "Api::V1::Assets", type: :request do
           headers: auth_headers_for(manager), as: :json
 
         expect(response).to have_http_status(:created)
-        expect(json_body["name"]).to eq("New Compressor")
-        expect(json_body["asset_tag"]).to match(/\AFF-\d{6}\z/)
+        expect(json_body["data"]["name"]).to eq("New Compressor")
+        expect(json_body["data"]["asset_tag"]).to match(/\AFF-\d{6}\z/)
       end
 
       it "uses a provided asset_tag" do
@@ -120,7 +120,7 @@ RSpec.describe "Api::V1::Assets", type: :request do
           headers: auth_headers_for(manager), as: :json
 
         expect(response).to have_http_status(:created)
-        expect(json_body["asset_tag"]).to eq("FF-888888")
+        expect(json_body["data"]["asset_tag"]).to eq("FF-888888")
       end
 
       it "stores custom_fields as jsonb" do
@@ -129,7 +129,7 @@ RSpec.describe "Api::V1::Assets", type: :request do
           headers: auth_headers_for(manager), as: :json
 
         expect(response).to have_http_status(:created)
-        expect(json_body["custom_fields"]["rpm"]).to eq(1500)
+        expect(json_body["data"]["custom_fields"]["rpm"]).to eq(1500)
       end
     end
 
@@ -164,7 +164,7 @@ RSpec.describe "Api::V1::Assets", type: :request do
         headers: auth_headers_for(manager), as: :json
 
       expect(response).to have_http_status(:ok)
-      expect(json_body["status"]).to eq("degraded")
+      expect(json_body["data"]["status"]).to eq("degraded")
     end
 
     it "returns 403 for a technician" do

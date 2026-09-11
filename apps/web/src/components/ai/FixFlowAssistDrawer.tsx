@@ -69,7 +69,7 @@ export function FixFlowAssistDrawer({ open, onClose, workOrder }: FixFlowAssistD
   }
 
   return (
-    <Drawer open={open} onClose={onClose} title="✨ FixFlow Assist" description="AI assistant for this work order">
+    <Drawer open={open} onClose={onClose} title="✨ FixFlow Assist" description="AI assistant for this work order" overlay={false}>
       <div className="flex h-full flex-col">
         <div className="space-y-3 p-4">
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs dark:border-gray-700 dark:bg-gray-800/50">

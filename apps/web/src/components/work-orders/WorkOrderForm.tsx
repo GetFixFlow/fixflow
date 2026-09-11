@@ -142,8 +142,8 @@ export function WorkOrderForm({
               control={control}
               render={({ field }) => (
                 <AssetSelect
-                  value={field.value ? { id: field.value } as never : null}
-                  onChange={(asset) => field.onChange(asset?.id ?? null)}
+                  value={field.value ?? null}
+                  onChange={(id) => field.onChange(id)}
                 />
               )}
             />

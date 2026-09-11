@@ -14,13 +14,13 @@ module Api
         attachment = @work_order.attachments.build(description: params[:description], user: current_user)
         attachment.file.attach(params[:file])
         attachment.save!
-        render json: AttachmentBlueprint.render_as_hash(attachment), status: :created
+        render json: { data: AttachmentBlueprint.render_as_hash(attachment) }, status: :created
       end
 
       # DELETE /api/v1/work_orders/:work_order_id/attachments/:id
       def destroy
         unless @attachment.user_id == current_user.id || current_user.manager_or_above?
-          return render_error("Forbidden", status: :forbidden)
+          return render_error("Forbidden", :forbidden)
         end
         @attachment.destroy!
         head :no_content

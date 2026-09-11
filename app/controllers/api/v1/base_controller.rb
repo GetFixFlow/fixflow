@@ -8,6 +8,19 @@ module Api
       before_action :set_current_context
 
       # ── Error handling ────────────────────────────────────────────────────
+      #
+      # Rails resolves rescue_from handlers in REVERSE registration order (the
+      # most-recently-registered matching handler wins), so the catch-all
+      # StandardError handler must be registered FIRST — otherwise it would
+      # shadow every more-specific handler below it, and e.g. a validation
+      # failure would incorrectly render a generic 500 instead of a 422.
+
+      rescue_from StandardError do |e|
+        Rails.logger.error "Unhandled error: #{e.class} — #{e.message}"
+        Rails.logger.error e.backtrace.first(10).join("\n")
+        render_error("An unexpected error occurred",
+                     :internal_server_error, code: "INTERNAL_ERROR")
+      end
 
       rescue_from ActiveRecord::RecordNotFound do |e|
         render_error("Resource not found", :not_found, code: "RESOURCE_NOT_FOUND")
@@ -40,13 +53,6 @@ module Api
 
       rescue_from ActionController::BadRequest do |e|
         render_error(e.message, :bad_request, code: "BAD_REQUEST")
-      end
-
-      rescue_from StandardError do |e|
-        Rails.logger.error "Unhandled error: #{e.class} — #{e.message}"
-        Rails.logger.error e.backtrace.first(10).join("\n")
-        render_error("An unexpected error occurred",
-                     :internal_server_error, code: "INTERNAL_ERROR")
       end
 
       private

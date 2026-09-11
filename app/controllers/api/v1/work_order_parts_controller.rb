@@ -16,11 +16,13 @@ module Api
             unit_cost:     params[:unit_cost]
           )
           render json: {
-            id:            wop.id,
-            part_id:       part.id,
-            name:          part.name,
-            quantity_used: wop.quantity_used,
-            unit_cost:     wop.unit_cost
+            data: {
+              id:            wop.id,
+              part_id:       part.id,
+              name:          part.name,
+              quantity_used: wop.quantity_used,
+              unit_cost:     wop.unit_cost
+            }
           }, status: :created
         end
       end

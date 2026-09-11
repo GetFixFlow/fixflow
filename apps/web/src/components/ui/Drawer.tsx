@@ -10,16 +10,21 @@ interface DrawerProps {
   description?: string
   children: React.ReactNode
   className?: string
+  /** When false, renders as a non-modal floating popup: no dimming overlay, and the rest of the page stays interactive. Defaults to true. */
+  overlay?: boolean
 }
 
-export function Drawer({ open, onClose, title, description, children, className }: DrawerProps) {
+export function Drawer({ open, onClose, title, description, children, className, overlay = true }: DrawerProps) {
   return (
-    <Dialog.Root open={open} onOpenChange={(v) => !v && onClose()}>
+    <Dialog.Root open={open} onOpenChange={(v) => !v && onClose()} modal={overlay}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        {overlay && (
+          <Dialog.Overlay className="fixed inset-0 z-50 bg-black/20 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        )}
         <Dialog.Content
           className={cn(
             'fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-white shadow-xl dark:bg-gray-800 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
+            !overlay && 'border-l border-gray-200 dark:border-gray-700',
             className,
           )}
         >

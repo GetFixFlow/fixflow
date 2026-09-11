@@ -8,7 +8,7 @@ module Api
       # POST /api/v1/requests
       def create
         org = Organization.find_by(subdomain: params[:subdomain])
-        return render_error("Organization not found", status: :not_found) unless org
+        return render_error("Organization not found", :not_found) unless org
 
         work_order = org.work_orders.create!(
           title:           params[:title],

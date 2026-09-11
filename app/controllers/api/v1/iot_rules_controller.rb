@@ -15,19 +15,19 @@ module Api
 
       # GET /api/v1/iot_rules/:id
       def show
-        render json: IotRuleBlueprint.render_as_hash(@rule, view: :extended)
+        render json: { data: IotRuleBlueprint.render_as_hash(@rule, view: :extended) }
       end
 
       # POST /api/v1/iot_rules
       def create
         rule = current_organization.iot_rules.create!(rule_params.merge(created_by: current_user))
-        render json: IotRuleBlueprint.render_as_hash(rule), status: :created
+        render json: { data: IotRuleBlueprint.render_as_hash(rule) }, status: :created
       end
 
       # PATCH /api/v1/iot_rules/:id
       def update
         @rule.update!(rule_params)
-        render json: IotRuleBlueprint.render_as_hash(@rule)
+        render json: { data: IotRuleBlueprint.render_as_hash(@rule) }
       end
 
       # DELETE /api/v1/iot_rules/:id  — archives instead of hard delete
@@ -39,13 +39,13 @@ module Api
       # PATCH /api/v1/iot_rules/:id/pause
       def pause
         @rule.update!(status: :paused)
-        render json: IotRuleBlueprint.render_as_hash(@rule)
+        render json: { data: IotRuleBlueprint.render_as_hash(@rule) }
       end
 
       # PATCH /api/v1/iot_rules/:id/resume
       def resume
         @rule.update!(status: :active)
-        render json: IotRuleBlueprint.render_as_hash(@rule)
+        render json: { data: IotRuleBlueprint.render_as_hash(@rule) }
       end
 
       # POST /api/v1/iot_rules/:id/test

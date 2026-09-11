@@ -58,7 +58,7 @@ RSpec.describe "Api::V1::Locations", type: :request do
       get "/api/v1/locations/#{site.id}", headers: auth_headers_for(tech), as: :json
 
       expect(response).to have_http_status(:ok)
-      expect(json_body["name"]).to eq("HQ")
+      expect(json_body["data"]["name"]).to eq("HQ")
       expect(json_body["full_path"]).to eq("HQ")
       expect(json_body["depth"]).to eq(0)
       expect(json_body["children"].first["name"]).to eq("Block A")
@@ -82,7 +82,7 @@ RSpec.describe "Api::V1::Locations", type: :request do
           headers: auth_headers_for(manager), as: :json
 
         expect(response).to have_http_status(:created)
-        expect(json_body["name"]).to eq("Warehouse A")
+        expect(json_body["data"]["name"]).to eq("Warehouse A")
         expect(json_body["location_type"]).to eq("site")
       end
 
@@ -137,7 +137,7 @@ RSpec.describe "Api::V1::Locations", type: :request do
         headers: auth_headers_for(manager), as: :json
 
       expect(response).to have_http_status(:ok)
-      expect(json_body["name"]).to eq("New Name")
+      expect(json_body["data"]["name"]).to eq("New Name")
     end
 
     it "returns 422 when a circular parent is detected" do

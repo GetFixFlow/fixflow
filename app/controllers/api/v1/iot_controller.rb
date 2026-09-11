@@ -11,14 +11,14 @@ module Api
       # ── POST /api/v1/iot/ingest ────────────────────────────────────────────
       def ingest
         payload = parse_payload
-        return render_error("Invalid JSON payload", status: :bad_request) if payload.nil?
+        return render_error("Invalid JSON payload", :bad_request) if payload.nil?
 
         result = if payload.is_a?(Array)
           Iot::IngestionService.ingest_batch(@api_organization, payload, source: :rest_api)
         elsif payload["readings"].is_a?(Array)
           # bulk from one device
           asset = find_asset_from_payload(@api_organization, payload)
-          return render_error("Asset not found", status: :unprocessable_entity) unless asset
+          return render_error("Asset not found", :unprocessable_entity) unless asset
 
           readings = payload["readings"].map do |r|
             r.merge("device_id" => payload["device_id"], "timestamp" => payload["timestamp"])
@@ -26,7 +26,7 @@ module Api
           Iot::IngestionService.ingest(asset, readings, source: :rest_api, device_id: payload["device_id"])
         else
           asset = find_asset_from_payload(@api_organization, payload)
-          return render_error("Asset not found", status: :unprocessable_entity) unless asset
+          return render_error("Asset not found", :unprocessable_entity) unless asset
 
           Iot::IngestionService.ingest(asset, [payload], source: :rest_api, device_id: payload["device_id"])
         end

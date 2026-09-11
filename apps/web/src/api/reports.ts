@@ -22,7 +22,7 @@ export const reportsApi = {
   pm: {
     compliance: (params?: Record<string, unknown>) =>
       apiClient.get('/reports/pm/compliance', { params }),
-    forecast: () => apiClient.get('/reports/pm/forecast'),
+    forecast: () => apiClient.get('/reports/pm/schedule_forecast'),
   },
 
   iot: {

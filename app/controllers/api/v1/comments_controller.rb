@@ -14,13 +14,13 @@ module Api
       # POST /api/v1/work_orders/:work_order_id/comments
       def create
         comment = @work_order.comments.create!(comment_params.merge(user: current_user))
-        render json: CommentBlueprint.render_as_hash(comment), status: :created
+        render json: { data: CommentBlueprint.render_as_hash(comment) }, status: :created
       end
 
       # DELETE /api/v1/work_orders/:work_order_id/comments/:id
       def destroy
         unless @comment.user_id == current_user.id || current_user.manager_or_above?
-          return render_error("Forbidden", status: :forbidden)
+          return render_error("Forbidden", :forbidden)
         end
         @comment.destroy!
         head :no_content

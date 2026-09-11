@@ -12,18 +12,19 @@ module Api
             build_compliance_report(org, from, to)
           end
 
-          respond_to do |format|
-            format.json { render json: data }
-            format.csv do
-              require_export_permission!
-              send_data ExportService.pm_compliance_csv(data[:by_month]),
-                filename: "pm_compliance_#{Date.today}.csv", type: "text/csv"
-            end
-            format.pdf do
-              require_export_permission!
-              send_data PdfReportService.pm_compliance_report(data, org_name: org.name),
-                filename: "pm_compliance_#{Date.today}.pdf", type: "application/pdf"
-            end
+          # Dispatch on the explicit `format` param — see note in
+          # Reports::WorkOrdersController#summary.
+          case params[:format]
+          when "csv"
+            require_export_permission!
+            send_data ExportService.pm_compliance_csv(data[:by_month]),
+              filename: "pm_compliance_#{Date.today}.csv", type: "text/csv"
+          when "pdf"
+            require_export_permission!
+            send_data PdfReportService.pm_compliance_report(data, org_name: org.name),
+              filename: "pm_compliance_#{Date.today}.pdf", type: "application/pdf"
+          else
+            render json: data
           end
         end
 

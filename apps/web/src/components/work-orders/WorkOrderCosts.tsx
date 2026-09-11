@@ -5,15 +5,18 @@ const HOURLY_RATE = 40 // USD per hour, configurable in settings
 
 interface WorkOrderCostsProps {
   workOrderId: number
-  actualHours?: number
-  laborCost?: number
+  actualHours?: number | string
+  laborCost?: number | string
 }
 
 export function WorkOrderCosts({ workOrderId, actualHours, laborCost }: WorkOrderCostsProps) {
   const { data: parts = [] } = useWorkOrderParts(workOrderId)
 
-  const partsCost = parts.reduce((sum, p) => sum + p.total_cost, 0)
-  const labor = laborCost ?? (actualHours ? actualHours * HOURLY_RATE : 0)
+  // Rails serializes decimal columns (labor_cost, actual_hours, total_cost) as
+  // JSON strings to avoid float precision loss — coerce before doing math.
+  const hours = actualHours != null ? Number(actualHours) : undefined
+  const partsCost = parts.reduce((sum, p) => sum + Number(p.total_cost), 0)
+  const labor = laborCost != null ? Number(laborCost) : (hours ? hours * HOURLY_RATE : 0)
   const total = partsCost + labor
 
   const Row = ({ label, value, bold }: { label: string; value: string; bold?: boolean }) => (
@@ -32,7 +35,7 @@ export function WorkOrderCosts({ workOrderId, actualHours, laborCost }: WorkOrde
       <div className="divide-y divide-gray-100 dark:divide-gray-700">
         <Row label="Parts cost" value={`$${partsCost.toFixed(2)}`} />
         <Row
-          label={`Labor cost${actualHours ? ` (${actualHours} hrs × $${HOURLY_RATE}/hr)` : ''}`}
+          label={`Labor cost${hours ? ` (${hours} hrs × $${HOURLY_RATE}/hr)` : ''}`}
           value={`$${labor.toFixed(2)}`}
         />
         <Row label="Total cost" value={`$${total.toFixed(2)}`} bold />
