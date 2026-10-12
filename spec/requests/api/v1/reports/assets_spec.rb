@@ -8,7 +8,7 @@ RSpec.describe "Asset Reports", type: :request do
 
   describe "GET /api/v1/reports/assets/health" do
     it "returns asset health overview" do
-      get "/api/v1/reports/assets/health", headers: headers, as: :json
+      get "/api/v1/reports/assets/health", headers: headers
 
       expect(response).to have_http_status(:ok)
       body = response.parsed_body
@@ -26,7 +26,7 @@ RSpec.describe "Asset Reports", type: :request do
 
   describe "GET /api/v1/reports/assets/:id/history" do
     it "returns asset timeline" do
-      get "/api/v1/reports/assets/#{asset.id}/history", headers: headers, as: :json
+      get "/api/v1/reports/assets/#{asset.id}/history", headers: headers
 
       expect(response).to have_http_status(:ok)
       body = response.parsed_body
@@ -36,7 +36,7 @@ RSpec.describe "Asset Reports", type: :request do
 
     it "returns 404 for asset not in org" do
       other_asset = create(:asset)
-      get "/api/v1/reports/assets/#{other_asset.id}/history", headers: headers, as: :json
+      get "/api/v1/reports/assets/#{other_asset.id}/history", headers: headers
       expect(response).to have_http_status(:not_found)
     end
   end
@@ -51,7 +51,7 @@ RSpec.describe "Asset Reports", type: :request do
     it "returns cost breakdown by asset" do
       get "/api/v1/reports/assets/cost_analysis",
         params: { from: 30.days.ago.iso8601, to: Time.current.iso8601 },
-        headers: headers, as: :json
+        headers: headers
 
       expect(response).to have_http_status(:ok)
       body = response.parsed_body

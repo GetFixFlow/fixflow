@@ -29,6 +29,7 @@ module Api
 
       def destroy
         require_admin!
+        return if performed?
         @user.destroy!
         head :no_content
       end

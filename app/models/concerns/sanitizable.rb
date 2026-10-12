@@ -11,6 +11,10 @@ module Sanitizable
     self.class.columns
         .select { |c| c.type == :string || c.type == :text }
         .map(&:name)
-        .each { |attr| self[attr] = self[attr]&.strip }
+        .each do |attr|
+          value = self[attr]
+          # Array columns (e.g. api_keys.scopes) also report type :string; only strip real strings.
+          self[attr] = value.strip if value.is_a?(String)
+        end
   end
 end

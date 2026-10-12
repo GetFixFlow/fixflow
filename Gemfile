@@ -7,6 +7,7 @@ gem "puma", ">= 5.0"
 # Auth
 gem "devise", "~> 4.9"
 gem "devise-jwt", "~> 0.12"
+gem "bcrypt", "~> 3.1" # ApiKey hashes keys with BCrypt directly
 
 # Multi-tenancy
 gem "acts_as_tenant", "~> 1.0"

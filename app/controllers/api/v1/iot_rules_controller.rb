@@ -1,7 +1,7 @@
 module Api
   module V1
     class IotRulesController < Api::V1::BaseController
-      before_action :require_manager!, only: %i[create update destroy pause resume]
+      before_action :require_manager!, only: %i[create update destroy pause resume test]
       before_action :set_rule, only: %i[show update destroy pause resume test]
 
       # GET /api/v1/iot_rules
@@ -52,7 +52,7 @@ module Api
       def test
         value = params.require(:value).to_f
 
-        would_trigger    = Iot::RuleEvaluatorService.check_threshold(@rule, value)
+        would_trigger    = ::Iot::RuleEvaluatorService.check_threshold(@rule, value)
         cooldown_active  = @rule.on_cooldown?
         would_create_wo  = would_trigger && !cooldown_active && @rule.auto_create_wo
 

@@ -22,7 +22,10 @@ namespace :fixflow do
   task :create_admin, [:email, :password, :org_name] => :environment do |_t, args|
     args.with_defaults(email: "admin@fixflow.local", password: "changeme!", org_name: "FixFlow")
     ActsAsTenant.without_tenant do
-      org  = Organization.create!(name: args[:org_name])
+      # One install serves one company: refuse to create a second.
+      abort "Setup is already complete (#{Organization.first.name}). Not creating another company." if Organization.setup_complete?
+
+      org  = Organization.create!(name: args[:org_name], subdomain: args[:org_name].parameterize)
       user = User.create!(
         email:                 args[:email],
         password:              args[:password],

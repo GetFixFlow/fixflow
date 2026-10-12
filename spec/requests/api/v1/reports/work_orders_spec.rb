@@ -8,7 +8,7 @@ RSpec.describe "Work Order Reports", type: :request do
   let(:headers) { auth_headers_for(manager) }
 
   before do
-    create(:work_order, organization: org, asset: asset, status: "completed",
+    create(:work_order, organization: org, asset: asset, status: "completed", completion_notes: "Replaced seal",
            completed_at: 1.day.ago, started_at: 2.days.ago, assignee: tech)
     create(:work_order, organization: org, asset: asset, status: "open")
   end
@@ -17,7 +17,7 @@ RSpec.describe "Work Order Reports", type: :request do
     it "returns summary metrics" do
       get "/api/v1/reports/work_orders/summary",
         params: { from: 30.days.ago.iso8601, to: Time.current.iso8601 },
-        headers: headers, as: :json
+        headers: headers
 
       expect(response).to have_http_status(:ok)
       body = response.parsed_body
@@ -38,7 +38,7 @@ RSpec.describe "Work Order Reports", type: :request do
     it "returns MTTR breakdown" do
       get "/api/v1/reports/work_orders/mttr",
         params: { from: 30.days.ago.iso8601, to: Time.current.iso8601 },
-        headers: headers, as: :json
+        headers: headers
 
       expect(response).to have_http_status(:ok)
       body = response.parsed_body
@@ -48,7 +48,7 @@ RSpec.describe "Work Order Reports", type: :request do
 
   describe "GET /api/v1/reports/work_orders/backlog" do
     it "returns open WO aging buckets" do
-      get "/api/v1/reports/work_orders/backlog", headers: headers, as: :json
+      get "/api/v1/reports/work_orders/backlog", headers: headers
 
       expect(response).to have_http_status(:ok)
       body = response.parsed_body
@@ -61,7 +61,7 @@ RSpec.describe "Work Order Reports", type: :request do
     it "is accessible to managers" do
       get "/api/v1/reports/work_orders/technician_performance",
         params: { from: 30.days.ago.iso8601, to: Time.current.iso8601 },
-        headers: headers, as: :json
+        headers: headers
 
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body).to include("technicians")
@@ -70,7 +70,7 @@ RSpec.describe "Work Order Reports", type: :request do
     it "is forbidden to technicians" do
       get "/api/v1/reports/work_orders/technician_performance",
         params: { from: 30.days.ago.iso8601, to: Time.current.iso8601 },
-        headers: auth_headers_for(tech), as: :json
+        headers: auth_headers_for(tech)
 
       expect(response).to have_http_status(:forbidden)
     end

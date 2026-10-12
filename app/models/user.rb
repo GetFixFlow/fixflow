@@ -24,8 +24,10 @@ class User < ApplicationRecord
     "#{first_name} #{last_name}".strip
   end
 
-  def admin?
-    role == "admin"
+  # admin?, manager?, technician? and requester? check the user's own role only.
+  # The policies layer the hierarchy on top (see ApplicationPolicy).
+  ROLES.each do |name|
+    define_method(:"#{name}?") { role == name }
   end
 
   def manager_or_above?

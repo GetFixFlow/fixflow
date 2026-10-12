@@ -28,9 +28,9 @@ RSpec.describe Iot::RuleEvaluatorService do
     context "lt operator" do
       let(:rule) { build(:iot_rule, operator: :lt, threshold: 20.0) }
 
-      it "returns true when value is less"    { expect(described_class.check_threshold(rule, 19.0)).to be true }
-      it "returns false when value is equal"  { expect(described_class.check_threshold(rule, 20.0)).to be false }
-      it "returns false when value is greater" { expect(described_class.check_threshold(rule, 21.0)).to be false }
+      it("returns true when value is less") { expect(described_class.check_threshold(rule, 19.0)).to be true }
+      it("returns false when value is equal") { expect(described_class.check_threshold(rule, 20.0)).to be false }
+      it("returns false when value is greater") { expect(described_class.check_threshold(rule, 21.0)).to be false }
     end
 
     context "gte operator" do
@@ -52,26 +52,26 @@ RSpec.describe Iot::RuleEvaluatorService do
     context "lte operator" do
       let(:rule) { build(:iot_rule, operator: :lte, threshold: 20.0) }
 
-      it "returns true when value equals threshold" { expect(described_class.check_threshold(rule, 20.0)).to be true }
-      it "returns true when value is less"          { expect(described_class.check_threshold(rule, 19.0)).to be true }
-      it "returns false when value is greater"      { expect(described_class.check_threshold(rule, 21.0)).to be false }
+      it("returns true when value equals threshold") { expect(described_class.check_threshold(rule, 20.0)).to be true }
+      it("returns true when value is less") { expect(described_class.check_threshold(rule, 19.0)).to be true }
+      it("returns false when value is greater") { expect(described_class.check_threshold(rule, 21.0)).to be false }
     end
 
     context "eq operator" do
       let(:rule) { build(:iot_rule, operator: :eq, threshold: 50.0) }
 
-      it "returns true when value equals threshold"   { expect(described_class.check_threshold(rule, 50.0)).to be true }
-      it "returns false when value differs"           { expect(described_class.check_threshold(rule, 50.1)).to be false }
+      it("returns true when value equals threshold") { expect(described_class.check_threshold(rule, 50.0)).to be true }
+      it("returns false when value differs") { expect(described_class.check_threshold(rule, 50.1)).to be false }
     end
 
     context "outside_range operator" do
       let(:rule) { build(:iot_rule, :outside_range) }  # threshold: 10.0, threshold_max: 90.0
 
-      it "returns true when value is below range"   { expect(described_class.check_threshold(rule, 9.9)).to be true }
-      it "returns true when value is above range"   { expect(described_class.check_threshold(rule, 90.1)).to be true }
-      it "returns false when value is within range" { expect(described_class.check_threshold(rule, 50.0)).to be false }
-      it "returns false at lower bound"             { expect(described_class.check_threshold(rule, 10.0)).to be false }
-      it "returns false at upper bound"             { expect(described_class.check_threshold(rule, 90.0)).to be false }
+      it("returns true when value is below range") { expect(described_class.check_threshold(rule, 9.9)).to be true }
+      it("returns true when value is above range") { expect(described_class.check_threshold(rule, 90.1)).to be true }
+      it("returns false when value is within range") { expect(described_class.check_threshold(rule, 50.0)).to be false }
+      it("returns false at lower bound") { expect(described_class.check_threshold(rule, 10.0)).to be false }
+      it("returns false at upper bound") { expect(described_class.check_threshold(rule, 90.0)).to be false }
     end
   end
 

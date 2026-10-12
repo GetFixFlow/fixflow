@@ -27,7 +27,7 @@ RSpec.describe "GET /api/v1/activity_logs", type: :request do
     it "filters by resource_type" do
       get "/api/v1/activity_logs",
         params: { resource_type: "WorkOrder" },
-        headers: headers, as: :json
+        headers: headers
 
       expect(response.parsed_body["activity_logs"].size).to eq(1)
     end
@@ -35,7 +35,7 @@ RSpec.describe "GET /api/v1/activity_logs", type: :request do
     it "filters by action" do
       get "/api/v1/activity_logs",
         params: { action: "work_order.completed" },
-        headers: headers, as: :json
+        headers: headers
 
       expect(response.parsed_body["activity_logs"].size).to eq(1)
     end
@@ -43,7 +43,7 @@ RSpec.describe "GET /api/v1/activity_logs", type: :request do
     it "filters by user_id" do
       get "/api/v1/activity_logs",
         params: { user_id: tech.id },
-        headers: headers, as: :json
+        headers: headers
 
       expect(response.parsed_body["activity_logs"].size).to eq(1)
     end

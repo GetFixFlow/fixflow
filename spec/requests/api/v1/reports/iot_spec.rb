@@ -16,7 +16,7 @@ RSpec.describe "IoT Reports", type: :request do
     it "returns alert summary" do
       get "/api/v1/reports/iot/alert_summary",
         params: { from: 30.days.ago.iso8601, to: Time.current.iso8601 },
-        headers: headers, as: :json
+        headers: headers
 
       expect(response).to have_http_status(:ok)
       body = response.parsed_body
@@ -27,7 +27,7 @@ RSpec.describe "IoT Reports", type: :request do
     it "can filter by asset_id" do
       get "/api/v1/reports/iot/alert_summary",
         params: { from: 30.days.ago.iso8601, to: Time.current.iso8601, asset_id: asset.id },
-        headers: headers, as: :json
+        headers: headers
 
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body["total_alerts"]).to eq(2)
@@ -46,7 +46,7 @@ RSpec.describe "IoT Reports", type: :request do
     it "returns sensor trend data" do
       get "/api/v1/reports/iot/sensor_trends",
         params: { asset_id: asset.id, from: 1.day.ago.iso8601, to: Time.current.iso8601 },
-        headers: headers, as: :json
+        headers: headers
 
       expect(response).to have_http_status(:ok)
       body = response.parsed_body
@@ -57,7 +57,7 @@ RSpec.describe "IoT Reports", type: :request do
     it "requires asset_id" do
       get "/api/v1/reports/iot/sensor_trends",
         params: { from: 1.day.ago.iso8601, to: Time.current.iso8601 },
-        headers: headers, as: :json
+        headers: headers
 
       expect(response).to have_http_status(:bad_request)
     end

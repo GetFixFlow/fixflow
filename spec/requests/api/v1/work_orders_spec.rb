@@ -132,6 +132,7 @@ RSpec.describe "Api::V1::WorkOrders", type: :request do
         params: { work_order: { title: "Nope" } },
         headers: auth_headers_for(other_tech)
       expect(response).to have_http_status(:forbidden)
+      expect(work_order.reload.title).not_to eq("Nope")
     end
   end
 
