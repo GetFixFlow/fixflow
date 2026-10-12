@@ -43,6 +43,31 @@ export interface User {
   avatar_url?: string
   phone?: string
   created_at: string
+  invitation_pending?: boolean
+  invitation_accepted_at?: string | null
+}
+
+export interface InvitePayload {
+  first_name: string
+  last_name: string
+  email: string
+  role: Role
+  send_welcome: boolean
+  message?: string
+}
+
+export interface InviteResult {
+  user: User
+  invitation_url: string
+  email_sent: boolean
+}
+
+export interface InvitationDetails {
+  email: string
+  first_name: string
+  last_name: string
+  role: Role
+  organization_name: string
 }
 
 export interface AuthTokens {

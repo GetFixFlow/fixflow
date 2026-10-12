@@ -105,8 +105,16 @@ Rails.application.routes.draw do
       resources :api_keys, only: %i[index create destroy]
 
       resources :users, only: %i[index show update destroy] do
-        collection { get :me }
+        collection do
+          get  :me
+          post :invite
+        end
+        member { post :resend_invitation }
       end
+
+      # Public: look up and accept an invitation by its emailed token
+      get  "invitations/:token",        to: "invitations#show",   as: :invitation
+      post "invitations/:token/accept", to: "invitations#accept", as: :accept_invitation
 
       # ── Dashboard ─────────────────────────────────────────────────────────
       get "dashboard", to: "dashboard#index"

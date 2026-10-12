@@ -41,7 +41,11 @@ MinIO console: `http://localhost:9001` (user: minioadmin / minioadmin)
 
 Each FixFlow install serves one company. Open the web app and, on a new install, it shows **Set up FixFlow**: enter your company name and the first administrator's details. Once that is done, public sign-up is closed (`POST /api/v1/auth/sign_up` returns `403`) and the login page no longer offers it.
 
-Adding more users is not available in the web app yet. Until it is, an administrator can create them from the Rails console.
+### Adding users
+
+Administrators add people from **Settings → Users → Invite User**. Choose a role and FixFlow creates an invitation link. If email is set up (`SMTP_HOST` and `SMTP_PASSWORD`), the link is also emailed; if not, the dialog tells you and you copy the link and send it yourself. The person opens the link, chooses a password and signs in. A link works once and expires after 7 days; use **Copy invite link** on a pending user in the Users list to make a new one.
+
+Set `APP_URL` to the address your web app is served from, so invitation links point to the right place.
 
 ---
 

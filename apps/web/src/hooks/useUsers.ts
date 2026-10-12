@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import type { AxiosError } from 'axios'
 import { toast } from 'sonner'
 import { usersApi } from '@/api/users'
 import type { Role } from '@/types'
@@ -14,11 +15,19 @@ export function useInviteUser() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: usersApi.invite,
-    onSuccess: (_, vars) => {
-      qc.invalidateQueries({ queryKey: ['users'] })
-      toast.success(`Invitation sent to ${vars.email}`)
-    },
-    onError: () => toast.error('Failed to send invitation.'),
+    // The invite dialog shows the result (and the link to copy), so no toast here.
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['users'] }),
+    onError: (error: AxiosError<{ error?: { message?: string } }>) =>
+      toast.error(error.response?.data?.error?.message ?? 'Could not create the invitation.'),
+  })
+}
+
+export function useResendInvitation() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => usersApi.resendInvitation(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['users'] }),
+    onError: () => toast.error('Could not create a new invitation link.'),
   })
 }
 

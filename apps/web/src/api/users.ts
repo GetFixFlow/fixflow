@@ -1,5 +1,5 @@
 import { apiClient } from './client'
-import type { User, Role } from '@/types'
+import type { User, Role, InvitePayload, InviteResult } from '@/types'
 
 export const usersApi = {
   list: (params?: Record<string, unknown>) =>
@@ -7,8 +7,10 @@ export const usersApi = {
 
   get: (id: number) => apiClient.get<{ user: User }>(`/users/${id}`),
 
-  invite: (data: { full_name: string; email: string; role: Role; send_welcome: boolean; message?: string }) =>
-    apiClient.post<{ user: User }>('/users/invite', { user: data }),
+  invite: (data: InvitePayload) => apiClient.post<InviteResult>('/users/invite', { user: data }),
+
+  resendInvitation: (id: number, sendEmail = false) =>
+    apiClient.post<InviteResult>(`/users/${id}/resend_invitation`, { user: { send_welcome: sendEmail } }),
 
   update: (id: number, data: Partial<User>) =>
     apiClient.patch<{ user: User }>(`/users/${id}`, { user: data }),

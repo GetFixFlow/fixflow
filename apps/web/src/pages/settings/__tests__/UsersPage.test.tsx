@@ -33,6 +33,7 @@ vi.mock('@/hooks/useUsers', () => ({
   useDeactivateUser: () => ({ mutate: vi.fn(), isPending: false }),
   useReactivateUser: () => ({ mutate: vi.fn(), isPending: false }),
   useResetUserPassword: () => ({ mutate: vi.fn(), isPending: false }),
+  useResendInvitation: () => ({ mutate: vi.fn(), isPending: false }),
 }))
 
 vi.mock('@/stores/authStore', () => ({

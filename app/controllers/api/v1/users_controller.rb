@@ -2,7 +2,8 @@ module Api
   module V1
     class UsersController < Api::V1::BaseController
       before_action :require_manager!, only: %i[index update destroy]
-      before_action :set_user, only: %i[show update destroy]
+      before_action :require_admin!,   only: %i[invite resend_invitation]
+      before_action :set_user, only: %i[show update destroy resend_invitation]
 
       def index
         scope = current_organization.users
@@ -27,6 +28,34 @@ module Api
         render json: UserBlueprint.render_as_hash(@user)
       end
 
+      # POST /api/v1/users/invite
+      # Always returns the invitation link, so an admin can send it by hand when
+      # email is not set up. The email is only attempted when it is.
+      def invite
+        user = nil
+        raw_token = nil
+        ActiveRecord::Base.transaction do
+          password = SecureRandom.hex(32) # unusable until the invitee sets their own
+          user = current_organization.users.create!(
+            invite_params.merge(password: password, password_confirmation: password)
+          )
+          raw_token = user.invite!(invited_by: current_user)
+        end
+
+        render json: invitation_payload(user, raw_token, send_email: send_welcome?), status: :created
+      end
+
+      # POST /api/v1/users/:id/resend_invitation — replaces the old link with a new one
+      def resend_invitation
+        unless @user.invitation_pending?
+          return render_error("This user has already accepted their invitation.",
+                              :unprocessable_entity, code: "INVITATION_ACCEPTED")
+        end
+
+        raw_token = @user.invite!(invited_by: current_user)
+        render json: invitation_payload(@user, raw_token, send_email: send_welcome?)
+      end
+
       def destroy
         require_admin!
         return if performed?
@@ -38,6 +67,27 @@ module Api
 
       def set_user
         @user = current_organization.users.find(params[:id])
+      end
+
+      def invite_params
+        params.require(:user).permit(:email, :first_name, :last_name, :role)
+      end
+
+      def send_welcome?
+        ActiveModel::Type::Boolean.new.cast(params.dig(:user, :send_welcome)) != false
+      end
+
+      def invitation_payload(user, raw_token, send_email:)
+        url = invitation_url_for(raw_token)
+        email_sent = send_email && Invitations.email_configured?
+        if email_sent
+          InvitationMailer.invite(user, url, params.dig(:user, :message).to_s.first(500)).deliver_later
+        end
+        { user: UserBlueprint.render_as_hash(user), invitation_url: url, email_sent: email_sent }
+      end
+
+      def invitation_url_for(raw_token)
+        "#{Invitations.base_url}/accept-invite?token=#{raw_token}"
       end
 
       def user_params

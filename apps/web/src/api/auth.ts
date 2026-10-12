@@ -1,5 +1,5 @@
 import { apiClient } from './client'
-import type { LoginPayload, RegisterPayload, User } from '@/types'
+import type { InvitationDetails, LoginPayload, RegisterPayload, User } from '@/types'
 
 export const authApi = {
   login: (payload: LoginPayload) =>
@@ -14,6 +14,12 @@ export const authApi = {
 
   register: (payload: RegisterPayload) =>
     apiClient.post<{ message: string; user: User }>('/auth/sign_up', { user: payload }),
+
+  invitation: (token: string) =>
+    apiClient.get<InvitationDetails>(`/invitations/${encodeURIComponent(token)}`).then((r) => r.data),
+
+  acceptInvitation: (token: string, payload: { password: string; password_confirmation: string }) =>
+    apiClient.post(`/invitations/${encodeURIComponent(token)}/accept`, { user: payload }),
 
   logout: () => apiClient.delete('/auth/sign_out'),
 
