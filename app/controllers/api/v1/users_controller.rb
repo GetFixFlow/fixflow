@@ -70,7 +70,10 @@ module Api
       end
 
       def invite_params
-        params.require(:user).permit(:email, :first_name, :last_name, :role)
+        # Only admins reach #invite. The role is checked against User::ROLES by the model.
+        allowed = [ :email, :first_name, :last_name ]
+        allowed << :role
+        params.require(:user).permit(allowed)
       end
 
       def send_welcome?
