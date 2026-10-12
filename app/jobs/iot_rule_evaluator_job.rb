@@ -1,4 +1,4 @@
-class IoTRuleEvaluatorJob < ApplicationJob
+class IotRuleEvaluatorJob < ApplicationJob
   queue_as :iot
 
   # Kept for backward compatibility with old REST ingest endpoint.

@@ -15,9 +15,11 @@ echo "PostgreSQL is ready."
 # Run migrations
 bundle exec rails db:migrate
 
-# Seed on first run if requested
+# Load demo data if requested. Never fatal: once a real company exists this is
+# refused on purpose, and the container must still start.
 if [ "${SEED_DB}" = "true" ]; then
-  bundle exec rails db:seed
+  echo "SEED_DB=true: loading demo data (accounts use a well-known password)."
+  CONFIRM=yes bundle exec rails fixflow:demo_data || echo "Demo data was not loaded."
 fi
 
 # Create MinIO buckets

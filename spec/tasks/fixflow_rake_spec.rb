@@ -41,6 +41,24 @@ RSpec.describe "fixflow rake tasks", type: :task do
     end
   end
 
+  describe "fixflow:demo_data" do
+    after { ENV.delete("CONFIRM") }
+
+    it "loads the demo company and lists the demo logins" do
+      expect {
+        expect { Rake::Task["fixflow:demo_data"].execute }.to output(/admin@demo\.com/).to_stdout
+      }.to change(Organization, :count).by(1)
+    end
+
+    it "aborts without changing anything when a real company exists" do
+      create(:organization, subdomain: "acme")
+
+      expect {
+        expect { Rake::Task["fixflow:demo_data"].execute }.to raise_error(SystemExit)
+      }.not_to change { [Organization.count, User.count] }
+    end
+  end
+
   describe "fixflow:create_api_key" do
     it "creates an API key and outputs the raw key" do
       org = create(:organization)
