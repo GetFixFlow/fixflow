@@ -24,6 +24,14 @@ FactoryBot.define do
       }
     end
 
+    # The model recalculates next_due_at from the frequency the first time it is saved.
+    # Specs choose their own due date, so restore it after create.
+    before(:create) { |pm| pm.instance_variable_set(:@spec_next_due_at, pm.next_due_at) }
+    after(:create) do |pm|
+      due = pm.instance_variable_get(:@spec_next_due_at)
+      pm.update_column(:next_due_at, due) if due
+    end
+
     trait :active_pm do
       status      { :active }
       next_due_at { 1.day.from_now }

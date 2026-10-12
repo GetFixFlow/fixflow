@@ -34,7 +34,7 @@ RSpec.describe "GET /api/v1/activity_logs", type: :request do
 
     it "filters by action" do
       get "/api/v1/activity_logs",
-        params: { action: "work_order.completed" },
+        params: { log_action: "work_order.completed" },
         headers: headers
 
       expect(response.parsed_body["activity_logs"].size).to eq(1)

@@ -68,7 +68,7 @@ RSpec.describe "Api::V1::PreventiveMaintenances", type: :request do
       get "/api/v1/preventive_maintenances/#{pm.id}", headers: auth_headers_for(manager)
       expect(response).to have_http_status(:ok)
       expect(json_body["data"]["id"]).to eq(pm.id)
-      expect(json_body).to have_key("template")
+      expect(json_body["data"]).to have_key("template")
     end
 
     it "technician can view a PM" do
@@ -115,9 +115,8 @@ RSpec.describe "Api::V1::PreventiveMaintenances", type: :request do
     end
 
     it "returns 422 when template is missing title" do
-      bad_params = valid_params.deep_merge(
-        preventive_maintenance: { template: { "description" => "no title here" } }
-      )
+      bad_params = valid_params.deep_dup
+      bad_params[:preventive_maintenance][:template] = { "description" => "no title here" }
       post "/api/v1/preventive_maintenances", params: bad_params, headers: auth_headers_for(manager)
       expect(response).to have_http_status(:unprocessable_entity)
     end

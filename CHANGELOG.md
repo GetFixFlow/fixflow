@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Fixed `DELETE /api/v1/auth/sign_out` answering 401 "No active session" after a successful logout. The token was revoked, but the client was told it failed.
+- Fixed `GET /api/v1/activity_logs` always returning an empty list: it filtered on `params[:action]`, which Rails always sets to the controller action ("index"). The action filter is now `log_action`. (The web Audit Log page still shows sample data and does not call this endpoint yet.)
 - Fixed the production API failing to boot. `config/environments/production.rb` selected an Active Storage service (`amazon`) that `storage.yml` does not define, and the class in `app/jobs/iot_rule_evaluator_job.rb` was named `IoTRuleEvaluatorJob`, which Rails' production loader rejects (now `IotRuleEvaluatorJob`).
 - MinIO credentials: `storage.yml` now also reads `MINIO_ACCESS_KEY` and `MINIO_SECRET_KEY`, the names `.env.example` and `docker-compose.prod.yml` set. Before, uploads would have used the default `minioadmin` login.
 - Demo data is now `rails fixflow:demo_data` and works in any environment, for empty installs only (`CONFIRM=yes` in production). `SEED_DB=true` now works in production; it used to do nothing because the seeds only ran in development. `make demo-data` added.
