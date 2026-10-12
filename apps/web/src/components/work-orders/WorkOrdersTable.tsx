@@ -162,7 +162,7 @@ export function WorkOrdersTable({
               new Date(wo.due_date) < new Date() &&
               !['completed', 'verified', 'cancelled'].includes(wo.status)
             const isCritical = wo.priority === 'critical'
-            const SourceIcon = SOURCE_ICONS[wo.source] ?? User
+            const SourceIcon = SOURCE_ICONS[wo.source ?? 'manual'] ?? User
             const visibleActions = rowActions.filter((a) => !a.hidden?.(wo))
 
             return (

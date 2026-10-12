@@ -11,9 +11,9 @@ export function CostTrendChart({ data }: { data: CostTrendPoint[] }) {
         <XAxis dataKey="period" tick={{ fontSize: 10 }} />
         <YAxis yAxisId="cost" tick={{ fontSize: 10 }} tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} />
         <YAxis yAxisId="count" orientation="right" tick={{ fontSize: 10 }} />
-        <Tooltip formatter={(v: number, name: string) => {
+        <Tooltip formatter={(v, name) => {
           if (name === 'WOs') return [v, name]
-          return [formatCurrency(v), name]
+          return [formatCurrency(Number(v)), name]
         }} />
         <Legend />
         <Bar yAxisId="cost" dataKey="labor" name="Labor" fill="#3b82f6" stackId="a" />

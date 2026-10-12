@@ -54,6 +54,17 @@ export function AssetIoTDetailPage() {
   const alerts = (historyData?.iot_alerts ?? []) as IotAlertExtended[]
   const rawReadings = (readingsData?.sensor_readings ?? []) as SensorReading[]
   const metrics = Object.keys(readings)
+  // The time-series chart needs each metric with its readings, unit and threshold.
+  const metricConfigs = metrics.map((name) => {
+    const rule = rules.find((r) => r.metric_name === name)
+    return {
+      name,
+      unit: rule?.metric_unit,
+      threshold: rule?.threshold_value,
+      operator: rule?.operator,
+      readings: readings[name] ?? [],
+    }
+  })
 
   const paginatedReadings = rawReadings.slice((readingsPage - 1) * PER_PAGE, readingsPage * PER_PAGE)
   const totalPages = Math.ceil(rawReadings.length / PER_PAGE)
@@ -130,7 +141,7 @@ export function AssetIoTDetailPage() {
       {metrics.length > 0 && (
         <Card>
           <CardContent className="p-4">
-            <SensorTimeSeriesChart assetId={assetId} metrics={metrics} />
+            <SensorTimeSeriesChart metrics={metricConfigs} />
           </CardContent>
         </Card>
       )}

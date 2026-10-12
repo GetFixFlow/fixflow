@@ -12,12 +12,12 @@ export function WOStatusDonutChart({ data, onSegmentClick }: WOStatusDonutChartP
         <ResponsiveContainer width="100%" height={220}>
           <PieChart>
             <Pie data={data} dataKey="count" nameKey="status" innerRadius={60} outerRadius={90}
-              paddingAngle={2} onClick={(d: StatusData) => onSegmentClick?.(d.status)}>
+              paddingAngle={2} onClick={(_, index) => onSegmentClick?.(data[index].status)}>
               {data.map((entry, i) => (
                 <Cell key={i} fill={STATUS_COLORS[entry.status as keyof typeof STATUS_COLORS] ?? '#6b7280'} />
               ))}
             </Pie>
-            <Tooltip formatter={(v: number, name: string) => [v, name.replace(/_/g, ' ')]} />
+            <Tooltip formatter={(v, name) => [v, String(name).replace(/_/g, ' ')]} />
           </PieChart>
         </ResponsiveContainer>
         <div className="absolute inset-0 flex items-center justify-center">

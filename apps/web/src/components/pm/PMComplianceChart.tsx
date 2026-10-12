@@ -14,7 +14,7 @@ export function PMComplianceChart({ data }: { data: MonthData[] }) {
           <BarChart data={data} barCategoryGap="30%">
             <XAxis dataKey="month" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
             <Tooltip
-              formatter={(v: number, name: string) => [v, name === 'completed' ? 'Completed' : 'Missed']}
+              formatter={(v, name) => [v, name === 'completed' ? 'Completed' : 'Missed']}
               contentStyle={{ fontSize: 12 }}
             />
             <Bar dataKey="completed" stackId="a" radius={[0, 0, 0, 0]}>

@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 import type { AssetStatus } from '@/types'
 
 const CSV_TEMPLATE_HEADERS = ['name', 'asset_tag', 'serial_number', 'status', 'location_name', 'manufacturer', 'model', 'year'].join(',')
-const VALID_STATUSES: AssetStatus[] = ['operational', 'degraded', 'down', 'maintenance', 'offline']
+const VALID_STATUSES: AssetStatus[] = ['operational', 'degraded', 'down', 'decommissioned']
 
 interface ParsedRow {
   row: number

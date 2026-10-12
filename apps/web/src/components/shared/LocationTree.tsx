@@ -36,6 +36,7 @@ const TYPE_ICONS: Record<LocationType, React.ElementType> = {
   floor: Layers,
   room: DoorOpen,
   zone: MapPin,
+  outdoor: MapPin,
 }
 
 function LocationNode({

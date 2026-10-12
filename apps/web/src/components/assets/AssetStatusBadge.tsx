@@ -7,9 +7,6 @@ const STATUS_LABELS: Record<AssetStatus, string> = {
   degraded: 'Degraded',
   down: 'Down',
   decommissioned: 'Decommissioned',
-  maintenance: 'Maintenance',
-  offline: 'Offline',
-  retired: 'Retired',
 }
 
 interface AssetStatusBadgeProps {

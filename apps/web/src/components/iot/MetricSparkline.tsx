@@ -11,7 +11,7 @@ interface MetricSparklineProps {
 export function MetricSparkline({ readings, threshold, width = 80, height = 32 }: MetricSparklineProps) {
   if (readings.length < 2) return null
   const last20 = readings.slice(-20).map((r) => ({ v: r.value }))
-  const isBreached = threshold != null && (last20.at(-1)?.v ?? 0) > threshold
+  const isBreached = threshold != null && (last20[last20.length - 1]?.v ?? 0) > threshold
   return (
     <span style={{ display: 'inline-block', width, height }} aria-hidden>
       <ResponsiveContainer width="100%" height="100%">

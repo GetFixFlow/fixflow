@@ -11,20 +11,20 @@ import type { PreventiveMaintenance } from '@/types'
 
 const mockPMs: PreventiveMaintenance[] = [
   {
-    id: 1, name: 'Monthly Pump Oil Change', title: 'Monthly Pump Oil Change',
+    id: 1, name: 'Monthly Pump Oil Change',
     status: 'active', priority: 'medium',
     frequency_type: 'time_based', frequency_value: 30, frequency_unit: 'days',
     next_due_at: new Date(Date.now() + 2 * 86400000).toISOString(),
     compliance_rate: 87, completed_count: 12, skipped_count: 2, missed_count: 1,
-    asset_id: 1, organization_id: 1, created_at: '', updated_at: '',
+    created_at: '', updated_at: '',
   },
   {
-    id: 2, name: 'HVAC Filter Replace', title: 'HVAC Filter Replace',
+    id: 2, name: 'HVAC Filter Replace',
     status: 'paused', priority: 'low',
     frequency_type: 'time_based', frequency_value: 90, frequency_unit: 'days',
     next_due_at: new Date(Date.now() - 5 * 86400000).toISOString(),
     compliance_rate: 60,
-    asset_id: 2, organization_id: 1, created_at: '', updated_at: '',
+    created_at: '', updated_at: '',
   },
 ]
 

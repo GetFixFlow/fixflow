@@ -24,8 +24,8 @@ describe('CompleteModal', () => {
 
   it('blocks submission with incomplete required checklist items', async () => {
     const items = [
-      { id: '1', description: 'Check oil', required: true, completed: false },
-      { id: '2', description: 'Test run', required: false, completed: false },
+      { step: 1, instruction: 'Check oil', required: true, completed: false },
+      { step: 2, instruction: 'Test run', required: false, completed: false },
     ]
     render(
       <CompleteModal workOrderId={1} open checklistItems={items} onClose={() => {}} />,

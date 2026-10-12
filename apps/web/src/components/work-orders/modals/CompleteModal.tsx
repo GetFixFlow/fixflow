@@ -58,7 +58,7 @@ export function CompleteModal({
                 <strong>{requiredIncomplete.length} required step{requiredIncomplete.length !== 1 && 's'} not checked:</strong>
                 <ul className="mt-1 list-disc pl-4 text-xs">
                   {requiredIncomplete.map((i) => (
-                    <li key={i.id}>{i.description}</li>
+                    <li key={i.step}>{i.instruction}</li>
                   ))}
                 </ul>
               </div>

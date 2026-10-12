@@ -166,7 +166,7 @@ export function WorkOrderDetailPage() {
           <CopyId text={wo.work_order_number} />
           <WorkOrderPriorityBadge priority={wo.priority} />
           <WorkOrderStatusBadge status={wo.status} />
-          <WorkOrderSourceBadge source={wo.source} showLabel={false} />
+          <WorkOrderSourceBadge source={wo.source ?? 'manual'} showLabel={false} />
 
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
@@ -479,7 +479,7 @@ export function WorkOrderDetailPage() {
           <section className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
             <WorkOrderCosts
               workOrderId={wo.id}
-              actualHours={wo.actual_hours}
+              actualHours={wo.actual_hours ?? undefined}
               laborCost={wo.labor_cost}
             />
           </section>
@@ -516,7 +516,7 @@ export function WorkOrderDetailPage() {
       />
       <RejectModal
         workOrderId={wo.id}
-        currentAssigneeId={wo.assignee_id}
+        currentAssigneeId={wo.assignee_id ?? undefined}
         open={openModal === 'reject'}
         onClose={() => setOpenModal(null)}
       />

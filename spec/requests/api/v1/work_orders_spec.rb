@@ -126,6 +126,22 @@ RSpec.describe "Api::V1::WorkOrders", type: :request do
       expect(response).to have_http_status(:ok)
     end
 
+    it "toggles a checklist step without losing the instructions" do
+      work_order.update!(assignee: technician, checklist: [
+        { "step" => 1, "instruction" => "Check oil", "required" => true,  "completed" => false },
+        { "step" => 2, "instruction" => "Test run",  "required" => false, "completed" => false }
+      ])
+
+      patch "/api/v1/work_orders/#{work_order.id}",
+        params: { work_order: { checklist: [ { step: 1, completed: true } ] } },
+        headers: auth_headers_for(technician), as: :json
+
+      expect(response).to have_http_status(:ok)
+      first, second = work_order.reload.checklist
+      expect(first).to include("instruction" => "Check oil", "required" => true, "completed" => true)
+      expect(second).to include("instruction" => "Test run", "completed" => false)
+    end
+
     it "forbids non-assignee technician from updating" do
       other_tech = create(:user, organization: organization, role: "technician")
       patch "/api/v1/work_orders/#{work_order.id}",

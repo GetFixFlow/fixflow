@@ -6,7 +6,7 @@ import { AssetHealthIndicator } from './AssetHealthIndicator'
 import { useUpdateAsset } from '@/hooks/useAssets'
 import type { Asset, AssetStatus } from '@/types'
 
-const STATUSES: AssetStatus[] = ['operational', 'degraded', 'down', 'maintenance', 'offline', 'decommissioned']
+const STATUSES: AssetStatus[] = ['operational', 'degraded', 'down', 'decommissioned']
 const DESTRUCTIVE: AssetStatus[] = ['down', 'decommissioned']
 
 interface AssetStatusChangerProps {

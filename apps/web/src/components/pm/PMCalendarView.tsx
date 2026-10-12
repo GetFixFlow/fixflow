@@ -35,7 +35,7 @@ export function PMCalendarView({ pms, onTrigger }: PMCalendarViewProps) {
 
   const pmsByDate = (day: Date) =>
     pms.filter((pm) => {
-      const due = pm.next_due_at ?? pm.next_due_date
+      const due = pm.next_due_at
       return due && isSameDay(new Date(due), day)
     })
 
@@ -87,9 +87,9 @@ export function PMCalendarView({ pms, onTrigger }: PMCalendarViewProps) {
                     key={pm.id}
                     onClick={() => setSelectedPM(pm)}
                     className={cn('w-full text-left text-xs rounded px-1 py-0.5 truncate', PRIORITY_CHIP[pm.priority ?? 'medium'])}
-                    title={pm.name ?? pm.title}
+                    title={pm.name}
                   >
-                    {pm.name ?? pm.title}
+                    {pm.name}
                   </button>
                 ))}
                 {dayPMs.length > 3 && (
@@ -106,7 +106,7 @@ export function PMCalendarView({ pms, onTrigger }: PMCalendarViewProps) {
         <div className="absolute right-0 top-0 z-20 w-72 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 shadow-xl p-4 space-y-3">
           <div className="flex items-start justify-between">
             <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm line-clamp-2">
-              {selectedPM.name ?? selectedPM.title}
+              {selectedPM.name}
             </h3>
             <button onClick={() => setSelectedPM(null)} className="text-gray-400 hover:text-gray-600 shrink-0 ml-2">
               <X className="h-4 w-4" />
@@ -114,8 +114,8 @@ export function PMCalendarView({ pms, onTrigger }: PMCalendarViewProps) {
           </div>
           <dl className="space-y-1.5 text-sm">
             <div><dt className="text-gray-400 text-xs">Asset</dt><dd>{selectedPM.asset?.name ?? '—'}</dd></div>
-            <div><dt className="text-gray-400 text-xs">Next Due</dt><dd><PMDueDateDisplay dueDate={selectedPM.next_due_at ?? selectedPM.next_due_date} /></dd></div>
-            {selectedPM.assignee && <div><dt className="text-gray-400 text-xs">Assigned to</dt><dd>{selectedPM.assignee.full_name}</dd></div>}
+            <div><dt className="text-gray-400 text-xs">Next Due</dt><dd><PMDueDateDisplay dueDate={selectedPM.next_due_at} /></dd></div>
+            {selectedPM.assigned_to && <div><dt className="text-gray-400 text-xs">Assigned to</dt><dd>{selectedPM.assigned_to.full_name}</dd></div>}
           </dl>
           <div className="flex gap-2">
             <Button size="sm" onClick={() => { onTrigger?.(selectedPM); setSelectedPM(null) }} className="flex-1">

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -8,10 +8,10 @@ import { SchedulePreviewModal, calculatePreviewDates } from '../SchedulePreviewM
 import type { PreventiveMaintenance } from '@/types'
 
 const mockPM: PreventiveMaintenance = {
-  id: 1, name: 'Monthly Oil Change', title: 'Monthly Oil Change',
+  id: 1, name: 'Monthly Oil Change',
   status: 'active', priority: 'medium',
   frequency_type: 'time_based', frequency_value: 30, frequency_unit: 'days',
-  asset_id: 1, organization_id: 1, created_at: '', updated_at: '',
+  created_at: '', updated_at: '',
 }
 
 function wrapper({ children }: { children: React.ReactNode }) {

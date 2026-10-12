@@ -49,7 +49,10 @@ interface SchedulePreviewModalProps {
 
 export function SchedulePreviewModal({ open, onClose, pmId, pm, previewDates }: SchedulePreviewModalProps) {
   const { data, isLoading } = usePreviewSchedule(pmId)
-  const items = previewDates ?? data?.items ?? []
+  // Client-calculated dates and API items use different field names; normalise them once.
+  const items = previewDates
+    ? previewDates.map((d) => ({ date: d.date, daysUntil: d.daysUntil, warnings: d.warnings }))
+    : (data?.items ?? []).map((i) => ({ date: new Date(i.date), daysUntil: i.days_until, warnings: i.warnings ?? [] }))
 
   return (
     <Dialog.Root open={open} onOpenChange={(v) => !v && onClose()}>
@@ -59,7 +62,7 @@ export function SchedulePreviewModal({ open, onClose, pmId, pm, previewDates }: 
           <div className="flex items-start justify-between mb-4">
             <div>
               <Dialog.Title className="text-lg font-semibold text-gray-900 dark:text-gray-100">Schedule Preview</Dialog.Title>
-              {pm && <p className="text-sm text-gray-500 mt-0.5">{pm.name ?? pm.title}</p>}
+              {pm && <p className="text-sm text-gray-500 mt-0.5">{pm.name}</p>}
             </div>
             <Dialog.Close asChild><button className="text-gray-400 hover:text-gray-600 p-1"><X className="h-5 w-5" /></button></Dialog.Close>
           </div>
@@ -79,9 +82,7 @@ export function SchedulePreviewModal({ open, onClose, pmId, pm, previewDates }: 
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {items.map((item, idx) => {
-                    const date = 'date' in item && item.date instanceof Date ? item.date : new Date((item as { date: string }).date)
-                    const daysUntil = 'daysUntil' in item ? (item as { daysUntil: number }).daysUntil : (item as { days_until: number }).days_until
-                    const warnings = 'warnings' in item ? (item as { warnings: string[] }).warnings : []
+                    const { date, daysUntil, warnings } = item
                     return (
                       <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                         <td className="py-2 text-gray-400 text-xs">{idx + 1}</td>

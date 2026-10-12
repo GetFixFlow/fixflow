@@ -11,16 +11,10 @@ interface WorkOrderChecklistProps {
 export function WorkOrderChecklist({ workOrderId, items, editable = true }: WorkOrderChecklistProps) {
   const update = useUpdateChecklist(workOrderId)
 
-  const toggle = (id: string) => {
+  const toggle = (step: number) => {
     if (!editable) return
     const updated = items.map((item) =>
-      item.id === id
-        ? {
-            ...item,
-            completed: !item.completed,
-            completed_at: !item.completed ? new Date().toISOString() : undefined,
-          }
-        : item,
+      item.step === step ? { ...item, completed: !item.completed } : item,
     )
     update.mutate(updated)
   }
@@ -46,20 +40,20 @@ export function WorkOrderChecklist({ workOrderId, items, editable = true }: Work
 
       <ul className="space-y-2" role="list">
         {items.map((item) => (
-          <li key={item.id} className="flex items-start gap-3">
+          <li key={item.step} className="flex items-start gap-3">
             <div className="mt-0.5">
               <input
                 type="checkbox"
-                id={`checklist-${item.id}`}
-                checked={item.completed}
-                onChange={() => toggle(item.id)}
+                id={`checklist-${item.step}`}
+                checked={!!item.completed}
+                onChange={() => toggle(item.step)}
                 disabled={!editable || update.isPending}
                 className="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 disabled:opacity-50"
-                aria-label={item.description}
+                aria-label={item.instruction}
               />
             </div>
             <label
-              htmlFor={`checklist-${item.id}`}
+              htmlFor={`checklist-${item.step}`}
               className={cn(
                 'flex-1 cursor-pointer text-sm',
                 item.completed
@@ -67,7 +61,7 @@ export function WorkOrderChecklist({ workOrderId, items, editable = true }: Work
                   : 'text-gray-800 dark:text-gray-200',
               )}
             >
-              {item.description}
+              {item.instruction}
               {item.required && !item.completed && (
                 <span className="ml-1.5 text-xs text-red-500">*required</span>
               )}
@@ -81,7 +75,7 @@ export function WorkOrderChecklist({ workOrderId, items, editable = true }: Work
           <strong>{requiredRemaining.length} required step{requiredRemaining.length !== 1 && 's'} not complete:</strong>
           <ul className="mt-1 list-disc pl-4 text-xs">
             {requiredRemaining.map((i) => (
-              <li key={i.id}>{i.description}</li>
+              <li key={i.step}>{i.instruction}</li>
             ))}
           </ul>
         </div>

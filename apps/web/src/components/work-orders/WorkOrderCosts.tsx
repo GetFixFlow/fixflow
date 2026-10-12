@@ -1,5 +1,6 @@
 import { DollarSign } from 'lucide-react'
 import { useWorkOrderParts } from '@/hooks/useWorkOrders'
+import { partLineTotal } from '@/utils/parts'
 
 const HOURLY_RATE = 40 // USD per hour, configurable in settings
 
@@ -15,7 +16,7 @@ export function WorkOrderCosts({ workOrderId, actualHours, laborCost }: WorkOrde
   // Rails serializes decimal columns (labor_cost, actual_hours, total_cost) as
   // JSON strings to avoid float precision loss — coerce before doing math.
   const hours = actualHours != null ? Number(actualHours) : undefined
-  const partsCost = parts.reduce((sum, p) => sum + Number(p.total_cost), 0)
+  const partsCost = parts.reduce((sum, p) => sum + partLineTotal(p), 0)
   const labor = laborCost != null ? Number(laborCost) : (hours ? hours * HOURLY_RATE : 0)
   const total = partsCost + labor
 

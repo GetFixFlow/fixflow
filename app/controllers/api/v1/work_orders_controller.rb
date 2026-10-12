@@ -34,7 +34,9 @@ module Api
       def update
         authorize_update!
         return if performed?
-        @work_order.update!(work_order_params)
+        attrs = work_order_params
+        attrs[:checklist] = merge_checklist(attrs[:checklist]) if attrs.key?(:checklist)
+        @work_order.update!(attrs)
         render json: { data: WorkOrderBlueprint.render_as_hash(@work_order) }
       end
 
@@ -249,6 +251,16 @@ module Api
         col = ALLOWED_SORTS.include?(params[:sort]) ? params[:sort] : "created_at"
         dir = params[:order] == "asc" ? :asc : :desc
         scope.order(col => dir)
+      end
+
+      # The client sends only { step, completed } per item. Merge that into the stored
+      # checklist so the instructions and "required" flags are not lost.
+      def merge_checklist(incoming)
+        updates = Array(incoming).index_by { |item| item[:step].to_i }
+        Array(@work_order.checklist).map do |item|
+          update = updates[item["step"].to_i]
+          update ? item.merge("completed" => ActiveModel::Type::Boolean.new.cast(update[:completed]) || false) : item
+        end
       end
 
       def work_order_params

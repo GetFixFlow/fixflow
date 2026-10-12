@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- The web app now passes the TypeScript check (307 errors before), `npm run build` runs it again, and CI runs it with the web tests and build.
+- Fixed work order checklists: ticking a step replaced the whole stored checklist with `{step, completed}`, wiping the instruction text and "required" flags, and the UI looked up items by fields (`id`, `description`) the API does not send. Updates are now merged by step.
+- Fixed the asset IoT page passing metric names to a chart that needs each metric's readings, which would throw for any asset with sensor data.
+- Removed the asset statuses the API rejects (`maintenance`, `offline`, `retired`) from the web forms and filters, and added the `outdoor` location type.
+- Work order parts now show their SKU, and line totals are computed from quantity and unit cost (the API sends neither a part object nor a total).
 - Fixed `DELETE /api/v1/auth/sign_out` answering 401 "No active session" after a successful logout. The token was revoked, but the client was told it failed.
 - Fixed `GET /api/v1/activity_logs` always returning an empty list: it filtered on `params[:action]`, which Rails always sets to the controller action ("index"). The action filter is now `log_action`. (The web Audit Log page still shows sample data and does not call this endpoint yet.)
 - Fixed the production API failing to boot. `config/environments/production.rb` selected an Active Storage service (`amazon`) that `storage.yml` does not define, and the class in `app/jobs/iot_rule_evaluator_job.rb` was named `IoTRuleEvaluatorJob`, which Rails' production loader rejects (now `IotRuleEvaluatorJob`).

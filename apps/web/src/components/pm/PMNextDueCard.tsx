@@ -48,9 +48,9 @@ export function PMNextDueCard({ assetId }: PMNextDueCardProps) {
               {topPMs.map((pm) => (
                 <li key={pm.id} className="flex items-center justify-between text-sm">
                   <Link to={`/preventive-maintenance/${pm.id}`} className="text-brand-600 hover:underline dark:text-brand-400 truncate max-w-[60%]">
-                    {pm.name ?? pm.title}
+                    {pm.name}
                   </Link>
-                  <PMDueDateDisplay dueDate={pm.next_due_at ?? pm.next_due_date} showIcon={false} className="text-xs" />
+                  <PMDueDateDisplay dueDate={pm.next_due_at} showIcon={false} className="text-xs" />
                 </li>
               ))}
             </ul>

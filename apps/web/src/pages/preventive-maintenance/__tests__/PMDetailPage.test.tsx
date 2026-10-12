@@ -10,12 +10,12 @@ import { useAuthStore } from '@/stores/authStore'
 import type { PreventiveMaintenance } from '@/types'
 
 const mockPM: PreventiveMaintenance = {
-  id: 1, name: 'Monthly Pump Oil Change', title: 'Monthly Pump Oil Change',
+  id: 1, name: 'Monthly Pump Oil Change',
   status: 'active', priority: 'medium',
   frequency_type: 'time_based', frequency_value: 30, frequency_unit: 'days',
   next_due_at: new Date(Date.now() + 2 * 86400000).toISOString(),
   compliance_rate: 87, completed_count: 12, skipped_count: 2, missed_count: 1,
-  asset_id: 1, organization_id: 1, created_at: '', updated_at: '',
+  created_at: '', updated_at: '',
   description: 'Check oil level and replace if needed.',
   checklist_template: [
     { step: 1, instruction: 'Shut down pump', required: true },

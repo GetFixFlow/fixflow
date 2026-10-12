@@ -66,7 +66,7 @@ export function WorkOrderEditPage() {
     priority: wo.priority,
     asset_id: wo.asset_id ?? undefined,
     due_date: wo.due_date?.slice(0, 16),
-    estimated_hours: wo.estimated_hours,
+    estimated_hours: wo.estimated_hours ?? undefined,
   }
 
   return (

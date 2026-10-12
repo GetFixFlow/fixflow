@@ -17,7 +17,7 @@ interface AttachmentThumbnailProps {
 }
 
 function AttachmentThumbnail({ attachment, onClick }: AttachmentThumbnailProps) {
-  const isImage = attachment.content_type.startsWith('image/')
+  const isImage = (attachment.content_type ?? '').startsWith('image/')
   const isPdf = attachment.content_type === 'application/pdf'
 
   return (
@@ -27,10 +27,10 @@ function AttachmentThumbnail({ attachment, onClick }: AttachmentThumbnailProps) 
         className="block w-full"
         aria-label={`View ${attachment.filename}`}
       >
-        {isImage && attachment.thumbnail_url ? (
+        {isImage && attachment.url ? (
           <img
-            src={attachment.thumbnail_url}
-            alt={attachment.filename}
+            src={attachment.url ?? undefined}
+            alt={attachment.filename ?? ''}
             className="h-32 w-full object-cover"
             loading="lazy"
           />
@@ -48,17 +48,16 @@ function AttachmentThumbnail({ attachment, onClick }: AttachmentThumbnailProps) 
       <div className="p-2">
         <p
           className="truncate text-xs font-medium text-gray-700 dark:text-gray-300"
-          title={attachment.filename}
+          title={attachment.filename ?? undefined}
         >
           {attachment.filename}
         </p>
-        <p className="text-[10px] text-gray-400">{formatFileSize(attachment.file_size)}</p>
       </div>
 
       <div className="absolute right-1 top-1 hidden gap-1 group-hover:flex">
         <a
-          href={attachment.url}
-          download={attachment.filename}
+          href={attachment.url ?? undefined}
+          download={attachment.filename ?? undefined}
           className="rounded bg-white/90 p-1 shadow hover:bg-white dark:bg-gray-800/90 dark:hover:bg-gray-800"
           aria-label="Download"
         >
@@ -146,7 +145,7 @@ export function WorkOrderAttachments({ workOrderId, editable = true }: WorkOrder
             <AttachmentThumbnail
               key={att.id}
               attachment={att}
-              onClick={() => att.content_type.startsWith('image/') && setLightbox(att)}
+              onClick={() => (att.content_type ?? '').startsWith('image/') && setLightbox(att)}
             />
           ))}
         </div>
@@ -224,8 +223,8 @@ export function WorkOrderAttachments({ workOrderId, editable = true }: WorkOrder
       {/* Lightbox */}
       {lightbox && (
         <Lightbox
-          url={lightbox.url}
-          filename={lightbox.filename}
+          url={lightbox.url ?? ''}
+          filename={lightbox.filename ?? ''}
           onClose={() => setLightbox(null)}
         />
       )}

@@ -44,10 +44,10 @@ export function WorkOrderReportsPage() {
     queryFn: () => reportsApi.workOrders.backlog().then((r) => r.data as Record<string, unknown>),
   })
 
-  const s = summary as Record<string, number & Record<string, unknown>> | undefined
+  const s = summary
 
   const kpis = [
-    { title: 'Total Work Orders', value: s?.total ?? 0, metric: 'total' },
+    { title: 'Total Work Orders', value: Number(s?.total ?? 0), metric: 'total' },
     { title: 'Completion Rate', value: s?.total ? formatPercent(((s.completed as number) / (s.total as number)) * 100) : '—', metric: 'completion' },
     { title: 'Avg Resolution Time', value: s?.avg_completion_hours ? formatHours(s.avg_completion_hours as number) : '—', metric: 'avg_resolution_hours' },
     { title: 'Overdue Rate', value: s?.overdue_rate ? formatPercent(s.overdue_rate as number) : '0%', metric: 'overdue_rate' },

@@ -65,6 +65,7 @@ class WorkOrderBlueprint < Blueprinter::Base
           id:            wop.id,
           part_id:       wop.part_id,
           name:          wop.part.name,
+          sku:           wop.part.sku,
           quantity_used: wop.quantity_used,
           unit_cost:     wop.unit_cost
         }

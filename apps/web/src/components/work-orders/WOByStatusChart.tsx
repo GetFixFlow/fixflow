@@ -50,7 +50,7 @@ export function WOByStatusChart({ data, onBarClick }: WOByStatusChartProps) {
           dataKey="count"
           radius={[0, 4, 4, 0]}
           cursor={onBarClick ? 'pointer' : undefined}
-          onClick={(d) => onBarClick?.(d.key)}
+          onClick={(_, index) => onBarClick?.(chartData[index].key)}
         >
           {chartData.map((entry) => (
             <Cell

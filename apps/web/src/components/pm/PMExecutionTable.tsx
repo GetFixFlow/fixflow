@@ -13,7 +13,6 @@ const STATUS_BADGE: Record<PmExecutionStatus, 'success' | 'warning' | 'destructi
   generated: 'default',
   pending: 'warning',
   skipped: 'secondary',
-  missed: 'destructive',
 }
 
 interface PMExecutionTableProps { pmId: number; onSkip: (executionId: number) => void }
@@ -55,9 +54,9 @@ export function PMExecutionTable({ pmId, onSkip }: PMExecutionTableProps) {
                 <Badge variant={STATUS_BADGE[ex.status]}>{ex.status}</Badge>
               </td>
               <td className="py-2 pr-4">
-                {ex.work_order_id ? (
-                  <Link to={`/work-orders/${ex.work_order_id}`} className="text-brand-600 hover:underline dark:text-brand-400">
-                    {ex.work_order?.work_order_number ?? `WO #${ex.work_order_id}`}
+                {ex.work_order ? (
+                  <Link to={`/work-orders/${ex.work_order.id}`} className="text-brand-600 hover:underline dark:text-brand-400">
+                    {ex.work_order.work_order_number}
                   </Link>
                 ) : <span className="text-gray-400">—</span>}
               </td>

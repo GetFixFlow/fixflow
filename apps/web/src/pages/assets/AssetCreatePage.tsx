@@ -19,7 +19,7 @@ const step1Schema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(100),
   asset_tag: z.string().max(50).optional(),
   serial_number: z.string().max(100).optional(),
-  status: z.enum(['operational', 'degraded', 'down', 'maintenance', 'offline'] as const),
+  status: z.enum(['operational', 'degraded', 'down', 'decommissioned'] as const),
 })
 
 const step2Schema = z.object({
@@ -32,9 +32,10 @@ const step2Schema = z.object({
 })
 
 type Step1Values = z.infer<typeof step1Schema>
-type Step2Values = z.infer<typeof step2Schema>
+type Step2Values = z.output<typeof step2Schema>
+type Step2Input = z.input<typeof step2Schema>
 
-const STATUS_OPTIONS: AssetStatus[] = ['operational', 'degraded', 'down', 'maintenance', 'offline']
+const STATUS_OPTIONS: AssetStatus[] = ['operational', 'degraded', 'down', 'decommissioned']
 
 const STEPS = [
   { label: 'Basic Information', description: 'Name, tag, and status' },
@@ -68,7 +69,7 @@ export function AssetCreatePage() {
     defaultValues: formData,
   })
 
-  const step2Form = useForm<Step2Values>({
+  const step2Form = useForm<Step2Input, unknown, Step2Values>({
     resolver: zodResolver(step2Schema),
     defaultValues: formData,
   })

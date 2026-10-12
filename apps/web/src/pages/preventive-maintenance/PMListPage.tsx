@@ -35,7 +35,7 @@ function filterPMs(pms: PreventiveMaintenance[], tab: TabId, search: string, sta
     const q = search.toLowerCase()
     filtered = filtered.filter(
       (pm) =>
-        (pm.name ?? pm.title ?? '').toLowerCase().includes(q) ||
+        pm.name.toLowerCase().includes(q) ||
         pm.asset?.name?.toLowerCase().includes(q),
     )
   }
@@ -43,13 +43,13 @@ function filterPMs(pms: PreventiveMaintenance[], tab: TabId, search: string, sta
 
   switch (tab) {
     case 'due_soon': return filtered.filter((pm) => {
-      const due = pm.next_due_at ?? pm.next_due_date
+      const due = pm.next_due_at
       if (!due || pm.status !== 'active') return false
       const d = new Date(due)
       return d >= today && d <= in7
     })
     case 'overdue': return filtered.filter((pm) => {
-      const due = pm.next_due_at ?? pm.next_due_date
+      const due = pm.next_due_at
       if (!due || pm.status !== 'active') return false
       return isBefore(new Date(due), today)
     })
@@ -79,8 +79,8 @@ export function PMListPage() {
 
   const tabCounts = useMemo(() => ({
     all: pms.length,
-    due_soon: pms.filter((pm) => { const d = pm.next_due_at ?? pm.next_due_date; return d && new Date(d) >= today && new Date(d) <= in7 && pm.status === 'active' }).length,
-    overdue: pms.filter((pm) => { const d = pm.next_due_at ?? pm.next_due_date; return d && isBefore(new Date(d), today) && pm.status === 'active' }).length,
+    due_soon: pms.filter((pm) => { const d = pm.next_due_at; return d && new Date(d) >= today && new Date(d) <= in7 && pm.status === 'active' }).length,
+    overdue: pms.filter((pm) => { const d = pm.next_due_at; return d && isBefore(new Date(d), today) && pm.status === 'active' }).length,
     paused: pms.filter((pm) => pm.status === 'paused').length,
   }), [pms])
 
@@ -203,15 +203,15 @@ export function PMListPage() {
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
               {filtered.map((pm) => {
-                const dueAt = pm.next_due_at ?? pm.next_due_date
+                const dueAt = pm.next_due_at
                 const compliance = pm.compliance_rate ?? 0
                 return (
                   <tr key={pm.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer" onClick={() => navigate(`/preventive-maintenance/${pm.id}`)}>
-                    <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{pm.name ?? pm.title}</td>
+                    <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{pm.name}</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{pm.asset?.name ?? '—'}</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{pm.frequency_value ? `Every ${pm.frequency_value} ${pm.frequency_unit ?? 'days'}` : pm.frequency_type}</td>
                     <td className="px-4 py-3">{dueAt ? new Date(dueAt).toLocaleDateString() : '—'}</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{pm.assignee?.full_name ?? '—'}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{pm.assigned_to?.full_name ?? '—'}</td>
                     <td className="px-4 py-3"><span className="capitalize">{pm.status}</span></td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">

@@ -46,7 +46,8 @@ const orgSchema = z.object({
   timezone: z.string(),
 })
 
-type OrgFormData = z.infer<typeof orgSchema>
+type OrgFormData = z.output<typeof orgSchema>
+type OrgFormInput = z.input<typeof orgSchema>
 
 interface Holiday {
   date: string
@@ -86,7 +87,7 @@ export function OrganizationPage() {
 
   const merged = { ...DEFAULT_ORG, ...org }
 
-  const form = useForm<OrgFormData>({
+  const form = useForm<OrgFormInput, unknown, OrgFormData>({
     resolver: zodResolver(orgSchema),
     defaultValues: {
       name: '',

@@ -82,7 +82,7 @@ export function AssetHealthReportPage() {
           columns={[
             { key: 'name', header: 'Asset Name', sortable: true },
             { key: 'asset_tag', header: 'Tag', sortable: true },
-            { key: 'health_score', header: 'Health %', sortable: true, align: 'right', render: (r) => <span className={`font-semibold ${(r.health_score as number) >= 80 ? 'text-green-600' : 'text-red-500'}`}>{r.health_score}%</span> },
+            { key: 'health_score', header: 'Health %', sortable: true, align: 'right', render: (r) => <span className={`font-semibold ${(r.health_score as number) >= 80 ? 'text-green-600' : 'text-red-500'}`}>{String(r.health_score)}%</span> },
             { key: 'open_work_orders', header: 'Open WOs', sortable: true, align: 'right' },
             { key: 'total_work_orders', header: 'Total WOs', sortable: true, align: 'right' },
             { key: 'sensor_alerts', header: 'IoT Alerts', sortable: true, align: 'right' },

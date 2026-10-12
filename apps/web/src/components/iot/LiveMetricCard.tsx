@@ -41,7 +41,7 @@ function formatOperator(op: IoTOperator): string {
 }
 
 export function LiveMetricCard({ metricName, unit, readings, threshold, operator = 'gt', className }: LiveMetricCardProps) {
-  const latest = readings.at(-1)
+  const latest = readings[readings.length - 1]
   const value = latest?.value
   const isStale = !latest || Date.now() - new Date(latest.recorded_at).getTime() > 5 * 60 * 1000
   const isVeryStale = !latest || Date.now() - new Date(latest.recorded_at).getTime() > 60 * 60 * 1000

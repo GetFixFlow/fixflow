@@ -1,6 +1,7 @@
 import { Package } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { useWorkOrderParts } from '@/hooks/useWorkOrders'
+import { partLineTotal } from '@/utils/parts'
 
 interface WorkOrderPartsLogProps {
   workOrderId: number
@@ -11,7 +12,7 @@ interface WorkOrderPartsLogProps {
 export function WorkOrderPartsLog({ workOrderId, editable = false, onAddPart }: WorkOrderPartsLogProps) {
   const { data: parts = [], isLoading } = useWorkOrderParts(workOrderId)
 
-  const total = parts.reduce((sum, p) => sum + p.total_cost, 0)
+  const total = parts.reduce((sum, p) => sum + partLineTotal(p), 0)
 
   if (isLoading) {
     return (
@@ -41,19 +42,19 @@ export function WorkOrderPartsLog({ workOrderId, editable = false, onAddPart }: 
               {parts.map((p) => (
                 <tr key={p.id} className="bg-white dark:bg-gray-900">
                   <td className="px-3 py-2 font-medium text-gray-800 dark:text-gray-200">
-                    {p.part.name}
+                    {p.name}
                   </td>
                   <td className="px-3 py-2 font-mono text-xs text-gray-500">
-                    {p.part.part_number ?? '—'}
+                    {p.sku ?? '—'}
                   </td>
                   <td className="px-3 py-2 text-right text-gray-700 dark:text-gray-300">
                     {p.quantity_used}
                   </td>
                   <td className="px-3 py-2 text-right text-gray-700 dark:text-gray-300">
-                    ${p.unit_cost.toFixed(2)}
+                    ${Number(p.unit_cost ?? 0).toFixed(2)}
                   </td>
                   <td className="px-3 py-2 text-right font-medium text-gray-900 dark:text-gray-100">
-                    ${p.total_cost.toFixed(2)}
+                    ${partLineTotal(p).toFixed(2)}
                   </td>
                 </tr>
               ))}
