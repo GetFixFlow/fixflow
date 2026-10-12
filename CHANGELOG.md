@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 - CI's Ruby jobs pass again. They had never passed: rubocop could not load its Rails cops (now loaded as plugins, with a baseline of existing offenses in `.rubocop_todo.yml` so new code is checked), `bin/bundler-audit` was missing its gem, and Brakeman insisted on its latest version.
-- Security: updated the gems with known advisories (nokogiri, puma, jwt, loofah, rails-html-sanitizer, websocket-driver, net-imap, concurrent-ruby, crass, msgpack, devise 4.9 to 5.0). Moved from Ruby 3.2, which reached end of life on 2026-03-31, to 3.3.6, matching the Dockerfile. Run `bundle install` after pulling.
+- Security: updated the gems with known advisories (nokogiri, puma, jwt, loofah, rails-html-sanitizer, websocket-driver, net-imap, concurrent-ruby, crass, msgpack, mail, Rails 8.1.3 to 8.1.4 for an Active Storage file-read/code-execution advisory, devise 4.9 to 5.0). Moved from Ruby 3.2, which reached end of life on 2026-03-31, to 3.3.6, matching the Dockerfile. Run `bundle install` after pulling.
 - The database backup job now runs `pg_dump` without a shell, so the database name can never be interpreted as a command.
 - Fixed `DELETE /api/v1/auth/sign_out` answering 401 "No active session" after a successful logout. The token was revoked, but the client was told it failed.
 - Fixed `GET /api/v1/activity_logs` always returning an empty list: it filtered on `params[:action]`, which Rails always sets to the controller action ("index"). The action filter is now `log_action`. (The web Audit Log page still shows sample data and does not call this endpoint yet.)
