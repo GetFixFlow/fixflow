@@ -9,7 +9,8 @@ module Api
         logs = logs.by_resource(params[:resource_type])        if params[:resource_type].present?
         logs = logs.for_resource(params[:resource_type], params[:resource_id]) if params[:resource_id].present?
         logs = logs.by_user(params[:user_id])                  if params[:user_id].present?
-        logs = logs.by_action(params[:action])                 if params[:action].present?
+        # Not params[:action]: Rails always sets that to the controller action ("index").
+        logs = logs.by_action(params[:log_action])             if params[:log_action].present?
         logs = logs.since(Time.zone.parse(params[:from]))      if params[:from].present?
         logs = logs.until_time(Time.zone.parse(params[:to]))   if params[:to].present?
 

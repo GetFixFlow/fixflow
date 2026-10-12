@@ -26,7 +26,8 @@ RSpec.describe "IoT Reports", type: :request do
 
     it "can filter by asset_id" do
       get "/api/v1/reports/iot/alert_summary",
-        params: { from: 30.days.ago.iso8601, to: Time.current.iso8601, asset_id: asset.id },
+        # iso8601 drops fractions of a second, so "now" can land just before alerts created this second
+        params: { from: 30.days.ago.iso8601, to: 1.minute.from_now.iso8601, asset_id: asset.id },
         headers: headers
 
       expect(response).to have_http_status(:ok)

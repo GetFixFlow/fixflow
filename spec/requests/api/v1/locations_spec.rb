@@ -59,9 +59,9 @@ RSpec.describe "Api::V1::Locations", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(json_body["data"]["name"]).to eq("HQ")
-      expect(json_body["full_path"]).to eq("HQ")
-      expect(json_body["depth"]).to eq(0)
-      expect(json_body["children"].first["name"]).to eq("Block A")
+      expect(json_body["data"]["full_path"]).to eq("HQ")
+      expect(json_body["data"]["depth"]).to eq(0)
+      expect(json_body["data"]["children"].first["name"]).to eq("Block A")
     end
 
     it "returns 404 for a location in another organization" do
@@ -83,7 +83,7 @@ RSpec.describe "Api::V1::Locations", type: :request do
 
         expect(response).to have_http_status(:created)
         expect(json_body["data"]["name"]).to eq("Warehouse A")
-        expect(json_body["location_type"]).to eq("site")
+        expect(json_body["data"]["location_type"]).to eq("site")
       end
 
       it "creates a child location under a parent" do
@@ -93,8 +93,8 @@ RSpec.describe "Api::V1::Locations", type: :request do
           headers: auth_headers_for(manager), as: :json
 
         expect(response).to have_http_status(:created)
-        expect(json_body["parent_id"]).to eq(site.id)
-        expect(json_body["depth"]).to eq(1)
+        expect(json_body["data"]["parent_id"]).to eq(site.id)
+        expect(json_body["data"]["depth"]).to eq(1)
       end
     end
 
@@ -148,7 +148,7 @@ RSpec.describe "Api::V1::Locations", type: :request do
         headers: auth_headers_for(manager), as: :json
 
       expect(response).to have_http_status(:unprocessable_entity)
-      expect(json_body["error"]).to match(/circular/i)
+      expect(json_body["error"]["message"]).to match(/circular/i)
     end
 
     it "returns 403 for a technician" do

@@ -89,7 +89,7 @@ RSpec.describe "Api::V1::Assets", type: :request do
       expect(response).to have_http_status(:ok)
       expect(json_body["data"]["id"]).to eq(asset.id)
       expect(json_body["data"]["asset_tag"]).to be_present
-      expect(json_body["open_work_orders_count"]).to eq(0)
+      expect(json_body["data"]["open_work_orders_count"]).to eq(0)
     end
 
     it "returns 404 for an asset in another organization" do
