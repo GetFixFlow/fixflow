@@ -37,6 +37,12 @@ docker compose exec api bundle exec rails db:create db:migrate db:seed
 The API will be available at `http://localhost:3000`.
 MinIO console: `http://localhost:9001` (user: minioadmin / minioadmin)
 
+### First-run setup
+
+Each FixFlow install serves one company. Open the web app and, on a new install, it shows **Set up FixFlow**: enter your company name and the first administrator's details. Once that is done, public sign-up is closed (`POST /api/v1/auth/sign_up` returns `403`) and the login page no longer offers it.
+
+Adding more users is not available in the web app yet. Until it is, an administrator can create them from the Rails console.
+
 ---
 
 ## Local Development (without Docker)

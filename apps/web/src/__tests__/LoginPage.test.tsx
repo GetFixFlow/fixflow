@@ -1,9 +1,14 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import { LoginPage } from '@/pages/auth/LoginPage'
+import { authApi } from '@/api'
+
+vi.mock('@/api', () => ({
+  authApi: { setupStatus: vi.fn(), login: vi.fn(), register: vi.fn() },
+}))
 
 const useNavigateMock = vi.fn()
 vi.mock('react-router-dom', async (importOriginal) => {
@@ -20,6 +25,10 @@ function wrapper({ children }: { children: React.ReactNode }) {
 }
 
 describe('LoginPage', () => {
+  beforeEach(() => {
+    vi.mocked(authApi.setupStatus).mockResolvedValue({ setup_required: false })
+  })
+
   it('renders email and password fields', () => {
     render(<LoginPage />, { wrapper })
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
@@ -42,5 +51,22 @@ describe('LoginPage', () => {
     await waitFor(() => {
       expect(screen.getByText(/at least 8 characters/i)).toBeInTheDocument()
     })
+  })
+  it('does not offer public sign-up', () => {
+    render(<LoginPage />, { wrapper })
+    expect(screen.queryByRole('link', { name: /sign up/i })).not.toBeInTheDocument()
+    expect(screen.getByText(/ask your administrator/i)).toBeInTheDocument()
+  })
+
+  it('sends the first visitor of a new install to setup', async () => {
+    vi.mocked(authApi.setupStatus).mockResolvedValue({ setup_required: true })
+    render(
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/setup" element={<div>setup screen</div>} />
+      </Routes>,
+      { wrapper },
+    )
+    expect(await screen.findByText('setup screen')).toBeInTheDocument()
   })
 })

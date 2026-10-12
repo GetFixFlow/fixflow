@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- First-run setup screen (`/setup`). Public sign-up now closes once a company exists, so a private install can no longer be used to create a second company. New `GET /api/v1/setup/status` endpoint.
+- Fixed the sign-up form sending `full_name` while the API requires `first_name` and `last_name`, so sign-up from the web app always failed validation.
 - Settings pages: profile, notifications, security, organization, branding, users, roles, IoT, data retention, audit log, import/export, advanced
 - Onboarding flow
 

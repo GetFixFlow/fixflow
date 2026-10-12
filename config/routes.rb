@@ -16,6 +16,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       get "auth/me", to: "auth/profile#show"
       get "health",  to: "health#show"
+      get "setup/status", to: "setup#status"
 
       resources :organizations, only: %i[show update]
 

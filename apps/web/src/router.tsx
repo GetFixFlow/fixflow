@@ -6,7 +6,7 @@ import { PageLoader } from '@/components/shared/PageLoader'
 
 // Eagerly-loaded pages (above-the-fold / entry points)
 import { LoginPage } from '@/pages/auth/LoginPage'
-import { RegisterPage } from '@/pages/auth/RegisterPage'
+import { SetupPage } from '@/pages/auth/SetupPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 
 // Lazy-loaded main pages
@@ -65,7 +65,8 @@ function Lazy({ children }: { children: React.ReactNode }) {
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
-  { path: '/register', element: <RegisterPage /> },
+  { path: '/setup', element: <SetupPage /> },
+  { path: '/register', element: <Navigate to="/setup" replace /> },
   {
     path: '/onboarding',
     element: <Lazy><OnboardingPage /></Lazy>,
