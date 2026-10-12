@@ -133,7 +133,7 @@ RSpec.describe "Api::V1::WorkOrders", type: :request do
       ])
 
       patch "/api/v1/work_orders/#{work_order.id}",
-        params: { work_order: { checklist: [ { step: 1, completed: true } ] } },
+        params: { work_order: { checklist: [{ step: 1, completed: true }] } },
         headers: auth_headers_for(technician), as: :json
 
       expect(response).to have_http_status(:ok)
