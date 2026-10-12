@@ -21,7 +21,8 @@ module Api
           }, status: :ok
         end
 
-        def respond_to_on_destroy
+        # Devise 5 passes non_navigational_status; we always answer with JSON.
+        def respond_to_on_destroy(**)
           if @signed_in_user
             render json: { message: "Logged out successfully" }, status: :ok
           else

@@ -5,7 +5,7 @@ gem "pg", "~> 1.1"
 gem "puma", ">= 5.0"
 
 # Auth
-gem "devise", "~> 4.9"
+gem "devise", "~> 5.0"
 gem "devise-jwt", "~> 0.12"
 gem "bcrypt", "~> 3.1" # ApiKey hashes keys with BCrypt directly
 
@@ -91,6 +91,7 @@ end
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
   gem "brakeman", require: false
+  gem "bundler-audit", require: false
   gem "rubocop-rails",  require: false
   gem "rubocop-rspec",  require: false
   gem "rswag-specs",    "~> 2.16"
