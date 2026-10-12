@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_10_142222) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_12_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -301,6 +301,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_10_142222) do
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
     t.string "first_name"
+    t.datetime "invitation_accepted_at"
+    t.datetime "invitation_sent_at"
+    t.string "invitation_token_digest"
+    t.bigint "invited_by_id"
     t.string "jti", null: false
     t.string "last_name"
     t.datetime "last_sign_in_at"
@@ -314,6 +318,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_10_142222) do
     t.integer "sign_in_count", default: 0, null: false
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["invitation_token_digest"], name: "index_users_on_invitation_token_digest", unique: true
+    t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
     t.index ["jti"], name: "index_users_on_jti", unique: true
     t.index ["organization_id", "role"], name: "index_users_on_organization_id_and_role"
     t.index ["organization_id"], name: "index_users_on_organization_id"
@@ -425,6 +431,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_10_142222) do
   add_foreign_key "sensor_readings", "assets"
   add_foreign_key "sensor_readings", "organizations"
   add_foreign_key "users", "organizations"
+  add_foreign_key "users", "users", column: "invited_by_id"
   add_foreign_key "work_order_parts", "parts"
   add_foreign_key "work_order_parts", "work_orders"
   add_foreign_key "work_orders", "assets"

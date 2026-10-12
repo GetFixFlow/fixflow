@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { formatDistanceToNow, format } from 'date-fns'
-import { Plus, MoreVertical, UserCheck, UserX, KeyRound, Pencil } from 'lucide-react'
+import { toast } from 'sonner'
+import { Plus, MoreVertical, UserCheck, UserX, KeyRound, Pencil, Link2 } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { Badge } from '@/components/ui/Badge'
-import { InviteUserModal } from '@/components/settings/InviteUserModal'
+import { InviteUserModal, copyToClipboard } from '@/components/settings/InviteUserModal'
 import { EditUserModal } from '@/components/settings/EditUserModal'
 import { useAuthStore } from '@/stores/authStore'
 import {
@@ -15,6 +16,7 @@ import {
   useReactivateUser,
   useResetUserPassword,
   useChangeUserRole,
+  useResendInvitation,
 } from '@/hooks/useUsers'
 import type { User, Role } from '@/types'
 import { cn } from '@/lib/utils'
@@ -58,6 +60,7 @@ export function UsersPage() {
   const reactivate = useReactivateUser()
   const resetPassword = useResetUserPassword()
   const changeRole = useChangeUserRole()
+  const resendInvitation = useResendInvitation()
 
   const [showInvite, setShowInvite] = useState(false)
   const [editUser, setEditUser] = useState<User | null>(null)
@@ -264,6 +267,24 @@ export function UsersPage() {
                                 >
                                   <Pencil className="h-3.5 w-3.5" /> Edit User
                                 </button>
+                                {isAdmin && u.invitation_pending && (
+                                  <button
+                                    onClick={() => {
+                                      resendInvitation.mutate(u.id, {
+                                        onSuccess: async (res) => {
+                                          const ok = await copyToClipboard(res.data.invitation_url)
+                                          toast[ok ? 'success' : 'info'](
+                                            ok ? 'New invite link copied.' : res.data.invitation_url,
+                                          )
+                                        },
+                                      })
+                                      setOpenMenuId(null)
+                                    }}
+                                    className="flex items-center gap-2 w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700"
+                                  >
+                                    <Link2 className="h-3.5 w-3.5" /> Copy invite link
+                                  </button>
+                                )}
                                 {isAdmin && (
                                   <button
                                     onClick={() => {

@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Invite users: admins create an invitation from Settings → Users, always get a copyable link, and the link is emailed when SMTP is configured. New accept-invite page where the invitee sets a password. New endpoints `POST /api/v1/users/invite`, `POST /api/v1/users/:id/resend_invitation`, `GET /api/v1/invitations/:token` and `POST /api/v1/invitations/:token/accept`. Only a digest of the token is stored. New `APP_URL` setting. Run `rails db:migrate` to add the invitation columns to `users`.
 - Fixed IoT ingestion returning 500 on every request (`Iot::IngestionService` resolved to the wrong namespace), and batch (array) payloads never being recognised.
 - Fixed the IoT rule "test" endpoint returning 500 for the same reason, and made it manager-only.
 - Fixed saving any API key raising an error, because the string-stripping hook also ran on the array column `scopes`.

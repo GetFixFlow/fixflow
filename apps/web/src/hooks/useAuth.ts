@@ -25,6 +25,31 @@ export function useSetupStatus() {
   })
 }
 
+export function useInvitation(token: string | null) {
+  return useQuery({
+    queryKey: ['invitation', token],
+    queryFn: () => authApi.invitation(token as string),
+    enabled: !!token,
+    retry: false,
+  })
+}
+
+export function useAcceptInvitation(token: string) {
+  const navigate = useNavigate()
+
+  return useMutation({
+    mutationFn: (payload: { password: string; password_confirmation: string }) =>
+      authApi.acceptInvitation(token, payload),
+    onSuccess: () => {
+      toast.success('Password set. Please sign in.')
+      navigate('/login')
+    },
+    onError: (error: AxiosError<{ errors?: string[] }>) => {
+      toast.error(error.response?.data?.errors?.[0] ?? 'Could not set your password. Try again.')
+    },
+  })
+}
+
 export function useLogin() {
   const { setAuth } = useAuthStore()
   const navigate = useNavigate()

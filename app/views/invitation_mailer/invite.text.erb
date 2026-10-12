@@ -1,0 +1,14 @@
+Hi <%= @user.first_name %>,
+
+<%= @inviter ? @inviter.full_name : "An administrator" %> invited you to join <%= @organization.name %> on FixFlow as <%= @user.role %>.
+<% if @personal_message %>
+
+"<%= @personal_message %>"
+<% end %>
+
+Set your password and sign in here:
+<%= @invitation_url %>
+
+This link works once and expires in <%= User::INVITATION_TTL.inspect %>.
+
+— FixFlow
