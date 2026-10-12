@@ -19,7 +19,7 @@ module Api
             )
           end
 
-          IoTRuleEvaluatorJob.perform_later(asset.id, readings)
+          IotRuleEvaluatorJob.perform_later(asset.id, readings)
 
           render json: { message: "Readings ingested", count: readings.size }, status: :accepted
         end

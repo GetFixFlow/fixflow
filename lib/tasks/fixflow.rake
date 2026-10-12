@@ -40,6 +40,15 @@ namespace :fixflow do
     end
   end
 
+  desc "Load a demo company with sample data (empty installs only; set CONFIRM=yes in production)"
+  task demo_data: :environment do
+    logins = DemoDataService.load!(confirmed: ENV["CONFIRM"] == "yes")
+    puts "Demo data loaded. Sign in with any of these (password: #{DemoDataService::DEMO_PASSWORD}):"
+    logins.each { |email| puts "  #{email}" }
+  rescue DemoDataService::Refused => e
+    abort e.message
+  end
+
   desc "Generate API key for IoT device — usage: rails fixflow:create_api_key[org_id,name]"
   task :create_api_key, [:org_id, :name] => :environment do |_t, args|
     org = Organization.find(args[:org_id])

@@ -8,8 +8,10 @@ local:
 
 minio:
   service: S3
-  access_key_id: <%= ENV.fetch("MINIO_ACCESS_KEY_ID", "minioadmin") %>
-  secret_access_key: <%= ENV.fetch("MINIO_SECRET_ACCESS_KEY", "minioadmin") %>
+  # MINIO_ACCESS_KEY / MINIO_SECRET_KEY are what .env.example and docker-compose.prod.yml set.
+  # The longer *_ID / *_ACCESS_KEY names are what docker-compose.yml (development) sets.
+  access_key_id: <%= ENV.fetch("MINIO_ACCESS_KEY_ID") { ENV.fetch("MINIO_ACCESS_KEY", "minioadmin") } %>
+  secret_access_key: <%= ENV.fetch("MINIO_SECRET_ACCESS_KEY") { ENV.fetch("MINIO_SECRET_KEY", "minioadmin") } %>
   region: <%= ENV.fetch("MINIO_REGION", "us-east-1") %>
   bucket: <%= ENV.fetch("MINIO_BUCKET", "fixflow") %>
   endpoint: <%= ENV.fetch("MINIO_ENDPOINT", "http://localhost:9000") %>

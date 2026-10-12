@@ -37,6 +37,18 @@ docker compose exec api bundle exec rails db:create db:migrate db:seed
 The API will be available at `http://localhost:3000`.
 MinIO console: `http://localhost:9001` (user: minioadmin / minioadmin)
 
+### Demo data
+
+To try FixFlow with a sample company (assets, work orders, PM schedules, IoT rules and sensor readings):
+
+```bash
+docker compose exec api rails fixflow:demo_data     # or: make demo-data
+```
+
+It works in any environment, but only on an install with no company of its own: it refuses once a real company exists. It creates accounts such as `admin@demo.com` with the password `password123`, so in production it asks for `CONFIRM=yes`. `rails db:seed` loads the same data in development only. Setting `SEED_DB=true` loads it when the API container starts.
+
+Loading demo data counts as setting the install up, so the first-run screen below is skipped. Skip this step if you want to start with your own company.
+
 ### First-run setup
 
 Each FixFlow install serves one company. Open the web app and, on a new install, it shows **Set up FixFlow**: enter your company name and the first administrator's details. Once that is done, public sign-up is closed (`POST /api/v1/auth/sign_up` returns `403`) and the login page no longer offers it.

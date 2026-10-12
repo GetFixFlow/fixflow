@@ -1,4 +1,4 @@
-class IoTRuleEvaluatorJob < ApplicationJob
+class IotRuleEvaluatorJob < ApplicationJob
   queue_as :iot
 
   # Legacy worker — delegates to the new IoT service layer.

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Fixed the production API failing to boot. `config/environments/production.rb` selected an Active Storage service (`amazon`) that `storage.yml` does not define, and the class in `app/jobs/iot_rule_evaluator_job.rb` was named `IoTRuleEvaluatorJob`, which Rails' production loader rejects (now `IotRuleEvaluatorJob`).
+- MinIO credentials: `storage.yml` now also reads `MINIO_ACCESS_KEY` and `MINIO_SECRET_KEY`, the names `.env.example` and `docker-compose.prod.yml` set. Before, uploads would have used the default `minioadmin` login.
+- Demo data is now `rails fixflow:demo_data` and works in any environment, for empty installs only (`CONFIRM=yes` in production). `SEED_DB=true` now works in production; it used to do nothing because the seeds only ran in development. `make demo-data` added.
+- `npm run build` no longer runs the type check, so the production web image can build while the existing type errors are cleared. Use `npm run typecheck` (or `make typecheck-web`).
+- `.env.example` is now tracked in git. It was ignored, so a fresh clone could not follow `cp .env.example .env`.
+- In the production compose file the worker waits for the API to be healthy, so the two no longer race to run migrations.
 - Invite users: admins create an invitation from Settings → Users, always get a copyable link, and the link is emailed when SMTP is configured. New accept-invite page where the invitee sets a password. New endpoints `POST /api/v1/users/invite`, `POST /api/v1/users/:id/resend_invitation`, `GET /api/v1/invitations/:token` and `POST /api/v1/invitations/:token/accept`. Only a digest of the token is stored. New `APP_URL` setting. Run `rails db:migrate` to add the invitation columns to `users`.
 - Fixed IoT ingestion returning 500 on every request (`Iot::IngestionService` resolved to the wrong namespace), and batch (array) payloads never being recognised.
 - Fixed the IoT rule "test" endpoint returning 500 for the same reason, and made it manager-only.
