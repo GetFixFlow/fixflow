@@ -1,9 +1,15 @@
-inherit_gem:
-  rubocop-rails: config/default.yml
+# rubocop 1.72+ loads cop packs as plugins. Inheriting a gem's config without loading
+# the plugin fails with "Rails cops have been extracted to the rubocop-rails gem".
+plugins:
+  - rubocop-rails
+  - rubocop-rspec
+
+inherit_from: .rubocop_todo.yml
 
 AllCops:
   TargetRubyVersion: 3.3
   NewCops: enable
+  SuggestExtensions: false
   Exclude:
     - "db/schema.rb"
     - "db/migrate/**/*"

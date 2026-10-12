@@ -1,3 +1,5 @@
+require "English"
+
 class DatabaseBackupJob < ApplicationJob
   queue_as :scheduled
 
@@ -40,8 +42,13 @@ class DatabaseBackupJob < ApplicationJob
     }
     db_name = uri.path.delete_prefix("/")
 
-    success = system(env, "pg_dump #{db_name} | gzip > #{local_path}", exception: false)
-    raise "pg_dump failed" unless success
+    # No shell: the database name is passed as one argument, never interpolated into a command.
+    dumped = false
+    Zlib::GzipWriter.open(local_path) do |gzip|
+      IO.popen(env, ["pg_dump", "--dbname=#{db_name}"], "rb") { |dump| IO.copy_stream(dump, gzip) }
+      dumped = $CHILD_STATUS.success?
+    end
+    raise "pg_dump failed" unless dumped
   end
 
   def upload_to_storage(local_path, filename, bucket)
