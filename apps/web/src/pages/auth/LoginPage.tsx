@@ -1,11 +1,11 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Link } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import { Zap } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { useLogin } from '@/hooks/useAuth'
+import { useLogin, useSetupStatus } from '@/hooks/useAuth'
 
 const schema = z.object({
   email: z.string().email('Valid email required'),
@@ -22,6 +22,10 @@ export function LoginPage() {
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
   const { mutate: login, isPending } = useLogin()
+  const { data: setup } = useSetupStatus()
+
+  // A brand-new install has no company yet: send the first visitor to setup.
+  if (setup?.setup_required) return <Navigate to="/setup" replace />
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 dark:bg-gray-900">
@@ -62,10 +66,7 @@ export function LoginPage() {
           </form>
 
           <p className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-brand-600 hover:underline">
-              Sign up
-            </Link>
+            Need an account? Ask your administrator to invite you.
           </p>
         </div>
       </div>

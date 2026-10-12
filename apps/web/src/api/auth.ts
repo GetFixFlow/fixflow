@@ -10,6 +10,8 @@ export const authApi = {
         token: response.headers['authorization']?.replace(/^Bearer /, '') ?? '',
       })),
 
+  setupStatus: () => apiClient.get<{ setup_required: boolean }>('/setup/status').then((r) => r.data),
+
   register: (payload: RegisterPayload) =>
     apiClient.post<{ message: string; user: User }>('/auth/sign_up', { user: payload }),
 

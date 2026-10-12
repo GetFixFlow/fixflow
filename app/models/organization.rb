@@ -14,4 +14,10 @@ class Organization < ApplicationRecord
     format: { with: /\A[a-z0-9\-]+\z/, message: "only lowercase letters, numbers, and hyphens" }
 
   store_accessor :settings, :timezone, :date_format, :work_order_prefix
+
+  # Each install serves one company. Setup is complete once that company
+  # exists, after which public sign-up is closed.
+  def self.setup_complete?
+    exists?
+  end
 end

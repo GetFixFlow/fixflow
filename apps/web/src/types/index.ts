@@ -57,7 +57,9 @@ export interface LoginPayload {
 export interface RegisterPayload {
   email: string
   password: string
-  full_name: string
+  password_confirmation: string
+  first_name: string
+  last_name: string
   organization_name: string
 }
 

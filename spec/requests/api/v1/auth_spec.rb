@@ -31,11 +31,11 @@ RSpec.describe "Auth", type: :request do
       expect(json_body["user"]["role"]).to eq("admin")
     end
 
-    it "returns 422 when email is already taken" do
+    it "returns 403 once a company exists, even for an unused email" do
       create(:user, email: "founder@startup.io")
       post "/api/v1/auth/sign_up", params: valid_params, as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:forbidden)
       expect(json_body["errors"]).to be_present
     end
 

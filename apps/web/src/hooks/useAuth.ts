@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
+import type { AxiosError } from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { authApi } from '@/api'
@@ -12,6 +13,15 @@ export function useCurrentUser() {
     queryKey: ['me'],
     queryFn: () => authApi.me().then((r) => r.data),
     enabled: isAuthenticated,
+  })
+}
+
+export function useSetupStatus() {
+  return useQuery({
+    queryKey: ['setup-status'],
+    queryFn: () => authApi.setupStatus(),
+    staleTime: 60_000,
+    retry: false,
   })
 }
 
@@ -36,10 +46,19 @@ export function useRegister() {
   return useMutation({
     mutationFn: (payload: RegisterPayload) => authApi.register(payload),
     onSuccess: () => {
-      toast.success('Account created! Please sign in.')
+      queryClient.setQueryData(['setup-status'], { setup_required: false })
+      toast.success('Setup complete! Please sign in.')
       navigate('/login')
     },
-    onError: () => toast.error('Registration failed. Please try again.'),
+    onError: (error: AxiosError<{ errors?: string[] }>) => {
+      const message = error.response?.data?.errors?.[0]
+      toast.error(message ?? 'Setup failed. Please try again.')
+      // Someone else finished setup first: the setup screen no longer applies.
+      if (error.response?.status === 403) {
+        queryClient.setQueryData(['setup-status'], { setup_required: false })
+        navigate('/login')
+      }
+    },
   })
 }
 

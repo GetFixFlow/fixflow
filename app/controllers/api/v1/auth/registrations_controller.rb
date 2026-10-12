@@ -4,9 +4,25 @@ module Api
       class RegistrationsController < Devise::RegistrationsController
         respond_to :json
 
-        # Public endpoint — no JWT required to register a new org + admin user
+        # Arbitrary constant naming the Postgres advisory lock that serializes first-run setup.
+        SETUP_LOCK_KEY = 7_424_001
+
+        # First-run setup only — no JWT required. Creates the company and its admin
+        # user, then refuses every later call so a private install cannot be used to
+        # create a second company. Further users are invited by an admin.
         def create
           ActiveRecord::Base.transaction do
+            # Two simultaneous first requests must not both pass the check below.
+            ActiveRecord::Base.connection.execute("SELECT pg_advisory_xact_lock(#{SETUP_LOCK_KEY})")
+
+            if Organization.setup_complete?
+              render json: {
+                code: "SETUP_COMPLETE",
+                errors: ["Setup is already complete. Ask an administrator to invite you."]
+              }, status: :forbidden
+              raise ActiveRecord::Rollback
+            end
+
             organization = build_organization
             build_resource(sign_up_params)
             resource.organization = organization
