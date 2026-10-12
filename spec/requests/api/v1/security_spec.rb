@@ -60,7 +60,7 @@ RSpec.describe "API Security", type: :request do
     it "handles injection attempt in search param without error" do
       headers = auth_headers_for(manager)
       get "/api/v1/assets", params: { q: "'; DROP TABLE assets; --" },
-          headers: headers, as: :json
+          headers: headers
       expect(response).not_to have_http_status(:internal_server_error)
     end
   end

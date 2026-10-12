@@ -1,12 +1,18 @@
 require "rails_helper"
 
 RSpec.describe Rack::Attack, type: :request do
-  before do
+  # Throttle counters must not leak into other specs: restore the original store afterwards.
+  around do |example|
+    original_store = Rack::Attack.cache.store
     Rack::Attack.cache.store = ActiveSupport::Cache::MemoryStore.new
     Rack::Attack.reset!
+    begin
+      example.run
+    ensure
+      Rack::Attack.reset!
+      Rack::Attack.cache.store = original_store
+    end
   end
-
-  after { Rack::Attack.reset! }
 
   describe "sign-in throttle" do
     it "allows up to 10 sign-in attempts per minute" do

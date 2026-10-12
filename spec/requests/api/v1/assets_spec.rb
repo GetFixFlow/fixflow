@@ -25,7 +25,7 @@ RSpec.describe "Api::V1::Assets", type: :request do
 
     it "filters by status" do
       get "/api/v1/assets", params: { status: "down" },
-        headers: auth_headers_for(tech), as: :json
+        headers: auth_headers_for(tech)
 
       expect(response).to have_http_status(:ok)
       names = json_body["assets"].map { |a| a["name"] }
@@ -38,7 +38,7 @@ RSpec.describe "Api::V1::Assets", type: :request do
       asset_at_location = create(:asset, organization: org, location: location, name: "Located Pump")
 
       get "/api/v1/assets", params: { location_id: location.id },
-        headers: auth_headers_for(tech), as: :json
+        headers: auth_headers_for(tech)
 
       names = json_body["assets"].map { |a| a["name"] }
       expect(names).to eq(["Located Pump"])
@@ -46,7 +46,7 @@ RSpec.describe "Api::V1::Assets", type: :request do
 
     it "searches by name" do
       get "/api/v1/assets", params: { search: "Alpha" },
-        headers: auth_headers_for(tech), as: :json
+        headers: auth_headers_for(tech)
 
       names = json_body["assets"].map { |a| a["name"] }
       expect(names).to include("Pump Alpha")
@@ -56,7 +56,7 @@ RSpec.describe "Api::V1::Assets", type: :request do
     it "searches by asset_tag" do
       target = create(:asset, organization: org, name: "Tagged Asset", asset_tag: "FF-999999")
       get "/api/v1/assets", params: { search: "FF-999999" },
-        headers: auth_headers_for(tech), as: :json
+        headers: auth_headers_for(tech)
 
       names = json_body["assets"].map { |a| a["name"] }
       expect(names).to include("Tagged Asset")

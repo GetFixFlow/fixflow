@@ -11,14 +11,14 @@ RSpec.describe "PM Reports", type: :request do
       pm = create(:preventive_maintenance, organization: org, asset: asset)
       create(:pm_execution, preventive_maintenance: pm, status: :completed,
              scheduled_date: 15.days.ago.to_date)
-      create(:pm_execution, preventive_maintenance: pm, status: :skipped,
+      create(:pm_execution, preventive_maintenance: pm, status: :skipped, skip_reason: "Equipment unavailable",
              scheduled_date: 10.days.ago.to_date)
     end
 
     it "returns compliance report" do
       get "/api/v1/reports/pm/compliance",
         params: { from: 30.days.ago.iso8601, to: Time.current.iso8601 },
-        headers: headers, as: :json
+        headers: headers
 
       expect(response).to have_http_status(:ok)
       body = response.parsed_body
@@ -45,7 +45,7 @@ RSpec.describe "PM Reports", type: :request do
     it "returns upcoming PM schedule grouped by week" do
       get "/api/v1/reports/pm/schedule_forecast",
         params: { days: 30 },
-        headers: headers, as: :json
+        headers: headers
 
       expect(response).to have_http_status(:ok)
       body = response.parsed_body
@@ -55,7 +55,7 @@ RSpec.describe "PM Reports", type: :request do
     it "caps days at 90" do
       get "/api/v1/reports/pm/schedule_forecast",
         params: { days: 200 },
-        headers: headers, as: :json
+        headers: headers
 
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body["forecast_days"]).to eq(90)

@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :work_order do
     organization
-    asset
+    asset { association :asset, organization: organization }
     sequence(:work_order_number) { |n| format("WO-%06d", n) }
     title       { Faker::Lorem.sentence(word_count: 4) }
     description { Faker::Lorem.paragraph }
@@ -14,35 +14,35 @@ FactoryBot.define do
     end
 
     trait :with_assignee do
-      association :assignee, factory: :user
+      assignee { association :user, organization: organization }
     end
 
     trait :assigned do
       status { "assigned" }
-      association :assignee, factory: :user
+      assignee { association :user, organization: organization }
     end
 
     trait :in_progress do
       status     { "in_progress" }
       started_at { 2.hours.ago }
-      association :assignee, factory: :user
+      assignee { association :user, organization: organization }
     end
 
     trait :on_hold do
       status { "on_hold" }
-      association :assignee, factory: :user
+      assignee { association :user, organization: organization }
     end
 
     trait :pending_parts do
       status { "pending_parts" }
-      association :assignee, factory: :user
+      assignee { association :user, organization: organization }
     end
 
     trait :completed do
       status           { "completed" }
       completed_at     { 1.hour.ago }
       completion_notes { Faker::Lorem.paragraph }
-      association :assignee, factory: :user
+      assignee { association :user, organization: organization }
     end
 
     trait :verified do
@@ -50,8 +50,8 @@ FactoryBot.define do
       completed_at     { 2.hours.ago }
       verified_at      { 1.hour.ago }
       completion_notes { Faker::Lorem.paragraph }
-      association :assignee, factory: :user
-      association :verified_by, factory: :user
+      assignee { association :user, organization: organization }
+      verified_by { association :user, organization: organization }
     end
 
     trait :cancelled do
@@ -64,7 +64,7 @@ FactoryBot.define do
     end
 
     trait :public_request do
-      requester_name  { Faker::Name.full_name }
+      requester_name  { Faker::Name.name }
       requester_email { Faker::Internet.email }
       sequence(:public_token) { |n| "token_#{n}" }
     end

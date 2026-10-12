@@ -11,14 +11,14 @@ RSpec.describe AssetPolicy, type: :policy do
   subject(:policy) { described_class }
 
   describe "create?" do
-    it "allows manager"   { expect(policy.new(manager, asset).create?).to be true }
-    it "forbids requester"{ expect(policy.new(requester, asset).create?).to be false }
-    it "forbids tech"     { expect(policy.new(tech, asset).create?).to be false }
+    it("allows manager") { expect(policy.new(manager, asset).create?).to be true }
+    it("forbids requester") { expect(policy.new(requester, asset).create?).to be false }
+    it("forbids tech") { expect(policy.new(tech, asset).create?).to be false }
   end
 
   describe "destroy?" do
-    it "allows admin"   { expect(policy.new(admin, asset).destroy?).to be true }
-    it "forbids manager"{ expect(policy.new(manager, asset).destroy?).to be false }
+    it("allows admin") { expect(policy.new(admin, asset).destroy?).to be true }
+    it("forbids manager") { expect(policy.new(manager, asset).destroy?).to be false }
   end
 
   describe "index? / show?" do

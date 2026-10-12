@@ -3,12 +3,12 @@ module Api
     class AssetsController < Api::V1::BaseController
       before_action :require_manager!, only: %i[create update]
       before_action :require_admin!,   only: %i[destroy]
-      before_action :set_asset,              only: %i[show update work_orders sensor_readings iot_rules qr_code]
+      before_action :set_asset,              only: %i[show update destroy work_orders sensor_readings iot_rules qr_code]
       before_action :set_asset_with_history, only: %i[history]
 
       # GET /api/v1/assets
       def index
-        scope = current_organization.assets
+        scope = current_organization.assets.kept
         scope = scope.by_status(params[:status])             if params[:status].present?
         scope = scope.by_location(params[:location_id])      if params[:location_id].present?
         scope = scope.search_by_name_or_tag(params[:search]) if params[:search].present?

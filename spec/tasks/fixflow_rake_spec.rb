@@ -25,6 +25,22 @@ RSpec.describe "fixflow rake tasks", type: :task do
     end
   end
 
+  describe "fixflow:create_admin when a company already exists" do
+    it "aborts without creating another company" do
+      create(:organization)
+
+      ActsAsTenant.without_tenant do
+        expect {
+          expect {
+            Rake::Task["fixflow:create_admin"].execute(
+              email: "second@example.com", password: "password123", org_name: "Second Org"
+            )
+          }.to raise_error(SystemExit)
+        }.not_to change { [Organization.count, User.count] }
+      end
+    end
+  end
+
   describe "fixflow:create_api_key" do
     it "creates an API key and outputs the raw key" do
       org = create(:organization)

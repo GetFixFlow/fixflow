@@ -33,6 +33,7 @@ module Api
       # PATCH /api/v1/work_orders/:id
       def update
         authorize_update!
+        return if performed?
         @work_order.update!(work_order_params)
         render json: { data: WorkOrderBlueprint.render_as_hash(@work_order) }
       end

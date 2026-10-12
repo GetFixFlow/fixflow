@@ -14,7 +14,7 @@ module Api
         return render_error("Invalid JSON payload", :bad_request) if payload.nil?
 
         result = if payload.is_a?(Array)
-          Iot::IngestionService.ingest_batch(@api_organization, payload, source: :rest_api)
+          ::Iot::IngestionService.ingest_batch(@api_organization, payload, source: :rest_api)
         elsif payload["readings"].is_a?(Array)
           # bulk from one device
           asset = find_asset_from_payload(@api_organization, payload)
@@ -23,12 +23,12 @@ module Api
           readings = payload["readings"].map do |r|
             r.merge("device_id" => payload["device_id"], "timestamp" => payload["timestamp"])
           end
-          Iot::IngestionService.ingest(asset, readings, source: :rest_api, device_id: payload["device_id"])
+          ::Iot::IngestionService.ingest(asset, readings, source: :rest_api, device_id: payload["device_id"])
         else
           asset = find_asset_from_payload(@api_organization, payload)
           return render_error("Asset not found", :unprocessable_entity) unless asset
 
-          Iot::IngestionService.ingest(asset, [payload], source: :rest_api, device_id: payload["device_id"])
+          ::Iot::IngestionService.ingest(asset, [payload], source: :rest_api, device_id: payload["device_id"])
         end
 
         render json: result, status: :ok
@@ -86,8 +86,9 @@ module Api
       end
 
       def parse_payload
-        return request.request_parameters if request.content_type&.include?("application/json")
-        JSON.parse(request.body.read)
+        # Parse the raw body: request_parameters wraps a top-level JSON array in a hash,
+        # which would hide batch payloads from the Array check in #ingest.
+        JSON.parse(request.raw_post)
       rescue JSON::ParserError
         nil
       end

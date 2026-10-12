@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :preventive_maintenance do
     organization
-    asset
+    asset { association :asset, organization: organization }
     sequence(:name) { |n| "PM Schedule #{n}" }
     description    { Faker::Lorem.sentence }
     priority       { :medium }
