@@ -2,3 +2,6 @@ en:
   password_mailer:
     reset:
       subject: "[FixFlow] Reset your password"
+  system_mailer:
+    test_email:
+      subject: "[FixFlow] Test email"

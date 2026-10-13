@@ -53,10 +53,12 @@ export const settingsApi = {
   },
 
   email: {
-    get: () => apiClient.get<{ smtp: SmtpSettings }>('/email_settings'),
-    update: (data: Partial<SmtpSettings>) =>
-      apiClient.patch('/email_settings', { smtp: data }),
-    test: () => apiClient.post<{ success: boolean; message: string }>('/email_settings/test'),
+    get: () => apiClient.get<{ smtp: EmailStatus }>('/email_settings'),
+    update: (data: SmtpSettings) => apiClient.patch<{ smtp: EmailStatus }>('/email_settings', { smtp: data }),
+    /** Forget what was saved here, going back to the server's environment. */
+    remove: () => apiClient.delete<{ smtp: EmailStatus }>('/email_settings'),
+    /** Sends a message through these settings without saving them. */
+    test: (data: SmtpSettings) => apiClient.post<{ success: boolean; message: string }>('/email_settings/test', { smtp: data }),
   },
 
   localization: {
@@ -120,11 +122,20 @@ export interface SmtpSettings {
   host: string
   port: number
   username: string
+  /** Only ever sent to the server. The server says whether one is saved (password_set) but never returns it. */
   password: string
   from_address: string
   from_name: string
   encryption: 'none' | 'tls' | 'ssl'
+}
+
+/** What the server reports about the install's mail server. */
+export interface EmailStatus extends Omit<SmtpSettings, 'password'> {
+  password_set: boolean
   configured: boolean
+  /** Where the working settings come from: saved here, the server's environment, or nowhere. */
+  source: 'settings' | 'environment' | null
+  environment_host: string | null
 }
 
 export interface LocalizationSettings {

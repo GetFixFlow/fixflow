@@ -138,6 +138,11 @@ export function useEmailSettings() {
   })
 }
 
+function emailFailure(fallback: string) {
+  return (error: AxiosError<{ error?: { message?: string } }>) =>
+    toast.error(error.response?.data?.error?.message ?? fallback)
+}
+
 export function useUpdateEmailSettings() {
   const qc = useQueryClient()
   return useMutation({
@@ -146,15 +151,25 @@ export function useUpdateEmailSettings() {
       qc.invalidateQueries({ queryKey: ['email_settings'] })
       toast.success('Email settings saved.')
     },
+    onError: emailFailure('Could not save the email settings.'),
   })
 }
 
-export function useTestEmail() {
+export function useRemoveEmailSettings() {
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: settingsApi.email.test,
-    onSuccess: () => toast.success('Test email sent!'),
-    onError: () => toast.error('Failed to send test email.'),
+    mutationFn: settingsApi.email.remove,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['email_settings'] })
+      toast.success('Saved email settings removed.')
+    },
+    onError: emailFailure('Could not remove the email settings.'),
   })
+}
+
+/** The page shows the outcome (and the reason it failed) next to the button, so no toast here. */
+export function useTestEmail() {
+  return useMutation({ mutationFn: settingsApi.email.test })
 }
 
 export function useLocalization() {
