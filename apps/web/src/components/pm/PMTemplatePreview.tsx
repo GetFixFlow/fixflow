@@ -19,7 +19,7 @@ export function PMTemplatePreview({ pm, onEdit }: { pm: PreventiveMaintenance; o
           <div>
             <dt className="text-gray-500 mb-0.5">Title template</dt>
             <dd className="text-gray-900 dark:text-gray-100 font-mono text-xs bg-gray-50 dark:bg-gray-800 rounded px-2 py-1">
-              {pm.title_template ?? pm.title ?? pm.name ?? '—'}
+              {pm.title_template ?? pm.template?.title ?? pm.name}
             </dd>
           </div>
           {pm.estimated_hours && (
@@ -34,10 +34,10 @@ export function PMTemplatePreview({ pm, onEdit }: { pm: PreventiveMaintenance; o
               <dd className="capitalize text-gray-900 dark:text-gray-100">{pm.priority}</dd>
             </div>
           )}
-          {pm.assignee && (
+          {pm.assigned_to && (
             <div className="flex justify-between">
               <dt className="text-gray-500">Default Assignee</dt>
-              <dd className="text-gray-900 dark:text-gray-100">{pm.assignee.full_name}</dd>
+              <dd className="text-gray-900 dark:text-gray-100">{pm.assigned_to.full_name}</dd>
             </div>
           )}
         </dl>

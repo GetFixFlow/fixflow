@@ -21,7 +21,7 @@ export function WorkOrderComments({ workOrderId, canViewInternal = false }: Work
   const [isInternal, setIsInternal] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const visible = canViewInternal ? comments : comments.filter((c) => !c.is_internal)
+  const visible = canViewInternal ? comments : comments.filter((c) => !c.internal)
 
   const submit = async () => {
     if (!body.trim()) return
@@ -95,7 +95,7 @@ export function WorkOrderComments({ workOrderId, canViewInternal = false }: Work
                   <span className="text-xs text-gray-400">
                     {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
                   </span>
-                  {comment.is_internal && (
+                  {comment.internal && (
                     <span className="flex items-center gap-0.5 rounded-full bg-yellow-100 px-2 py-0.5 text-[10px] font-medium text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400">
                       <Lock className="h-2.5 w-2.5" /> Internal note
                     </span>

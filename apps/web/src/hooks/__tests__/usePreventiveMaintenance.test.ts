@@ -8,10 +8,10 @@ import React from 'react'
 import type { PreventiveMaintenance } from '@/types'
 
 const mockPM: PreventiveMaintenance = {
-  id: 1, name: 'Test PM', title: 'Test PM',
+  id: 1, name: 'Test PM',
   status: 'active', priority: 'medium',
   frequency_type: 'time_based', frequency_value: 30, frequency_unit: 'days',
-  asset_id: 1, organization_id: 1, created_at: '', updated_at: '',
+  created_at: '', updated_at: '',
 }
 
 function makeWrapper() {

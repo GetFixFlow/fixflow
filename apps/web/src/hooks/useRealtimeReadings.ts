@@ -77,7 +77,7 @@ export function useRealtimeReadings(
   const isStale: Record<string, boolean> = {}
 
   for (const [metric, list] of Object.entries(readings)) {
-    const last = list.at(-1) ?? null
+    const last = list[list.length - 1] ?? null
     latest[metric] = last
     isStale[metric] = !last || now - new Date(last.recorded_at).getTime() > STALE_MS
     const threshold = thresholdsRef.current?.[metric]

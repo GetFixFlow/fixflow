@@ -42,7 +42,7 @@ export function EditUserModal({ open, onClose, user: targetUser }: EditUserModal
       full_name: targetUser.full_name,
       email: targetUser.email,
       phone: targetUser.phone ?? '',
-      job_title: (targetUser as Record<string, unknown>).job_title as string ?? '',
+      job_title: targetUser.job_title ?? '',
       role: targetUser.role,
     },
   })

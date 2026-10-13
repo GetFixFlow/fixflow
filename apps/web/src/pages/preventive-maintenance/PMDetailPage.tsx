@@ -67,7 +67,7 @@ export function PMDetailPage() {
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{pm.name ?? pm.title}</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{pm.name}</h1>
             <div className="flex items-center gap-2 mt-1">
               <PMStatusBadge status={pm.status} />
               {pm.priority && <span className="capitalize text-sm text-gray-500">{pm.priority} priority</span>}

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- The web app now passes the TypeScript check (307 errors before), `npm run build` runs it again, and CI runs it with the web tests and build.
+- Fixed work order checklists: ticking a step replaced the whole stored checklist with `{step, completed}`, wiping the instruction text and "required" flags, and the UI looked up items by fields (`id`, `description`) the API does not send. Updates are now merged by step.
+- Fixed the asset IoT page passing metric names to a chart that needs each metric's readings, which would throw for any asset with sensor data.
+- Removed the asset statuses the API rejects (`maintenance`, `offline`, `retired`) from the web forms and filters, and added the `outdoor` location type.
+- Work order parts now show their SKU, and line totals are computed from quantity and unit cost (the API sends neither a part object nor a total).
 - CI's Ruby jobs pass again. They had never passed: rubocop could not load its Rails cops (now loaded as plugins, with a baseline of existing offenses in `.rubocop_todo.yml` so new code is checked), `bin/bundler-audit` was missing its gem, and Brakeman insisted on its latest version.
 - Security: updated the gems with known advisories (nokogiri, puma, jwt, loofah, rails-html-sanitizer, websocket-driver, net-imap, concurrent-ruby, crass, msgpack, mail, Rails 8.1.3 to 8.1.4 for an Active Storage file-read/code-execution advisory, devise 4.9 to 5.0). Moved from Ruby 3.2, which reached end of life on 2026-03-31, to 3.3.6, matching the Dockerfile. Run `bundle install` after pulling.
 - The database backup job now runs `pg_dump` without a shell, so the database name can never be interpreted as a command.

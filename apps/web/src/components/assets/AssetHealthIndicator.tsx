@@ -6,9 +6,6 @@ const STATUS_COLOR: Record<AssetStatus, string> = {
   degraded: 'bg-yellow-500',
   down: 'bg-red-500',
   decommissioned: 'bg-gray-400',
-  maintenance: 'bg-yellow-500',
-  offline: 'bg-red-500',
-  retired: 'bg-gray-400',
 }
 
 const STATUS_LABEL: Record<AssetStatus, string> = {
@@ -16,9 +13,6 @@ const STATUS_LABEL: Record<AssetStatus, string> = {
   degraded: 'Degraded',
   down: 'Down',
   decommissioned: 'Decommissioned',
-  maintenance: 'Maintenance',
-  offline: 'Offline',
-  retired: 'Retired',
 }
 
 interface AssetHealthIndicatorProps {

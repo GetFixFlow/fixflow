@@ -15,7 +15,7 @@ import { PMForecastTimeline } from '@/components/pm/PMForecastTimeline'
 import { PMDueDateDisplay } from '@/components/pm/PMDueDateDisplay'
 import { TriggerPMModal } from '@/components/pm/TriggerPMModal'
 import { usePMDashboard, usePMForecast } from '@/hooks/usePreventiveMaintenance'
-import type { PreventiveMaintenance } from '@/types'
+import type { PMDashboardStats, PreventiveMaintenance } from '@/types'
 
 // Mock data for charts when real data not available
 const MOCK_TREND = Array.from({ length: 6 }, (_, i) => ({
@@ -37,7 +37,7 @@ export function PMDashboardPage() {
   const { data: dashData, isLoading } = usePMDashboard(90)
   const { data: forecastData } = usePMForecast(30)
 
-  const stats = dashData ?? {
+  const stats: PMDashboardStats = dashData ?? {
     overall_compliance: 87,
     compliance_change: 2.3,
     due_this_week: 6,
@@ -131,7 +131,7 @@ export function PMDashboardPage() {
               <BarChart data={stats.by_location} layout="vertical" margin={{ left: 60 }}>
                 <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 11 }} />
                 <YAxis type="category" dataKey="location_name" tick={{ fontSize: 11 }} width={60} />
-                <Tooltip formatter={(v: number) => [`${v}%`, 'Compliance']} />
+                <Tooltip formatter={(v) => [`${v}%`, 'Compliance']} />
                 <Bar dataKey="compliance" radius={[0, 4, 4, 0]}>
                   {stats.by_location.map((entry, i) => (
                     <Cell key={i} fill={entry.compliance >= 90 ? '#22c55e' : entry.compliance >= 70 ? '#eab308' : '#ef4444'} />
@@ -167,7 +167,7 @@ export function PMDashboardPage() {
                 <tbody>
                   {stats.overdue_pms.map((pm) => (
                     <tr key={pm.id} className="border-b border-gray-50 dark:border-gray-800/50">
-                      <td className="py-2 font-medium">{pm.name ?? pm.title}</td>
+                      <td className="py-2 font-medium">{pm.name}</td>
                       <td className="py-2 text-gray-500">{pm.asset?.name ?? '—'}</td>
                       <td className="py-2 text-right">
                         <Button size="sm" onClick={() => setTriggerTarget(pm)}>
@@ -194,7 +194,7 @@ export function PMDashboardPage() {
                 {stats.upcoming_week.map(({ pm, due_date }, i) => (
                   <li key={i} className="flex items-center justify-between text-sm">
                     <div>
-                      <Link to={`/preventive-maintenance/${pm.id}`} className="font-medium text-gray-900 dark:text-gray-100 hover:text-brand-600">{pm.name ?? pm.title}</Link>
+                      <Link to={`/preventive-maintenance/${pm.id}`} className="font-medium text-gray-900 dark:text-gray-100 hover:text-brand-600">{pm.name}</Link>
                       <p className="text-xs text-gray-500">{pm.asset?.name ?? '—'}</p>
                     </div>
                     <PMDueDateDisplay dueDate={due_date} showIcon={false} className="text-xs" />

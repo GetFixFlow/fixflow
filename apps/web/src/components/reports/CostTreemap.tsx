@@ -2,7 +2,7 @@ import { Treemap, ResponsiveContainer, Tooltip } from 'recharts'
 import { formatCurrency } from '@/utils/chartUtils'
 import { CHART_COLORS } from '@/utils/chartUtils'
 
-interface CostNode { name: string; cost: number; children?: CostNode[] }
+type CostNode = { name: string; cost: number; children?: CostNode[] }
 
 const COLORS = Object.values(CHART_COLORS)
 
@@ -37,7 +37,7 @@ export function CostTreemap({ data }: { data: CostNode[] }) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <Treemap data={treeData} dataKey="cost" nameKey="name" content={<CustomContent />}>
-        <Tooltip formatter={(v: number) => [formatCurrency(v), 'Cost']} />
+        <Tooltip formatter={(v) => [formatCurrency(Number(v)), 'Cost']} />
       </Treemap>
     </ResponsiveContainer>
   )

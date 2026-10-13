@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "NODE_OPTIONS=--experimental-global-webcrypto vite build",
+    "build": "tsc -b && NODE_OPTIONS=--experimental-global-webcrypto vite build",
     "typecheck": "tsc -b",
     "lint": "eslint .",
     "preview": "vite preview",

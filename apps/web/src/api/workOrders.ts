@@ -3,6 +3,7 @@ import type {
   WorkOrder,
   WorkOrderComment,
   WorkOrderAttachment,
+  ChecklistItem,
   WorkOrderPart,
   WorkRequest,
 } from '@/types'
@@ -63,9 +64,9 @@ export const workOrdersApi = {
     apiClient.delete(`/work_orders/${id}/parts/${partId}`),
 
   // Checklist
-  updateChecklist: (id: number, checklist_items: unknown[]) =>
+  updateChecklist: (id: number, items: ChecklistItem[]) =>
     apiClient.patch<{ data: WorkOrder }>(`/work_orders/${id}`, {
-      work_order: { checklist_items },
+      work_order: { checklist: items.map(({ step, completed }) => ({ step, completed: !!completed })) },
     }),
 }
 

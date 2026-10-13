@@ -50,8 +50,8 @@ export function PMEditPage() {
 
   useEffect(() => {
     if (pm) {
-      setName(pm.name ?? pm.title ?? '')
-      setAssetId(pm.asset_id)
+      setName(pm.name)
+      setAssetId(pm.asset?.id)
       setPriority(pm.priority ?? 'medium')
       setDescription(pm.description ?? '')
       setFreqType(pm.frequency_type ?? 'time_based')

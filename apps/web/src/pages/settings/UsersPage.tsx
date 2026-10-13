@@ -249,7 +249,7 @@ export function UsersPage() {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-xs text-gray-400 hidden lg:table-cell">
-                          {format(new Date(u.created_at), 'MMM d, yyyy')}
+                          {u.created_at ? format(new Date(u.created_at), 'MMM d, yyyy') : '—'}
                         </td>
                         <td className="px-4 py-3">
                           <div className="relative">

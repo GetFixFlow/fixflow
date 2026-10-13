@@ -24,7 +24,7 @@ export function PMComplianceTrendChart({ data, target = 95 }: PMComplianceTrendC
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis dataKey="period" tick={{ fontSize: 10 }} />
             <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 10 }} />
-            <Tooltip formatter={(v: number) => [`${v.toFixed(1)}%`, 'Compliance']} />
+            <Tooltip formatter={(v) => [`${Number(v).toFixed(1)}%`, 'Compliance']} />
             <Line type="monotone" dataKey="compliance_rate" name="Compliance %" stroke="#22c55e" strokeWidth={2} dot={{ r: 3 }} />
             <ReferenceLine y={target} stroke="#ef4444" strokeDasharray="5 3" label={{ value: `Target ${target}%`, position: 'right', fontSize: 10 }} />
           </ComposedChart>

@@ -23,7 +23,7 @@ export function MTTRChart({ data, overall_avg }: { data: Record<GroupBy, MTTRDat
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
           <XAxis type="number" tick={{ fontSize: 10 }} unit="h" />
           <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={75} />
-          <Tooltip formatter={(v: number | string) => [`${Number(v).toFixed(1)} hrs`, 'Avg MTTR']} />
+          <Tooltip formatter={(v) => [`${Number(v).toFixed(1)} hrs`, 'Avg MTTR']} />
           <Bar dataKey="avg_hours" name="Avg MTTR" radius={[0, 4, 4, 0]}>
             {current.slice(0, 10).map((entry: MTTRDataPoint, i: number) => (
               <Cell key={i} fill={entry.avg_hours < 4 ? '#22c55e' : entry.avg_hours < 8 ? '#eab308' : '#ef4444'} />

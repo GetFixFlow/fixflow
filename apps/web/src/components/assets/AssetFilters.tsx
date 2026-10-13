@@ -23,8 +23,6 @@ const STATUS_OPTIONS: { value: AssetStatus | ''; label: string }[] = [
   { value: 'degraded', label: 'Degraded' },
   { value: 'down', label: 'Down' },
   { value: 'decommissioned', label: 'Decommissioned' },
-  { value: 'maintenance', label: 'Maintenance' },
-  { value: 'offline', label: 'Offline' },
 ]
 
 export function AssetFilters({ filters, onChange, locations, totalCount }: AssetFiltersProps) {

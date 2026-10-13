@@ -285,7 +285,7 @@ export function AssetDetailPage() {
                           <dt className="text-xs capitalize text-gray-500 dark:text-gray-400">
                             {key.replace(/_/g, ' ')}
                           </dt>
-                          <dd className="mt-0.5 font-medium text-gray-900 dark:text-gray-100">{val}</dd>
+                          <dd className="mt-0.5 font-medium text-gray-900 dark:text-gray-100">{String(val)}</dd>
                         </div>
                       ))}
                     </dl>

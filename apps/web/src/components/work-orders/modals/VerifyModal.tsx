@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button'
 import { useVerifyWorkOrder } from '@/hooks/useWorkOrders'
 import { useWorkOrderParts } from '@/hooks/useWorkOrders'
 import type { WorkOrder } from '@/types'
+import { partLineTotal } from '@/utils/parts'
 
 interface VerifyModalProps {
   workOrder: WorkOrder
@@ -26,7 +27,7 @@ export function VerifyModal({ workOrder, open, onClose, onReject }: VerifyModalP
   const verify = useVerifyWorkOrder()
   const { data: parts = [] } = useWorkOrderParts(workOrder.id)
 
-  const partsCost = parts.reduce((sum, p) => sum + p.total_cost, 0)
+  const partsCost = parts.reduce((sum, p) => sum + partLineTotal(p), 0)
 
   const toggleCheck = (item: string) => {
     setChecked((prev) => ({ ...prev, [item]: !prev[item] }))

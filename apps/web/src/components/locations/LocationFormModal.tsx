@@ -12,7 +12,7 @@ import type { Location, LocationType } from '@/types'
 const schema = z
   .object({
     name: z.string().min(2, 'Name must be at least 2 characters').max(100),
-    location_type: z.enum(['site', 'building', 'floor', 'room', 'zone'] as const),
+    location_type: z.enum(['site', 'building', 'floor', 'room', 'zone', 'outdoor'] as const),
     parent_id: z.number().nullable().optional(),
     description: z.string().max(500).optional(),
   })
@@ -37,6 +37,7 @@ const LOCATION_TYPES: { value: LocationType; label: string }[] = [
   { value: 'floor', label: 'Floor' },
   { value: 'room', label: 'Room' },
   { value: 'zone', label: 'Zone' },
+  { value: 'outdoor', label: 'Outdoor' },
 ]
 
 export function LocationFormModal({

@@ -17,8 +17,8 @@ export function TriggerPMModal({ open, onClose, pm }: TriggerPMModalProps) {
   const [note, setNote] = useState('')
   const trigger = useTriggerPM()
 
-  const title = pm.title_template ?? pm.name ?? pm.title
-  const defaultDue = pm.next_due_at ?? pm.next_due_date
+  const title = pm.title_template ?? pm.template?.title ?? pm.name
+  const defaultDue = pm.next_due_at
   const steps = pm.checklist_template ?? []
 
   const handleSubmit = () => {
@@ -44,7 +44,7 @@ export function TriggerPMModal({ open, onClose, pm }: TriggerPMModalProps) {
             <p className="text-xs text-gray-400 uppercase font-medium mb-2">Work Order Preview</p>
             <div className="flex justify-between"><span className="text-gray-500">Title</span><span className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-[60%]">{title}</span></div>
             <div className="flex justify-between"><span className="text-gray-500">Priority</span><span className="capitalize">{pm.priority}</span></div>
-            {pm.assignee && <div className="flex justify-between"><span className="text-gray-500">Assign to</span><span>{pm.assignee.full_name}</span></div>}
+            {pm.assigned_to && <div className="flex justify-between"><span className="text-gray-500">Assign to</span><span>{pm.assigned_to.full_name}</span></div>}
             {defaultDue && <div className="flex justify-between"><span className="text-gray-500">Due date</span><span>{format(new Date(defaultDue), 'MMM d, yyyy')}</span></div>}
             {pm.estimated_hours && <div className="flex justify-between"><span className="text-gray-500">Est. Hours</span><span>{pm.estimated_hours}</span></div>}
             {steps.length > 0 && <div className="flex justify-between"><span className="text-gray-500">Checklist</span><span>{steps.length} steps</span></div>}

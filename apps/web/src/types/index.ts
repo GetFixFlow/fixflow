@@ -42,7 +42,9 @@ export interface User {
   organization_id: number
   avatar_url?: string
   phone?: string
-  created_at: string
+  job_title?: string
+  department?: string
+  created_at?: string
   invitation_pending?: boolean
   invitation_accepted_at?: string | null
 }
@@ -99,20 +101,35 @@ export interface Organization {
 
 // ── Location ─────────────────────────────────────────────────────────────────
 
+export type LocationType = 'site' | 'building' | 'floor' | 'zone' | 'room' | 'outdoor'
+
 export interface Location {
   id: number
   name: string
+  location_type: LocationType
   description?: string
-  ancestry?: string
-  parent_id?: number
-  organization_id: number
+  ancestry?: string | null
+  parent_id?: number | null
+  depth?: number
+  full_path?: string
+  children?: { id: number; name: string; location_type: LocationType }[]
+  organization_id?: number
   created_at: string
   updated_at: string
+  // Expected by the locations UI; the API does not return these yet.
+  asset_count?: number
+  children_count?: number
+}
+
+export interface LocationTreeNode extends Location {
+  children: LocationTreeNode[]
+  depth: number
+  path: string
 }
 
 // ── Asset ─────────────────────────────────────────────────────────────────────
 
-export type AssetStatus = 'operational' | 'maintenance' | 'offline' | 'retired'
+export type AssetStatus = 'operational' | 'degraded' | 'down' | 'decommissioned'
 
 export interface Asset {
   id: number
@@ -126,11 +143,18 @@ export interface Asset {
   serial_number?: string
   purchase_date?: string
   purchase_cost?: number
-  location_id?: number
-  location?: Location
+  location_id?: number | null
+  location?: Location | null
   organization_id: number
+  custom_fields?: Record<string, unknown>
   created_at: string
   updated_at: string
+  // Extended view
+  open_work_orders_count?: number
+  // Expected by the asset UI; the API does not return these yet.
+  last_work_order_date?: string | null
+  year_manufactured?: number | null
+  warranty_expiry?: string | null
 }
 
 // ── Work Order ────────────────────────────────────────────────────────────────
@@ -140,11 +164,57 @@ export type WorkOrderStatus =
   | 'assigned'
   | 'in_progress'
   | 'on_hold'
+  | 'pending_parts'
   | 'completed'
   | 'verified'
   | 'cancelled'
 
 export type WorkOrderType = 'corrective' | 'preventive' | 'inspection' | 'emergency'
+export type WorkOrderSource = 'manual' | 'pm' | 'iot_rule'
+// Sent as resolution_type when completing a work order. The API does not store it yet.
+export type ResolutionType = 'fully_resolved' | 'temporarily_resolved' | 'partially_resolved'
+
+export interface ChecklistItem {
+  step: number
+  instruction: string
+  required?: boolean
+  completed?: boolean
+}
+
+export interface PersonRef {
+  id?: number
+  full_name: string
+  email?: string
+  role?: Role
+  organization_id?: number
+}
+
+export interface WorkOrderComment {
+  id: number
+  body: string
+  internal: boolean
+  created_at: string
+  user: PersonRef & { id: number }
+}
+
+export interface WorkOrderAttachment {
+  id: number
+  description?: string | null
+  content_type: string | null
+  filename: string | null
+  url: string | null
+  created_at: string
+  user: PersonRef & { id: number }
+}
+
+export interface WorkOrderPart {
+  id: number
+  part_id: number
+  name: string
+  sku?: string | null
+  quantity_used: number
+  unit_cost: number | string | null
+}
 
 export interface WorkOrder {
   id: number
@@ -153,52 +223,178 @@ export interface WorkOrder {
   description?: string
   status: WorkOrderStatus
   priority: Priority
-  work_order_type: WorkOrderType
-  due_date?: string
-  completed_at?: string
-  estimated_hours?: number
-  actual_hours?: number
-  asset_id?: number
-  asset?: Asset
-  assignee_id?: number
-  assignee?: User
-  requester_id?: number
-  requester?: User
+  work_order_type?: WorkOrderType
+  due_date?: string | null
+  started_at?: string | null
+  completed_at?: string | null
+  verified_at?: string | null
+  estimated_hours?: number | null
+  actual_hours?: number | null
+  parts_cost?: number | string
+  labor_cost?: number | string
+  completion_notes?: string | null
+  rejection_reason?: string | null
+  cancellation_reason?: string | null
+  checklist?: ChecklistItem[]
+  asset_id?: number | null
+  asset?: { id: number; name: string; asset_tag: string; location?: { name: string } | null } | null
+  assignee_id?: number | null
+  assignee?: PersonRef | null
+  requester_id?: number | null
+  requester?: PersonRef | null
+  verified_by?: PersonRef | null
+  comments?: WorkOrderComment[]
+  attachments?: WorkOrderAttachment[]
+  parts_used?: WorkOrderPart[]
   organization_id: number
   created_at: string
   updated_at: string
+  // Expected by the work order UI; the API does not return these yet.
+  source?: WorkOrderSource
+  pm_id?: number | null
+  iot_alert_id?: number | null
+  checklist_items?: ChecklistItem[]
+}
+
+export interface WorkRequest {
+  id: number
+  token?: string
+  work_order_number?: string
+  title: string
+  description?: string
+  status: 'received' | 'created' | WorkOrderStatus
+  priority?: Priority
+  requester_name?: string
+  requester_email?: string
+  created_at: string
+  updated_at?: string
 }
 
 // ── Preventive Maintenance ────────────────────────────────────────────────────
 
+export type PmFrequencyType = 'time_based' | 'meter_based' | 'calendar_based' | 'condition_based'
+export type PmFrequencyUnit = 'days' | 'weeks' | 'months' | 'hours' | 'cycles'
+export type PmStatus = 'active' | 'paused' | 'archived'
+export type PmExecutionStatus = 'pending' | 'generated' | 'completed' | 'skipped'
+
+/** @deprecated The API sends frequency_type and frequency_unit. */
 export type PmFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annually' | 'custom'
-export type PmStatus = 'active' | 'inactive' | 'paused'
+
+export interface PMChecklistStep {
+  step: number
+  instruction: string
+  required: boolean
+  estimated_minutes?: number
+  photo_required?: boolean
+  notes?: string
+}
+
+export interface PMRequiredPart {
+  part_id: number
+  quantity: number
+  part?: Part
+}
+
+export interface PMTemplate {
+  title: string
+  description?: string
+  checklist?: PMChecklistStep[]
+  required_parts?: PMRequiredPart[]
+  estimated_hours?: number
+}
 
 export interface PreventiveMaintenance {
   id: number
-  title: string
+  name: string
   description?: string
-  frequency: PmFrequency
-  frequency_value?: number
-  next_due_date: string
   status: PmStatus
-  estimated_hours?: number
-  asset_id: number
-  asset?: Asset
-  assignee_id?: number
-  assignee?: User
-  organization_id: number
+  priority: Priority
+  frequency_type: PmFrequencyType
+  frequency_value?: number
+  frequency_unit?: PmFrequencyUnit
+  start_date?: string
+  end_date?: string | null
+  next_due_at?: string | null
+  last_run_at?: string | null
+  times_generated?: number
+  times_completed?: number
+  times_skipped?: number
+  estimated_hours?: number | null
+  template?: PMTemplate
+  asset?: { id: number; name: string; asset_tag: string; location?: { name: string } | null } | null
+  assigned_to?: PersonRef | null
+  recent_executions?: PmExecution[]
   created_at: string
   updated_at: string
+  // Expected by the PM UI; the API does not return these yet.
+  title_template?: string
+  checklist_template?: PMChecklistStep[]
+  required_parts?: PMRequiredPart[]
+  calendar_day_of_month?: number | null
+  calendar_day_of_week?: number | null
+  compliance_rate?: number
+  completed_count?: number
+  skipped_count?: number
+  missed_count?: number
+  generated_count?: number
 }
 
 export interface PmExecution {
   id: number
-  preventive_maintenance_id: number
-  work_order_id?: number
-  executed_at?: string
-  notes?: string
+  scheduled_date: string
+  generated_at?: string | null
+  status: PmExecutionStatus
+  skip_reason?: string | null
+  notes?: string | null
+  work_order?: { id: number; work_order_number: string; status: WorkOrderStatus } | null
   created_at: string
+}
+
+export interface PMFilters {
+  status: PmStatus | ''
+  priority: Priority | ''
+  asset_id: number
+  overdue: boolean
+  search: string
+  page: number
+}
+
+export interface PMForecastItem {
+  pm_id: number
+  pm_name: string
+  asset_name: string
+  due_date: string
+  priority: Priority
+  estimated_hours?: number
+}
+
+export interface PMSchedulePreviewItem {
+  date: string
+  days_until: number
+  occurrence: number
+  warnings?: string[]
+}
+
+export interface PMDashboardStats {
+  overall_compliance: number
+  compliance_change: number
+  due_this_week: number
+  overdue_count: number
+  completed_this_month: number
+  scheduled_this_month: number
+  avg_completion_hours: number
+  avg_estimated_hours: number
+  monthly_trend: { month: string; completed: number; missed: number; compliance: number }[]
+  by_location: { location_name: string; compliance: number; count: number }[]
+  overdue_pms: PreventiveMaintenance[]
+  upcoming_week: { pm: PreventiveMaintenance; due_date: string }[]
+  worst_assets?: unknown[]
+  recent_activity: {
+    type: 'generated' | 'completed' | 'skipped' | 'missed'
+    pm_name: string
+    wo_number?: string
+    occurred_at: string
+  }[]
 }
 
 // ── IoT ───────────────────────────────────────────────────────────────────────

@@ -12,12 +12,12 @@ export function AssetHealthDonut({ data, healthScore, onSegmentClick }: AssetHea
       <ResponsiveContainer width="100%" height={250}>
         <PieChart>
           <Pie data={data} dataKey="count" nameKey="status" innerRadius={70} outerRadius={105}
-            paddingAngle={2} onClick={(d: AssetStatus) => onSegmentClick?.(d.status)}>
+            paddingAngle={2} onClick={(_, index) => onSegmentClick?.(data[index].status)}>
             {data.map((entry, i) => (
               <Cell key={i} fill={COLORS[entry.status as keyof typeof COLORS] ?? '#6b7280'} />
             ))}
           </Pie>
-          <Tooltip formatter={(v: number, name: string) => [v, name.charAt(0).toUpperCase() + name.slice(1)]} />
+          <Tooltip formatter={(v, name) => [v, String(name).charAt(0).toUpperCase() + String(name).slice(1)]} />
         </PieChart>
       </ResponsiveContainer>
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

@@ -12,7 +12,7 @@ export function AssetCostChart({ data, avgCost }: { data: AssetCost[]; avgCost: 
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
           <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={(v: number) => `$${(v/1000).toFixed(1)}k`} />
           <YAxis type="category" dataKey="asset_name" tick={{ fontSize: 10 }} width={85} />
-          <Tooltip formatter={(v: number | string) => [formatCurrency(Number(v))]} />
+          <Tooltip formatter={(v) => formatCurrency(Number(v))} />
           <Legend />
           <Bar dataKey="labor_cost" name="Labor" fill="#3b82f6" stackId="a" />
           <Bar dataKey="parts_cost" name="Parts" fill="#22c55e" stackId="a" radius={[0, 4, 4, 0]} />

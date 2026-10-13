@@ -44,9 +44,9 @@ export function PmPage() {
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="font-medium text-gray-900 dark:text-gray-100">{pm.title}</p>
+                    <p className="font-medium text-gray-900 dark:text-gray-100">{pm.name}</p>
                     <p className="text-xs text-gray-500 mt-1">
-                      {pm.frequency} · Next due: {format(new Date(pm.next_due_date), 'MMM d, yyyy')}
+                      {pm.frequency_type.replace(/_/g, ' ')} · Next due: {pm.next_due_at ? format(new Date(pm.next_due_at), 'MMM d, yyyy') : '—'}
                     </p>
                   </div>
                   <Badge variant={statusBadge(pm.status)}>{pm.status}</Badge>

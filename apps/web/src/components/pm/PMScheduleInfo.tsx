@@ -6,8 +6,8 @@ import { formatFrequency } from './PMFrequencyBadge'
 import type { PreventiveMaintenance } from '@/types'
 
 export function PMScheduleInfo({ pm }: { pm: PreventiveMaintenance }) {
-  const dueAt = pm.next_due_at ?? pm.next_due_date
-  const frequencyLabel = formatFrequency(pm.frequency_type, pm.frequency_value, pm.frequency_unit, pm.calendar_day_of_month, pm.calendar_day_of_week)
+  const dueAt = pm.next_due_at
+  const frequencyLabel = formatFrequency(pm.frequency_type, pm.frequency_value, pm.frequency_unit, pm.calendar_day_of_month ?? undefined, pm.calendar_day_of_week ?? undefined)
 
   return (
     <Card>

@@ -149,7 +149,7 @@ export function ProfilePage() {
     .slice(0, 2)
     .toUpperCase()
   const avatarColor = nameToColor(user?.full_name ?? 'User')
-  const avatarUrl = avatarPreview ?? (profile as Record<string, unknown>)?.avatar_url as string | undefined
+  const avatarUrl = avatarPreview ?? profile?.avatar_url
 
   return (
     <div className="space-y-6 max-w-2xl">

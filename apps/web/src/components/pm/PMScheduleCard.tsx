@@ -23,7 +23,7 @@ export function PMScheduleCard({ pm, onTrigger, onPause, onResume, onArchive }: 
   const { user } = useAuthStore()
   const isManager = user?.role === 'admin' || user?.role === 'manager'
   const isAdmin = user?.role === 'admin'
-  const dueAt = pm.next_due_at ?? pm.next_due_date
+  const dueAt = pm.next_due_at
   const compliance = pm.compliance_rate ?? 0
   const complianceColor = compliance >= 90 ? 'bg-green-500' : compliance >= 70 ? 'bg-yellow-500' : 'bg-red-500'
 
@@ -76,7 +76,7 @@ export function PMScheduleCard({ pm, onTrigger, onPause, onResume, onArchive }: 
 
         {/* PM Name */}
         <Link to={`/preventive-maintenance/${pm.id}`} className="text-base font-semibold text-gray-900 hover:text-brand-600 dark:text-gray-100 dark:hover:text-brand-400 line-clamp-2">
-          {pm.name ?? pm.title}
+          {pm.name}
         </Link>
 
         {/* Asset info */}
@@ -103,13 +103,12 @@ export function PMScheduleCard({ pm, onTrigger, onPause, onResume, onArchive }: 
               frequencyType={pm.frequency_type}
               frequencyValue={pm.frequency_value}
               frequencyUnit={pm.frequency_unit}
-              calendarDayOfMonth={pm.calendar_day_of_month}
-              calendarDayOfWeek={pm.calendar_day_of_week}
-              frequency={pm.frequency}
+              calendarDayOfMonth={pm.calendar_day_of_month ?? undefined}
+              calendarDayOfWeek={pm.calendar_day_of_week ?? undefined}
             />
           </div>
-          {pm.assignee && (
-            <div className="text-xs text-gray-500">👤 {pm.assignee.full_name}</div>
+          {pm.assigned_to && (
+            <div className="text-xs text-gray-500">👤 {pm.assigned_to.full_name}</div>
           )}
         </div>
 

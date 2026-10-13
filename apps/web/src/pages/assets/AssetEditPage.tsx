@@ -18,7 +18,7 @@ const schema = z.object({
   name: z.string().min(2).max(100),
   asset_tag: z.string().max(50).optional(),
   serial_number: z.string().max(100).optional(),
-  status: z.enum(['operational', 'degraded', 'down', 'decommissioned', 'maintenance', 'offline', 'retired'] as const),
+  status: z.enum(['operational', 'degraded', 'down', 'decommissioned'] as const),
   location_id: z.number().nullable().optional(),
   manufacturer: z.string().max(100).optional(),
   model: z.string().max(100).optional(),
@@ -26,13 +26,14 @@ const schema = z.object({
   purchase_date: z.string().optional(),
   warranty_expiry: z.string().optional(),
   description: z.string().max(1000).optional(),
-  custom_fields: z.record(z.string()).optional(),
+  custom_fields: z.record(z.string(), z.string()).optional(),
 })
 
-type FormValues = z.infer<typeof schema>
+type FormValues = z.output<typeof schema>
+type FormInput = z.input<typeof schema>
 
 const STATUS_OPTIONS: AssetStatus[] = [
-  'operational', 'degraded', 'down', 'decommissioned', 'maintenance', 'offline', 'retired',
+  'operational', 'degraded', 'down', 'decommissioned',
 ]
 
 export function AssetEditPage() {
@@ -45,7 +46,7 @@ export function AssetEditPage() {
   const locations = locationsData ?? []
   const updateMutation = useUpdateAsset(assetId)
 
-  const { register, handleSubmit, setValue, watch, reset, formState: { errors, isDirty } } = useForm<FormValues>({
+  const { register, handleSubmit, setValue, watch, reset, formState: { errors, isDirty } } = useForm<FormInput, unknown, FormValues>({
     resolver: zodResolver(schema),
   })
 
@@ -63,7 +64,7 @@ export function AssetEditPage() {
         purchase_date: asset.purchase_date ?? '',
         warranty_expiry: asset.warranty_expiry ?? '',
         description: asset.description ?? '',
-        custom_fields: asset.custom_fields ?? {},
+        custom_fields: Object.fromEntries(Object.entries(asset.custom_fields ?? {}).map(([k, v]) => [k, String(v)])),
       })
     }
   }, [asset, reset])
