@@ -1,8 +1,11 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ProfilePage } from '../ProfilePage'
+
+const updateMutate = vi.hoisted(() => vi.fn())
 
 vi.mock('@/hooks/useSettings', () => ({
   useProfile: () => ({
@@ -10,11 +13,12 @@ vi.mock('@/hooks/useSettings', () => ({
       full_name: 'Alice Smith',
       email: 'alice@test.com',
       role: 'admin',
+      organization_name: 'Acme Corp',
       created_at: '2026-01-01T00:00:00Z',
     },
     isLoading: false,
   }),
-  useUpdateProfile: () => ({ mutate: vi.fn(), isPending: false }),
+  useUpdateProfile: () => ({ mutate: updateMutate, isPending: false }),
   useChangePassword: () => ({ mutate: vi.fn(), isPending: false }),
   useSessions: () => ({
     data: [
@@ -81,5 +85,34 @@ describe('ProfilePage', () => {
   it('shows change password section (collapsed)', () => {
     render(<ProfilePage />, { wrapper: Wrapper })
     expect(screen.getByText('Change Password')).toBeInTheDocument()
+  })
+
+  it('shows the real organization name, not a placeholder', () => {
+    render(<ProfilePage />, { wrapper: Wrapper })
+    expect(screen.getByText('Acme Corp')).toBeInTheDocument()
+    expect(screen.queryByText('Demo Manufacturing Co.')).not.toBeInTheDocument()
+  })
+
+  it('keeps the sign-in email read-only', async () => {
+    render(<ProfilePage />, { wrapper: Wrapper })
+    expect(await screen.findByDisplayValue('alice@test.com')).toBeDisabled()
+  })
+
+  it('does not offer a photo upload, which the API does not support yet', () => {
+    render(<ProfilePage />, { wrapper: Wrapper })
+    expect(screen.queryByText(/change photo/i)).not.toBeInTheDocument()
+  })
+
+  it('saves only the fields the API accepts', async () => {
+    render(<ProfilePage />, { wrapper: Wrapper })
+    const name = await screen.findByDisplayValue('Alice Smith')
+    await userEvent.clear(name)
+    await userEvent.type(name, 'Alice Jones')
+    await userEvent.click(screen.getByRole('button', { name: /save/i }))
+
+    await waitFor(() => expect(updateMutate).toHaveBeenCalled())
+    expect(updateMutate.mock.calls[0][0]).toEqual({
+      full_name: 'Alice Jones', phone: '', job_title: '', department: '',
+    })
   })
 })

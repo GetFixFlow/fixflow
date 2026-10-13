@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- My Profile now works. New `GET` and `PATCH /api/v1/profile` for name, phone, job title and department (new `users.job_title` and `users.department` columns; run `rails db:migrate`), and `PATCH /api/v1/profile/password`. Changing the password signs you out everywhere: every issued token is revoked, and the page sends you to sign in. Password attempts are limited to 5 a minute.
+- The profile page showed a hard-coded organization name ("Demo Manufacturing Co.") for everyone; it now shows yours. The sign-in email is shown read-only, and the profile photo upload is removed until photos are supported.
 - The web app now passes the TypeScript check (307 errors before), `npm run build` runs it again, and CI runs it with the web tests and build.
 - Fixed work order checklists: ticking a step replaced the whole stored checklist with `{step, completed}`, wiping the instruction text and "required" flags, and the UI looked up items by fields (`id`, `description`) the API does not send. Updates are now merged by step.
 - Fixed the asset IoT page passing metric names to a chart that needs each metric's readings, which would throw for any asset with sensor data.

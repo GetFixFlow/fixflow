@@ -27,6 +27,14 @@ class User < ApplicationRecord
     "#{first_name} #{last_name}".strip
   end
 
+  # The profile form edits one name field. The first word is the first name and the
+  # rest is the last name; a single word leaves the last name blank, which fails validation.
+  def full_name=(value)
+    first, last = value.to_s.strip.split(/\s+/, 2)
+    self.first_name = first
+    self.last_name = last
+  end
+
   # admin?, manager?, technician? and requester? check the user's own role only.
   # The policies layer the hierarchy on top (see ApplicationPolicy).
   ROLES.each do |name|

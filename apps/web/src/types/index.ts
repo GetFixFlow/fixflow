@@ -42,8 +42,9 @@ export interface User {
   organization_id: number
   avatar_url?: string
   phone?: string
-  job_title?: string
-  department?: string
+  job_title?: string | null
+  department?: string | null
+  organization_name?: string
   created_at?: string
   invitation_pending?: boolean
   invitation_accepted_at?: string | null

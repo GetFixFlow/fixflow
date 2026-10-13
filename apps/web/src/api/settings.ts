@@ -4,20 +4,8 @@ import type { User } from '@/types'
 export const settingsApi = {
   profile: {
     get: () => apiClient.get<{ user: User }>('/profile'),
-    update: (data: Partial<User> & { avatar?: File }) => {
-      const fd = new FormData()
-      if (data.avatar) fd.append('user[avatar]', data.avatar)
-      if (data.full_name) fd.append('user[full_name]', data.full_name)
-      if (data.email) fd.append('user[email]', data.email)
-      if (data.phone != null) fd.append('user[phone]', data.phone ?? '')
-      if ((data as Record<string, unknown>).job_title != null)
-        fd.append('user[job_title]', (data as Record<string, unknown>).job_title as string ?? '')
-      if ((data as Record<string, unknown>).department != null)
-        fd.append('user[department]', (data as Record<string, unknown>).department as string ?? '')
-      return apiClient.patch<{ user: User }>('/profile', fd, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
-    },
+    update: (data: { full_name?: string; phone?: string; job_title?: string; department?: string }) =>
+      apiClient.patch<{ user: User }>('/profile', { user: data }),
     changePassword: (data: { current_password: string; password: string; password_confirmation: string }) =>
       apiClient.patch('/profile/password', { user: data }),
   },

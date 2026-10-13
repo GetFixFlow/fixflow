@@ -1,5 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import type { AxiosError } from 'axios'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import { queryClient } from '@/lib/queryClient'
 import { settingsApi } from '@/api/settings'
 import { useAuthStore } from '@/stores/authStore'
 import type { User } from '@/types'
@@ -18,18 +21,28 @@ export function useUpdateProfile() {
     mutationFn: settingsApi.profile.update,
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ['profile'] })
-      updateUser((res as { data: { user: User } }).data.user)
+      updateUser(res.data.user)
       toast.success('Profile updated.')
     },
-    onError: () => toast.error('Failed to update profile.'),
+    onError: (error: AxiosError<{ error?: { message?: string } }>) =>
+      toast.error(error.response?.data?.error?.message ?? 'Failed to update profile.'),
   })
 }
 
 export function useChangePassword() {
+  const clearAuth = useAuthStore((s) => s.clearAuth)
+  const navigate = useNavigate()
   return useMutation({
     mutationFn: settingsApi.profile.changePassword,
-    onSuccess: () => toast.success('Password updated.'),
-    onError: () => toast.error('Failed to update password. Check current password.'),
+    // The server signs the user out everywhere, this session included, so go to sign-in.
+    onSuccess: () => {
+      toast.success('Password changed. Please sign in again.')
+      clearAuth()
+      queryClient.clear()
+      navigate('/login')
+    },
+    onError: (error: AxiosError<{ error?: { message?: string } }>) =>
+      toast.error(error.response?.data?.error?.message ?? 'Failed to change password.'),
   })
 }
 
