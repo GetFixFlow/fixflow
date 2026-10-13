@@ -6,6 +6,7 @@ module Api
 
       before_action :authenticate_user!
       before_action :set_current_context
+      around_action :use_organization_time_zone
 
       # ── Error handling ────────────────────────────────────────────────────
       #
@@ -61,6 +62,12 @@ module Api
         Current.user       = current_user
         Current.request_ip = request.remote_ip
         ActsAsTenant.current_tenant = current_organization
+      end
+
+      # Dates the client sends without an offset (report ranges, filters) mean the
+      # company's local time, not the server's.
+      def use_organization_time_zone(&)
+        Time.use_zone(current_organization&.timezone_or_default || "UTC", &)
       end
 
       def current_organization

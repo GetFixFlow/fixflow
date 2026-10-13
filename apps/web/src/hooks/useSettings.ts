@@ -108,7 +108,8 @@ export function useUpdateOrgSettings() {
       qc.invalidateQueries({ queryKey: ['org_settings'] })
       toast.success('Settings saved.')
     },
-    onError: () => toast.error('Failed to save settings.'),
+    onError: (error: AxiosError<{ error?: { message?: string } }>) =>
+      toast.error(error.response?.data?.error?.message ?? 'Failed to save settings.'),
   })
 }
 

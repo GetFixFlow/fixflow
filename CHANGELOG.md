@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Company settings now work (Settings → Organization). New `GET` and `PATCH /api/v1/organization_settings` (read by anyone signed in, changed by admins only). Applied today: the company name, **time zone** (dates sent without an offset, such as report ranges, now mean the company's local time), **work order number prefix** (e.g. `MNT-000001`; changing it keeps counting), and the **default priority and due days** for new work orders that do not set their own. The PM, IoT, auto-close, working hours and holiday settings are saved too, marked "Saved, not applied yet" on the page. The unused `organizations` route is removed.
+- Work order numbers now count up from the highest existing number instead of sorting the numbers as text.
+- Fixed the organization page showing default working days and no holidays after load.
 - My Profile now works. New `GET` and `PATCH /api/v1/profile` for name, phone, job title and department (new `users.job_title` and `users.department` columns; run `rails db:migrate`), and `PATCH /api/v1/profile/password`. Changing the password signs you out everywhere: every issued token is revoked, and the page sends you to sign in. Password attempts are limited to 5 a minute.
 - The profile page showed a hard-coded organization name ("Demo Manufacturing Co.") for everyone; it now shows yours. The sign-in email is shown read-only, and the profile photo upload is removed until photos are supported.
 - The web app now passes the TypeScript check (307 errors before), `npm run build` runs it again, and CI runs it with the web tests and build.

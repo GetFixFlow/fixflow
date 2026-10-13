@@ -16,14 +16,15 @@ Rails.application.routes.draw do
     namespace :v1 do
       get "auth/me", to: "auth/profile#show"
 
+      # Company settings: anyone signed in can read them, only admins change them
+      resource :organization_settings, only: %i[show update], controller: "organization_settings"
+
       # The signed-in user's own details and password
       resource :profile, only: %i[show update], controller: "profile" do
         patch :password
       end
       get "health",  to: "health#show"
       get "setup/status", to: "setup#status"
-
-      resources :organizations, only: %i[show update]
 
       resources :locations do
         collection { get :tree }

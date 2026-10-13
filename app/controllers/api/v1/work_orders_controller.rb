@@ -24,9 +24,10 @@ module Api
 
       # POST /api/v1/work_orders
       def create
-        work_order = current_organization.work_orders.create!(
-          work_order_params.merge(requester: current_user)
-        )
+        attrs = work_order_params
+        attrs[:priority] = current_organization.default_priority if attrs[:priority].blank?
+        attrs[:due_date] = current_organization.default_due_days.days.from_now if attrs[:due_date].blank?
+        work_order = current_organization.work_orders.create!(attrs.merge(requester: current_user))
         render json: { data: WorkOrderBlueprint.render_as_hash(work_order) }, status: :created
       end
 
