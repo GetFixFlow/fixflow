@@ -32,6 +32,7 @@ class WorkOrder < ApplicationRecord
   validates :status,   inclusion: { in: STATUSES }
   validates :completion_notes, presence: true, if: -> { completed? || verified? }
   validate  :assignee_belongs_to_same_org, if: :assignee_id
+  validate  :assignee_is_active, if: :will_save_change_to_assignee_id?
   validate  :verifier_is_not_assignee,     if: :verified_by_id
 
   # ─── Callbacks ─────────────────────────────────────────────────────────────
@@ -142,6 +143,10 @@ class WorkOrder < ApplicationRecord
 
   def verifier_differs_from_assignee?
     verified_by_id != assignee_id || assignee_id.nil?
+  end
+
+  def assignee_is_active
+    errors.add(:assignee, "is deactivated and cannot be assigned work") if assignee && !assignee.active?
   end
 
   def assignee_belongs_to_same_org

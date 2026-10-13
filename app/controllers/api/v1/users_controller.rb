@@ -1,9 +1,14 @@
 module Api
   module V1
     class UsersController < Api::V1::BaseController
-      before_action :require_manager!, only: %i[index update destroy]
-      before_action :require_admin!,   only: %i[invite resend_invitation]
-      before_action :set_user, only: %i[show update destroy resend_invitation]
+      before_action :require_manager!, only: %i[index update]
+      before_action :require_admin!,   only: %i[invite resend_invitation destroy deactivate reactivate role
+                                                bulk_role bulk_deactivate]
+      before_action :set_user, only: %i[show update destroy resend_invitation deactivate reactivate role]
+
+      rescue_from UserAdministration::Refused do |error|
+        render_error(error.message, :unprocessable_entity, code: "USER_ACTION_REFUSED")
+      end
 
       def index
         scope = current_organization.users
@@ -23,9 +28,47 @@ module Api
         render json: UserBlueprint.render_as_hash(@user)
       end
 
+      # Managers edit details; only admins change a role, and that goes through the
+      # same safeguards as the role endpoint.
       def update
-        @user.update!(user_params)
+        ActiveRecord::Base.transaction do
+          @user.update!(user_params) if user_params.present?
+          role = params.dig(:user, :role)
+          UserAdministration.change_role!(@user, role, by: current_user) if role.present? && current_user.admin?
+        end
         render json: UserBlueprint.render_as_hash(@user)
+      end
+
+      # PATCH /api/v1/users/:id/deactivate
+      def deactivate
+        UserAdministration.deactivate!(@user, by: current_user)
+        render json: { user: UserBlueprint.render_as_hash(@user) }
+      end
+
+      # PATCH /api/v1/users/:id/reactivate
+      def reactivate
+        UserAdministration.reactivate!(@user)
+        render json: { user: UserBlueprint.render_as_hash(@user) }
+      end
+
+      # PATCH /api/v1/users/:id/role
+      def role
+        UserAdministration.change_role!(@user, params[:role], by: current_user)
+        render json: { user: UserBlueprint.render_as_hash(@user) }
+      end
+
+      # PATCH /api/v1/users/bulk_role: all or nothing
+      def bulk_role
+        users = users_from_ids
+        bulk_apply(users) { |user| UserAdministration.change_role!(user, params[:role], by: current_user) }
+        render json: { users: UserBlueprint.render_as_hash(users) }
+      end
+
+      # PATCH /api/v1/users/bulk_deactivate: all or nothing
+      def bulk_deactivate
+        users = users_from_ids
+        bulk_apply(users) { |user| UserAdministration.deactivate!(user, by: current_user) }
+        render json: { users: UserBlueprint.render_as_hash(users) }
       end
 
       # POST /api/v1/users/invite
@@ -57,9 +100,7 @@ module Api
       end
 
       def destroy
-        require_admin!
-        return if performed?
-        @user.destroy!
+        UserAdministration.delete!(@user, by: current_user)
         head :no_content
       end
 
@@ -94,9 +135,26 @@ module Api
       end
 
       def user_params
-        allowed = [ :first_name, :last_name, :phone ]
-        allowed << :role if current_user.admin?
-        params.require(:user).permit(allowed)
+        params.fetch(:user, {}).permit(:full_name, :first_name, :last_name, :phone, :job_title, :department)
+      end
+
+      # The people named by params[:ids], all from this company or none.
+      def users_from_ids
+        ids = Array(params[:ids]).map(&:to_i).uniq
+        users = current_organization.users.where(id: ids).order(:id).to_a
+        raise ActiveRecord::RecordNotFound if users.size != ids.size || ids.empty?
+
+        users
+      end
+
+      def bulk_apply(users)
+        ActiveRecord::Base.transaction do
+          users.each do |user|
+            yield user
+          rescue UserAdministration::Refused => e
+            raise UserAdministration::Refused, "#{user.full_name}: #{e.message}"
+          end
+        end
       end
     end
   end

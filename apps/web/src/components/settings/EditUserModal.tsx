@@ -48,7 +48,8 @@ export function EditUserModal({ open, onClose, user: targetUser }: EditUserModal
   })
 
   const onSubmit = form.handleSubmit((data) => {
-    updateUser.mutate(data, {
+    const { email: _email, ...editable } = data // the sign-in email is read-only
+    updateUser.mutate(editable, {
       onSuccess: () => {
         onClose()
       },
@@ -86,7 +87,7 @@ export function EditUserModal({ open, onClose, user: targetUser }: EditUserModal
               <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                 Email *
               </label>
-              <Input {...form.register('email')} type="email" />
+              <Input {...form.register('email')} type="email" disabled />
               {form.formState.errors.email && (
                 <p className="text-xs text-red-500 mt-1">{form.formState.errors.email.message}</p>
               )}

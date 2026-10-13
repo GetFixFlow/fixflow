@@ -4,7 +4,10 @@ Devise.setup do |config|
   config.mailer_sender = ENV.fetch("MAILER_FROM", "noreply@fixflow.dev")
   config.case_insensitive_keys = [ :email ]
   config.strip_whitespace_keys = [ :email ]
-  config.skip_session_storage = [ :http_auth ]
+  # Authentication is by token only. Storing the signed-in user in the session cookie as
+  # well would keep them signed in after the token is revoked (sign-out, password change,
+  # deactivation) and would allow cookie-only requests.
+  config.skip_session_storage = %i[http_auth params_auth]
   config.stretches = Rails.env.test? ? 1 : 12
   config.reconfirmable = false
   config.expire_all_remember_me_on_sign_out = true

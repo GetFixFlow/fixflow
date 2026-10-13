@@ -46,6 +46,7 @@ export interface User {
   department?: string | null
   organization_name?: string
   created_at?: string
+  active?: boolean
   invitation_pending?: boolean
   invitation_accepted_at?: string | null
 }

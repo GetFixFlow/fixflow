@@ -2,6 +2,7 @@ class UserBlueprint < Blueprinter::Base
   identifier :id
   fields :email, :role, :first_name, :last_name, :phone, :organization_id, :created_at
   field(:full_name) { |user| user.full_name }
+  field(:active) { |user| user.active? }
   field(:invitation_pending) { |user| user.invitation_pending? }
   # Users who signed up themselves have no invitation, so they count as accepted.
   field :invitation_accepted_at do |user|
