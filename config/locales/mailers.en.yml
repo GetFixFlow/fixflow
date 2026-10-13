@@ -1,0 +1,4 @@
+en:
+  password_mailer:
+    reset:
+      subject: "[FixFlow] Reset your password"

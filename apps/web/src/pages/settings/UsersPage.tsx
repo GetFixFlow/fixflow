@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { formatDistanceToNow, format } from 'date-fns'
 import { toast } from 'sonner'
-import { Plus, MoreVertical, UserCheck, UserX, Pencil, Link2 } from 'lucide-react'
+import { Plus, MoreVertical, UserCheck, UserX, Pencil, Link2, KeyRound } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/Skeleton'
 import { Badge } from '@/components/ui/Badge'
 import { InviteUserModal, copyToClipboard } from '@/components/settings/InviteUserModal'
 import { EditUserModal } from '@/components/settings/EditUserModal'
+import { ResetPasswordLinkModal } from '@/components/settings/ResetPasswordLinkModal'
 import { useAuthStore } from '@/stores/authStore'
 import {
   useUsers,
@@ -16,6 +17,7 @@ import {
   useReactivateUser,
   useBulkChangeRole,
   useBulkDeactivate,
+  useResetUserPassword,
   useResendInvitation,
 } from '@/hooks/useUsers'
 import type { User, Role } from '@/types'
@@ -60,6 +62,8 @@ export function UsersPage() {
   const reactivate = useReactivateUser()
   const bulkChangeRole = useBulkChangeRole()
   const bulkDeactivate = useBulkDeactivate()
+  const resetPassword = useResetUserPassword()
+  const [resetResult, setResetResult] = useState<{ user: User; resetUrl: string; emailSent: boolean } | null>(null)
   const [bulkRole, setBulkRole] = useState<Role | ''>('')
   const resendInvitation = useResendInvitation()
 
@@ -115,6 +119,16 @@ export function UsersPage() {
     <div className="space-y-6">
       {/* Modals */}
       <InviteUserModal open={showInvite} onClose={() => setShowInvite(false)} />
+      {resetResult && (
+        <ResetPasswordLinkModal
+          open
+          onClose={() => setResetResult(null)}
+          person={resetResult.user.full_name}
+          email={resetResult.user.email}
+          resetUrl={resetResult.resetUrl}
+          emailSent={resetResult.emailSent}
+        />
+      )}
       {editUser && (
         <EditUserModal open={!!editUser} onClose={() => setEditUser(null)} user={editUser} />
       )}
@@ -296,6 +310,20 @@ export function UsersPage() {
                                     className="flex items-center gap-2 w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700"
                                   >
                                     <Link2 className="h-3.5 w-3.5" /> Copy invite link
+                                  </button>
+                                )}
+                                {isAdmin && u.id !== currentUser?.id && u.active !== false && !u.invitation_pending && (
+                                  <button
+                                    onClick={() => {
+                                      resetPassword.mutate(u.id, {
+                                        onSuccess: (res) =>
+                                          setResetResult({ user: u, resetUrl: res.data.reset_url, emailSent: res.data.email_sent }),
+                                      })
+                                      setOpenMenuId(null)
+                                    }}
+                                    className="flex items-center gap-2 w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700"
+                                  >
+                                    <KeyRound className="h-3.5 w-3.5" /> Reset Password
                                   </button>
                                 )}
                                 {isAdmin && u.id !== currentUser?.id && (

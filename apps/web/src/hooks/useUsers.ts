@@ -84,6 +84,13 @@ export function useReactivateUser() {
   })
 }
 
+export function useResetUserPassword() {
+  return useMutation({
+    mutationFn: usersApi.resetPassword,
+    onError: failureMessage('Could not create a reset link.'),
+  })
+}
+
 export function useBulkChangeRole() {
   const qc = useQueryClient()
   return useMutation({

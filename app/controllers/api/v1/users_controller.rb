@@ -3,8 +3,8 @@ module Api
     class UsersController < Api::V1::BaseController
       before_action :require_manager!, only: %i[index update]
       before_action :require_admin!,   only: %i[invite resend_invitation destroy deactivate reactivate role
-                                                bulk_role bulk_deactivate]
-      before_action :set_user, only: %i[show update destroy resend_invitation deactivate reactivate role]
+                                                bulk_role bulk_deactivate reset_password]
+      before_action :set_user, only: %i[show update destroy resend_invitation deactivate reactivate role reset_password]
 
       rescue_from UserAdministration::Refused do |error|
         render_error(error.message, :unprocessable_entity, code: "USER_ACTION_REFUSED")
@@ -49,6 +49,17 @@ module Api
       def reactivate
         UserAdministration.reactivate!(@user)
         render json: { user: UserBlueprint.render_as_hash(@user) }
+      end
+
+      # POST /api/v1/users/:id/reset_password
+      # Gives the admin a link to hand over, and emails it when email is set up. The person's
+      # current password keeps working until the link is used.
+      def reset_password
+        ensure_can_reset!(@user)
+        url = @user.reset_password_url
+        email_sent = EmailSetup.configured?
+        PasswordMailer.reset(@user, url).deliver_later if email_sent
+        render json: { reset_url: url, email_sent: email_sent }
       end
 
       # PATCH /api/v1/users/:id/role
@@ -105,6 +116,15 @@ module Api
       end
 
       private
+
+      def ensure_can_reset!(user)
+        refusal =
+          if user.id == current_user.id then "You can change your own password in My Profile."
+          elsif user.invitation_pending? then "#{user.full_name} has not accepted their invitation yet. Send a new invitation instead."
+          elsif !user.active? then "#{user.full_name} is deactivated."
+          end
+        raise UserAdministration::Refused, refusal if refusal
+      end
 
       def set_user
         @user = current_organization.users.find(params[:id])

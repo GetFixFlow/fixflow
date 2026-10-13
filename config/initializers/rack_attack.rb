@@ -26,6 +26,14 @@ class Rack::Attack
     req.get_header("HTTP_AUTHORIZATION").presence || req.ip
   end
 
+  # Forgot password: 5 requests / min per IP, and 10 attempts / min to use a reset link.
+  throttle("api/auth/password/request", limit: 5, period: 1.minute) do |req|
+    req.ip if req.path == "/api/v1/auth/password" && req.post?
+  end
+  throttle("api/auth/password/use", limit: 10, period: 1.minute) do |req|
+    req.ip if req.path == "/api/v1/auth/password" && (req.put? || req.patch?)
+  end
+
   # Password changes: 5 attempts / min per signed-in caller (the current password is checked each time).
   throttle("api/profile/password", limit: 5, period: 1.minute) do |req|
     next unless req.path == "/api/v1/profile/password" && req.patch?

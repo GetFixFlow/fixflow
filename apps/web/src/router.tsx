@@ -8,6 +8,8 @@ import { PageLoader } from '@/components/shared/PageLoader'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { SetupPage } from '@/pages/auth/SetupPage'
 import { AcceptInvitePage } from '@/pages/auth/AcceptInvitePage'
+import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage'
+import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 
 // Lazy-loaded main pages
@@ -68,6 +70,8 @@ export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
   { path: '/setup', element: <SetupPage /> },
   { path: '/accept-invite', element: <AcceptInvitePage /> },
+  { path: '/forgot-password', element: <ForgotPasswordPage /> },
+  { path: '/reset-password', element: <ResetPasswordPage /> },
   { path: '/register', element: <Navigate to="/setup" replace /> },
   {
     path: '/onboarding',
