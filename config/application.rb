@@ -24,6 +24,9 @@ module Fixflow
     config.autoload_lib(ignore: %w[assets tasks])
     config.api_only = true
 
+    # Uploaded files are served under /api, which the dev proxy and both nginx configs already forward.
+    config.active_storage.routes_prefix = "/api/v1/storage"
+
     config.time_zone = "UTC"
 
     config.active_job.queue_adapter = :sidekiq

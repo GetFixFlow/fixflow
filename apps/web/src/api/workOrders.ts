@@ -42,12 +42,12 @@ export const workOrdersApi = {
   listAttachments: (id: number) =>
     apiClient.get<{ attachments: WorkOrderAttachment[] }>(`/work_orders/${id}/attachments`),
 
-  uploadAttachment: (id: number, file: File) => {
+  uploadAttachment: (id: number, file: File, clientId?: string) => {
     const form = new FormData()
     form.append('attachment[file]', file)
-    return apiClient.post<{ data: WorkOrderAttachment }>(`/work_orders/${id}/attachments`, form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
+    if (clientId) form.append('client_id', clientId)
+    // No Content-Type header: axios leaves it to the browser, which adds multipart/form-data with the boundary the server needs.
+    return apiClient.post<{ data: WorkOrderAttachment }>(`/work_orders/${id}/attachments`, form)
   },
 
   deleteAttachment: (id: number, attachmentId: number) =>

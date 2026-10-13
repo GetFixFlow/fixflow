@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { workOrdersApi } from '@/api'
+import { fileStore } from './fileStore'
 import { EVENT_RESULT_STATUS, offlineQueue, type QueuedAction } from './offlineQueue'
 
 export interface SyncResult {
@@ -7,8 +8,16 @@ export interface SyncResult {
   rejected: number
 }
 
+/** The photo was not found on the device: the browser cleared its storage, or this is another browser. */
+class PhotoMissing extends Error {}
+
 const serverMessage = (error: unknown) =>
-  (axios.isAxiosError(error) && error.response?.data?.error?.message) || 'The server did not accept it.'
+  (error instanceof PhotoMissing && error.message) ||
+  (axios.isAxiosError(error) && error.response?.data?.error?.message) ||
+  'The server did not accept it.'
+
+/** A photo that is sent or given up on no longer needs its file kept. */
+const forget = (action: QueuedAction) => (action.type === 'photo' ? fileStore.delete(action.fileKey).catch(() => undefined) : undefined)
 
 /** No answer at all: no signal, a timeout, a dropped connection. The change may or may not have arrived. */
 export const isNetworkError = (error: unknown) => axios.isAxiosError(error) && !error.response
@@ -21,7 +30,11 @@ const isTemporary = (error: unknown) => {
 }
 
 async function send(action: QueuedAction) {
-  if (action.type === 'comment') {
+  if (action.type === 'photo') {
+    const blob = await fileStore.get(action.fileKey).catch(() => undefined)
+    if (!blob) throw new PhotoMissing('The photo is no longer on this device.')
+    await workOrdersApi.uploadAttachment(action.workOrderId, new File([blob], action.filename, { type: action.contentType }), action.clientId)
+  } else if (action.type === 'comment') {
     await workOrdersApi.createComment(action.workOrderId, action.body, action.internal, action.clientId)
   } else {
     await workOrdersApi.transition(action.workOrderId, action.event, action.payload)
@@ -49,6 +62,7 @@ async function run(): Promise<SyncResult> {
     try {
       await send(action)
       offlineQueue.remove(action.id)
+      await forget(action)
       result.synced++
     } catch (error) {
       if (isTemporary(error)) break // keep everything, in order, for the next try
@@ -59,6 +73,7 @@ async function run(): Promise<SyncResult> {
         offlineQueue.reject(action.id, serverMessage(error))
         result.rejected++
       }
+      await forget(action)
     }
   }
   return result

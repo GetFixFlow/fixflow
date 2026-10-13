@@ -1,8 +1,11 @@
-import { useState, useRef } from 'react'
-import { Upload, FileText, Image, Download, Trash2, X, Camera } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Upload, FileText, Download, X, Camera, CloudOff } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { useWorkOrderAttachments, useUploadAttachment } from '@/hooks/useWorkOrders'
+import { usePendingActions } from '@/hooks/useOfflineQueue'
+import { fileStore } from '@/lib/fileStore'
+import type { QueuedPhoto } from '@/lib/offlineQueue'
 import type { WorkOrderAttachment } from '@/types'
 
 function formatFileSize(bytes: number): string {
@@ -68,6 +71,47 @@ function AttachmentThumbnail({ attachment, onClick }: AttachmentThumbnailProps) 
   )
 }
 
+/** A photo taken offline that has not been sent yet, shown from the copy kept on the device. */
+function PendingPhoto({ photo }: { photo: QueuedPhoto }) {
+  const [url, setUrl] = useState<string>()
+  const isImage = photo.contentType.startsWith('image/')
+
+  useEffect(() => {
+    let objectUrl: string | undefined
+    let cancelled = false
+    if (isImage) {
+      fileStore
+        .get(photo.fileKey)
+        .then((blob) => {
+          if (blob && !cancelled) setUrl((objectUrl = URL.createObjectURL(blob)))
+        })
+        .catch(() => undefined)
+    }
+    return () => {
+      cancelled = true
+      if (objectUrl) URL.revokeObjectURL(objectUrl)
+    }
+  }, [photo.fileKey, isImage])
+
+  return (
+    <div className="relative overflow-hidden rounded-lg border border-amber-300 bg-gray-50 dark:border-amber-700 dark:bg-gray-800">
+      {url ? (
+        <img src={url} alt={photo.filename} className="h-32 w-full object-cover opacity-80" />
+      ) : (
+        <div className="flex h-32 items-center justify-center">
+          <FileText className="h-12 w-12 text-gray-400" />
+        </div>
+      )}
+      <span className="absolute left-1 top-1 flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">
+        <CloudOff className="h-2.5 w-2.5" /> Waiting to sync
+      </span>
+      <p className="truncate p-2 text-xs font-medium text-gray-700 dark:text-gray-300" title={photo.filename}>
+        {photo.filename}
+      </p>
+    </div>
+  )
+}
+
 // Lightbox
 function Lightbox({ url, filename, onClose }: { url: string; filename: string; onClose: () => void }) {
   return (
@@ -100,27 +144,20 @@ interface WorkOrderAttachmentsProps {
 export function WorkOrderAttachments({ workOrderId, editable = true }: WorkOrderAttachmentsProps) {
   const { data: attachments = [], isLoading } = useWorkOrderAttachments(workOrderId)
   const upload = useUploadAttachment(workOrderId)
+  const pendingPhotos = usePendingActions(workOrderId).filter((a): a is QueuedPhoto => a.type === 'photo')
   const [lightbox, setLightbox] = useState<WorkOrderAttachment | null>(null)
   const [dragOver, setDragOver] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState<string[]>([])
 
-  const uploadFile = async (file: File) => {
-    if (file.size > 10 * 1024 * 1024) {
-      alert(`${file.name} exceeds 10 MB limit.`)
-      return
-    }
+  const uploadFile = (file: File) => {
     setUploading((prev) => [...prev, file.name])
-    try {
-      await upload.mutateAsync(file)
-    } finally {
-      setUploading((prev) => prev.filter((n) => n !== file.name))
-    }
+    upload.mutate(file, { onSettled: () => setUploading((prev) => prev.filter((n) => n !== file.name)) })
   }
 
   const onFiles = (files: FileList | null) => {
     if (!files) return
-    const accepted = Array.from(files).slice(0, 20 - attachments.length)
+    const accepted = Array.from(files).slice(0, 20 - attachments.length - pendingPhotos.length)
     accepted.forEach(uploadFile)
   }
 
@@ -139,7 +176,7 @@ export function WorkOrderAttachments({ workOrderId, editable = true }: WorkOrder
             <div key={i} className="h-36 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700" />
           ))}
         </div>
-      ) : attachments.length > 0 ? (
+      ) : attachments.length > 0 || pendingPhotos.length > 0 ? (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {attachments.map((att) => (
             <AttachmentThumbnail
@@ -147,6 +184,9 @@ export function WorkOrderAttachments({ workOrderId, editable = true }: WorkOrder
               attachment={att}
               onClick={() => (att.content_type ?? '').startsWith('image/') && setLightbox(att)}
             />
+          ))}
+          {pendingPhotos.map((photo) => (
+            <PendingPhoto key={photo.id} photo={photo} />
           ))}
         </div>
       ) : null}
@@ -162,7 +202,7 @@ export function WorkOrderAttachments({ workOrderId, editable = true }: WorkOrder
       ))}
 
       {/* Upload zone */}
-      {editable && attachments.length < 20 && (
+      {editable && attachments.length + pendingPhotos.length < 20 && (
         <div
           className={cn(
             'flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-colors',
@@ -186,7 +226,7 @@ export function WorkOrderAttachments({ workOrderId, editable = true }: WorkOrder
             Drag & drop or click to upload
           </p>
           <p className="mt-1 text-xs text-gray-400">
-            Images, PDF, documents · max 10 MB · {20 - attachments.length} remaining
+            Images, PDF, documents · max 10 MB · {20 - attachments.length - pendingPhotos.length} remaining
           </p>
           <input
             ref={inputRef}

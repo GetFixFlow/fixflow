@@ -42,7 +42,16 @@ export interface QueuedComment extends Base {
   /** Sent with the comment so sending it twice (a reply lost on a bad connection) posts it once. */
   clientId: string
 }
-export type QueuedAction = QueuedTransition | QueuedComment
+export interface QueuedPhoto extends Base {
+  type: 'photo'
+  /** Where the file is kept on the device (see fileStore). */
+  fileKey: string
+  filename: string
+  contentType: string
+  size: number
+  clientId: string
+}
+export type QueuedAction = QueuedTransition | QueuedComment | QueuedPhoto
 
 export interface RejectedAction {
   action: QueuedAction
@@ -117,7 +126,7 @@ export const offlineQueue = {
   /** False when nobody is signed in, as there is no one to keep the change for. */
   canQueue: () => currentKey() !== null,
 
-  enqueue(action: Omit<QueuedTransition, 'id' | 'queuedAt'> | Omit<QueuedComment, 'id' | 'queuedAt'>) {
+  enqueue(action: Omit<QueuedTransition, 'id' | 'queuedAt'> | Omit<QueuedComment, 'id' | 'queuedAt'> | Omit<QueuedPhoto, 'id' | 'queuedAt'>) {
     const queued = { ...action, id: newId(), queuedAt: Date.now() } as QueuedAction
     commit({ ...current(), queue: [...current().queue, queued] })
     return queued
