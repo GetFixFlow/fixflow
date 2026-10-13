@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import type { AxiosError } from 'axios'
 import { toast } from 'sonner'
 import { workOrdersApi } from '@/api'
 import type { WorkOrder, ChecklistItem } from '@/types'
@@ -226,9 +227,26 @@ export function useLogPart(workOrderId: number) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: WO_PARTS_KEY(workOrderId) })
       qc.invalidateQueries({ queryKey: [...WO_KEY, workOrderId] })
+      qc.invalidateQueries({ queryKey: ['parts'] })
       toast.success('Parts logged.')
     },
-    onError: () => toast.error('Failed to log parts.'),
+    onError: (error: AxiosError<{ error?: { message?: string } }>) =>
+      toast.error(error.response?.data?.error?.message ?? 'Failed to log parts.'),
+  })
+}
+
+export function useRemovePart(workOrderId: number) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (lineId: number) => workOrdersApi.removePart(workOrderId, lineId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: WO_PARTS_KEY(workOrderId) })
+      qc.invalidateQueries({ queryKey: [...WO_KEY, workOrderId] })
+      qc.invalidateQueries({ queryKey: ['parts'] })
+      toast.success('Part removed and put back in stock.')
+    },
+    onError: (error: AxiosError<{ error?: { message?: string } }>) =>
+      toast.error(error.response?.data?.error?.message ?? 'Failed to remove the part.'),
   })
 }
 

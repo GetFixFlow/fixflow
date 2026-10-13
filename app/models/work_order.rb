@@ -116,6 +116,11 @@ class WorkOrder < ApplicationRecord
   scope :due_from,           ->(date)      { where("due_date >= ?", date) }
   scope :due_to,             ->(date)      { where("due_date <= ?", date) }
 
+  # What the logged parts cost, kept on the work order so cost reports can sum it.
+  def recalculate_parts_cost!
+    update!(parts_cost: work_order_parts.sum("quantity_used * COALESCE(unit_cost, 0)"))
+  end
+
   private
 
   def log_activity(action)
