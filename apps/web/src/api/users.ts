@@ -9,6 +9,9 @@ export const usersApi = {
 
   invite: (data: InvitePayload) => apiClient.post<InviteResult>('/users/invite', { user: data }),
 
+  resetPassword: (id: number) =>
+    apiClient.post<{ reset_url: string; email_sent: boolean }>(`/users/${id}/reset_password`),
+
   resendInvitation: (id: number, sendEmail = false) =>
     apiClient.post<InviteResult>(`/users/${id}/resend_invitation`, { user: { send_welcome: sendEmail } }),
 

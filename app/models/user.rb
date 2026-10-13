@@ -9,6 +9,8 @@ class User < ApplicationRecord
 
   INVITATION_TTL = 7.days
 
+  include PasswordReset
+
   belongs_to :organization
   belongs_to :invited_by, class_name: "User", optional: true
   has_many :assigned_work_orders,  class_name: "WorkOrder", foreign_key: :assignee_id,   dependent: :nullify

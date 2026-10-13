@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Navigate } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { Zap } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -65,7 +65,12 @@ export function LoginPage() {
             </Button>
           </form>
 
-          <p className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-4 text-center text-sm">
+            <Link to="/forgot-password" className="text-brand-600 hover:underline">
+              Forgot your password?
+            </Link>
+          </p>
+          <p className="mt-2 text-center text-sm text-gray-500 dark:text-gray-400">
             Need an account? Ask your administrator to invite you.
           </p>
         </div>

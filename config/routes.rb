@@ -6,6 +6,7 @@ Rails.application.routes.draw do
 
   devise_for :users,
     path: "api/v1/auth",
+    skip: :passwords, # forgot and reset password are Api::V1::Auth::PasswordsController, below
     path_names: { sign_in: "sign_in", sign_out: "sign_out", registration: "sign_up" },
     controllers: {
       sessions: "api/v1/auth/sessions",
@@ -15,6 +16,10 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       get "auth/me", to: "auth/profile#show"
+
+      # Forgot password (public): ask for a link, then use it to choose a new password
+      post  "auth/password", to: "auth/passwords#create"
+      match "auth/password", to: "auth/passwords#update", via: %i[put patch]
 
       # Company settings: anyone signed in can read them, only admins change them
       resource :organization_settings, only: %i[show update], controller: "organization_settings"
@@ -119,6 +124,7 @@ Rails.application.routes.draw do
         end
         member do
           post  :resend_invitation
+          post  :reset_password
           patch :deactivate
           patch :reactivate
           patch :role

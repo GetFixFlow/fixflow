@@ -50,6 +50,27 @@ export function useAcceptInvitation(token: string) {
   })
 }
 
+export function useForgotPassword() {
+  return useMutation({
+    mutationFn: (email: string) => authApi.forgotPassword(email),
+    onError: () => toast.error('Could not send the request. Try again in a moment.'),
+  })
+}
+
+export function useResetPassword() {
+  const navigate = useNavigate()
+
+  return useMutation({
+    mutationFn: (payload: Parameters<typeof authApi.resetPassword>[0]) => authApi.resetPassword(payload),
+    onSuccess: () => {
+      toast.success('Password changed. Please sign in.')
+      navigate('/login')
+    },
+    onError: (error: AxiosError<{ error?: { message?: string } }>) =>
+      toast.error(error.response?.data?.error?.message ?? 'Could not change the password.'),
+  })
+}
+
 export function useLogin() {
   const { setAuth } = useAuthStore()
   const navigate = useNavigate()

@@ -40,6 +40,7 @@ const actions = vi.hoisted(() => ({
   reactivate: vi.fn(),
   bulkDeactivate: vi.fn(),
   bulkRole: vi.fn(),
+  resetPassword: vi.fn(),
 }))
 
 vi.mock('@/hooks/useUsers', () => ({
@@ -50,6 +51,7 @@ vi.mock('@/hooks/useUsers', () => ({
   useReactivateUser: () => ({ mutate: actions.reactivate, isPending: false }),
   useBulkDeactivate: () => ({ mutate: actions.bulkDeactivate, isPending: false }),
   useBulkChangeRole: () => ({ mutate: actions.bulkRole, isPending: false }),
+  useResetUserPassword: () => ({ mutate: actions.resetPassword, isPending: false }),
   useResendInvitation: () => ({ mutate: vi.fn(), isPending: false }),
 }))
 
@@ -132,10 +134,29 @@ describe('UsersPage', () => {
       expect(actions.reactivate).toHaveBeenCalledWith(3)
     })
 
-    it('no longer offers Reset Password, which has no backend yet', async () => {
+    it('offers Reset Password for another active person and shows the link it creates', async () => {
+      actions.resetPassword.mockImplementation((_id: number, options: { onSuccess: (r: unknown) => void }) =>
+        options.onSuccess({ data: { reset_url: 'https://app.test/reset-password?token=abc', email_sent: false } }),
+      )
       render(<UsersPage />, { wrapper: Wrapper })
       await openMenu('Bob Jones')
-      expect(screen.queryByText(/reset password/i)).not.toBeInTheDocument()
+      await userEvent.click(screen.getByText('Reset Password'))
+
+      expect(actions.resetPassword.mock.calls[0][0]).toBe(2)
+      expect(await screen.findByLabelText('Reset link')).toHaveValue('https://app.test/reset-password?token=abc')
+      expect(screen.getByText(/email is not set up on this server/i)).toBeInTheDocument()
+    })
+
+    it('does not offer Reset Password for yourself or for someone deactivated', async () => {
+      render(<UsersPage />, { wrapper: Wrapper })
+      await openMenu('Alice Smith')
+      expect(screen.queryByText('Reset Password')).not.toBeInTheDocument()
+    })
+
+    it('does not offer Reset Password for a deactivated person', async () => {
+      render(<UsersPage />, { wrapper: Wrapper })
+      await openMenu('Dan Former')
+      expect(screen.queryByText('Reset Password')).not.toBeInTheDocument()
     })
 
     it('deactivates the selected people with one request', async () => {

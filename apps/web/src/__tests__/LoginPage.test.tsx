@@ -52,6 +52,11 @@ describe('LoginPage', () => {
       expect(screen.getByText(/at least 8 characters/i)).toBeInTheDocument()
     })
   })
+  it('links to forgot password', () => {
+    render(<LoginPage />, { wrapper })
+    expect(screen.getByRole('link', { name: /forgot your password/i })).toHaveAttribute('href', '/forgot-password')
+  })
+
   it('does not offer public sign-up', () => {
     render(<LoginPage />, { wrapper })
     expect(screen.queryByRole('link', { name: /sign up/i })).not.toBeInTheDocument()

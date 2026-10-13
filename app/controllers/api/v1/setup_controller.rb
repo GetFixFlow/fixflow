@@ -6,7 +6,7 @@ module Api
 
       # Lets the web app decide between the first-run setup screen and the login screen.
       def status
-        render json: { setup_required: !Organization.setup_complete? }
+        render json: { setup_required: !Organization.setup_complete?, email_configured: EmailSetup.configured? }
       end
     end
   end
