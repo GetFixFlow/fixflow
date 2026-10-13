@@ -197,6 +197,8 @@ export interface WorkOrderComment {
   internal: boolean
   created_at: string
   user: PersonRef & { id: number }
+  /** Written without a connection and not sent yet. */
+  pending?: boolean
 }
 
 export interface WorkOrderAttachment {
@@ -221,6 +223,8 @@ export interface WorkOrderPart {
 export interface WorkOrder {
   id: number
   work_order_number: string
+  /** How many of this person's changes to it are waiting to be sent. Set by the app, not the server. */
+  pending_sync?: number
   title: string
   description?: string
   status: WorkOrderStatus

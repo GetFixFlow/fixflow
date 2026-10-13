@@ -188,6 +188,14 @@ open → in_progress → pending_parts → in_progress
 
 ---
 
+## Working offline
+
+A technician who loses signal can keep going. With no connection, **Start work, Put on hold, Waiting for parts, Resume and Complete**, and **comments**, are saved on the phone, shown straight away with a *Waiting to sync* badge, and sent in order when the connection returns. The status at the top of the screen shows what is waiting. If the server refuses a change (for example, the work order was reassigned meanwhile), it is listed there with the reason instead of disappearing. Changes belong to the person who made them, so a shared phone keeps each person's separate.
+
+Things that need the server's decision (assigning, verifying, rejecting, cancelling, editing a work order) still need a connection.
+
+To reopen a page you already visited while offline, the app must be served over **HTTPS** (browsers only allow the offline cache on secure addresses; `localhost` counts). On a plain `http://` address the offline cache is not available: changes made while the page stays open are still saved and sent, but reloading the page offline will not work.
+
 ## Architecture
 
 ```

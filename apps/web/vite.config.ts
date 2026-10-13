@@ -30,11 +30,16 @@ export default defineConfig({
       workbox: {
         runtimeCaching: [
           {
-            urlPattern: /^https?:\/\/localhost:3000\/api\/.*/i,
-            handler: 'StaleWhileRevalidate',
+            // Any API read, whichever address the app is served from. Network first, so what is shown
+            // is current whenever there is a connection; the kept copy is only for when there is none.
+            urlPattern: ({ url, request }: { url: URL; request: Request }) =>
+              request.method === 'GET' && url.pathname.startsWith('/api/v1/'),
+            handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',
-              expiration: { maxEntries: 100, maxAgeSeconds: 300 },
+              networkTimeoutSeconds: 4,
+              expiration: { maxEntries: 150, maxAgeSeconds: 60 * 60 * 24 * 3 },
+              cacheableResponse: { statuses: [200] },
             },
           },
         ],

@@ -9,6 +9,7 @@ import {
   Clock,
   User,
   Calendar,
+  CloudOff,
 } from 'lucide-react'
 import { format, formatDistanceToNow } from 'date-fns'
 import * as Tabs from '@radix-ui/react-tabs'
@@ -166,6 +167,11 @@ export function WorkOrderDetailPage() {
           <CopyId text={wo.work_order_number} />
           <WorkOrderPriorityBadge priority={wo.priority} />
           <WorkOrderStatusBadge status={wo.status} />
+          {!!wo.pending_sync && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+              <CloudOff className="h-3 w-3" /> Waiting to sync
+            </span>
+          )}
           <WorkOrderSourceBadge source={wo.source ?? 'manual'} showLabel={false} />
 
           <DropdownMenu.Root>

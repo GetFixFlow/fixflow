@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { clearApiCache } from '@/lib/apiCache'
 import type { User } from '@/types'
 
 interface AuthState {
@@ -25,6 +26,7 @@ export const useAuthStore = create<AuthState>()(
 
       clearAuth: () => {
         localStorage.removeItem('auth_token')
+        clearApiCache()
         set({ user: null, token: null, isAuthenticated: false })
       },
 

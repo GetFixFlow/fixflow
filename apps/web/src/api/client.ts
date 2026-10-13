@@ -1,5 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { toast } from 'sonner'
+import { clearApiCache } from '@/lib/apiCache'
 
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api/v1',
@@ -23,6 +24,7 @@ apiClient.interceptors.response.use(
       toast.error('Server error. Please try again later.')
     } else if (error.response?.status === 401) {
       localStorage.removeItem('auth_token')
+      clearApiCache()
       window.location.href = '/login'
     }
     return Promise.reject(error)
