@@ -1,5 +1,6 @@
 class Organization < ApplicationRecord
   include OrganizationSettings
+  include OrganizationBranding
 
   has_many :users, dependent: :destroy
   has_many :locations, dependent: :destroy
