@@ -96,7 +96,14 @@ export interface OrgSettings {
   iot_auto_wo_threshold: string
   work_hours: { start: string; end: string }
   work_days: number[]
+  holidays: Holiday[]
   timezone: string
+}
+
+export interface Holiday {
+  date: string
+  name: string
+  repeating: boolean
 }
 
 export interface BrandingSettings {

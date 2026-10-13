@@ -127,11 +127,13 @@ class WorkOrder < ApplicationRecord
 
   def generate_work_order_number
     return if work_order_number.present?
+    # The number is unique across the table, so the next one comes from the highest
+    # trailing number of any prefix; changing the prefix never restarts the count.
     last = ActsAsTenant.without_tenant do
-      self.class.unscoped.where("work_order_number LIKE 'WO-%'").order(work_order_number: :desc).pick(:work_order_number)
+      self.class.unscoped.maximum(Arel.sql("CAST(NULLIF(substring(work_order_number from '[0-9]+$'), '') AS bigint)"))
     end
-    seq = last ? last.delete_prefix("WO-").to_i + 1 : 1
-    self.work_order_number = format("WO-%06d", seq)
+    prefix = organization&.prefix_for_work_orders || "WO"
+    self.work_order_number = format("%<prefix>s-%<seq>06d", prefix: prefix, seq: last.to_i + 1)
   end
 
   def completion_notes_present?

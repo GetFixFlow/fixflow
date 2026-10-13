@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -10,7 +10,15 @@ import { Card, CardContent } from '@/components/ui/Card'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { useAuthStore } from '@/stores/authStore'
 import { useOrgSettings, useUpdateOrgSettings } from '@/hooks/useSettings'
-import type { OrgSettings } from '@/api/settings'
+import type { Holiday, OrgSettings } from '@/api/settings'
+
+function NotApplied() {
+  return (
+    <span className="ml-2 rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+      Saved, not applied yet
+    </span>
+  )
+}
 
 const INDUSTRIES = ['Manufacturing', 'Facilities', 'Healthcare', 'Education', 'Property', 'Municipal', 'Other']
 const SIZES = ['1-10', '11-50', '51-200', '201-500', '500+']
@@ -24,7 +32,7 @@ const TIMEZONES = [
 
 const orgSchema = z.object({
   name: z.string().min(2, 'Name is required'),
-  slug: z.string().min(2, 'Slug is required'),
+  slug: z.string().optional(),
   industry: z.string().optional(),
   size: z.string().optional(),
   website: z.string().url('Invalid URL').optional().or(z.literal('')),
@@ -49,12 +57,6 @@ const orgSchema = z.object({
 type OrgFormData = z.output<typeof orgSchema>
 type OrgFormInput = z.input<typeof orgSchema>
 
-interface Holiday {
-  date: string
-  name: string
-  repeating: boolean
-}
-
 const DEFAULT_ORG: Partial<OrgSettings> = {
   name: '',
   slug: '',
@@ -72,6 +74,7 @@ const DEFAULT_ORG: Partial<OrgSettings> = {
   iot_auto_wo_threshold: 'critical',
   work_hours: { start: '08:00', end: '17:00' },
   work_days: [1, 2, 3, 4, 5],
+  holidays: [],
   timezone: 'UTC',
 }
 
@@ -84,6 +87,13 @@ export function OrganizationPage() {
   const [holidays, setHolidays] = useState<Holiday[]>([])
   const [addingHoliday, setAddingHoliday] = useState(false)
   const [newHoliday, setNewHoliday] = useState<Holiday>({ date: '', name: '', repeating: false })
+
+  // The saved days and holidays arrive after the first render, so copy them in once loaded.
+  useEffect(() => {
+    if (!org) return
+    setWorkDays(org.work_days ?? [1, 2, 3, 4, 5])
+    setHolidays(org.holidays ?? [])
+  }, [org])
 
   const merged = { ...DEFAULT_ORG, ...org }
 
@@ -155,7 +165,6 @@ export function OrganizationPage() {
   const onSubmit = form.handleSubmit((data) => {
     updateOrg.mutate({
       name: data.name,
-      slug: data.slug,
       industry: data.industry,
       size: data.size,
       website: data.website,
@@ -174,6 +183,7 @@ export function OrganizationPage() {
       iot_auto_wo_threshold: data.iot_auto_wo_threshold,
       work_hours: { start: data.work_hours_start, end: data.work_hours_end },
       work_days: workDays,
+      holidays,
       timezone: data.timezone,
     })
   })
@@ -225,12 +235,10 @@ export function OrganizationPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                URL Slug *
+                URL Slug
               </label>
-              <Input {...form.register('slug')} placeholder="acme-corp" />
-              {form.formState.errors.slug && (
-                <p className="text-xs text-red-500 mt-1">{form.formState.errors.slug.message}</p>
-              )}
+              <Input {...form.register('slug')} disabled />
+              <p className="text-xs text-gray-400 mt-1">Set when the company was created; it cannot be changed.</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -308,7 +316,7 @@ export function OrganizationPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Auto-Close After (days)
+                  Auto-Close After (days)<NotApplied />
                 </label>
                 <Input {...form.register('auto_close_days')} type="number" min={0} max={365} />
                 <p className="text-xs text-gray-400 mt-1">0 = disabled</p>
@@ -317,13 +325,14 @@ export function OrganizationPage() {
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" {...form.register('require_completion_notes')} className="rounded" />
                   <span className="text-sm text-gray-700 dark:text-gray-300">Require completion notes when closing WOs</span>
+                  <NotApplied />
                 </label>
               </div>
             </div>
           </div>
 
           <div className="pt-3 border-t border-gray-100 dark:border-gray-700 space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Preventive Maintenance</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Preventive Maintenance<NotApplied /></p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -347,7 +356,7 @@ export function OrganizationPage() {
           </div>
 
           <div className="pt-3 border-t border-gray-100 dark:border-gray-700 space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">IoT Settings</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">IoT Settings<NotApplied /></p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -390,6 +399,9 @@ export function OrganizationPage() {
       <Card>
         <CardContent className="p-6 space-y-4">
           <h3 className="font-semibold text-gray-900 dark:text-gray-100">Working Hours</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            The time zone is applied to dates and reports. Working hours, days and holidays are saved but not used yet.
+          </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>

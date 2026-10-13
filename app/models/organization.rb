@@ -1,4 +1,6 @@
 class Organization < ApplicationRecord
+  include OrganizationSettings
+
   has_many :users, dependent: :destroy
   has_many :locations, dependent: :destroy
   has_many :assets, dependent: :destroy
@@ -13,7 +15,7 @@ class Organization < ApplicationRecord
   validates :subdomain, presence: true, uniqueness: true,
     format: { with: /\A[a-z0-9\-]+\z/, message: "only lowercase letters, numbers, and hyphens" }
 
-  store_accessor :settings, :timezone, :date_format, :work_order_prefix
+  store_accessor :settings, :date_format
 
   # Each install serves one company. Setup is complete once that company
   # exists, after which public sign-up is closed.
