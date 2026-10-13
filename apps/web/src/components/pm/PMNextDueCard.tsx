@@ -14,7 +14,7 @@ export function PMNextDueCard({ assetId }: PMNextDueCardProps) {
   const { user } = useAuthStore()
   const isManager = user?.role === 'admin' || user?.role === 'manager'
   const { data, isLoading } = usePMs({ asset_id: assetId, status: 'active' })
-  const pms = data?.preventive_maintenances ?? []
+  const pms = data?.pm_schedules ?? []
   const topPMs = pms.slice(0, 3)
 
   if (isLoading) return (

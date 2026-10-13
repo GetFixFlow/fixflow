@@ -14,23 +14,25 @@ class PmSchedulerService
     end
   end
 
-  def self.generate_work_order(pm)
+  # overrides (all optional): assignee, due_date, priority, note. They change this work order only.
+  def self.generate_work_order(pm, overrides: {})
     ActiveRecord::Base.transaction do
       title       = interpolate(pm.template["title"].to_s, pm)
       description = build_description(pm)
+      description = "#{description}\n\nNote: #{overrides[:note]}" if overrides[:note].present?
       checklist   = build_checklist(pm.template["checklist"])
 
       work_order = WorkOrder.create!(
         organization:           pm.organization,
         asset:                  pm.asset,
-        assignee:               pm.assigned_to,
+        assignee:               overrides[:assignee] || pm.assigned_to,
         preventive_maintenance: pm,
         title:                  title,
         description:            description,
-        priority:               pm.priority,
+        priority:               overrides[:priority] || pm.priority,
         checklist:              checklist,
         estimated_hours:        pm.template["estimated_hours"] || pm.estimated_hours,
-        due_date:               pm.next_due_at
+        due_date:               overrides[:due_date] || pm.next_due_at
       )
 
       execution = pm.pm_executions.create!(

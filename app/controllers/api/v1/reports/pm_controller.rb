@@ -54,6 +54,7 @@ module Api
                 {
                   pm_id:             pm.id,
                   name:              pm.name,
+                  priority:          pm.priority,
                   asset:             pm.asset.name,
                   due_date:          pm.next_due_at&.to_date,
                   estimated_hours:   pm.estimated_hours.to_f,

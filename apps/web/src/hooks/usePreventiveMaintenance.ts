@@ -81,8 +81,7 @@ export function useTriggerPM() {
       pmApi.trigger(id, overrides).then((r) => r.data),
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: PM_KEY })
-      const woNum = data.data?.work_order_number
-      toast.success(`Work order ${woNum ?? ''} created.`, { duration: 8000 })
+      toast.success(`Work order ${data.work_order.work_order_number} created.`, { duration: 8000 })
     },
     onError: () => toast.error('Failed to trigger PM.'),
   })

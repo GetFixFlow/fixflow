@@ -70,7 +70,7 @@ export function PMListPage() {
   const [triggerTarget, setTriggerTarget] = useState<PreventiveMaintenance | null>(null)
 
   const { data, isLoading } = usePMs()
-  const pms = data?.preventive_maintenances ?? []
+  const pms = data?.pm_schedules ?? []
   const pausePM = usePausePM()
   const resumePM = useResumePM()
 
