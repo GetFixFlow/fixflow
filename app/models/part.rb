@@ -7,7 +7,13 @@ class Part < ApplicationRecord
   has_many :work_order_parts, dependent: :destroy
   has_many :work_orders, through: :work_order_parts
 
+  before_validation { self.sku = sku.presence&.strip }
+  before_destroy :ensure_never_used, prepend: true
+
   validates :name, presence: true
+  validates :sku, uniqueness: { scope: :organization_id, case_sensitive: false },
+                  allow_nil: true
+  validates :unit_cost, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
   validates :quantity_on_hand, numericality: { greater_than_or_equal_to: 0 }
   validates :reorder_point, numericality: { greater_than_or_equal_to: 0 }
 
@@ -27,5 +33,15 @@ class Part < ApplicationRecord
 
       update!(quantity_on_hand: new_qty)
     end
+  end
+
+  private
+
+  # Deleting a used part would delete its lines from every work order and quietly change their cost.
+  def ensure_never_used
+    return unless work_order_parts.exists?
+
+    errors.add(:base, "#{name} has been used on work orders, so it cannot be deleted. Set its stock to 0 instead.")
+    throw :abort
   end
 end

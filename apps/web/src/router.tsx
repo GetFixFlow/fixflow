@@ -21,6 +21,7 @@ const AssetEditPage = lazy(() => import('@/pages/assets/AssetEditPage').then(m =
 const AssetImportPage = lazy(() => import('@/pages/assets/AssetImportPage').then(m => ({ default: m.AssetImportPage })))
 const QRLabelPrintPage = lazy(() => import('@/pages/assets/QRLabelPrintPage').then(m => ({ default: m.QRLabelPrintPage })))
 const QRScannerPage = lazy(() => import('@/pages/assets/QRScannerPage').then(m => ({ default: m.QRScannerPage })))
+const PartsPage = lazy(() => import('@/pages/parts/PartsPage').then(m => ({ default: m.PartsPage })))
 const LocationsPage = lazy(() => import('@/pages/assets/LocationsPage').then(m => ({ default: m.LocationsPage })))
 const WorkOrdersListPage = lazy(() => import('@/pages/work-orders/WorkOrdersListPage').then(m => ({ default: m.WorkOrdersListPage })))
 const WorkOrderCreatePage = lazy(() => import('@/pages/work-orders/WorkOrderCreatePage').then(m => ({ default: m.WorkOrderCreatePage })))
@@ -105,6 +106,7 @@ export const router = createBrowserRouter([
           {
             element: <ProtectedRoute allowedRoles={['admin', 'manager', 'technician']} />,
             children: [
+              { path: '/parts', element: <Lazy><PartsPage /></Lazy> },
               { path: '/iot', element: <Lazy><IotPage /></Lazy> },
             ],
           },
