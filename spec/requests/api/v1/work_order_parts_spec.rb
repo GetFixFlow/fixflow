@@ -42,6 +42,12 @@ RSpec.describe "Api::V1::WorkOrderParts", type: :request do
       expect(work_order.reload.parts_cost).to eq(30)
     end
 
+    it "tells the managers when logging parts takes a part down to its reorder point" do
+      filter.update!(reorder_point: 3)
+
+      expect { log(part_id: filter.id, quantity_used: 3) }.to have_enqueued_job(LowStockAlertJob).with(filter.id, "low")
+    end
+
     it "uses the catalog's unit cost when none is given" do
       log(part_id: filter.id, quantity_used: 2)
 

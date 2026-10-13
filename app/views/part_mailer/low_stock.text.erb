@@ -1,0 +1,17 @@
+Hi <%= @manager.full_name %>,
+
+<% if @out %>
+<%= @part.name %> has run out of stock.
+<% else %>
+<%= @part.name %> has fallen to its reorder point.
+<% end %>
+
+Part:        <%= @part.name %><%= " (#{@part.sku})" if @part.sku.present? %>
+On hand:     <%= @part.quantity_on_hand.to_f %> <%= @part.unit %>
+Reorder at:  <%= @part.reorder_point.to_f %> <%= @part.unit %>
+
+You will not be emailed again about this part until it has been restocked and falls low again.
+
+See the parts that need reordering: <%= @url %>
+
+— FixFlow
