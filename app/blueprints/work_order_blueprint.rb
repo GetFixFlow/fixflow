@@ -60,16 +60,7 @@ class WorkOrderBlueprint < Blueprinter::Base
     association :attachments, blueprint: AttachmentBlueprint
 
     field(:parts_used) do |wo|
-      wo.work_order_parts.includes(:part).map do |wop|
-        {
-          id:            wop.id,
-          part_id:       wop.part_id,
-          name:          wop.part.name,
-          sku:           wop.part.sku,
-          quantity_used: wop.quantity_used,
-          unit_cost:     wop.unit_cost
-        }
-      end
+      WorkOrderPartBlueprint.render_as_hash(wo.work_order_parts.includes(:part).order(:id))
     end
   end
 end

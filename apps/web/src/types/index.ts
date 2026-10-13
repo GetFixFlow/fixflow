@@ -545,12 +545,14 @@ export interface ApiKeyFull extends ApiKey {
 export interface Part {
   id: number
   name: string
-  part_number?: string
-  description?: string
+  sku?: string | null
   quantity_on_hand: number
-  reorder_point?: number
-  unit_cost?: number
-  supplier?: string
+  reorder_point: number
+  unit?: string
+  /** What one costs; prefilled when logging parts. Null until someone sets it. */
+  unit_cost?: number | null
+  low_stock?: boolean
+  location_id?: number | null
   organization_id: number
   created_at: string
   updated_at: string

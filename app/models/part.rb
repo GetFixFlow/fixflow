@@ -1,4 +1,6 @@
 class Part < ApplicationRecord
+  class InsufficientStock < ArgumentError; end
+
   acts_as_tenant :organization
   belongs_to :organization
   belongs_to :location, optional: true
@@ -16,10 +18,14 @@ class Part < ApplicationRecord
     quantity_on_hand <= reorder_point
   end
 
+  # Under a row lock: two technicians taking the last of a part at once cannot both succeed.
   def adjust_stock(quantity, direction: :add)
-    delta = direction == :add ? quantity.abs : -quantity.abs
-    new_qty = quantity_on_hand + delta
-    raise ArgumentError, "Insufficient stock" if new_qty < 0
-    update!(quantity_on_hand: new_qty)
+    with_lock do
+      delta   = direction == :add ? quantity.abs : -quantity.abs
+      new_qty = quantity_on_hand + delta
+      raise InsufficientStock, "Only #{quantity_on_hand.to_f.round(2)} #{unit} of #{name} in stock." if new_qty.negative?
+
+      update!(quantity_on_hand: new_qty)
+    end
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_13_160000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_13_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -205,6 +205,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_160000) do
     t.string "sku"
     t.string "unit", default: "each"
     t.datetime "updated_at", null: false
+    t.decimal "unit_cost", precision: 10, scale: 2
     t.index ["location_id"], name: "index_parts_on_location_id"
     t.index ["organization_id", "name"], name: "index_parts_on_organization_id_and_name"
     t.index ["organization_id"], name: "index_parts_on_organization_id"

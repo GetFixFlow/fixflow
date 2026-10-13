@@ -72,7 +72,7 @@ export function PMTemplatePreview({ pm, onEdit }: { pm: PreventiveMaintenance; o
                 <li key={i} className="flex justify-between text-sm">
                   <span className="text-gray-700 dark:text-gray-300">
                     {p.part?.name ?? `Part #${p.part_id}`}
-                    {p.part?.part_number && <span className="ml-1 text-xs text-gray-400">({p.part.part_number})</span>}
+                    {p.part?.sku && <span className="ml-1 text-xs text-gray-400">({p.part.sku})</span>}
                   </span>
                   <span className="text-gray-500">× {p.quantity}</span>
                 </li>

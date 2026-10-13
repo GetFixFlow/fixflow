@@ -355,7 +355,7 @@ export function WorkOrderDetailPage() {
               <Tabs.Content value="parts">
                 <WorkOrderPartsLog
                   workOrderId={wo.id}
-                  editable={!isReadOnly && isAssignedToMe}
+                  editable={!isReadOnly && (isAssignedToMe || canManage)}
                   onAddPart={() => setOpenModal('part_log')}
                 />
               </Tabs.Content>

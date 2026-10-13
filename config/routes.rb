@@ -58,7 +58,7 @@ Rails.application.routes.draw do
         end
         resources :comments,    only: %i[index create destroy]
         resources :attachments, only: %i[index create destroy]
-        resources :parts, only: %i[create destroy], controller: "work_order_parts"
+        resources :parts, only: %i[index create destroy], controller: "work_order_parts"
         collection do
           get :overdue
           get :unassigned

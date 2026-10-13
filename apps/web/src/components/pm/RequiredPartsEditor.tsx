@@ -2,15 +2,8 @@ import { useState } from 'react'
 import { Plus, Trash2, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
+import { useDebouncedValue, useParts } from '@/hooks/useParts'
 import type { PMRequiredPart, Part } from '@/types'
-
-// Mock parts for now (pending real parts API hook)
-const MOCK_PARTS: Part[] = [
-  { id: 1, name: 'Oil Filter', part_number: 'PT-001', quantity_on_hand: 5, unit_cost: 12.50, organization_id: 1, created_at: '', updated_at: '' },
-  { id: 2, name: 'V-Belt Drive', part_number: 'PT-002', quantity_on_hand: 2, unit_cost: 28.00, organization_id: 1, created_at: '', updated_at: '' },
-  { id: 3, name: 'Air Filter', part_number: 'PT-003', quantity_on_hand: 10, unit_cost: 8.00, organization_id: 1, created_at: '', updated_at: '' },
-  { id: 4, name: 'Bearing Kit', part_number: 'PT-004', quantity_on_hand: 1, unit_cost: 45.00, organization_id: 1, created_at: '', updated_at: '' },
-]
 
 interface RequiredPartsEditorProps {
   value: PMRequiredPart[]
@@ -21,11 +14,8 @@ export function RequiredPartsEditor({ value, onChange }: RequiredPartsEditorProp
   const [search, setSearch] = useState('')
   const [showSearch, setShowSearch] = useState(false)
 
-  const filtered = MOCK_PARTS.filter(
-    (p) =>
-      !value.some((v) => v.part_id === p.id) &&
-      (p.name.toLowerCase().includes(search.toLowerCase()) || (p.part_number ?? '').toLowerCase().includes(search.toLowerCase())),
-  )
+  const { data: parts = [], isLoading } = useParts(useDebouncedValue(search), showSearch)
+  const filtered = parts.filter((p) => !value.some((v) => v.part_id === p.id))
 
   const addPart = (part: Part) => {
     onChange([...value, { part_id: part.id, part, quantity: 1 }])
@@ -61,7 +51,7 @@ export function RequiredPartsEditor({ value, onChange }: RequiredPartsEditorProp
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                     {item.part?.name ?? `Part #${item.part_id}`}
                   </p>
-                  {item.part?.part_number && <p className="text-xs text-gray-400">{item.part.part_number}</p>}
+                  {item.part?.sku && <p className="text-xs text-gray-400">{item.part.sku}</p>}
                   {overstocked && (
                     <p className="text-xs text-orange-500 flex items-center gap-1">
                       <AlertTriangle className="h-3 w-3" />
@@ -108,11 +98,11 @@ export function RequiredPartsEditor({ value, onChange }: RequiredPartsEditorProp
                 onClick={() => addPart(p)}
                 className="w-full flex items-center justify-between px-2 py-1.5 text-sm rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-left"
               >
-                <span className="text-gray-900 dark:text-gray-100">{p.name} <span className="text-xs text-gray-400 ml-1">{p.part_number}</span></span>
+                <span className="text-gray-900 dark:text-gray-100">{p.name} <span className="text-xs text-gray-400 ml-1">{p.sku}</span></span>
                 <span className="text-xs text-gray-400">{p.quantity_on_hand} in stock</span>
               </button>
             ))}
-            {filtered.length === 0 && <p className="text-xs text-gray-400 px-2 py-1">No matching parts</p>}
+            {!isLoading && filtered.length === 0 && <p className="text-xs text-gray-400 px-2 py-1">{search ? 'No matching parts' : 'No parts have been added yet'}</p>}
           </div>
           <Button type="button" variant="ghost" size="sm" onClick={() => { setShowSearch(false); setSearch('') }} className="w-full">Cancel</Button>
         </div>
