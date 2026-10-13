@@ -190,7 +190,9 @@ open → in_progress → pending_parts → in_progress
 
 ## Working offline
 
-A technician who loses signal can keep going. With no connection, **Start work, Put on hold, Waiting for parts, Resume and Complete**, and **comments**, are saved on the phone, shown straight away with a *Waiting to sync* badge, and sent in order when the connection returns. The status at the top of the screen shows what is waiting. If the server refuses a change (for example, the work order was reassigned meanwhile), it is listed there with the reason instead of disappearing. Changes belong to the person who made them, so a shared phone keeps each person's separate.
+A technician who loses signal can keep going. With no connection, **Start work, Put on hold, Waiting for parts, Resume and Complete**, **comments** and **photos and documents**, are saved on the phone, shown straight away with a *Waiting to sync* badge, and sent in order when the connection returns. The status at the top of the screen shows what is waiting. If the server refuses a change (for example, the work order was reassigned meanwhile), it is listed there with the reason instead of disappearing. Changes belong to the person who made them, so a shared phone keeps each person's separate.
+
+Photos are shrunk to at most 1600 pixels on a side before they are kept or sent, so they are quick to upload and small to store on the phone; a photo that cannot be sent stays on the phone until it can, and anything over 10 MB or not a photo, PDF or Word document is refused with the reason.
 
 Things that need the server's decision (assigning, verifying, rejecting, cancelling, editing a work order) still need a connection.
 

@@ -1,8 +1,11 @@
+import 'fake-indexeddb/auto'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/test/server'
 import { offlineQueue } from '../offlineQueue'
 import { syncQueue } from '../offlineSync'
+import { fileStore } from '../fileStore'
+import { apiClient } from '@/api/client'
 import { resetDevice, setOnline, signInAs } from '@/test/offline'
 
 beforeEach(() => {
@@ -128,5 +131,59 @@ describe('syncQueue', () => {
     expect(calls).toBe(1)
     expect(first).toEqual({ synced: 1, rejected: 0 })
     expect(second).toEqual({ synced: 0, rejected: 0 }) // not reported twice
+  })
+})
+
+describe('syncQueue: photos', () => {
+  const keepPhoto = async (workOrderId = 1, clientId = 'p1') => {
+    const fileKey = `photo-${clientId}`
+    await fileStore.put(fileKey, new Blob([new Uint8Array(500)], { type: 'image/jpeg' }))
+    return offlineQueue.enqueue({ type: 'photo', workOrderId, fileKey, filename: 'leak.jpg', contentType: 'image/jpeg', size: 500, clientId, label: 'Photo "leak.jpg"' })
+  }
+
+  it('uploads the kept file with its name and id, then forgets it', async () => {
+    server.use(http.post('/api/v1/work_orders/1/attachments', () => ok()))
+    const post = vi.spyOn(apiClient, 'post')
+    await keepPhoto()
+
+    expect(await syncQueue()).toEqual({ synced: 1, rejected: 0 })
+
+    const form = post.mock.calls[0][1] as FormData
+    const file = form?.get('attachment[file]') as File
+    expect(file.name).toBe('leak.jpg')
+    expect(file.type).toBe('image/jpeg')
+    expect(file.size).toBe(500)
+    expect(form?.get('client_id')).toBe('p1')
+    expect(await fileStore.get('photo-p1')).toBeUndefined()
+  })
+
+  it('keeps the file for the next try when there is no connection', async () => {
+    server.use(http.post('/api/v1/work_orders/1/attachments', () => HttpResponse.error()))
+    await keepPhoto()
+
+    expect(await syncQueue()).toEqual({ synced: 0, rejected: 0 })
+
+    expect(offlineQueue.getSnapshot().queue).toHaveLength(1)
+    expect(await fileStore.get('photo-p1')).toBeDefined()
+  })
+
+  it('gives up with the reason when the server refuses it, and frees the file', async () => {
+    server.use(http.post('/api/v1/work_orders/1/attachments', () => refuse(422, 'That file is not a valid photo.')))
+    await keepPhoto()
+
+    expect(await syncQueue()).toEqual({ synced: 0, rejected: 1 })
+
+    expect(offlineQueue.getSnapshot().rejected[0]).toMatchObject({ message: 'That file is not a valid photo.' })
+    expect(await fileStore.get('photo-p1')).toBeUndefined()
+  })
+
+  it('says so when the file is gone from the device, and carries on', async () => {
+    server.use(http.post('/api/v1/work_orders/2/comments', () => ok()))
+    const photo = await keepPhoto()
+    await fileStore.delete(photo.type === 'photo' ? photo.fileKey : '')
+    comment(2)
+
+    expect(await syncQueue()).toEqual({ synced: 1, rejected: 1 })
+    expect(offlineQueue.getSnapshot().rejected[0]).toMatchObject({ message: 'The photo is no longer on this device.' })
   })
 })

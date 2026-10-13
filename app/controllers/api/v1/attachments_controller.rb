@@ -9,12 +9,30 @@ module Api
         render json: { attachments: AttachmentBlueprint.render_as_hash(@work_order.attachments.includes(:user)) }
       end
 
-      # POST /api/v1/work_orders/:work_order_id/attachments
+      # POST /api/v1/work_orders/:work_order_id/attachments  (multipart: file, description, client_id)
+      # `client_id` is optional: a phone that lost signal sends the same one again, and gets the
+      # attachment it already uploaded instead of a second copy.
       def create
-        attachment = @work_order.attachments.build(description: params[:description], user: current_user)
-        attachment.file.attach(params[:file])
+        file = params.dig(:attachment, :file) || params[:file]
+        unless file.respond_to?(:original_filename)
+          return render_error("Choose a file to upload.", :unprocessable_entity,
+code: "VALIDATION_ERROR")
+        end
+
+        if file.content_type.to_s.start_with?("image/") && !Attachment.photo?(file.tempfile)
+          return render_error("That file is not a valid photo.", :unprocessable_entity, code: "VALIDATION_ERROR")
+        end
+
+        client_id = params[:client_id].presence
+        existing = client_id && @work_order.attachments.find_by(client_id: client_id, user_id: current_user.id)
+        return render json: { data: AttachmentBlueprint.render_as_hash(existing) } if existing
+
+        attachment = @work_order.attachments.build(description: params[:description], user: current_user, client_id: client_id)
+        attachment.file.attach(file)
         attachment.save!
         render json: { data: AttachmentBlueprint.render_as_hash(attachment) }, status: :created
+      rescue ActiveRecord::RecordNotUnique
+        render json: { data: AttachmentBlueprint.render_as_hash(@work_order.attachments.find_by!(client_id: client_id)) }
       end
 
       # DELETE /api/v1/work_orders/:work_order_id/attachments/:id

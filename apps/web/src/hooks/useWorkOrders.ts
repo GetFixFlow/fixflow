@@ -6,6 +6,8 @@ import { workOrdersApi } from '@/api'
 import { usePendingActions } from '@/hooks/useOfflineQueue'
 import { applyPending, isOfflineEvent, newClientId, offlineQueue, type OfflineEvent } from '@/lib/offlineQueue'
 import { isNetworkError } from '@/lib/offlineSync'
+import { fileStore } from '@/lib/fileStore'
+import { prepareUpload } from '@/lib/imagePrep'
 import { useAuthStore } from '@/stores/authStore'
 import type { WorkOrder, WorkOrderComment, ChecklistItem } from '@/types'
 
@@ -306,12 +308,56 @@ export function useWorkOrderAttachments(id: number) {
   })
 }
 
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024
+
+/**
+ * Uploads a photo or document. With no connection it is kept on the device, in the queue, and sent
+ * later; photos are shrunk first so they are quick to send and small to keep.
+ */
 export function useUploadAttachment(workOrderId: number) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (file: File) => workOrdersApi.uploadAttachment(workOrderId, file),
-    onSuccess: () => qc.invalidateQueries({ queryKey: WO_ATTACHMENTS_KEY(workOrderId) }),
-    onError: () => toast.error('Failed to upload attachment.'),
+    networkMode: 'always',
+    mutationFn: async (original: File): Promise<{ queued: boolean }> => {
+      const file = await prepareUpload(original)
+      if (file.size > MAX_UPLOAD_BYTES) throw new Error(`${original.name} is over the 10 MB limit.`)
+
+      const clientId = newClientId()
+      const keep = async () => {
+        const fileKey = `photo-${clientId}`
+        try {
+          await fileStore.put(fileKey, file)
+        } catch {
+          throw new Error('Could not keep the file on this device. Try again when you are online.')
+        }
+        offlineQueue.enqueue({
+          type: 'photo',
+          workOrderId,
+          fileKey,
+          filename: file.name,
+          contentType: file.type,
+          size: file.size,
+          clientId,
+          label: describe(qc, workOrderId, `Photo "${file.name}"`),
+        })
+        return { queued: true }
+      }
+
+      if (!navigator.onLine && offlineQueue.canQueue()) return keep()
+      try {
+        await workOrdersApi.uploadAttachment(workOrderId, file, clientId)
+        return { queued: false }
+      } catch (error) {
+        if (isNetworkError(error) && offlineQueue.canQueue()) return keep()
+        throw error
+      }
+    },
+    onSuccess: ({ queued }) => {
+      if (queued) return toast.info(QUEUED_MESSAGE)
+      qc.invalidateQueries({ queryKey: WO_ATTACHMENTS_KEY(workOrderId) })
+    },
+    onError: (error: AxiosError<{ error?: { message?: string } }> | Error) =>
+      toast.error(('response' in error && error.response?.data?.error?.message) || error.message || 'Failed to upload the file.'),
   })
 }
 
