@@ -54,6 +54,18 @@ RSpec.describe "Auth", type: :request do
     end
   end
 
+  # ─── Sessions are by token only ───────────────────────────────────────────
+
+  describe "the session cookie" do
+    it "does not authenticate on its own, so revoking the token ends the session" do
+      post "/api/v1/auth/sign_in", params: { user: { email: user.email, password: "password123" } }, as: :json
+      expect(response).to have_http_status(:ok)
+
+      get "/api/v1/auth/me" # the test client keeps the cookie; no Authorization header
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
+
   # ─── POST /api/v1/auth/sign_in ─────────────────────────────────────────────
 
   describe "POST /api/v1/auth/sign_in" do

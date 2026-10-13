@@ -61,7 +61,8 @@ export function useLogin() {
       toast.success(`Welcome back, ${user.full_name}!`)
       navigate('/dashboard')
     },
-    onError: () => toast.error('Invalid email or password.'),
+    onError: (error: AxiosError<{ error?: string }>) =>
+      toast.error(error.response?.data?.error ?? 'Invalid email or password.'),
   })
 }
 

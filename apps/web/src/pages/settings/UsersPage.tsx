@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { formatDistanceToNow, format } from 'date-fns'
 import { toast } from 'sonner'
-import { Plus, MoreVertical, UserCheck, UserX, KeyRound, Pencil, Link2 } from 'lucide-react'
+import { Plus, MoreVertical, UserCheck, UserX, Pencil, Link2 } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -14,8 +14,8 @@ import {
   useUsers,
   useDeactivateUser,
   useReactivateUser,
-  useResetUserPassword,
-  useChangeUserRole,
+  useBulkChangeRole,
+  useBulkDeactivate,
   useResendInvitation,
 } from '@/hooks/useUsers'
 import type { User, Role } from '@/types'
@@ -58,8 +58,9 @@ export function UsersPage() {
   const { data: users = [], isLoading } = useUsers()
   const deactivate = useDeactivateUser()
   const reactivate = useReactivateUser()
-  const resetPassword = useResetUserPassword()
-  const changeRole = useChangeUserRole()
+  const bulkChangeRole = useBulkChangeRole()
+  const bulkDeactivate = useBulkDeactivate()
+  const [bulkRole, setBulkRole] = useState<Role | ''>('')
   const resendInvitation = useResendInvitation()
 
   const [showInvite, setShowInvite] = useState(false)
@@ -139,13 +140,26 @@ export function UsersPage() {
           <div className="flex items-center gap-2 ml-auto">
             {isAdmin && (
               <>
+                <select
+                  aria-label="New role"
+                  value={bulkRole}
+                  onChange={(e) => setBulkRole(e.target.value as Role | '')}
+                  className="h-8 rounded-md border border-gray-300 bg-white px-2 text-sm dark:border-gray-600 dark:bg-gray-800"
+                >
+                  <option value="">Role…</option>
+                  <option value="admin">Admin</option>
+                  <option value="manager">Manager</option>
+                  <option value="technician">Technician</option>
+                  <option value="requester">Requester</option>
+                </select>
                 <Button
                   variant="outline"
                   size="sm"
+                  disabled={!bulkRole || bulkChangeRole.isPending}
                   onClick={() => {
-                    const role = prompt('New role (admin/manager/technician/requester):') as Role
-                    if (role) selectedIds.forEach((id) => changeRole.mutate({ id, role }))
-                    clearSelection()
+                    if (!bulkRole) return
+                    bulkChangeRole.mutate({ ids: selectedIds, role: bulkRole }, { onSuccess: clearSelection })
+                    setBulkRole('')
                   }}
                 >
                   Change Role
@@ -155,9 +169,8 @@ export function UsersPage() {
                   size="sm"
                   className="text-red-600 border-red-300 hover:bg-red-50"
                   onClick={() => {
-                    if (confirm(`Deactivate ${selectedIds.length} users?`)) {
-                      selectedIds.forEach((id) => deactivate.mutate(id))
-                      clearSelection()
+                    if (confirm(`Deactivate ${selectedIds.length} users? They are signed out and cannot sign in until reactivated.`)) {
+                      bulkDeactivate.mutate(selectedIds, { onSuccess: clearSelection })
                     }
                   }}
                 >
@@ -285,18 +298,7 @@ export function UsersPage() {
                                     <Link2 className="h-3.5 w-3.5" /> Copy invite link
                                   </button>
                                 )}
-                                {isAdmin && (
-                                  <button
-                                    onClick={() => {
-                                      resetPassword.mutate(u.id)
-                                      setOpenMenuId(null)
-                                    }}
-                                    className="flex items-center gap-2 w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700"
-                                  >
-                                    <KeyRound className="h-3.5 w-3.5" /> Reset Password
-                                  </button>
-                                )}
-                                {isAdmin && (
+                                {isAdmin && u.id !== currentUser?.id && (
                                   isDeactivated ? (
                                     <button
                                       onClick={() => { reactivate.mutate(u.id); setOpenMenuId(null) }}

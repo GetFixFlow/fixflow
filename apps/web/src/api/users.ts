@@ -22,8 +22,6 @@ export const usersApi = {
 
   reactivate: (id: number) => apiClient.patch(`/users/${id}/reactivate`),
 
-  resetPassword: (id: number) => apiClient.post(`/users/${id}/reset_password`),
-
   bulkChangeRole: (ids: number[], role: Role) =>
     apiClient.patch('/users/bulk_role', { ids, role }),
 

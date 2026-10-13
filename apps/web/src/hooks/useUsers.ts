@@ -4,6 +4,11 @@ import { toast } from 'sonner'
 import { usersApi } from '@/api/users'
 import type { Role } from '@/types'
 
+function failureMessage(fallback: string) {
+  return (error: AxiosError<{ error?: { message?: string } }>) =>
+    toast.error(error.response?.data?.error?.message ?? fallback)
+}
+
 export function useUsers(params?: Record<string, unknown>) {
   return useQuery({
     queryKey: ['users', params],
@@ -39,6 +44,7 @@ export function useUpdateUser(id: number) {
       qc.invalidateQueries({ queryKey: ['users'] })
       toast.success('User updated.')
     },
+    onError: failureMessage('Could not update the user.'),
   })
 }
 
@@ -50,6 +56,7 @@ export function useChangeUserRole() {
       qc.invalidateQueries({ queryKey: ['users'] })
       toast.success('Role updated.')
     },
+    onError: failureMessage('Could not change the role.'),
   })
 }
 
@@ -61,6 +68,7 @@ export function useDeactivateUser() {
       qc.invalidateQueries({ queryKey: ['users'] })
       toast.success('User deactivated.')
     },
+    onError: failureMessage('Could not deactivate the user.'),
   })
 }
 
@@ -72,12 +80,31 @@ export function useReactivateUser() {
       qc.invalidateQueries({ queryKey: ['users'] })
       toast.success('User reactivated.')
     },
+    onError: failureMessage('Could not reactivate the user.'),
   })
 }
 
-export function useResetUserPassword() {
+export function useBulkChangeRole() {
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: usersApi.resetPassword,
-    onSuccess: () => toast.success('Password reset email sent.'),
+    mutationFn: ({ ids, role }: { ids: number[]; role: Role }) => usersApi.bulkChangeRole(ids, role),
+    onSuccess: (_, { ids }) => {
+      qc.invalidateQueries({ queryKey: ['users'] })
+      toast.success(`Role updated for ${ids.length} user${ids.length !== 1 ? 's' : ''}.`)
+    },
+    onError: failureMessage('Could not change the roles. Nothing was changed.'),
   })
 }
+
+export function useBulkDeactivate() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: usersApi.bulkDeactivate,
+    onSuccess: (_, ids) => {
+      qc.invalidateQueries({ queryKey: ['users'] })
+      toast.success(`${ids.length} user${ids.length !== 1 ? 's' : ''} deactivated.`)
+    },
+    onError: failureMessage('Could not deactivate the users. Nothing was changed.'),
+  })
+}
+

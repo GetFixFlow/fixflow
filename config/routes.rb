@@ -112,10 +112,17 @@ Rails.application.routes.draw do
 
       resources :users, only: %i[index show update destroy] do
         collection do
-          get  :me
-          post :invite
+          get   :me
+          post  :invite
+          patch :bulk_role
+          patch :bulk_deactivate
         end
-        member { post :resend_invitation }
+        member do
+          post  :resend_invitation
+          patch :deactivate
+          patch :reactivate
+          patch :role
+        end
       end
 
       # Public: look up and accept an invitation by its emailed token

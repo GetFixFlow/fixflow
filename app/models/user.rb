@@ -20,6 +20,7 @@ class User < ApplicationRecord
   validates :first_name, :last_name, presence: true
 
   scope :by_role, ->(role) { where(role: role) }
+  scope :active, -> { where(deactivated_at: nil) }
   scope :technicians, -> { where(role: "technician") }
   scope :managers, -> { where(role: %w[admin manager]) }
 
@@ -33,6 +34,19 @@ class User < ApplicationRecord
     first, last = value.to_s.strip.split(/\s+/, 2)
     self.first_name = first
     self.last_name = last
+  end
+
+  # Deactivated people cannot sign in, and every token they hold stops working.
+  def active?
+    deactivated_at.nil?
+  end
+
+  def active_for_authentication?
+    super && active?
+  end
+
+  def inactive_message
+    active? ? super : :deactivated
   end
 
   # admin?, manager?, technician? and requester? check the user's own role only.
