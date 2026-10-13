@@ -26,6 +26,13 @@ class Rack::Attack
     req.get_header("HTTP_AUTHORIZATION").presence || req.ip
   end
 
+  # Password changes: 5 attempts / min per signed-in caller (the current password is checked each time).
+  throttle("api/profile/password", limit: 5, period: 1.minute) do |req|
+    next unless req.path == "/api/v1/profile/password" && req.patch?
+
+    req.get_header("HTTP_AUTHORIZATION").presence || req.ip
+  end
+
   # ── Blocklist ──────────────────────────────────────────────────────────────
 
   blocklist("block bad ips") do |req|

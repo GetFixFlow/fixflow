@@ -1,8 +1,8 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Eye, EyeOff, ChevronDown, ChevronUp, Upload, Check } from 'lucide-react'
+import { Eye, EyeOff, ChevronDown, ChevronUp, Check } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -41,7 +41,7 @@ function passwordStrength(pw: string): { score: number; label: string; color: st
 
 const profileSchema = z.object({
   full_name: z.string().min(2, 'Name is required'),
-  email: z.string().email('Invalid email'),
+  email: z.string().optional(),
   phone: z.string().optional(),
   job_title: z.string().optional(),
   department: z.string().optional(),
@@ -77,13 +77,8 @@ export function ProfilePage() {
   const revokeSession = useRevokeSession()
   const revokeAll = useRevokeAllSessions()
 
-  const [avatarFile, setAvatarFile] = useState<File | null>(null)
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [pwVisible, setPwVisible] = useState<Record<string, boolean>>({})
   const [pwOpen, setPwOpen] = useState(false)
-  const fileRef = useRef<HTMLInputElement>(null)
-
-  const profileData = profile as (typeof profile & { job_title?: string; department?: string }) | undefined
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
@@ -94,13 +89,13 @@ export function ProfilePage() {
       job_title: '',
       department: '',
     },
-    values: profileData
+    values: profile
       ? {
-          full_name: profileData.full_name ?? '',
-          email: profileData.email ?? '',
-          phone: profileData.phone ?? '',
-          job_title: profileData.job_title ?? '',
-          department: profileData.department ?? '',
+          full_name: profile.full_name ?? '',
+          email: profile.email ?? '',
+          phone: profile.phone ?? '',
+          job_title: profile.job_title ?? '',
+          department: profile.department ?? '',
         }
       : undefined,
   })
@@ -116,21 +111,8 @@ export function ProfilePage() {
     { label: 'Contains special character', met: /[^A-Za-z0-9]/.test(newPw) },
   ]
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    if (file.size > 2 * 1024 * 1024) {
-      alert('File must be under 2MB')
-      return
-    }
-    setAvatarFile(file)
-    const reader = new FileReader()
-    reader.onload = () => setAvatarPreview(reader.result as string)
-    reader.readAsDataURL(file)
-  }
-
   const onSaveProfile = form.handleSubmit((data) => {
-    updateProfile.mutate({ ...data, ...(avatarFile ? { avatar: avatarFile } : {}) })
+    updateProfile.mutate({ full_name: data.full_name, phone: data.phone, job_title: data.job_title, department: data.department })
   })
 
   const onChangePassword = pwForm.handleSubmit((data) => {
@@ -149,7 +131,6 @@ export function ProfilePage() {
     .slice(0, 2)
     .toUpperCase()
   const avatarColor = nameToColor(user?.full_name ?? 'User')
-  const avatarUrl = avatarPreview ?? profile?.avatar_url
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -160,33 +141,10 @@ export function ProfilePage() {
         <CardContent className="p-6 space-y-5">
           <h3 className="font-semibold text-gray-900 dark:text-gray-100">Profile Information</h3>
 
-          {/* Avatar */}
+          {/* Avatar: initials only; photo upload is not supported yet */}
           <div className="flex items-center gap-4">
-            <div className="relative">
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  className="h-20 w-20 rounded-full object-cover border-2 border-gray-200"
-                  alt="Avatar"
-                />
-              ) : (
-                <div className={cn('h-20 w-20 rounded-full flex items-center justify-center text-2xl font-bold text-white', avatarColor)}>
-                  {initials}
-                </div>
-              )}
-            </div>
-            <div>
-              <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
-                <Upload className="h-4 w-4 mr-1.5" /> Change Photo
-              </Button>
-              <p className="text-xs text-gray-400 mt-1">PNG, JPG up to 2MB</p>
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleAvatarChange}
-              />
+            <div className={cn('h-20 w-20 rounded-full flex items-center justify-center text-2xl font-bold text-white', avatarColor)}>
+              {initials}
             </div>
           </div>
 
@@ -209,12 +167,10 @@ export function ProfilePage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Email *
+                    Email
                   </label>
-                  <Input {...form.register('email')} type="email" />
-                  {form.formState.errors.email && (
-                    <p className="text-xs text-red-500 mt-1">{form.formState.errors.email.message}</p>
-                  )}
+                  <Input {...form.register('email')} type="email" disabled aria-describedby="email-note" />
+                  <p id="email-note" className="text-xs text-gray-400 mt-1">Your sign-in email cannot be changed here yet.</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -249,7 +205,7 @@ export function ProfilePage() {
                 </div>
                 <div>
                   <label className="block text-xs text-gray-400 mb-1">Organization</label>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">Demo Manufacturing Co.</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">{profile?.organization_name ?? '—'}</p>
                 </div>
                 <div>
                   <label className="block text-xs text-gray-400 mb-1">Member Since</label>

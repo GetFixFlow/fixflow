@@ -15,6 +15,11 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       get "auth/me", to: "auth/profile#show"
+
+      # The signed-in user's own details and password
+      resource :profile, only: %i[show update], controller: "profile" do
+        patch :password
+      end
       get "health",  to: "health#show"
       get "setup/status", to: "setup#status"
 
