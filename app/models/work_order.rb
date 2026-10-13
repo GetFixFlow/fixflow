@@ -80,7 +80,7 @@ class WorkOrder < ApplicationRecord
     event :complete do
       transitions from: :in_progress, to: :completed, guard: :completion_notes_present?
       before { self.completed_at = Time.current }
-      after  { NotifyManagerJob.perform_later(id); log_activity("completed") }
+      after  { NotifyManagerJob.perform_later(id); PmExecutionSync.completed(self); log_activity("completed") }
     end
 
     event :verify do
@@ -92,12 +92,12 @@ class WorkOrder < ApplicationRecord
     event :reject do
       transitions from: :completed, to: :in_progress
       before { self.completed_at = nil }
-      after  { NotifyAssigneeJob.perform_later(id); log_activity("rejected") }
+      after  { NotifyAssigneeJob.perform_later(id); PmExecutionSync.reopened(self); log_activity("rejected") }
     end
 
     event :cancel do
       transitions from: %i[open assigned in_progress on_hold pending_parts completed], to: :cancelled
-      after { log_activity("cancelled") }
+      after { PmExecutionSync.cancelled(self); log_activity("cancelled") }
     end
   end
 

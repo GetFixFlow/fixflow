@@ -202,6 +202,38 @@ RSpec.describe "Api::V1::PreventiveMaintenances", type: :request do
     end
   end
 
+  describe "PATCH /api/v1/preventive_maintenances/:id/trigger with overrides" do
+    let(:pm) { create(:preventive_maintenance, :active_pm, organization: organization, asset: asset) }
+    let(:other_tech) { create(:user, organization: organization, role: "technician") }
+
+    def trigger(overrides)
+      patch "/api/v1/preventive_maintenances/#{pm.id}/trigger", params: { overrides: overrides },
+                                                                headers: auth_headers_for(manager), as: :json
+    end
+
+    it "applies the assignee, priority, due date and note to that work order only" do
+      trigger(assignee_id: other_tech.id, priority: "critical", due_date: "2027-02-01T09:00:00Z", note: "Customer visit Friday")
+
+      expect(response).to have_http_status(:created)
+      work_order = WorkOrder.find(json_body["work_order"]["id"])
+      expect(work_order).to have_attributes(assignee_id: other_tech.id, priority: "critical")
+      expect(work_order.due_date.to_date).to eq(Date.new(2027, 2, 1))
+      expect(work_order.description).to include("Note: Customer visit Friday")
+      expect(pm.reload.priority).to eq("medium")
+    end
+
+    it "does not accept an assignee from another company or a deactivated one" do
+      outsider = create(:user)
+      trigger(assignee_id: outsider.id)
+      expect(response).to have_http_status(:not_found)
+
+      UserAdministration.deactivate!(other_tech, by: create(:user, :admin, organization: organization))
+      trigger(assignee_id: other_tech.id)
+      expect(response).to have_http_status(:not_found)
+      expect(WorkOrder.where(preventive_maintenance: pm)).to be_empty
+    end
+  end
+
   describe "PATCH /api/v1/preventive_maintenances/:id/trigger" do
     let(:pm) { create(:preventive_maintenance, :active_pm, organization: organization, asset: asset) }
 
@@ -247,15 +279,12 @@ RSpec.describe "Api::V1::PreventiveMaintenances", type: :request do
     let!(:active_pm)  { create(:preventive_maintenance, :active_pm, organization: organization, asset: asset) }
     let!(:overdue_pm) { create(:preventive_maintenance, :overdue_pm, organization: organization, asset: asset) }
 
-    it "returns compliance summary" do
+    it "returns the numbers the dashboard shows, from real data" do
       get "/api/v1/preventive_maintenances/dashboard", headers: auth_headers_for(manager)
+
       expect(response).to have_http_status(:ok)
-      expect(json_body).to have_key("summary")
-      summary = json_body["summary"]
-      expect(summary).to have_key("total_active")
-      expect(summary).to have_key("overdue")
-      expect(summary).to have_key("compliance_rate")
-      expect(summary["overdue"]).to eq(1)
+      expect(json_body).to include("overdue_count" => 1, "overall_compliance" => nil, "monthly_trend" => be_an(Array))
+      expect(json_body["overdue_pms"].pluck("id")).to eq([overdue_pm.id])
     end
 
     it "returns 401 without auth" do

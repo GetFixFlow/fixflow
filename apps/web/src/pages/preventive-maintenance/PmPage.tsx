@@ -14,7 +14,7 @@ export function PmPage() {
     queryKey: ['preventive_maintenances'],
     queryFn: () => pmApi.list().then((r) => r.data),
   })
-  const pms = data?.preventive_maintenances ?? []
+  const pms = data?.pm_schedules ?? []
 
   return (
     <div className="space-y-6">

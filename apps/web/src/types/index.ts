@@ -378,23 +378,26 @@ export interface PMSchedulePreviewItem {
 }
 
 export interface PMDashboardStats {
-  overall_compliance: number
-  compliance_change: number
+  period_days: number
+  /** Share of due executions that were completed; null when nothing has come due yet. */
+  overall_compliance: number | null
+  /** Change in points against the previous period; null when either period has no data. */
+  compliance_change: number | null
   due_this_week: number
   overdue_count: number
   completed_this_month: number
   scheduled_this_month: number
-  avg_completion_hours: number
-  avg_estimated_hours: number
-  monthly_trend: { month: string; completed: number; missed: number; compliance: number }[]
-  by_location: { location_name: string; compliance: number; count: number }[]
+  avg_completion_hours: number | null
+  avg_estimated_hours: number | null
+  /** One entry per month, oldest first; month is YYYY-MM. */
+  monthly_trend: { month: string; completed: number; missed: number; compliance: number | null }[]
+  by_location: { location_name: string; compliance: number | null; count: number }[]
   overdue_pms: PreventiveMaintenance[]
   upcoming_week: { pm: PreventiveMaintenance; due_date: string }[]
-  worst_assets?: unknown[]
   recent_activity: {
     type: 'generated' | 'completed' | 'skipped' | 'missed'
     pm_name: string
-    wo_number?: string
+    wo_number?: string | null
     occurred_at: string
   }[]
 }

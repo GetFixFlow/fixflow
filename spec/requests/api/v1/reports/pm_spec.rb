@@ -52,6 +52,14 @@ RSpec.describe "PM Reports", type: :request do
       expect(body).to include("forecast_days", "total_upcoming", "estimated_hours", "by_week")
     end
 
+    it "gives each schedule its id, asset, due date and priority for the timeline" do
+      get "/api/v1/reports/pm/schedule_forecast", params: { days: 30 }, headers: headers
+
+      entry = response.parsed_body["by_week"].first["pms"].first
+      expect(entry).to include("pm_id", "name", "asset", "due_date", "estimated_hours")
+      expect(entry["priority"]).to eq("medium")
+    end
+
     it "caps days at 90" do
       get "/api/v1/reports/pm/schedule_forecast",
         params: { days: 200 },

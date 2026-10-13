@@ -39,7 +39,7 @@ describe('PMListPage', () => {
     useAuthStore.setState({ user: { id: 1, email: '', full_name: 'Manager', role: 'manager', organization_id: 1 }, token: 'tok', isAuthenticated: true })
     server.use(
       http.get('/api/v1/preventive_maintenances', () =>
-        HttpResponse.json({ preventive_maintenances: mockPMs, meta: { request_id: 'test', timestamp: '' } }),
+        HttpResponse.json({ pm_schedules: mockPMs, meta: { request_id: 'test', timestamp: '' } }),
       ),
     )
   })

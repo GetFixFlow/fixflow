@@ -38,11 +38,11 @@ describe('TriggerPMModal', () => {
 
   it('submission calls trigger mutation and closes on success', async () => {
     server.use(
-      http.post('/api/v1/preventive_maintenances/1/trigger', () =>
-        HttpResponse.json({ data: { work_order_number: 'WO-100', work_order_id: 100 }, meta: { request_id: 'test', timestamp: '' } }),
+      http.patch('/api/v1/preventive_maintenances/1/trigger', () =>
+        HttpResponse.json({ message: 'Work order generated', work_order: { id: 100, work_order_number: 'WO-100' } }, { status: 201 }),
       ),
       http.get('/api/v1/preventive_maintenances', () =>
-        HttpResponse.json({ preventive_maintenances: [], meta: { request_id: 'test', timestamp: '' } }),
+        HttpResponse.json({ pm_schedules: [], meta: { request_id: 'test', timestamp: '' } }),
       ),
     )
     const onClose = vi.fn()

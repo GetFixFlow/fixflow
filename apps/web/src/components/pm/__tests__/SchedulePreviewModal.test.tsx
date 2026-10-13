@@ -22,8 +22,8 @@ function wrapper({ children }: { children: React.ReactNode }) {
 describe('SchedulePreviewModal', () => {
   beforeEach(() => {
     server.use(
-      http.get('/api/v1/preventive_maintenances/1/preview_schedule', () =>
-        HttpResponse.json({ items: [], meta: { request_id: 'test', timestamp: '' } }),
+      http.get('/api/v1/preventive_maintenances/1/preview', () =>
+        HttpResponse.json({ scheduled_dates: [] }),
       ),
     )
   })

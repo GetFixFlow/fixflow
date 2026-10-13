@@ -2,6 +2,7 @@ module Api
   module V1
     class PreventiveMaintenancesController < Api::V1::BaseController
       before_action :require_manager!, only: %i[create update destroy pause resume trigger]
+      before_action :load_trigger_overrides, only: :trigger
       before_action :set_pm, only: %i[show update destroy pause resume trigger preview]
 
       # GET /api/v1/preventive_maintenances
@@ -14,28 +15,10 @@ module Api
         }
       end
 
-      # GET /api/v1/preventive_maintenances/dashboard
+      # GET /api/v1/preventive_maintenances/dashboard?date_range=90
       def dashboard
-        org = current_organization
-        pms = org.preventive_maintenances
-
-        active_pms   = pms.status_active
-        overdue_pms  = active_pms.overdue.includes(:asset)
-        due_this_week = active_pms.due_within(7).includes(:asset)
-
-        render json: {
-          summary: {
-            total_active:          active_pms.count,
-            due_this_week:         due_this_week.count,
-            overdue:               overdue_pms.count,
-            completed_this_month:  this_month_completed_count(pms),
-            compliance_rate:       compliance_rate(pms)
-          },
-          overdue_pms:   overdue_pm_list(overdue_pms),
-          due_this_week: due_this_week_list(due_this_week),
-          compliance_by_location: compliance_by_location(pms),
-          recent_executions: recent_executions_list(pms)
-        }
+        days = params.fetch(:date_range, 90).to_i.clamp(7, 365)
+        render json: PmDashboardService.new(current_organization, days: days).call
       end
 
       # GET /api/v1/preventive_maintenances/:id
@@ -80,7 +63,7 @@ module Api
 
       # PATCH /api/v1/preventive_maintenances/:id/trigger
       def trigger
-        work_order = PmSchedulerService.generate_work_order(@pm)
+        work_order = PmSchedulerService.generate_work_order(@pm, overrides: @trigger_overrides)
         render json: {
           message:    "Work order generated",
           work_order: WorkOrderBlueprint.render_as_hash(work_order)
@@ -109,6 +92,20 @@ module Api
         scope
       end
 
+      def load_trigger_overrides
+        @trigger_overrides = trigger_overrides
+      end
+
+      # Optional changes for a manually triggered work order (the "Advanced overrides" in the dialog).
+      def trigger_overrides
+        raw = params[:overrides]
+        return {} if raw.blank?
+
+        raw = raw.permit(:assignee_id, :due_date, :priority, :note)
+        assignee = current_organization.users.active.find(raw[:assignee_id]) if raw[:assignee_id].present?
+        { assignee: assignee, due_date: raw[:due_date].presence, priority: raw[:priority].presence, note: raw[:note] }.compact
+      end
+
       def pm_params
         params.require(:preventive_maintenance).permit(
           :name, :description, :asset_id, :assigned_to_id, :priority,
@@ -116,86 +113,6 @@ module Api
           :start_date, :end_date, :estimated_hours,
           template: {}
         )
-      end
-
-      # ─── Dashboard helpers ─────────────────────────────────────────────────
-
-      def this_month_completed_count(pms)
-        PmExecution
-          .where(preventive_maintenance: pms)
-          .where(status: :completed)
-          .where(scheduled_date: Time.current.beginning_of_month..)
-          .count
-      end
-
-      def compliance_rate(pms)
-        ninety_days_ago = 90.days.ago.to_date
-        execs = PmExecution
-          .where(preventive_maintenance: pms)
-          .where(scheduled_date: ninety_days_ago..)
-          .where(status: %i[generated skipped completed])
-
-        total     = execs.count
-        completed = execs.where(status: :completed).count
-        return 0.0 if total.zero?
-
-        (completed.to_f / total * 100).round(1)
-      end
-
-      def overdue_pm_list(overdue_pms)
-        overdue_pms.map do |pm|
-          days_overdue = (Date.today - pm.next_due_at.to_date).to_i
-          {
-            id:          pm.id,
-            name:        pm.name,
-            asset:       pm.asset&.name,
-            next_due_at: pm.next_due_at,
-            days_overdue: days_overdue
-          }
-        end
-      end
-
-      def due_this_week_list(due_this_week)
-        due_this_week.map do |pm|
-          {
-            id:          pm.id,
-            name:        pm.name,
-            asset:       pm.asset&.name,
-            next_due_at: pm.next_due_at,
-            priority:    pm.priority
-          }
-        end
-      end
-
-      def compliance_by_location(pms)
-        ninety_days_ago = 90.days.ago.to_date
-
-        pms.includes(asset: :location)
-          .group_by { |pm| pm.asset&.location&.name || "Unknown" }
-          .map do |location, loc_pms|
-            execs = PmExecution
-              .where(preventive_maintenance: loc_pms)
-              .where(scheduled_date: ninety_days_ago..)
-              .where(status: %i[generated skipped completed])
-
-            total     = execs.count
-            completed = execs.where(status: :completed).count
-            rate      = total.zero? ? 100.0 : (completed.to_f / total * 100).round(1)
-
-            { location: location, rate: rate }
-          end
-          .sort_by { |h| -h[:rate] }
-      end
-
-      def recent_executions_list(pms)
-        execs = PmExecution
-          .where(preventive_maintenance: pms)
-          .where.not(work_order_id: nil)
-          .includes(:work_order, :preventive_maintenance)
-          .order(generated_at: :desc)
-          .limit(10)
-
-        PmExecutionBlueprint.render_as_hash(execs)
       end
     end
   end
