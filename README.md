@@ -55,7 +55,7 @@ Each FixFlow install serves one company. Open the web app and, on a new install,
 
 ### Adding users
 
-Administrators add people from **Settings → Users → Invite User**. Choose a role and FixFlow creates an invitation link. If email is set up (`SMTP_HOST` and `SMTP_PASSWORD`), the link is also emailed; if not, the dialog tells you and you copy the link and send it yourself. The person opens the link, chooses a password and signs in. A link works once and expires after 7 days; use **Copy invite link** on a pending user in the Users list to make a new one.
+Administrators add people from **Settings → Users → Invite User**. Choose a role and FixFlow creates an invitation link. If email is set up (see [Email](#email)), the link is also emailed; if not, the dialog tells you and you copy the link and send it yourself. The person opens the link, chooses a password and signs in. A link works once and expires after 7 days; use **Copy invite link** on a pending user in the Users list to make a new one.
 
 Set `APP_URL` to the address your web app is served from, so invitation links point to the right place.
 
@@ -201,6 +201,22 @@ Photos are shrunk to at most 1600 pixels on a side before they are kept or sent,
 Things that need the server's decision (assigning, verifying, rejecting, cancelling, editing a work order) still need a connection.
 
 To reopen a page you already visited while offline, the app must be served over **HTTPS** (browsers only allow the offline cache on secure addresses; `localhost` counts). On a plain `http://` address the offline cache is not available: changes made while the page stays open are still saved and sent, but reloading the page offline will not work.
+
+## Email
+
+FixFlow sends email for invitations, password resets, work order assignments and low-stock alerts. Without a mail server it still works: invitations and password resets give an administrator a link to copy and send themselves.
+
+**Set it up in the app:** **Settings → Email** (administrators). Enter the mail server, then **Send me a test email**: it sends a message to you through what is in the form, without saving it, and if it fails it tells you why in plain words (wrong password, host not found, nothing listening on that port, wrong encryption). When the test arrives, **Save**. Saved settings apply to the next email without a restart and take priority over the server's environment. The password is stored encrypted (with a key derived from `SECRET_KEY_BASE`, so if you change that secret, enter the password again) and is never shown again.
+
+| Mail service | Server | Port | Encryption | Notes |
+| --- | --- | --- | --- | --- |
+| Microsoft 365 | `smtp.office365.com` | 587 | STARTTLS | Username and sender are the mailbox. SMTP AUTH must be enabled for it in the Microsoft 365 admin centre. |
+| Gmail / Google Workspace | `smtp.gmail.com` | 587 | STARTTLS | Use an [app password](https://myaccount.google.com/apppasswords) (needs 2-Step Verification), not the account password. The sender must be that account. |
+| A mail server on your network | its address | 25 (or 587) | None (or STARTTLS) | Many internal servers need no username or password. If it asks for one, enter it. |
+
+**Or set it in the server's environment** (`.env`): `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`. These are used when nothing is saved in the app. Email counts as set up in production once there is a saved mail server or both `SMTP_HOST` and `SMTP_PASSWORD`.
+
+Emails are sent in the background, and a failure there is only logged. If people say they are not getting email, use **Send me a test email** first: it shows the actual error.
 
 ## Architecture
 

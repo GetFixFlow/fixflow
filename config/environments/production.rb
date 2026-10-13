@@ -51,15 +51,8 @@ Rails.application.configure do
   # Action Mailer
   config.action_mailer.raise_delivery_errors = false
   config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "localhost") }
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings = {
-    address:              ENV.fetch("SMTP_HOST", "smtp.sendgrid.net"),
-    port:                 ENV.fetch("SMTP_PORT", 587).to_i,
-    user_name:            ENV["SMTP_USERNAME"],
-    password:             ENV["SMTP_PASSWORD"],
-    authentication:       :plain,
-    enable_starttls_auto: true
-  }
+  # Through the mail server saved in Settings, else the SMTP_* environment settings (see FixflowMailDelivery).
+  config.action_mailer.delivery_method = :fixflow
 
   config.i18n.fallbacks = true
   config.active_record.dump_schema_after_migration = false
