@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { Lock, Trash2, Mic } from 'lucide-react'
+import { CloudOff, Lock, Trash2, Mic } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
@@ -23,10 +23,9 @@ export function WorkOrderComments({ workOrderId, canViewInternal = false }: Work
 
   const visible = canViewInternal ? comments : comments.filter((c) => !c.internal)
 
-  const submit = async () => {
+  const submit = () => {
     if (!body.trim()) return
-    await createComment.mutateAsync({ body: body.trim(), is_internal: isInternal })
-    setBody('')
+    createComment.mutate({ body: body.trim(), internal: isInternal }, { onSuccess: () => setBody('') })
   }
 
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -37,9 +36,9 @@ export function WorkOrderComments({ workOrderId, canViewInternal = false }: Work
   }
 
   // 1-hour window for deletion
-  const canDelete = (createdAt: string, commentUserId: number) => {
-    if (commentUserId !== user?.id) return false
-    return Date.now() - new Date(createdAt).getTime() < 60 * 60 * 1000
+  const canDelete = (comment: { created_at: string; pending?: boolean; user: { id: number } }) => {
+    if (comment.pending || comment.user.id !== user?.id) return false
+    return Date.now() - new Date(comment.created_at).getTime() < 60 * 60 * 1000
   }
 
   return (
@@ -95,6 +94,11 @@ export function WorkOrderComments({ workOrderId, canViewInternal = false }: Work
                   <span className="text-xs text-gray-400">
                     {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
                   </span>
+                  {comment.pending && (
+                    <span className="flex items-center gap-0.5 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+                      <CloudOff className="h-2.5 w-2.5" /> Waiting to sync
+                    </span>
+                  )}
                   {comment.internal && (
                     <span className="flex items-center gap-0.5 rounded-full bg-yellow-100 px-2 py-0.5 text-[10px] font-medium text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400">
                       <Lock className="h-2.5 w-2.5" /> Internal note
@@ -105,7 +109,7 @@ export function WorkOrderComments({ workOrderId, canViewInternal = false }: Work
                   {comment.body}
                 </p>
               </div>
-              {canDelete(comment.created_at, comment.user.id) && (
+              {canDelete(comment) && (
                 <button
                   onClick={() => deleteComment.mutate(comment.id)}
                   className="shrink-0 rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"

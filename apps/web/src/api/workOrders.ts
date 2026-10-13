@@ -30,9 +30,9 @@ export const workOrdersApi = {
   listComments: (id: number) =>
     apiClient.get<{ comments: WorkOrderComment[] }>(`/work_orders/${id}/comments`),
 
-  createComment: (id: number, body: string, is_internal: boolean) =>
+  createComment: (id: number, body: string, internal: boolean, clientId?: string) =>
     apiClient.post<{ data: WorkOrderComment }>(`/work_orders/${id}/comments`, {
-      comment: { body, is_internal },
+      comment: { body, internal, client_id: clientId },
     }),
 
   deleteComment: (id: number, commentId: number) =>

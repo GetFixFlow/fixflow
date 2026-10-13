@@ -7,6 +7,7 @@ import { useUiStore } from '@/stores/uiStore'
 import { useRealtimeStore } from '@/stores/realtimeStore'
 import { useLogout } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/Button'
+import { SyncStatus } from './SyncStatus'
 import { cn } from '@/lib/utils'
 
 export function Header() {
@@ -40,6 +41,7 @@ export function Header() {
       </button>
 
       <div className="flex items-center gap-2">
+        <SyncStatus />
         <Button variant="ghost" size="icon" onClick={toggleDarkMode} aria-label="Toggle theme">
           {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>

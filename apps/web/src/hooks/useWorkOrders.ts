@@ -1,24 +1,42 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMemo } from 'react'
+import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
 import { toast } from 'sonner'
 import { workOrdersApi } from '@/api'
-import type { WorkOrder, ChecklistItem } from '@/types'
+import { usePendingActions } from '@/hooks/useOfflineQueue'
+import { applyPending, isOfflineEvent, newClientId, offlineQueue, type OfflineEvent } from '@/lib/offlineQueue'
+import { isNetworkError } from '@/lib/offlineSync'
+import { useAuthStore } from '@/stores/authStore'
+import type { WorkOrder, WorkOrderComment, ChecklistItem } from '@/types'
 
 export const WO_KEY = ['work_orders'] as const
 
 export function useWorkOrders(params?: Record<string, unknown>) {
-  return useQuery({
+  const query = useQuery({
     queryKey: [...WO_KEY, params],
     queryFn: () => workOrdersApi.list(params).then((r) => r.data),
   })
+  const pending = usePendingActions()
+  const data = useMemo(
+    () =>
+      query.data && pending.length > 0
+        ? { ...query.data, work_orders: query.data.work_orders.map((wo) => applyPending(wo, pending)) }
+        : query.data,
+    [query.data, pending],
+  )
+  return { ...query, data }
 }
 
+/** The work order, with this person's not-yet-sent changes already showing. */
 export function useWorkOrder(id?: number) {
-  return useQuery({
+  const query = useQuery({
     queryKey: [...WO_KEY, id],
     queryFn: () => workOrdersApi.get(id!).then((r) => r.data.data),
     enabled: !!id,
   })
+  const pending = usePendingActions(id)
+  const data = useMemo(() => (query.data ? applyPending(query.data, pending) : query.data), [query.data, pending])
+  return { ...query, data }
 }
 
 export function useCreateWorkOrder() {
@@ -57,19 +75,61 @@ export function useDeleteWorkOrder() {
   })
 }
 
+const QUEUED_MESSAGE = 'Saved on this device. It will be sent when you are back online.'
+
+/** What a queued change is called in messages: "Start work on WO-000012". */
+function describe(qc: QueryClient, id: number, what: string) {
+  const number = qc.getQueryData<WorkOrder>([...WO_KEY, id])?.work_order_number
+  return `${what} on ${number ?? `work order ${id}`}`
+}
+
+const EVENT_WORDS: Record<OfflineEvent, string> = {
+  start: 'Start work',
+  hold: 'Put on hold',
+  pending_parts: 'Waiting for parts',
+  need_parts: 'Waiting for parts',
+  resume: 'Resume work',
+  complete: 'Mark complete',
+}
+
+/**
+ * Sends a status change. A field event (start, hold, need parts, resume, complete) that cannot be
+ * sent for lack of a connection is kept on the device and sent later; anything else fails as before.
+ */
+async function sendTransition(
+  qc: QueryClient,
+  { id, event, payload }: { id: number; event: string; payload?: Record<string, unknown> },
+): Promise<{ queued: boolean }> {
+  const keep = () => {
+    offlineQueue.enqueue({
+      type: 'transition',
+      workOrderId: id,
+      event: event as OfflineEvent,
+      payload,
+      label: describe(qc, id, EVENT_WORDS[event as OfflineEvent]),
+    })
+    return { queued: true }
+  }
+  const canKeep = isOfflineEvent(event) && offlineQueue.canQueue()
+
+  if (canKeep && !navigator.onLine) return keep()
+  try {
+    await workOrdersApi.transition(id, event, payload)
+    return { queued: false }
+  } catch (error) {
+    if (canKeep && isNetworkError(error)) return keep()
+    throw error
+  }
+}
+
 export function useTransitionWorkOrder() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({
-      id,
-      event,
-      payload,
-    }: {
-      id: number
-      event: string
-      payload?: Record<string, unknown>
-    }) => workOrdersApi.transition(id, event, payload),
-    onSuccess: (_, vars) => {
+    // Always run, even offline: it is this function that decides to keep the change for later.
+    networkMode: 'always',
+    mutationFn: (vars: { id: number; event: string; payload?: Record<string, unknown> }) => sendTransition(qc, vars),
+    onSuccess: ({ queued }, vars) => {
+      if (queued) return toast.info(QUEUED_MESSAGE)
       qc.invalidateQueries({ queryKey: WO_KEY })
       qc.invalidateQueries({ queryKey: [...WO_KEY, vars.id] })
       toast.success('Status updated.')
@@ -95,6 +155,7 @@ export function useAssignWorkOrder() {
 export function useCompleteWorkOrder() {
   const qc = useQueryClient()
   return useMutation({
+    networkMode: 'always',
     mutationFn: ({
       id,
       completion_notes,
@@ -106,10 +167,13 @@ export function useCompleteWorkOrder() {
       actual_hours: number
       resolution_type: string
     }) =>
-      workOrdersApi.transition(id, 'complete', {
-        work_order: { completion_notes, actual_hours, resolution_type },
+      sendTransition(qc, {
+        id,
+        event: 'complete',
+        payload: { work_order: { completion_notes, actual_hours, resolution_type } },
       }),
-    onSuccess: (_, vars) => {
+    onSuccess: ({ queued }, vars) => {
+      if (queued) return toast.info(QUEUED_MESSAGE)
       qc.invalidateQueries({ queryKey: WO_KEY })
       qc.invalidateQueries({ queryKey: [...WO_KEY, vars.id] })
       toast.success('Work order marked as complete.')
@@ -159,23 +223,66 @@ export function useRejectWorkOrder() {
 // Comments
 export const WO_COMMENTS_KEY = (id: number) => [...WO_KEY, id, 'comments'] as const
 
+/** The comments, with the ones written offline and not sent yet shown at the end, marked as waiting. */
 export function useWorkOrderComments(id: number) {
-  return useQuery({
+  const query = useQuery({
     queryKey: WO_COMMENTS_KEY(id),
     queryFn: () => workOrdersApi.listComments(id).then((r) => r.data.comments),
     enabled: !!id,
   })
+  const pending = usePendingActions(id)
+  const me = useAuthStore((s) => s.user)
+  const data = useMemo(() => {
+    if (!query.data || !me) return query.data
+    const waiting: WorkOrderComment[] = pending.flatMap((a) =>
+      a.type === 'comment'
+        ? [{
+            id: -a.queuedAt,
+            body: a.body,
+            internal: a.internal,
+            created_at: new Date(a.queuedAt).toISOString(),
+            user: { id: me.id, full_name: me.full_name, role: me.role },
+            pending: true,
+          }]
+        : [],
+    )
+    return [...query.data, ...waiting]
+  }, [query.data, pending, me])
+  return { ...query, data }
 }
 
 export function useCreateComment(workOrderId: number) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ body, is_internal }: { body: string; is_internal: boolean }) =>
-      workOrdersApi.createComment(workOrderId, body, is_internal),
-    onSuccess: () => {
+    networkMode: 'always',
+    mutationFn: async ({ body, internal }: { body: string; internal: boolean }): Promise<{ queued: boolean }> => {
+      const clientId = newClientId()
+      const keep = () => {
+        offlineQueue.enqueue({
+          type: 'comment',
+          workOrderId,
+          body,
+          internal,
+          clientId,
+          label: describe(qc, workOrderId, 'Comment'),
+        })
+        return { queued: true }
+      }
+      if (!navigator.onLine && offlineQueue.canQueue()) return keep()
+      try {
+        await workOrdersApi.createComment(workOrderId, body, internal, clientId)
+        return { queued: false }
+      } catch (error) {
+        if (isNetworkError(error) && offlineQueue.canQueue()) return keep()
+        throw error
+      }
+    },
+    onSuccess: ({ queued }) => {
+      if (queued) return toast.info(QUEUED_MESSAGE)
       qc.invalidateQueries({ queryKey: WO_COMMENTS_KEY(workOrderId) })
     },
-    onError: () => toast.error('Failed to post comment.'),
+    onError: (error: AxiosError<{ error?: { message?: string } }>) =>
+      toast.error(error.response?.data?.error?.message ?? 'Failed to post comment.'),
   })
 }
 

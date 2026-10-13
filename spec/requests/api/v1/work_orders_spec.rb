@@ -353,6 +353,48 @@ RSpec.describe "Api::V1::WorkOrders", type: :request do
         }.to change(Comment, :count).by(1)
         expect(response).to have_http_status(:created)
       end
+
+      it "lets a manager add an internal note, which technicians then cannot see" do
+        post "/api/v1/work_orders/#{work_order.id}/comments",
+          params: { comment: { body: "Quote is too high", internal: true } }, headers: auth_headers_for(manager), as: :json
+        expect(response).to have_http_status(:created)
+        expect(json_body.dig("data", "internal")).to be(true)
+
+        get "/api/v1/work_orders/#{work_order.id}/comments", headers: auth_headers_for(technician)
+        expect(json_body["comments"].pluck("body")).not_to include("Quote is too high")
+      end
+
+      it "does not let a technician add an internal note" do
+        expect {
+          post "/api/v1/work_orders/#{work_order.id}/comments",
+            params: { comment: { body: "Sneaky", internal: true } }, headers: auth_headers_for(technician), as: :json
+        }.not_to change(Comment, :count)
+        expect(response).to have_http_status(:forbidden)
+      end
+
+      it "does not post the same comment twice when a phone sends it again" do
+        params = { comment: { body: "Replaced the belt", client_id: "abc-123" } }
+
+        post "/api/v1/work_orders/#{work_order.id}/comments", params: params, headers: auth_headers_for(technician), as: :json
+        expect(response).to have_http_status(:created)
+        first_id = json_body.dig("data", "id")
+
+        expect {
+          post "/api/v1/work_orders/#{work_order.id}/comments", params: params, headers: auth_headers_for(technician), as: :json
+        }.not_to change(Comment, :count)
+        expect(response).to have_http_status(:ok)
+        expect(json_body.dig("data", "id")).to eq(first_id)
+      end
+
+      it "treats the same client id on another work order as a new comment" do
+        other = create(:work_order, organization: organization)
+        [work_order, other].each do |wo|
+          post "/api/v1/work_orders/#{wo.id}/comments",
+            params: { comment: { body: "Done", client_id: "same" } }, headers: auth_headers_for(technician), as: :json
+        end
+
+        expect(Comment.where(client_id: "same").count).to eq(2)
+      end
     end
 
     describe "DELETE /api/v1/work_orders/:id/comments/:comment_id" do
