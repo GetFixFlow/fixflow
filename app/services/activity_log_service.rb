@@ -18,7 +18,9 @@ class ActivityLogService
   end
 
   private_class_method def self.org_id_for(resource)
-    if resource.respond_to?(:organization_id)
+    if resource.is_a?(Organization)
+      resource.id
+    elsif resource.respond_to?(:organization_id)
       resource.organization_id
     elsif resource.respond_to?(:organization)
       resource.organization&.id

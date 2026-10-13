@@ -17,9 +17,15 @@ class Organization < ApplicationRecord
 
   store_accessor :settings, :date_format
 
+  # The mail server saved in the app, or an empty one.
+  def smtp_config = SmtpConfig.load(self)
+
   # Each install serves one company. Setup is complete once that company
   # exists, after which public sign-up is closed.
   def self.setup_complete?
     exists?
   end
+
+  # The install's one company.
+  def self.the_company = order(:id).first
 end
