@@ -6,6 +6,7 @@ import { Zap } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { useLogin, useSetupStatus } from '@/hooks/useAuth'
+import { useBranding } from '@/hooks/useSettings'
 
 const schema = z.object({
   email: z.string().email('Valid email required'),
@@ -23,6 +24,7 @@ export function LoginPage() {
 
   const { mutate: login, isPending } = useLogin()
   const { data: setup } = useSetupStatus()
+  const { data: branding } = useBranding()
 
   // A brand-new install has no company yet: send the first visitor to setup.
   if (setup?.setup_required) return <Navigate to="/setup" replace />
@@ -31,12 +33,18 @@ export function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 dark:bg-gray-900">
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-600">
-            <Zap className="h-6 w-6 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Sign in to FixFlow</h1>
+          {branding?.logo_url ? (
+            <img src={branding.logo_url} alt={branding.name} className="mb-4 h-12 max-w-[14rem] object-contain" />
+          ) : (
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-600">
+              <Zap className="h-6 w-6 text-white" />
+            </div>
+          )}
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            {branding?.login_headline ?? 'Sign in to FixFlow'}
+          </h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Enter your credentials to continue
+            {branding?.login_subtitle ?? 'Enter your credentials to continue'}
           </p>
         </div>
 

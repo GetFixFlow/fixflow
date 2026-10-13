@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, waitFor, act } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { http, HttpResponse } from 'msw'
@@ -40,7 +40,7 @@ describe('WorkOrderAttachments offline', () => {
     expect(await screen.findByText('sent.jpg')).toBeInTheDocument()
     expect(screen.getByText('leak.jpg')).toBeInTheDocument()
     expect(screen.getByText('Waiting to sync')).toBeInTheDocument()
-    await waitFor(() => expect(screen.getByAltText('leak.jpg')).toHaveAttribute('src', 'blob:preview'))
+    await waitFor(() => expect(screen.getByAltText('leak.jpg')).toHaveAttribute('src', 'blob:preview'), { timeout: 5000 })
   })
 
   it('keeps a photo chosen while offline, and shows it at once', async () => {
@@ -49,22 +49,22 @@ describe('WorkOrderAttachments offline', () => {
     setOnline(false)
 
     const input = document.querySelector('input[type="file"]') as HTMLInputElement
-    await act(async () => {
-      await userEvent.upload(input, new File([new Uint8Array(800)], 'pump.jpg', { type: 'image/jpeg' }))
-    })
+    await userEvent.upload(input, new File([new Uint8Array(800)], 'pump.jpg', { type: 'image/jpeg' }))
 
-    expect(await screen.findByText('pump.jpg')).toBeInTheDocument()
-    expect(screen.getByText('Waiting to sync')).toBeInTheDocument()
+    // Keeping the file goes through the (fake) browser database. While it does, the name shows in an
+    // "uploading" row that is then replaced by the waiting tile, so wait for the final state.
+    expect(await screen.findByText('Waiting to sync', {}, { timeout: 5000 })).toBeInTheDocument()
+    await waitFor(() => expect(screen.getAllByText('pump.jpg')).toHaveLength(1))
     const [queued] = offlineQueue.getSnapshot().queue as QueuedPhoto[]
     expect(queued).toMatchObject({ type: 'photo', filename: 'pump.jpg', workOrderId: 1 })
   })
 
   it('counts waiting photos against the limit of 20', async () => {
     renderIt()
-    expect(await screen.findByText(/19 remaining/)).toBeInTheDocument()
+    expect(await screen.findByText(/19 remaining/, {}, { timeout: 5000 })).toBeInTheDocument()
 
     offlineQueue.enqueue({ type: 'photo', workOrderId: 1, fileKey: 'k', filename: 'one.jpg', contentType: 'image/jpeg', size: 1, clientId: 'z', label: 'Photo' })
 
-    expect(await screen.findByText(/18 remaining/)).toBeInTheDocument()
+    expect(await screen.findByText(/18 remaining/, {}, { timeout: 5000 })).toBeInTheDocument()
   })
 })

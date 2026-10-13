@@ -5,6 +5,8 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { authApi } from '@/api'
+import { http, HttpResponse } from 'msw'
+import { server } from '@/test/server'
 
 vi.mock('@/api', () => ({
   authApi: { setupStatus: vi.fn(), login: vi.fn(), register: vi.fn() },
@@ -73,5 +75,27 @@ describe('LoginPage', () => {
       { wrapper },
     )
     expect(await screen.findByText('setup screen')).toBeInTheDocument()
+  })
+
+  it("shows the company's logo, headline and subtitle from Settings, Branding", async () => {
+    server.use(http.get('/api/v1/branding', () => HttpResponse.json({
+      branding: {
+        name: 'Acme Corp', logo_url: '/api/v1/storage/x/logo.png', favicon_url: null, primary_color: '#16a34a',
+        login_headline: 'Acme Maintenance', login_subtitle: 'Sign in with your work email',
+      },
+    })))
+    render(<LoginPage />, { wrapper })
+
+    expect(await screen.findByRole('heading', { name: 'Acme Maintenance' })).toBeInTheDocument()
+    expect(screen.getByText('Sign in with your work email')).toBeInTheDocument()
+    expect(screen.getByAltText('Acme Corp')).toHaveAttribute('src', '/api/v1/storage/x/logo.png')
+  })
+
+  it('shows the usual text until the branding has loaded, or if it cannot', async () => {
+    server.use(http.get('/api/v1/branding', () => HttpResponse.json({}, { status: 500 })))
+    render(<LoginPage />, { wrapper })
+
+    expect(screen.getByRole('heading', { name: 'Sign in to FixFlow' })).toBeInTheDocument()
+    expect(screen.getByText('Enter your credentials to continue')).toBeInTheDocument()
   })
 })

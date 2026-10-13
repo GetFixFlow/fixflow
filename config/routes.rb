@@ -23,6 +23,7 @@ Rails.application.routes.draw do
 
       # Company settings: anyone signed in can read them, only admins change them
       resource :organization_settings, only: %i[show update], controller: "organization_settings"
+      resource :branding, only: %i[show update], controller: "branding"
 
       # The signed-in user's own details and password
       resource :profile, only: %i[show update], controller: "profile" do

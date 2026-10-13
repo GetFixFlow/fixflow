@@ -6,6 +6,7 @@ import { useEffect } from 'react'
 import { router } from './router'
 import { queryClient } from './lib/queryClient'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { BrandingApplier } from './components/layout/BrandingApplier'
 import { useUiStore } from './stores/uiStore'
 
 function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -21,6 +22,7 @@ export default function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
+          <BrandingApplier />
           <RouterProvider router={router} />
           <Toaster position="top-right" richColors />
           <ReactQueryDevtools initialIsOpen={false} />

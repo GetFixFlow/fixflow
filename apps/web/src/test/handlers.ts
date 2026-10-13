@@ -1,6 +1,15 @@
 import { http, HttpResponse } from 'msw'
 
 export const handlers = [
+  http.get('/api/v1/branding', () => {
+    return HttpResponse.json({
+      branding: {
+        name: 'Demo Co', logo_url: null, favicon_url: null, primary_color: '#2563eb',
+        login_headline: 'Sign in to FixFlow', login_subtitle: 'Enter your credentials to continue',
+      },
+    })
+  }),
+
   http.post('/api/v1/users/sign_in', () => {
     return HttpResponse.json({
       success: true,

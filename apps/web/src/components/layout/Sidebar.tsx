@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUiStore } from '@/stores/uiStore'
+import { useBranding } from '@/hooks/useSettings'
 import { useAuthStore } from '@/stores/authStore'
 import type { Role } from '@/types'
 
@@ -38,6 +39,7 @@ const NAV_ITEMS: NavItem[] = [
 export function Sidebar() {
   const { sidebarCollapsed, toggleSidebar } = useUiStore()
   const { user } = useAuthStore()
+  const { data: branding } = useBranding()
 
   const visibleItems = NAV_ITEMS.filter(
     (item) => !item.roles || (user && item.roles.includes(user.role)),
@@ -52,14 +54,22 @@ export function Sidebar() {
     >
       {/* Logo */}
       <div className="flex h-16 items-center border-b border-gray-200 px-4 dark:border-gray-700">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600">
-            <Zap className="h-4 w-4 text-white" />
+        {branding?.logo_url ? (
+          <img
+            src={branding.logo_url}
+            alt={branding.name}
+            className={cn('h-8 object-contain object-left', sidebarCollapsed ? 'w-8' : 'max-w-[11rem]')}
+          />
+        ) : (
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600">
+              <Zap className="h-4 w-4 text-white" />
+            </div>
+            {!sidebarCollapsed && (
+              <span className="text-lg font-bold text-gray-900 dark:text-white">FixFlow</span>
+            )}
           </div>
-          {!sidebarCollapsed && (
-            <span className="text-lg font-bold text-gray-900 dark:text-white">FixFlow</span>
-          )}
-        </div>
+        )}
       </div>
 
       {/* Nav */}

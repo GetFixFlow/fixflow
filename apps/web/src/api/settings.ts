@@ -38,17 +38,19 @@ export const settingsApi = {
   },
 
   branding: {
+    // Public: the sign-in page needs it before anyone has signed in.
     get: () => apiClient.get<{ branding: BrandingSettings }>('/branding'),
-    update: (data: Partial<BrandingSettings> & { logo?: File; favicon?: File }) => {
+    update: (data: BrandingUpdate) => {
       const fd = new FormData()
+      fd.append('branding[primary_color]', data.primary_color)
+      fd.append('branding[login_headline]', data.login_headline)
+      fd.append('branding[login_subtitle]', data.login_subtitle)
       if (data.logo) fd.append('branding[logo]', data.logo)
       if (data.favicon) fd.append('branding[favicon]', data.favicon)
-      if (data.primary_color) fd.append('branding[primary_color]', data.primary_color)
-      if (data.sidebar_color) fd.append('branding[sidebar_color]', data.sidebar_color)
-      if (data.accent_color) fd.append('branding[accent_color]', data.accent_color)
-      if (data.login_headline) fd.append('branding[login_headline]', data.login_headline)
-      if (data.login_subtitle) fd.append('branding[login_subtitle]', data.login_subtitle)
-      return apiClient.patch('/branding', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+      if (data.remove_logo) fd.append('branding[remove_logo]', 'true')
+      if (data.remove_favicon) fd.append('branding[remove_favicon]', 'true')
+      // No Content-Type header: the browser adds multipart/form-data with the boundary the server needs.
+      return apiClient.patch<{ branding: BrandingSettings }>('/branding', fd)
     },
   },
 
@@ -107,13 +109,23 @@ export interface Holiday {
 }
 
 export interface BrandingSettings {
-  logo_url?: string
-  favicon_url?: string
+  /** The company name, shown where a logo is not set. */
+  name: string
+  logo_url: string | null
+  favicon_url: string | null
   primary_color: string
-  sidebar_color: string
-  accent_color: string
   login_headline: string
   login_subtitle: string
+}
+
+export interface BrandingUpdate {
+  primary_color: string
+  login_headline: string
+  login_subtitle: string
+  logo?: File | null
+  favicon?: File | null
+  remove_logo?: boolean
+  remove_favicon?: boolean
 }
 
 export interface SmtpSettings {

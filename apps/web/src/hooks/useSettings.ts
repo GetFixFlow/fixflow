@@ -113,10 +113,12 @@ export function useUpdateOrgSettings() {
   })
 }
 
+/** Public, so the sign-in page can use it too. Falls back to the defaults (the app still works) if it cannot load. */
 export function useBranding() {
   return useQuery({
     queryKey: ['branding'],
     queryFn: () => settingsApi.branding.get().then((r) => r.data.branding),
+    staleTime: 5 * 60 * 1000,
   })
 }
 
@@ -128,6 +130,8 @@ export function useUpdateBranding() {
       qc.invalidateQueries({ queryKey: ['branding'] })
       toast.success('Branding saved.')
     },
+    onError: (error: AxiosError<{ error?: { message?: string } }>) =>
+      toast.error(error.response?.data?.error?.message ?? 'Could not save the branding.'),
   })
 }
 
