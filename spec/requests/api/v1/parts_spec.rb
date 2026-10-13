@@ -69,6 +69,54 @@ RSpec.describe "Api::V1::Parts", type: :request do
       expect(filter.reload.name).to eq("Oil filter")
     end
 
+    it "does not let the stock level be edited directly, only adjusted" do
+      patch "/api/v1/parts/#{belt.id}", params: { part: { quantity_on_hand: 999, name: "V-belt B" } },
+headers: auth_headers_for(manager), as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(belt.reload).to have_attributes(name: "V-belt B", quantity_on_hand: 20)
+    end
+
+    it "refuses a SKU already used in the company, ignoring case, but allows several parts without one" do
+      post "/api/v1/parts", params: { part: { name: "Another filter", sku: "of-100" } }, headers: auth_headers_for(manager), as: :json
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(json_body.dig("error", "message")).to eq("Sku is already used by another part")
+
+      2.times do |i|
+        post "/api/v1/parts", params: { part: { name: "No SKU #{i}", sku: "  " } }, headers: auth_headers_for(manager), as: :json
+        expect(response).to have_http_status(:created)
+      end
+    end
+
+    it "allows the same SKU in another company" do
+      other = create(:organization)
+      expect(build(:part, organization: other, sku: "OF-100")).to be_valid
+    end
+
+    it "refuses a negative cost" do
+      post "/api/v1/parts", params: { part: { name: "Bad", unit_cost: -1 } }, headers: auth_headers_for(manager), as: :json
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+
+    it "keeps a record of who changed the catalog" do
+      expect do
+        post "/api/v1/parts", params: new_part, headers: auth_headers_for(manager), as: :json
+        patch "/api/v1/parts/#{json_body['id']}", params: { part: { unit_cost: 50 } }, headers: auth_headers_for(manager), as: :json
+      end.to change { ActivityLog.where(action: %w[part.created part.updated]).count }.by(2)
+    end
+
+    it "refuses to delete a part that has been used on a work order" do
+      work_order = create(:work_order, organization: org)
+      create(:work_order_part, work_order: work_order, part: belt, quantity_used: 1)
+
+      delete "/api/v1/parts/#{belt.id}", headers: auth_headers_for(admin), as: :json
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(json_body.dig("error", "code")).to eq("PART_IN_USE")
+      expect(Part.exists?(belt.id)).to be(true)
+      expect(work_order.work_order_parts.count).to eq(1)
+    end
+
     it "lets only an admin delete a part" do
       delete "/api/v1/parts/#{belt.id}", headers: auth_headers_for(manager), as: :json
       expect(response).to have_http_status(:forbidden)
@@ -89,6 +137,21 @@ headers: auth_headers_for(technician), as: :json
       expect(json_body["quantity_on_hand"]).to eq(15.0)
     end
 
+    it "records who changed the stock, from what to what, and why" do
+      patch "/api/v1/parts/#{belt.id}/adjust_stock", params: { quantity: 3, direction: "remove", reason: "Cycle count" },
+headers: auth_headers_for(technician), as: :json
+
+      log = ActivityLog.where(action: "part.stock_adjusted").last
+      expect(log.user_id).to eq(technician.id)
+      expect(log.metadata).to include("from" => 20.0, "to" => 17.0, "reason" => "Cycle count")
+    end
+
+    it "refuses a zero or missing quantity" do
+      patch "/api/v1/parts/#{belt.id}/adjust_stock", params: { quantity: 0 }, headers: auth_headers_for(technician), as: :json
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(belt.reload.quantity_on_hand).to eq(20)
+    end
+
     it "refuses to go below zero with a clear message" do
       patch "/api/v1/parts/#{filter.id}/adjust_stock", params: { quantity: 9, direction: "remove" },
 headers: auth_headers_for(technician), as: :json
@@ -101,6 +164,14 @@ headers: auth_headers_for(technician), as: :json
     it "is not for requesters" do
       patch "/api/v1/parts/#{belt.id}/adjust_stock", params: { quantity: 1 }, headers: auth_headers_for(requester), as: :json
       expect(response).to have_http_status(:forbidden)
+    end
+  end
+
+  describe "GET /api/v1/parts?low_stock=true" do
+    it "lets a technician see just the parts to reorder" do
+      get "/api/v1/parts", params: { low_stock: "true" }, headers: auth_headers_for(technician)
+
+      expect(json_body["parts"].pluck("name")).to eq(["Oil filter"])
     end
   end
 

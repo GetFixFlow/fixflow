@@ -11,6 +11,7 @@ module Api
       def index
         scope = current_organization.parts
         scope = search(scope, params[:search]) if params[:search].present?
+        scope = scope.low_stock if ActiveModel::Type::Boolean.new.cast(params[:low_stock])
         pagy, parts = pagy(scope.order(:name))
         render json: {
           parts: PartBlueprint.render_as_hash(parts),
@@ -29,23 +30,37 @@ module Api
 
       def create
         part = current_organization.parts.create!(part_params)
+        record(part, "part.created")
         render json: PartBlueprint.render_as_hash(part), status: :created
       end
 
+      # The stock level is not edited here: use adjust_stock, which keeps a record of who changed it.
       def update
         @part.update!(part_params)
+        record(@part, "part.updated", changes: @part.previous_changes.except("updated_at"))
         render json: PartBlueprint.render_as_hash(@part)
       end
 
       def destroy
-        @part.destroy!
+        return render_error(@part.errors.full_messages.first, :unprocessable_entity, code: "PART_IN_USE") unless @part.destroy
+
+        record(@part, "part.deleted")
         head :no_content
       end
 
+      # PATCH /api/v1/parts/:id/adjust_stock  { quantity, direction: add|remove, reason }
       def adjust_stock
+        quantity = params[:quantity].to_f
+        unless quantity.positive?
+          return render_error("Enter a quantity greater than zero.", :unprocessable_entity,
+code: "VALIDATION_ERROR")
+        end
+
+        before = @part.quantity_on_hand
         direction = params[:direction].to_s == "remove" ? :remove : :add
-        @part.adjust_stock(params[:quantity].to_f, direction: direction)
-        render json: PartBlueprint.render_as_hash(@part.reload)
+        @part.adjust_stock(quantity, direction: direction)
+        record(@part, "part.stock_adjusted", from: before.to_f, to: @part.quantity_on_hand.to_f, reason: params[:reason].presence)
+        render json: PartBlueprint.render_as_hash(@part)
       end
 
       private
@@ -66,7 +81,13 @@ module Api
       end
 
       def part_params
-        params.require(:part).permit(:name, :sku, :quantity_on_hand, :reorder_point, :unit, :unit_cost, :location_id)
+        allowed = %i[name sku reorder_point unit unit_cost location_id]
+        allowed << :quantity_on_hand if action_name == "create"
+        params.expect(part: allowed)
+      end
+
+      def record(part, action, **metadata)
+        ActivityLogService.log(action: action, resource: part, metadata: metadata.compact)
       end
     end
   end

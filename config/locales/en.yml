@@ -29,3 +29,10 @@
 
 en:
   hello: "Hello world"
+  activerecord:
+    errors:
+      models:
+        part:
+          attributes:
+            sku:
+              taken: "is already used by another part"
