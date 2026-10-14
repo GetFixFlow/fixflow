@@ -13,14 +13,14 @@ import { SensorTrendComparison } from '@/components/reports/SensorTrendCompariso
 import { DataTable } from '@/components/reports/DataTable'
 import { useReportStore } from '@/stores/reportStore'
 import { reportsApi } from '@/api/reports'
-import { format } from 'date-fns'
 import { formatPercent } from '@/utils/chartUtils'
+import { formatDate } from '@/lib/localeFormat'
 
 export function IoTAnalyticsReportPage() {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const { getParams, dateFrom, dateTo } = useReportStore()
   const params = getParams()
-  const dateRange = `${format(dateFrom, 'MMM d, yyyy')} – ${format(dateTo, 'MMM d, yyyy')}`
+  const dateRange = `${formatDate(dateFrom)} – ${formatDate(dateTo)}`
 
   const { data: alerts, isLoading } = useQuery({
     queryKey: ['reports', 'iot_alerts', params],

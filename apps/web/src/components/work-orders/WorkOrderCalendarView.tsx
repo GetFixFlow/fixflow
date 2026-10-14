@@ -17,6 +17,7 @@ import {
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import type { WorkOrder, Priority } from '@/types'
+import { weekdayLabels, weekStartsOn } from '@/lib/localeFormat'
 
 const PRIORITY_DOT: Record<Priority, string> = {
   critical: 'bg-red-500',
@@ -36,8 +37,8 @@ export function WorkOrderCalendarView({ workOrders }: WorkOrderCalendarViewProps
 
   const monthStart = startOfMonth(currentMonth)
   const monthEnd = endOfMonth(currentMonth)
-  const calStart = startOfWeek(monthStart)
-  const calEnd = endOfWeek(monthEnd)
+  const calStart = startOfWeek(monthStart, { weekStartsOn: weekStartsOn() })
+  const calEnd = endOfWeek(monthEnd, { weekStartsOn: weekStartsOn() })
   const days = eachDayOfInterval({ start: calStart, end: calEnd })
 
   const wosByDay = workOrders.reduce<Record<string, WorkOrder[]>>((acc, wo) => {
@@ -90,7 +91,7 @@ export function WorkOrderCalendarView({ workOrders }: WorkOrderCalendarViewProps
 
       {/* Day-of-week headers */}
       <div className="grid grid-cols-7 text-center">
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
+        {weekdayLabels().map((d) => (
           <div
             key={d}
             className="py-2 text-xs font-medium uppercase text-gray-400 dark:text-gray-500"

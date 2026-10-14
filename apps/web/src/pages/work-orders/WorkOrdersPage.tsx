@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/Card'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Button } from '@/components/ui/Button'
-import { format } from 'date-fns'
+import { formatDate } from '@/lib/localeFormat'
 
 export function WorkOrdersPage() {
   const { data, isLoading } = useWorkOrders()
@@ -52,7 +52,7 @@ export function WorkOrdersPage() {
                     <p className="mt-1 font-medium text-gray-900 dark:text-gray-100">{wo.title}</p>
                     {wo.due_date && (
                       <p className="mt-1 text-xs text-gray-500">
-                        Due {format(new Date(wo.due_date), 'MMM d, yyyy')}
+                        Due {formatDate(new Date(wo.due_date))}
                       </p>
                     )}
                   </div>

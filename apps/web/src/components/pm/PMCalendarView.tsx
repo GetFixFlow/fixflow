@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { PMDueDateDisplay } from './PMDueDateDisplay'
 import type { PreventiveMaintenance, Priority } from '@/types'
+import { weekdayLabels, weekStartsOn } from '@/lib/localeFormat'
 
 const PRIORITY_CHIP: Record<Priority, string> = {
   critical: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
@@ -29,8 +30,8 @@ export function PMCalendarView({ pms, onTrigger }: PMCalendarViewProps) {
 
   const monthStart = startOfMonth(currentMonth)
   const monthEnd = endOfMonth(currentMonth)
-  const calStart = startOfWeek(monthStart)
-  const calEnd = endOfWeek(monthEnd)
+  const calStart = startOfWeek(monthStart, { weekStartsOn: weekStartsOn() })
+  const calEnd = endOfWeek(monthEnd, { weekStartsOn: weekStartsOn() })
   const calDays = eachDayOfInterval({ start: calStart, end: calEnd })
 
   const pmsByDate = (day: Date) =>
@@ -59,7 +60,7 @@ export function PMCalendarView({ pms, onTrigger }: PMCalendarViewProps) {
 
       {/* Day names */}
       <div className="grid grid-cols-7 mb-1">
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
+        {weekdayLabels().map((d) => (
           <div key={d} className="text-center text-xs font-medium text-gray-400 py-1">{d}</div>
         ))}
       </div>

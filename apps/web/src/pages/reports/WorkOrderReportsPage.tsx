@@ -18,8 +18,8 @@ import { useReportStore } from '@/stores/reportStore'
 import { useComparisonData } from '@/hooks/useComparisonData'
 import { reportsApi } from '@/api/reports'
 import { exportToCSV } from '@/services/exportService'
-import { format } from 'date-fns'
 import { formatHours, formatPercent } from '@/utils/chartUtils'
+import { formatDate } from '@/lib/localeFormat'
 
 export function WorkOrderReportsPage() {
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -27,7 +27,7 @@ export function WorkOrderReportsPage() {
   const { change } = useComparisonData()
 
   const params = getParams()
-  const dateRange = `${format(dateFrom, 'MMM d, yyyy')} – ${format(dateTo, 'MMM d, yyyy')}`
+  const dateRange = `${formatDate(dateFrom)} – ${formatDate(dateTo)}`
 
   const { data: summary, isLoading } = useQuery({
     queryKey: ['reports', 'wo_summary', params],

@@ -1,9 +1,10 @@
 import { RefreshCw } from 'lucide-react'
-import { format, formatDistanceToNow } from 'date-fns'
+import { formatDistanceToNow } from 'date-fns'
 import { Card, CardContent } from '@/components/ui/Card'
 import { PMDueDateDisplay } from './PMDueDateDisplay'
 import { formatFrequency } from './PMFrequencyBadge'
 import type { PreventiveMaintenance } from '@/types'
+import { formatDate } from '@/lib/localeFormat'
 
 export function PMScheduleInfo({ pm }: { pm: PreventiveMaintenance }) {
   const dueAt = pm.next_due_at
@@ -19,7 +20,7 @@ export function PMScheduleInfo({ pm }: { pm: PreventiveMaintenance }) {
         <dl className="space-y-2 text-sm">
           <div className="flex justify-between">
             <dt className="text-gray-500">Started</dt>
-            <dd className="text-gray-900 dark:text-gray-100">{pm.start_date ? format(new Date(pm.start_date), 'MMM d, yyyy') : '—'}</dd>
+            <dd className="text-gray-900 dark:text-gray-100">{pm.start_date ? formatDate(new Date(pm.start_date)) : '—'}</dd>
           </div>
           <div className="flex justify-between">
             <dt className="text-gray-500">Next Due</dt>
@@ -33,7 +34,7 @@ export function PMScheduleInfo({ pm }: { pm: PreventiveMaintenance }) {
           </div>
           <div className="flex justify-between">
             <dt className="text-gray-500">End Date</dt>
-            <dd className="text-gray-900 dark:text-gray-100">{pm.end_date ? format(new Date(pm.end_date), 'MMM d, yyyy') : 'No end date'}</dd>
+            <dd className="text-gray-900 dark:text-gray-100">{pm.end_date ? formatDate(new Date(pm.end_date)) : 'No end date'}</dd>
           </div>
           {pm.estimated_hours && (
             <div className="flex justify-between">

@@ -1,4 +1,5 @@
 import { apiClient } from './client'
+import type { LocaleSettings } from '@/lib/localeFormat'
 import type { User } from '@/types'
 
 export const settingsApi = {
@@ -150,12 +151,5 @@ export interface EmailStatus extends Omit<SmtpSettings, 'password'> {
   environment_host: string | null
 }
 
-export interface LocalizationSettings {
-  language: string
-  date_format: string
-  time_format: '12h' | '24h'
-  timezone: string
-  currency: string
-  first_day_of_week: 'monday' | 'sunday'
-  number_format: string
-}
+/** How dates, times, numbers and money are shown. Defined with the formatting code that uses it. */
+export type LocalizationSettings = LocaleSettings

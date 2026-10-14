@@ -12,8 +12,8 @@ import { PMComplianceTrendChart } from '@/components/reports/PMComplianceTrendCh
 import { PMForecastTable } from '@/components/reports/PMForecastTable'
 import { useReportStore } from '@/stores/reportStore'
 import { reportsApi } from '@/api/reports'
-import { format } from 'date-fns'
 import { formatPercent } from '@/utils/chartUtils'
+import { formatDate } from '@/lib/localeFormat'
 
 interface PMComplianceResponse {
   overall_compliance_rate: number
@@ -46,7 +46,7 @@ export function PMComplianceReportPage() {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const { getParams, dateFrom, dateTo } = useReportStore()
   const params = getParams()
-  const dateRange = `${format(dateFrom, 'MMM d, yyyy')} – ${format(dateTo, 'MMM d, yyyy')}`
+  const dateRange = `${formatDate(dateFrom)} – ${formatDate(dateTo)}`
 
   const { data: compliance, isLoading } = useQuery({
     queryKey: ['reports', 'pm_compliance', params],

@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { queryClient } from '@/lib/queryClient'
 import { settingsApi } from '@/api/settings'
 import { useAuthStore } from '@/stores/authStore'
+import { useLocaleStore } from '@/lib/localeFormat'
 import type { User } from '@/types'
 
 export function useProfile() {
@@ -176,10 +177,13 @@ export function useTestEmail() {
   return useMutation({ mutationFn: settingsApi.email.test })
 }
 
-export function useLocalization() {
+/** Every signed-in person reads it: it decides how every date and amount is shown. */
+export function useLocalization(enabled = true) {
   return useQuery({
     queryKey: ['localization'],
     queryFn: () => settingsApi.localization.get().then((r) => r.data.localization),
+    staleTime: 5 * 60 * 1000,
+    enabled,
   })
 }
 
@@ -187,9 +191,12 @@ export function useUpdateLocalization() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: settingsApi.localization.update,
-    onSuccess: () => {
+    onSuccess: (response) => {
+      useLocaleStore.getState().setLocale(response.data.localization)
       qc.invalidateQueries({ queryKey: ['localization'] })
       toast.success('Localization saved.')
     },
+    onError: (error: AxiosError<{ error?: { message?: string } }>) =>
+      toast.error(error.response?.data?.error?.message ?? 'Could not save the localization settings.'),
   })
 }

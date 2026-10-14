@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
 import { useAuthStore } from '@/stores/authStore'
 import { cn } from '@/lib/utils'
+import { formatDateTime } from '@/lib/localeFormat'
 
 const ACTION_TYPES = [
   { value: '', label: 'All Actions' },
@@ -168,7 +169,7 @@ export function AuditLogPage() {
                   filteredLogs.map((log) => (
                     <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
                       <td className="px-4 py-2.5 text-xs text-gray-500 whitespace-nowrap">
-                        {format(new Date(log.created_at), 'MMM d, yyyy h:mm a')}
+                        {formatDateTime(new Date(log.created_at))}
                       </td>
                       <td className="px-4 py-2.5">
                         <p className="font-medium text-gray-900 dark:text-gray-100 text-xs">{log.user?.full_name}</p>

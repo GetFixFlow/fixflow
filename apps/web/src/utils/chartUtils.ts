@@ -1,7 +1,9 @@
 import { format, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval, startOfWeek, startOfMonth } from 'date-fns'
+import { formatMoney, formatNumber, weekStartsOn } from '@/lib/localeFormat'
 
+/** Whole amounts in the company's currency (charts). */
 export function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value)
+  return formatMoney(value, 0)
 }
 
 export function formatHours(value: number): string {
@@ -14,7 +16,7 @@ export function formatPercent(value: number, decimals = 1): string {
 }
 
 export function formatCount(value: number): string {
-  return new Intl.NumberFormat('en-US').format(value)
+  return formatNumber(value, 0)
 }
 
 export function getStatusColor(status: string): string {
@@ -40,7 +42,7 @@ export function generateDateSeries(from: Date, to: Date, interval: DateInterval)
     return eachDayOfInterval({ start: from, end: to }).map((d: Date) => format(d, 'yyyy-MM-dd'))
   }
   if (interval === 'week') {
-    return eachWeekOfInterval({ start: from, end: to }).map((d: Date) => format(startOfWeek(d), 'yyyy-MM-dd'))
+    return eachWeekOfInterval({ start: from, end: to }, { weekStartsOn: weekStartsOn() }).map((d: Date) => format(startOfWeek(d, { weekStartsOn: weekStartsOn() }), 'yyyy-MM-dd'))
   }
   return eachMonthOfInterval({ start: from, end: to }).map((d: Date) => format(startOfMonth(d), 'yyyy-MM'))
 }

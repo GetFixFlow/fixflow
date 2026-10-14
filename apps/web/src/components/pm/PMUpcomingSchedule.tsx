@@ -1,9 +1,9 @@
 import { Calendar } from 'lucide-react'
-import { format } from 'date-fns'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { usePreviewSchedule } from '@/hooks/usePreventiveMaintenance'
 import { cn } from '@/lib/utils'
+import { formatDate } from '@/lib/localeFormat'
 
 export function PMUpcomingSchedule({ pmId }: { pmId: number }) {
   const { data, isLoading } = usePreviewSchedule(pmId)
@@ -32,7 +32,7 @@ export function PMUpcomingSchedule({ pmId }: { pmId: number }) {
               const isNext = idx === 0
               return (
                 <li key={item.occurrence} className={cn('flex items-center justify-between text-sm', isNext && 'font-medium')}>
-                  <span className="text-gray-700 dark:text-gray-300">{format(new Date(item.date), 'MMM d, yyyy')}</span>
+                  <span className="text-gray-700 dark:text-gray-300">{formatDate(new Date(item.date))}</span>
                   <span className={cn('text-xs',
                     diff < 0 ? 'text-red-500' :
                     diff === 0 ? 'text-orange-500 font-semibold' :

@@ -1,6 +1,7 @@
 import { AlertCircle, Clock } from 'lucide-react'
-import { differenceInCalendarDays, isToday, isTomorrow, format } from 'date-fns'
+import { differenceInCalendarDays, isToday, isTomorrow } from 'date-fns'
 import { cn } from '@/lib/utils'
+import { formatDate } from '@/lib/localeFormat'
 
 interface PMDueDateDisplayProps { dueDate?: string | null; className?: string; showIcon?: boolean }
 
@@ -30,5 +31,5 @@ export function PMDueDateDisplay({ dueDate, className, showIcon = true }: PMDueD
       {showIcon && <Clock className="h-3.5 w-3.5" />}Due in {diff} days
     </span>
   )
-  return <span className={cn('text-sm text-gray-600 dark:text-gray-400', className)}>{format(date, 'MMM d, yyyy')}</span>
+  return <span className={cn('text-sm text-gray-600 dark:text-gray-400', className)}>{formatDate(date)}</span>
 }

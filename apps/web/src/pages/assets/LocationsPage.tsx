@@ -14,6 +14,7 @@ import { useLocations } from '@/hooks/useLocations'
 import { useAssets } from '@/hooks/useAssets'
 import { useAuthStore } from '@/stores/authStore'
 import type { Location } from '@/types'
+import { formatDate } from '@/lib/localeFormat'
 
 export function LocationsPage() {
   const navigate = useNavigate()
@@ -245,7 +246,7 @@ export function LocationsPage() {
                             </td>
                             <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
                               {asset.last_work_order_date
-                                ? new Date(asset.last_work_order_date).toLocaleDateString()
+                                ? formatDate(asset.last_work_order_date)
                                 : '—'}
                             </td>
                           </tr>
@@ -321,7 +322,7 @@ export function LocationsPage() {
                       <div>
                         <p className="text-gray-500 dark:text-gray-400">Created</p>
                         <p className="mt-0.5 font-medium text-gray-900 dark:text-gray-100">
-                          {new Date(selectedLocation.created_at).toLocaleDateString()}
+                          {formatDate(selectedLocation.created_at)}
                         </p>
                       </div>
                       {selectedLocation.description && (

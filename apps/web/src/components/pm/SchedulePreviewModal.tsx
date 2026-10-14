@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/Skeleton'
 import { usePreviewSchedule } from '@/hooks/usePreventiveMaintenance'
 import { cn } from '@/lib/utils'
 import type { PreventiveMaintenance } from '@/types'
+import { formatDate } from '@/lib/localeFormat'
 
 // Client-side schedule preview calculator (used in create form before PM is saved)
 export function calculatePreviewDates(
@@ -86,7 +87,7 @@ export function SchedulePreviewModal({ open, onClose, pmId, pm, previewDates }: 
                     return (
                       <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                         <td className="py-2 text-gray-400 text-xs">{idx + 1}</td>
-                        <td className="py-2 font-medium text-gray-900 dark:text-gray-100">{format(date, 'MMM d, yyyy')}</td>
+                        <td className="py-2 font-medium text-gray-900 dark:text-gray-100">{formatDate(date)}</td>
                         <td className="py-2 text-gray-500">{format(date, 'EEEE')}</td>
                         <td className={cn('py-2 text-xs', daysUntil < 0 ? 'text-red-500' : daysUntil <= 7 ? 'text-orange-500' : 'text-gray-400')}>
                           {daysUntil < 0 ? `${Math.abs(daysUntil)}d overdue` : daysUntil === 0 ? 'Today' : `in ${daysUntil}d`}

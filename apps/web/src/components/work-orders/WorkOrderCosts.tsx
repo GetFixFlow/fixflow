@@ -1,6 +1,7 @@
 import { DollarSign } from 'lucide-react'
 import { useWorkOrderParts } from '@/hooks/useWorkOrders'
 import { partLineTotal } from '@/utils/parts'
+import { formatMoney } from '@/lib/localeFormat'
 
 const HOURLY_RATE = 40 // USD per hour, configurable in settings
 
@@ -34,12 +35,12 @@ export function WorkOrderCosts({ workOrderId, actualHours, laborCost }: WorkOrde
         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Cost Summary</span>
       </div>
       <div className="divide-y divide-gray-100 dark:divide-gray-700">
-        <Row label="Parts cost" value={`$${partsCost.toFixed(2)}`} />
+        <Row label="Parts cost" value={formatMoney(partsCost)} />
         <Row
           label={`Labor cost${hours ? ` (${hours} hrs × $${HOURLY_RATE}/hr)` : ''}`}
-          value={`$${labor.toFixed(2)}`}
+          value={formatMoney(labor)}
         />
-        <Row label="Total cost" value={`$${total.toFixed(2)}`} bold />
+        <Row label="Total cost" value={formatMoney(total)} bold />
       </div>
     </div>
   )

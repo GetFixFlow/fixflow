@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/Input'
 import { useTestIotRule } from '@/hooks/useIoT'
 import { cn } from '@/lib/utils'
 import type { IotRuleExtended } from '@/types'
+import { formatTime } from '@/lib/localeFormat'
 
 interface TestRuleModalProps {
   open: boolean
@@ -92,7 +93,7 @@ export function TestRuleModal({ open, rule, onClose }: TestRuleModalProps) {
                 {result.recent_readings.slice(0, 5).map((r, i) => (
                   <div key={i} className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 py-0.5">
                     <span className="font-mono">{r.value} {r.unit}</span>
-                    <span>{new Date(r.recorded_at).toLocaleTimeString()}</span>
+                    <span>{formatTime(r.recorded_at)}</span>
                     <span className={r.would_trigger ? 'text-red-600' : 'text-green-600'}>
                       {r.would_trigger ? '⚡ trigger' : '✓ ok'}
                     </span>

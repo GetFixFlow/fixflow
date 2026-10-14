@@ -2,6 +2,7 @@ import { Package, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { useRemovePart, useWorkOrderParts } from '@/hooks/useWorkOrders'
 import { partLineTotal } from '@/utils/parts'
+import { formatMoney } from '@/lib/localeFormat'
 
 interface WorkOrderPartsLogProps {
   workOrderId: number
@@ -53,10 +54,10 @@ export function WorkOrderPartsLog({ workOrderId, editable = false, onAddPart }: 
                     {p.quantity_used}
                   </td>
                   <td className="px-3 py-2 text-right text-gray-700 dark:text-gray-300">
-                    ${Number(p.unit_cost ?? 0).toFixed(2)}
+                    {formatMoney(p.unit_cost ?? 0)}
                   </td>
                   <td className="px-3 py-2 text-right font-medium text-gray-900 dark:text-gray-100">
-                    ${partLineTotal(p).toFixed(2)}
+                    {formatMoney(partLineTotal(p))}
                   </td>
                   {editable && (
                     <td className="px-3 py-2 text-right">
@@ -80,7 +81,7 @@ export function WorkOrderPartsLog({ workOrderId, editable = false, onAddPart }: 
                   Total parts cost:
                 </td>
                 <td className="px-3 py-2 text-right text-sm font-bold text-gray-900 dark:text-gray-100">
-                  ${total.toFixed(2)}
+                  {formatMoney(total)}
                 </td>
                 {editable && <td />}
               </tr>

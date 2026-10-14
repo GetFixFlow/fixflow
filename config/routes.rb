@@ -24,6 +24,7 @@ Rails.application.routes.draw do
       # Company settings: anyone signed in can read them, only admins change them
       resource :organization_settings, only: %i[show update], controller: "organization_settings"
       resource :branding, only: %i[show update], controller: "branding"
+      resource :localization_settings, only: %i[show update], controller: "localization_settings"
       resource :email_settings, only: %i[show update destroy], controller: "email_settings" do
         post :test
       end
