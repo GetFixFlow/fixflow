@@ -62,17 +62,22 @@ export function LocationsPage() {
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Locations</h2>
           {canManage && (
-            <Button
-              size="sm"
-              onClick={() => {
-                setEditLocation(null)
-                setDefaultParentId(null)
-                setFormOpen(true)
-              }}
-            >
-              <Plus className="h-4 w-4" />
-              Add
-            </Button>
+            <div className="flex gap-1.5">
+              <Button size="sm" variant="outline" onClick={() => navigate('/import?kind=locations')} aria-label="Import locations from a CSV file">
+                Import
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => {
+                  setEditLocation(null)
+                  setDefaultParentId(null)
+                  setFormOpen(true)
+                }}
+              >
+                <Plus className="h-4 w-4" />
+                Add
+              </Button>
+            </div>
           )}
         </div>
 

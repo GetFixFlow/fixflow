@@ -18,7 +18,7 @@ const AssetsListPage = lazy(() => import('@/pages/assets/AssetsListPage').then(m
 const AssetCreatePage = lazy(() => import('@/pages/assets/AssetCreatePage').then(m => ({ default: m.AssetCreatePage })))
 const AssetDetailPage = lazy(() => import('@/pages/assets/AssetDetailPage').then(m => ({ default: m.AssetDetailPage })))
 const AssetEditPage = lazy(() => import('@/pages/assets/AssetEditPage').then(m => ({ default: m.AssetEditPage })))
-const AssetImportPage = lazy(() => import('@/pages/assets/AssetImportPage').then(m => ({ default: m.AssetImportPage })))
+const ImportPage = lazy(() => import('@/pages/import/ImportPage').then(m => ({ default: m.ImportPage })))
 const QRLabelPrintPage = lazy(() => import('@/pages/assets/QRLabelPrintPage').then(m => ({ default: m.QRLabelPrintPage })))
 const QRScannerPage = lazy(() => import('@/pages/assets/QRScannerPage').then(m => ({ default: m.QRScannerPage })))
 const PartsPage = lazy(() => import('@/pages/parts/PartsPage').then(m => ({ default: m.PartsPage })))
@@ -88,7 +88,7 @@ export const router = createBrowserRouter([
           { path: '/dashboard', element: <Lazy><DashboardPage /></Lazy> },
           { path: '/assets', element: <Lazy><AssetsListPage /></Lazy> },
           { path: '/assets/new', element: <Lazy><AssetCreatePage /></Lazy> },
-          { path: '/assets/import', element: <Lazy><AssetImportPage /></Lazy> },
+          { path: '/assets/import', element: <Navigate to="/import?kind=assets" replace /> },
           { path: '/assets/scan', element: <Lazy><QRScannerPage /></Lazy> },
           { path: '/assets/print-labels', element: <Lazy><QRLabelPrintPage /></Lazy> },
           { path: '/assets/:id', element: <Lazy><AssetDetailPage /></Lazy> },
@@ -113,6 +113,7 @@ export const router = createBrowserRouter([
           {
             element: <ProtectedRoute allowedRoles={['admin', 'manager']} />,
             children: [
+              { path: '/import', element: <Lazy><ImportPage /></Lazy> },
               { path: '/reports', element: <Lazy><ReportsHubPage /></Lazy> },
               { path: '/reports/work-orders', element: <Lazy><WorkOrderReportsPage /></Lazy> },
               { path: '/reports/assets', element: <Lazy><AssetHealthReportPage /></Lazy> },

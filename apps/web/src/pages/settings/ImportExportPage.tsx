@@ -118,10 +118,9 @@ export function ImportExportPage() {
               <div className="flex items-start gap-3">
                 <Upload className="h-5 w-5 text-brand-500 mt-0.5" />
                 <div>
-                  <p className="font-medium text-sm text-gray-900 dark:text-gray-100">Import Assets</p>
+                  <p className="font-medium text-sm text-gray-900 dark:text-gray-100">Import locations, assets and parts</p>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    Upload a CSV file to bulk-import assets. Download the{' '}
-                    <button className="text-brand-600 hover:underline">template CSV</button> to get started.
+                    Upload a CSV file to bulk-import locations, assets or parts. The import page has a template for each, and checks your file before anything is imported.
                   </p>
                 </div>
               </div>
@@ -129,7 +128,7 @@ export function ImportExportPage() {
                 size="sm"
                 variant="outline"
                 onClick={() => {
-                  window.location.href = '/assets/import'
+                  window.location.href = '/import?kind=assets'
                 }}
               >
                 <Upload className="h-3.5 w-3.5 mr-1.5" /> Import

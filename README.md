@@ -188,6 +188,20 @@ open → in_progress → pending_parts → in_progress
 
 ---
 
+## Importing data from a spreadsheet
+
+**Import** (managers and administrators; the Import button on Locations, Assets and Parts, or `/import`) brings **locations, assets and parts** in from a CSV file. Choose what you are importing, download its **template**, fill it in, and choose the file: it is **checked first and nothing is imported yet**. A clean file shows a preview and an Import button. A file with mistakes lists every one with its **row (as your spreadsheet numbers it), column and the problem**, and downloads as a list to work through. **If any row has a problem nothing is imported**, so after fixing the file you can upload it again without the rows that were fine being doubled up.
+
+Do it in this order: **locations**, then assets and parts, which refer to a location by its name or by its full path (`Plant > Floor 1 > Line 2`; use the path when two places share a name). In the locations file a row can sit under one made earlier in the same file.
+
+| Import | Columns (the first is required) | Notes |
+| --- | --- | --- |
+| Locations | `name`, `type`, `parent` | Type is site, building, floor, zone, room or outdoor (top level defaults to site, anything below to zone). |
+| Assets | `name`, `asset_tag`, `serial_number`, `status`, `location` | Tags must be new. A blank tag is made up for you. Any other column (manufacturer, year…) is kept as a custom field. |
+| Parts | `name`, `sku`, `quantity_on_hand`, `reorder_point`, `unit`, `unit_cost`, `location` | SKUs must be new. Importing parts does not trigger low-stock emails. |
+
+The file can come straight from Excel: CSV saved by Excel (including the byte order mark, Windows line endings, Windows-1252 accents, and the semicolon separator some countries use with a decimal comma), quoted values with commas or line breaks, tab-separated text, and column headings in any case. It cannot be an `.xlsx` workbook (in Excel use File, Save As, CSV). Up to 5 MB and 5,000 rows at a time.
+
 ## Checklists
 
 A preventive maintenance schedule can carry a **checklist** (set when you create or edit the schedule). Each work order it generates gets a copy, and the technician ticks the steps on their phone as they work. A step is **required** unless it is marked optional: the work order **cannot be completed while a required step is undone**, and the server says which ones are missing. Each tick records **who did it and when**, shown under the step, and the checklist is **locked once the work order is completed**, so what was done stays on the record. Managers can tick steps too. Ticking works **offline**: the tick is kept on the phone, marked "Waiting to sync", and sent when the connection returns (if the work order was completed in the meantime, you are told the tick was not kept).
