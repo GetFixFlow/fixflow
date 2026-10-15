@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button'
 import { useLogPart } from '@/hooks/useWorkOrders'
 import { useDebouncedValue, useParts } from '@/hooks/useParts'
 import type { Part } from '@/types'
+import { formatMoney } from '@/lib/localeFormat'
 
 interface PartLogModalProps {
   workOrderId: number
@@ -144,7 +145,7 @@ export function PartLogModal({ workOrderId, open, onClose }: PartLogModalProps) 
         {canSubmit && (
           <div className="flex items-center justify-between rounded-md bg-gray-50 px-3 py-2 dark:bg-gray-800">
             <span className="text-sm text-gray-600 dark:text-gray-400">Total:</span>
-            <span className="text-sm font-bold text-gray-900 dark:text-gray-100">${total.toFixed(2)}</span>
+            <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{formatMoney(total)}</span>
           </div>
         )}
 

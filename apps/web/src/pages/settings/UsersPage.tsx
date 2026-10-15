@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { formatDistanceToNow, format } from 'date-fns'
+import { formatDistanceToNow } from 'date-fns'
 import { toast } from 'sonner'
 import { Plus, MoreVertical, UserCheck, UserX, Pencil, Link2, KeyRound } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -22,6 +22,7 @@ import {
 } from '@/hooks/useUsers'
 import type { User, Role } from '@/types'
 import { cn } from '@/lib/utils'
+import { formatDate } from '@/lib/localeFormat'
 
 const ROLE_STYLES: Record<string, string> = {
   admin: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
@@ -276,7 +277,7 @@ export function UsersPage() {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-xs text-gray-400 hidden lg:table-cell">
-                          {u.created_at ? format(new Date(u.created_at), 'MMM d, yyyy') : '—'}
+                          {u.created_at ? formatDate(new Date(u.created_at)) : '—'}
                         </td>
                         <td className="px-4 py-3">
                           <div className="relative">

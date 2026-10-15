@@ -32,6 +32,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useRealtimeStore } from '@/stores/realtimeStore'
 import { Badge, statusBadge, priorityBadge } from '@/components/ui/Badge'
 import { format, formatDistanceToNow } from 'date-fns'
+import { formatDate } from '@/lib/localeFormat'
 
 function InfoCard({
   icon: Icon,
@@ -254,8 +255,8 @@ export function AssetDetailPage() {
                       ['Model', asset.model],
                       ['Year', asset.year_manufactured],
                       ['Status', asset.status],
-                      ['Purchase Date', asset.purchase_date ? format(new Date(asset.purchase_date), 'MMM d, yyyy') : null],
-                      ['Warranty Expiry', asset.warranty_expiry ? format(new Date(asset.warranty_expiry), 'MMM d, yyyy') : null],
+                      ['Purchase Date', asset.purchase_date ? formatDate(new Date(asset.purchase_date)) : null],
+                      ['Warranty Expiry', asset.warranty_expiry ? formatDate(new Date(asset.warranty_expiry)) : null],
                     ].map(([label, value]) =>
                       value != null ? (
                         <div key={label as string}>
@@ -353,7 +354,7 @@ export function AssetDetailPage() {
                         </Badge>
                       </td>
                       <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
-                        {wo.due_date ? format(new Date(wo.due_date), 'MMM d, yyyy') : '—'}
+                        {wo.due_date ? formatDate(new Date(wo.due_date)) : '—'}
                       </td>
                     </tr>
                   ))}

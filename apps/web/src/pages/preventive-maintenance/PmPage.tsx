@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/Card'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Button } from '@/components/ui/Button'
-import { format } from 'date-fns'
+import { formatDate } from '@/lib/localeFormat'
 
 export function PmPage() {
   const { data, isLoading } = useQuery({
@@ -46,7 +46,7 @@ export function PmPage() {
                   <div>
                     <p className="font-medium text-gray-900 dark:text-gray-100">{pm.name}</p>
                     <p className="text-xs text-gray-500 mt-1">
-                      {pm.frequency_type.replace(/_/g, ' ')} · Next due: {pm.next_due_at ? format(new Date(pm.next_due_at), 'MMM d, yyyy') : '—'}
+                      {pm.frequency_type.replace(/_/g, ' ')} · Next due: {pm.next_due_at ? formatDate(new Date(pm.next_due_at)) : '—'}
                     </p>
                   </div>
                   <Badge variant={statusBadge(pm.status)}>{pm.status}</Badge>

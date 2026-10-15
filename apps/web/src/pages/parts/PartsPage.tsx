@@ -10,8 +10,8 @@ import { StockAdjustModal } from '@/components/parts/StockAdjustModal'
 import { useCatalog, useDebouncedValue, useDeletePart } from '@/hooks/useParts'
 import { useAuthStore } from '@/stores/authStore'
 import type { Part } from '@/types'
+import { formatMoney } from '@/lib/localeFormat'
 
-const money = (v: number | null | undefined) => (v == null ? '—' : `$${Number(v).toFixed(2)}`)
 
 function StockBadge({ part }: { part: Part }) {
   if (Number(part.quantity_on_hand) <= 0) return <Badge variant="destructive">Out of stock</Badge>
@@ -107,7 +107,7 @@ export function PartsPage() {
                   <td className="px-4 py-3 font-mono text-xs text-gray-500">{part.sku ?? '—'}</td>
                   <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{part.quantity_on_hand} {part.unit}</td>
                   <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{part.reorder_point}</td>
-                  <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{money(part.unit_cost)}</td>
+                  <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{formatMoney(part.unit_cost)}</td>
                   <td className="px-4 py-3"><StockBadge part={part} /></td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-1">

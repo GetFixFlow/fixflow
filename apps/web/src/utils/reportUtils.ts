@@ -1,5 +1,6 @@
 import { format, differenceInHours, startOfDay, startOfWeek, startOfMonth } from 'date-fns'
 import type { WorkOrder } from '@/types'
+import { weekStartsOn } from '@/lib/localeFormat'
 
 export function calculateCompliance(scheduled: number, completed: number): number {
   if (scheduled === 0) return 100
@@ -33,7 +34,7 @@ export function groupByPeriod<T>(
     const date = new Date(item[dateField] as string)
     let key: string
     if (period === 'day') key = format(startOfDay(date), 'yyyy-MM-dd')
-    else if (period === 'week') key = format(startOfWeek(date), 'yyyy-MM-dd')
+    else if (period === 'week') key = format(startOfWeek(date, { weekStartsOn: weekStartsOn() }), 'yyyy-MM-dd')
     else key = format(startOfMonth(date), 'yyyy-MM')
     if (!groups.has(key)) groups.set(key, [])
     groups.get(key)!.push(item)

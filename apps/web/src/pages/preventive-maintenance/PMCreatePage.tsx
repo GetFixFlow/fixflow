@@ -14,6 +14,7 @@ import { useCreatePM } from '@/hooks/usePreventiveMaintenance'
 import { useAsset } from '@/hooks/useAssets'
 import { cn } from '@/lib/utils'
 import type { PMChecklistStep, PMRequiredPart, PmFrequencyType, PmFrequencyUnit, Priority } from '@/types'
+import { formatDate } from '@/lib/localeFormat'
 
 const STEPS = ['Basic', 'Schedule', 'Template', 'Review']
 const PRIORITY_OPTIONS: Priority[] = ['critical', 'high', 'medium', 'low']
@@ -235,7 +236,7 @@ export function PMCreatePage() {
                     return (
                       <li key={i} className="flex gap-2 text-sm">
                         <span className="text-blue-600 dark:text-blue-400 w-4">{i + 1}.</span>
-                        <span className="text-gray-700 dark:text-gray-300">{format(d, 'MMM d, yyyy')}</span>
+                        <span className="text-gray-700 dark:text-gray-300">{formatDate(d)}</span>
                         <span className="text-gray-400 text-xs">(in {diff} days)</span>
                         {i === 0 && <span className="text-xs text-blue-500">← first</span>}
                       </li>
@@ -288,8 +289,8 @@ export function PMCreatePage() {
                   <div className="flex justify-between"><dt className="text-gray-500">Schedule</dt>
                     <dd><PMFrequencyBadge frequencyType={freqType} frequencyValue={freqValue} frequencyUnit={freqUnit} /></dd>
                   </div>
-                  <div className="flex justify-between"><dt className="text-gray-500">Starts</dt><dd>{format(new Date(startDate), 'MMM d, yyyy')}</dd></div>
-                  <div className="flex justify-between"><dt className="text-gray-500">First due</dt><dd>{format(previewDates[0], 'MMM d, yyyy')}</dd></div>
+                  <div className="flex justify-between"><dt className="text-gray-500">Starts</dt><dd>{formatDate(new Date(startDate))}</dd></div>
+                  <div className="flex justify-between"><dt className="text-gray-500">First due</dt><dd>{formatDate(previewDates[0])}</dd></div>
                   <div className="flex justify-between"><dt className="text-gray-500">Template</dt><dd className="truncate max-w-[60%]">{titleTemplate || name}</dd></div>
                   {checklistSteps.length > 0 && <div className="flex justify-between"><dt className="text-gray-500">Checklist</dt><dd>{checklistSteps.length} steps ({checklistSteps.filter((s) => s.required).length} required)</dd></div>}
                   {requiredParts.length > 0 && <div className="flex justify-between"><dt className="text-gray-500">Parts</dt><dd>{requiredParts.map((p) => `${p.part?.name} ×${p.quantity}`).join(', ')}</dd></div>}

@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { SkipForward } from 'lucide-react'
-import { format } from 'date-fns'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { usePMExecutions } from '@/hooks/usePreventiveMaintenance'
 import type { PmExecutionStatus } from '@/types'
+import { formatDate } from '@/lib/localeFormat'
 
 const STATUS_BADGE: Record<PmExecutionStatus, 'success' | 'warning' | 'destructive' | 'secondary' | 'default'> = {
   completed: 'success',
@@ -48,7 +48,7 @@ export function PMExecutionTable({ pmId, onSkip }: PMExecutionTableProps) {
           {executions.map((ex) => (
             <tr key={ex.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
               <td className="py-2 pr-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
-                {format(new Date(ex.scheduled_date), 'MMM d, yyyy')}
+                {formatDate(new Date(ex.scheduled_date))}
               </td>
               <td className="py-2 pr-4">
                 <Badge variant={STATUS_BADGE[ex.status]}>{ex.status}</Badge>

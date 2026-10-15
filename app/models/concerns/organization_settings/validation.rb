@@ -12,6 +12,7 @@ module OrganizationSettings
     def validate_company_settings
       values = settings_with_defaults
       validate_choices(values)
+      validate_localization(values)
       validate_numbers(values)
       validate_schedule(values)
     end
@@ -26,6 +27,13 @@ module OrganizationSettings
       return if AUTO_WO_THRESHOLDS.include?(values["iot_auto_wo_threshold"])
 
       errors.add(:iot_auto_wo_threshold, "is not a valid option")
+    end
+
+    def validate_localization(values)
+      { date_format: DATE_FORMATS, time_format: TIME_FORMATS, currency: CURRENCIES,
+        number_format: NUMBER_FORMATS, first_day_of_week: DAYS_OF_WEEK }.each do |key, allowed|
+        errors.add(key, "is not one of the available options") unless allowed.include?(values[key.to_s])
+      end
     end
 
     def validate_numbers(values)

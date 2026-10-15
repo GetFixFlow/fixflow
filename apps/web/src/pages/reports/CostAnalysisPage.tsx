@@ -14,14 +14,14 @@ import { DataTable } from '@/components/reports/DataTable'
 import { useReportStore } from '@/stores/reportStore'
 import { reportsApi } from '@/api/reports'
 import { exportToCSV } from '@/services/exportService'
-import { format } from 'date-fns'
 import { formatCurrency } from '@/utils/chartUtils'
+import { formatDate } from '@/lib/localeFormat'
 
 export function CostAnalysisPage() {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const { getParams, dateFrom, dateTo } = useReportStore()
   const params = getParams()
-  const dateRange = `${format(dateFrom, 'MMM d, yyyy')} – ${format(dateTo, 'MMM d, yyyy')}`
+  const dateRange = `${formatDate(dateFrom)} – ${formatDate(dateTo)}`
 
   const { data: summary, isLoading } = useQuery({
     queryKey: ['reports', 'costs_summary', params],

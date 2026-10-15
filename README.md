@@ -188,6 +188,12 @@ open → in_progress → pending_parts → in_progress
 
 ---
 
+## Localization
+
+**Settings → Localization** (administrators) sets how dates, times, numbers and money are shown to everyone: the **date format** (for example 05/10/2026, 05 Oct 2026, 2026-10-05), **12- or 24-hour time**, the **currency** (USD, EUR, GBP, JPY, CAD, AUD, CHF, INR, LKR, SGD), the **number style** (1,234.56 or 1.234,56 or with spaces) and the **first day of the week** in calendars and weekly reports. The page previews the result as you choose. The **time zone** is the same one as in Company settings and is used for schedules, such as when preventive maintenance falls due; dates and times on screen are shown in each person's own device time.
+
+Not covered yet: **language**. There are no translations, so the page does not offer a language (it is on the roadmap as "Language support"). The resolution heat map in the reports still starts its weeks on Monday whatever is chosen, a few small date labels (such as month names in some charts) keep their own style, and labor cost is still worked out at a fixed 40 per hour whatever the currency.
+
 ## Branding
 
 **Settings → Branding** (administrators) puts the company's own look on the install: a **logo** (shown in the sidebar and on the sign-in page), a **favicon**, one **primary colour** that restyles the whole app (buttons, links, highlights), and the **headline and subtitle** on the sign-in page. The colour is shown on the page as you pick it, and it must be dark enough for white text to be readable on it (the page tells you if it is not). Logos are PNG, JPEG or WebP up to 2 MB; favicons PNG or ICO up to 512 KB. SVG is not accepted, as it can carry scripts. The branding is public by design, because the sign-in page needs it before anyone has signed in.

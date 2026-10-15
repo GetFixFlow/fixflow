@@ -1,3 +1,5 @@
+import { formatDate } from '@/lib/localeFormat'
+
 export function PrintHeader({ reportTitle, dateRange }: { reportTitle: string; dateRange: string }) {
   return (
     <div className="hidden print:block mb-6 pb-4 border-b border-gray-200">
@@ -8,7 +10,7 @@ export function PrintHeader({ reportTitle, dateRange }: { reportTitle: string; d
         </div>
         <div className="text-right text-sm text-gray-500">
           <p>{dateRange}</p>
-          <p>Generated {new Date().toLocaleDateString()}</p>
+          <p>Generated {formatDate(new Date())}</p>
         </div>
       </div>
     </div>

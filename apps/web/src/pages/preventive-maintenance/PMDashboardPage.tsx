@@ -17,6 +17,7 @@ import { PMDueDateDisplay } from '@/components/pm/PMDueDateDisplay'
 import { TriggerPMModal } from '@/components/pm/TriggerPMModal'
 import { usePMDashboard, usePMForecast } from '@/hooks/usePreventiveMaintenance'
 import type { PreventiveMaintenance } from '@/types'
+import { formatDate } from '@/lib/localeFormat'
 
 export function PMDashboardPage() {
   const [triggerTarget, setTriggerTarget] = useState<PreventiveMaintenance | null>(null)
@@ -245,7 +246,7 @@ export function PMDashboardPage() {
                 <li key={i} className="flex items-start gap-2 text-sm">
                   <span>{evt.type === 'completed' ? '✅' : evt.type === 'skipped' ? '⏭' : evt.type === 'missed' ? '❌' : '📋'}</span>
                   <span className="flex-1 text-gray-700 dark:text-gray-300">{evt.pm_name}{evt.wo_number ? ` auto-generated ${evt.wo_number}` : ''}</span>
-                  <span className="text-xs text-gray-400">{new Date(evt.occurred_at).toLocaleDateString()}</span>
+                  <span className="text-xs text-gray-400">{formatDate(evt.occurred_at)}</span>
                 </li>
               ))}
             </ul>

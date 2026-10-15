@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Plus, MoreVertical, Key } from 'lucide-react'
-import { formatDistanceToNow, format } from 'date-fns'
+import { formatDistanceToNow } from 'date-fns'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -12,6 +12,7 @@ import { ApiKeyCreateModal } from '@/components/iot/ApiKeyCreateModal'
 import { ApiKeyRevealModal } from '@/components/iot/ApiKeyRevealModal'
 import { toast } from 'sonner'
 import type { ApiKeyWithSecret } from '@/types'
+import { formatDate } from '@/lib/localeFormat'
 
 export function ApiKeysPage() {
   const [showCreate, setShowCreate] = useState(false)
@@ -115,7 +116,7 @@ export function ApiKeysPage() {
                         <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{key.name}</td>
                         <td className="px-4 py-3 font-mono text-xs text-gray-500">{key.key_prefix}...</td>
                         <td className="px-4 py-3 text-xs text-gray-500">
-                          {format(new Date(key.created_at), 'MMM d, yyyy')}
+                          {formatDate(new Date(key.created_at))}
                         </td>
                         <td className="px-4 py-3 text-xs text-gray-500">
                           {key.last_used_at
@@ -123,7 +124,7 @@ export function ApiKeysPage() {
                             : 'Never'}
                         </td>
                         <td className="px-4 py-3 text-xs text-gray-500">
-                          {key.expires_at ? format(new Date(key.expires_at), 'MMM d, yyyy') : 'No expiry'}
+                          {key.expires_at ? formatDate(new Date(key.expires_at)) : 'No expiry'}
                         </td>
                         <td className="px-4 py-3">
                           <span className={cn(

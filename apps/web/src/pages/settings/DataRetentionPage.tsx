@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { format } from 'date-fns'
 import { Download, HardDrive, Archive, RefreshCw } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
 import { useAuthStore } from '@/stores/authStore'
 import { cn } from '@/lib/utils'
+import { formatDateTime } from '@/lib/localeFormat'
 
 const RETENTION_OPTIONS = [
   { value: 'forever', label: 'Forever' },
@@ -175,7 +175,7 @@ export function DataRetentionPage() {
                 {MOCK_BACKUPS.map((backup) => (
                   <tr key={backup.id} className="border-b border-gray-50 dark:border-gray-800">
                     <td className="py-2.5 text-gray-700 dark:text-gray-300">
-                      {format(new Date(backup.date), 'MMM d, yyyy h:mm a')}
+                      {formatDateTime(new Date(backup.date))}
                     </td>
                     <td className="py-2.5 text-gray-500">{backup.size}</td>
                     <td className="py-2.5">

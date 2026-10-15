@@ -1,17 +1,30 @@
 # The company settings screen. The name is a column; everything else lives in the
 # settings jsonb column, merged over these defaults.
 #
-# Applied today: timezone, wo_number_prefix, default_priority, default_due_days.
+# Applied today: timezone, wo_number_prefix, default_priority, default_due_days, and the regional
+# display settings (date_format, time_format, currency, number_format, first_day_of_week).
 # The rest are stored and returned but nothing reads them yet.
 module OrganizationSettings
   extend ActiveSupport::Concern
 
   PRIORITIES = %w[low medium high critical].freeze
   AUTO_WO_THRESHOLDS = %w[critical high medium never].freeze
+  DATE_FORMATS = ["MM/DD/YYYY", "DD/MM/YYYY", "YYYY-MM-DD", "DD MMM YYYY", "MMM D, YYYY"].freeze
+  TIME_FORMATS = %w[12h 24h].freeze
+  CURRENCIES = %w[USD EUR GBP JPY CAD AUD CHF INR LKR SGD].freeze
+  NUMBER_FORMATS = ["1,234.56", "1.234,56", "1 234.56", "1 234,56"].freeze
+  DAYS_OF_WEEK = %w[monday sunday].freeze
+  # The settings shown on the Localization screen.
+  LOCALIZATION_KEYS = %w[timezone date_format time_format currency number_format first_day_of_week].freeze
 
   DEFAULTS = {
     "industry" => "", "size" => "", "website" => "", "address" => "",
     "timezone" => "UTC",
+    "date_format" => "MMM D, YYYY",
+    "time_format" => "12h",
+    "currency" => "USD",
+    "number_format" => "1,234.56",
+    "first_day_of_week" => "sunday", # what the calendars and reports always used
     "wo_number_prefix" => "WO",
     "default_priority" => "medium",
     "default_due_days" => 7,

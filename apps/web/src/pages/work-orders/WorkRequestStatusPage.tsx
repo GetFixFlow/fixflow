@@ -1,10 +1,10 @@
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { CheckCircle, Clock, Zap } from 'lucide-react'
-import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { workRequestsApi } from '@/api'
 import type { WorkRequest } from '@/types'
+import { formatDate } from '@/lib/localeFormat'
 
 const STATUS_STEPS: Array<{
   key: WorkRequest['status']
@@ -68,7 +68,7 @@ export function WorkRequestStatusPage() {
           </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Request Status</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Submitted {format(new Date(data.created_at), 'MMMM d, yyyy')}
+            Submitted {formatDate(new Date(data.created_at))}
           </p>
         </div>
 

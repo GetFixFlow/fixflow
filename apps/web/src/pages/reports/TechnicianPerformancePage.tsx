@@ -13,8 +13,8 @@ import { TechnicianComparisonChart } from '@/components/reports/TechnicianCompar
 import { TechnicianDetailPanel } from '@/components/reports/TechnicianDetailPanel'
 import { useReportStore } from '@/stores/reportStore'
 import { reportsApi } from '@/api/reports'
-import { format } from 'date-fns'
 import { formatHours, formatPercent } from '@/utils/chartUtils'
+import { formatDate } from '@/lib/localeFormat'
 
 type MetricKey = 'completed' | 'avg_hours' | 'overdue' | 'first_fix'
 
@@ -24,7 +24,7 @@ export function TechnicianPerformancePage() {
   const [metric, setMetric] = useState<MetricKey>('completed')
   const { getParams, dateFrom, dateTo } = useReportStore()
   const params = getParams()
-  const dateRange = `${format(dateFrom, 'MMM d, yyyy')} – ${format(dateTo, 'MMM d, yyyy')}`
+  const dateRange = `${formatDate(dateFrom)} – ${formatDate(dateTo)}`
 
   const { data: techData, isLoading } = useQuery({
     queryKey: ['reports', 'technician_performance', params],

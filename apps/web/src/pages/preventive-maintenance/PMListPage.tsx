@@ -15,6 +15,7 @@ import { usePMs, usePausePM, useResumePM } from '@/hooks/usePreventiveMaintenanc
 import { useAuthStore } from '@/stores/authStore'
 import { cn } from '@/lib/utils'
 import type { PreventiveMaintenance } from '@/types'
+import { formatDate } from '@/lib/localeFormat'
 
 type TabId = 'all' | 'due_soon' | 'overdue' | 'paused'
 type ViewMode = 'cards' | 'table' | 'calendar'
@@ -210,7 +211,7 @@ export function PMListPage() {
                     <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{pm.name}</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{pm.asset?.name ?? '—'}</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{pm.frequency_value ? `Every ${pm.frequency_value} ${pm.frequency_unit ?? 'days'}` : pm.frequency_type}</td>
-                    <td className="px-4 py-3">{dueAt ? new Date(dueAt).toLocaleDateString() : '—'}</td>
+                    <td className="px-4 py-3">{dueAt ? formatDate(dueAt) : '—'}</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{pm.assigned_to?.full_name ?? '—'}</td>
                     <td className="px-4 py-3"><span className="capitalize">{pm.status}</span></td>
                     <td className="px-4 py-3">

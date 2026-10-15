@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { X, ChevronDown, ChevronUp, Zap } from 'lucide-react'
-import { format } from 'date-fns'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { useTriggerPM } from '@/hooks/usePreventiveMaintenance'
 import type { PreventiveMaintenance } from '@/types'
+import { formatDate } from '@/lib/localeFormat'
 
 interface TriggerPMModalProps { open: boolean; onClose: () => void; pm: PreventiveMaintenance }
 
@@ -45,7 +45,7 @@ export function TriggerPMModal({ open, onClose, pm }: TriggerPMModalProps) {
             <div className="flex justify-between"><span className="text-gray-500">Title</span><span className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-[60%]">{title}</span></div>
             <div className="flex justify-between"><span className="text-gray-500">Priority</span><span className="capitalize">{pm.priority}</span></div>
             {pm.assigned_to && <div className="flex justify-between"><span className="text-gray-500">Assign to</span><span>{pm.assigned_to.full_name}</span></div>}
-            {defaultDue && <div className="flex justify-between"><span className="text-gray-500">Due date</span><span>{format(new Date(defaultDue), 'MMM d, yyyy')}</span></div>}
+            {defaultDue && <div className="flex justify-between"><span className="text-gray-500">Due date</span><span>{formatDate(new Date(defaultDue))}</span></div>}
             {pm.estimated_hours && <div className="flex justify-between"><span className="text-gray-500">Est. Hours</span><span>{pm.estimated_hours}</span></div>}
             {steps.length > 0 && <div className="flex justify-between"><span className="text-gray-500">Checklist</span><span>{steps.length} steps</span></div>}
           </div>

@@ -23,6 +23,7 @@ import { StatCardSkeleton } from '@/components/ui/Skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Badge, statusBadge } from '@/components/ui/Badge'
+import { formatDateTime } from '@/lib/localeFormat'
 
 export function DashboardPage() {
   const { data, isLoading } = useDashboard()
@@ -166,7 +167,7 @@ export function DashboardPage() {
                         <span className="ml-2 text-gray-500">{activity.type.replace(/_/g, ' ')}</span>
                       </div>
                       <span className="text-xs text-gray-400">
-                        {new Date(activity.timestamp).toLocaleString()}
+                        {formatDateTime(activity.timestamp)}
                       </span>
                     </li>
                   ))}

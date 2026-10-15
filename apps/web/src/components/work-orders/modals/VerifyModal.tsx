@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { format } from 'date-fns'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { useVerifyWorkOrder } from '@/hooks/useWorkOrders'
 import { useWorkOrderParts } from '@/hooks/useWorkOrders'
 import type { WorkOrder } from '@/types'
 import { partLineTotal } from '@/utils/parts'
+import { formatDateTime, formatMoney } from '@/lib/localeFormat'
 
 interface VerifyModalProps {
   workOrder: WorkOrder
@@ -53,7 +53,7 @@ export function VerifyModal({ workOrder, open, onClose, onReject }: VerifyModalP
             <div className="flex justify-between">
               <span className="text-gray-500">Completed at</span>
               <span className="font-medium text-gray-900 dark:text-gray-100">
-                {format(new Date(workOrder.completed_at), 'MMM d, yyyy HH:mm')}
+                {formatDateTime(new Date(workOrder.completed_at))}
               </span>
             </div>
           )}
@@ -69,7 +69,7 @@ export function VerifyModal({ workOrder, open, onClose, onReject }: VerifyModalP
             <div className="flex justify-between">
               <span className="text-gray-500">Parts used</span>
               <span className="font-medium text-gray-900 dark:text-gray-100">
-                {parts.length} part{parts.length !== 1 && 's'} (${partsCost.toFixed(2)})
+                {parts.length} part{parts.length !== 1 && 's'} ({formatMoney(partsCost)})
               </span>
             </div>
           )}

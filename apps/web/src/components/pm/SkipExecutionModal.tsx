@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { X, AlertTriangle } from 'lucide-react'
-import { format, addDays } from 'date-fns'
+import { addDays } from 'date-fns'
 import { Button } from '@/components/ui/Button'
 import { useSkipExecution } from '@/hooks/usePreventiveMaintenance'
 import type { PreventiveMaintenance } from '@/types'
+import { formatDate } from '@/lib/localeFormat'
 
 const REASONS = [
   'Asset unavailable',
@@ -46,7 +47,7 @@ export function SkipExecutionModal({ open, onClose, pmId, executionId, scheduled
             <Dialog.Title className="text-lg font-semibold text-gray-900 dark:text-gray-100">Skip This PM Occurrence</Dialog.Title>
             <Dialog.Close asChild><button className="text-gray-400 hover:text-gray-600 p-1"><X className="h-5 w-5" /></button></Dialog.Close>
           </div>
-          <p className="text-sm text-gray-500 mb-4">Scheduled date: {format(new Date(scheduledDate), 'MMM d, yyyy')}</p>
+          <p className="text-sm text-gray-500 mb-4">Scheduled date: {formatDate(new Date(scheduledDate))}</p>
 
           <div className="space-y-2 mb-4">
             {REASONS.map((r) => (
@@ -71,7 +72,7 @@ export function SkipExecutionModal({ open, onClose, pmId, executionId, scheduled
           <div className="rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 p-3 mb-4 flex gap-2">
             <AlertTriangle className="h-4 w-4 text-orange-500 shrink-0 mt-0.5" />
             <p className="text-xs text-orange-700 dark:text-orange-300">
-              Skipping will affect your compliance rate. Next occurrence: {format(nextDate, 'MMM d, yyyy')}.
+              Skipping will affect your compliance rate. Next occurrence: {formatDate(nextDate)}.
             </p>
           </div>
 

@@ -1,6 +1,6 @@
 import { Wrench, RefreshCw, Zap, Activity } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { format } from 'date-fns'
+import { formatDate } from '@/lib/localeFormat'
 
 export type TimelineEventType = 'work_order' | 'pm' | 'iot_alert' | 'status_change'
 
@@ -68,7 +68,7 @@ export function AssetTimeline({ events, className }: AssetTimelineProps) {
                   dateTime={event.date}
                   className="shrink-0 text-xs text-gray-400 dark:text-gray-500"
                 >
-                  {format(new Date(event.date), 'MMM d, yyyy')}
+                  {formatDate(new Date(event.date))}
                 </time>
               </div>
             </div>
