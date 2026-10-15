@@ -487,6 +487,7 @@ export function WorkOrderDetailPage() {
               workOrderId={wo.id}
               actualHours={wo.actual_hours ?? undefined}
               laborCost={wo.labor_cost}
+              laborRate={wo.labor_rate}
             />
           </section>
 

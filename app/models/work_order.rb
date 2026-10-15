@@ -28,6 +28,7 @@ class WorkOrder < ApplicationRecord
   # ─── Validations ───────────────────────────────────────────────────────────
 
   validates :title, presence: true
+  validates :actual_hours, numericality: { greater_than_or_equal_to: 0, less_than: 10_000 }, allow_nil: true
   validates :priority, inclusion: { in: PRIORITIES }
   validates :status,   inclusion: { in: STATUSES }
   validates :completion_notes, presence: true, if: -> { completed? || verified? }
@@ -37,6 +38,7 @@ class WorkOrder < ApplicationRecord
 
   # ─── Callbacks ─────────────────────────────────────────────────────────────
 
+  before_save :price_labor, if: -> { will_save_change_to_actual_hours? || (actual_hours.present? && labor_rate.nil?) }
   before_create :generate_work_order_number
 
   # ─── State Machine (AASM) ──────────────────────────────────────────────────
@@ -122,6 +124,18 @@ class WorkOrder < ApplicationRecord
   end
 
   private
+
+  # Labor is priced when hours are recorded (or changed): hours x the assignee's rate, else the company's.
+  # The rate used is kept, so changing a rate later does not rewrite work already done.
+  def price_labor
+    if actual_hours.blank?
+      self.labor_rate = nil
+      self.labor_cost = 0
+    else
+      self.labor_rate = assignee&.hourly_rate || organization.default_labor_rate
+      self.labor_cost = (actual_hours * labor_rate).round(2)
+    end
+  end
 
   def log_activity(action)
     ActivityLogService.log(

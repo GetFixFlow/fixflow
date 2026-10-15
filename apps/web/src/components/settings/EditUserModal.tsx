@@ -14,6 +14,7 @@ const schema = z.object({
   email: z.string().email('Invalid email'),
   phone: z.string().optional(),
   job_title: z.string().optional(),
+  hourly_rate: z.string().refine((v) => v.trim() === '' || (Number.isFinite(Number(v)) && Number(v) >= 0 && Number(v) <= 100000), 'Enter an amount from 0 to 100000, or leave it empty').optional(),
   role: z.enum(['admin', 'manager', 'technician', 'requester']),
 })
 
@@ -35,6 +36,7 @@ interface EditUserModalProps {
 export function EditUserModal({ open, onClose, user: targetUser }: EditUserModalProps) {
   const { user: currentUser } = useAuthStore()
   const updateUser = useUpdateUser(targetUser.id)
+  const isAdmin = currentUser?.role === 'admin'
 
   const form = useForm<EditFormData>({
     resolver: zodResolver(schema),
@@ -43,20 +45,22 @@ export function EditUserModal({ open, onClose, user: targetUser }: EditUserModal
       email: targetUser.email,
       phone: targetUser.phone ?? '',
       job_title: targetUser.job_title ?? '',
+      hourly_rate: targetUser.hourly_rate == null ? '' : String(targetUser.hourly_rate),
       role: targetUser.role,
     },
   })
 
   const onSubmit = form.handleSubmit((data) => {
-    const { email: _email, ...editable } = data // the sign-in email is read-only
-    updateUser.mutate(editable, {
+    const { email: _email, hourly_rate, ...editable } = data // the sign-in email is read-only
+    // What someone is paid is the administrator's to see and set; empty means the company's default rate.
+    const rate = isAdmin ? { hourly_rate: (hourly_rate ?? '').trim() === '' ? null : Number(hourly_rate) } : {}
+    updateUser.mutate({ ...editable, ...rate }, {
       onSuccess: () => {
         onClose()
       },
     })
   })
 
-  const isAdmin = currentUser?.role === 'admin'
 
   return (
     <Dialog.Root open={open} onOpenChange={(o) => !o && onClose()}>
@@ -106,6 +110,19 @@ export function EditUserModal({ open, onClose, user: targetUser }: EditUserModal
               </label>
               <Input {...form.register('job_title')} />
             </div>
+
+            {isAdmin && (
+              <div>
+                <label htmlFor="hourly-rate" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                  Hourly rate
+                </label>
+                <Input id="hourly-rate" {...form.register('hourly_rate')} type="number" min={0} step="0.01" placeholder="Company default" />
+                <p className="text-xs text-gray-500 mt-1">Used to cost the hours this person records on work orders. Leave empty to use the company default rate. Only administrators see this.</p>
+                {form.formState.errors.hourly_rate && (
+                  <p className="text-xs text-red-500 mt-1">{form.formState.errors.hourly_rate.message}</p>
+                )}
+              </div>
+            )}
 
             {isAdmin && (
               <div>

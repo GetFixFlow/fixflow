@@ -31,7 +31,12 @@ class WorkOrderBlueprint < Blueprinter::Base
       :due_date, :estimated_hours, :actual_hours,
       :started_at, :completed_at, :verified_at,
       :completion_notes, :rejection_reason, :cancellation_reason,
-      :parts_cost, :labor_cost, :checklist, :created_at, :updated_at
+      :parts_cost, :checklist, :created_at, :updated_at
+
+    # What the work cost in wages reveals what people are paid: managers and administrators only
+    # (pass `labor: true`).
+    field(:labor_cost) { |wo, options| options[:labor] ? wo.labor_cost : nil }
+    field(:labor_rate) { |wo, options| options[:labor] ? wo.labor_rate : nil }
 
     field(:asset) do |wo|
       wo.asset ? { id: wo.asset.id, name: wo.asset.name, asset_tag: wo.asset.asset_tag } : nil

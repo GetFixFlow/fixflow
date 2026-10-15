@@ -15,7 +15,7 @@ module Api
         scope = scope.by_role(params[:role]) if params[:role]
         pagy, users = pagy(scope.order(:first_name, :last_name))
         render json: {
-          users: UserBlueprint.render_as_hash(users),
+          users: UserBlueprint.render_as_hash(users, show_rate: current_user.admin?),
           meta: pagy_metadata_response(pagy)
         }
       end
@@ -25,7 +25,7 @@ module Api
       end
 
       def show
-        render json: UserBlueprint.render_as_hash(@user)
+        render json: UserBlueprint.render_as_hash(@user, show_rate: current_user.admin?)
       end
 
       # Managers edit details; only admins change a role, and that goes through the
@@ -36,7 +36,7 @@ module Api
           role = params.dig(:user, :role)
           UserAdministration.change_role!(@user, role, by: current_user) if role.present? && current_user.admin?
         end
-        render json: UserBlueprint.render_as_hash(@user)
+        render json: UserBlueprint.render_as_hash(@user, show_rate: current_user.admin?)
       end
 
       # PATCH /api/v1/users/:id/deactivate
@@ -155,7 +155,9 @@ module Api
       end
 
       def user_params
-        params.fetch(:user, {}).permit(:full_name, :first_name, :last_name, :phone, :job_title, :department)
+        allowed = %i[full_name first_name last_name phone job_title department]
+        allowed << :hourly_rate if current_user.admin? # what someone is paid is the administrator's to set
+        params.fetch(:user, {}).permit(allowed)
       end
 
       # The people named by params[:ids], all from this company or none.

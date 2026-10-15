@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_13_230000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_15_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -326,6 +326,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_230000) do
     t.string "job_title"
     t.string "department"
     t.datetime "deactivated_at"
+    t.decimal "hourly_rate", precision: 8, scale: 2
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["invitation_token_digest"], name: "index_users_on_invitation_token_digest", unique: true
     t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
@@ -390,6 +391,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_230000) do
     t.datetime "verified_at"
     t.bigint "verified_by_id"
     t.string "work_order_number"
+    t.decimal "labor_rate", precision: 8, scale: 2
     t.index ["asset_id", "created_at"], name: "index_work_orders_on_asset_id_and_created_at"
     t.index ["asset_id"], name: "index_work_orders_on_asset_id"
     t.index ["assignee_id", "status"], name: "index_work_orders_on_assignee_id_and_status"

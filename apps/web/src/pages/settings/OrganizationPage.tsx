@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Skeleton } from '@/components/ui/Skeleton'
+import { CURRENCIES, useLocaleStore } from '@/lib/localeFormat'
 import { useAuthStore } from '@/stores/authStore'
 import { useOrgSettings, useUpdateOrgSettings } from '@/hooks/useSettings'
 import type { Holiday, OrgSettings } from '@/api/settings'
@@ -39,6 +40,7 @@ const orgSchema = z.object({
   address: z.string().optional(),
   default_priority: z.string(),
   default_due_days: z.coerce.number().min(1).max(365),
+  labor_rate: z.coerce.number().min(0).max(100000),
   require_completion_notes: z.boolean(),
   auto_close_days: z.coerce.number().min(0).max(365),
   wo_number_prefix: z.string().min(1),
@@ -62,6 +64,7 @@ const DEFAULT_ORG: Partial<OrgSettings> = {
   slug: '',
   default_priority: 'medium',
   default_due_days: 7,
+  labor_rate: 0,
   require_completion_notes: false,
   auto_close_days: 30,
   wo_number_prefix: 'WO',
@@ -80,6 +83,8 @@ const DEFAULT_ORG: Partial<OrgSettings> = {
 
 export function OrganizationPage() {
   const { user } = useAuthStore()
+  const currency = useLocaleStore((l) => l.locale.currency)
+  const currencySymbol = (CURRENCIES[currency] ?? CURRENCIES.USD).symbol.trim()
   const { data: org, isLoading } = useOrgSettings()
   const updateOrg = useUpdateOrgSettings()
 
@@ -108,6 +113,7 @@ export function OrganizationPage() {
       address: '',
       default_priority: 'medium',
       default_due_days: 7,
+      labor_rate: 0,
       require_completion_notes: false,
       auto_close_days: 30,
       wo_number_prefix: 'WO',
@@ -132,6 +138,7 @@ export function OrganizationPage() {
           address: merged.address ?? '',
           default_priority: merged.default_priority ?? 'medium',
           default_due_days: merged.default_due_days ?? 7,
+          labor_rate: merged.labor_rate ?? 0,
           require_completion_notes: merged.require_completion_notes ?? false,
           auto_close_days: merged.auto_close_days ?? 30,
           wo_number_prefix: merged.wo_number_prefix ?? 'WO',
@@ -171,6 +178,7 @@ export function OrganizationPage() {
       address: data.address,
       default_priority: data.default_priority,
       default_due_days: data.default_due_days,
+      labor_rate: data.labor_rate,
       require_completion_notes: data.require_completion_notes,
       auto_close_days: data.auto_close_days,
       wo_number_prefix: data.wo_number_prefix,
@@ -307,6 +315,15 @@ export function OrganizationPage() {
                   Default Due Days
                 </label>
                 <Input {...form.register('default_due_days')} type="number" min={1} max={365} />
+              </div>
+              <div>
+                <label htmlFor="labor-rate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Hourly labor rate ({currencySymbol})
+                </label>
+                <Input id="labor-rate" {...form.register('labor_rate')} type="number" min={0} step="0.01" />
+                <p className="text-xs text-gray-500 mt-1">
+                  What an hour of work costs when the technician has no rate of their own. A person&apos;s own rate is set in Users. Without any rate, labor is counted as nothing.
+                </p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">

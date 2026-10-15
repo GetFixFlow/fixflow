@@ -38,6 +38,7 @@ module OrganizationSettings
 
     def validate_numbers(values)
       validate_integer_range(values, "default_due_days", 1..365)
+      validate_labor_rate(values["labor_rate"], :labor_rate)
       validate_integer_range(values, "auto_close_days", 0..365)
       validate_integer_range(values, "pm_compliance_target", 0..100)
       validate_integer_range(values, "pm_reminder_days", 0..30)
@@ -58,6 +59,12 @@ module OrganizationSettings
 
     def holiday_valid?(holiday)
       holiday["date"].to_s.match?(/\A\d{4}-\d{2}-\d{2}\z/) && holiday["name"].present?
+    end
+
+    def validate_labor_rate(value, attribute)
+      return if value.is_a?(Numeric) && value >= 0 && value <= 100_000
+
+      errors.add(attribute, "must be an amount from 0 to 100000")
     end
 
     def validate_integer_range(values, key, range)

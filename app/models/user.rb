@@ -20,6 +20,7 @@ class User < ApplicationRecord
 
   validates :role, inclusion: { in: ROLES }
   validates :first_name, :last_name, presence: true
+  validates :hourly_rate, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100_000 }, allow_nil: true
 
   scope :by_role, ->(role) { where(role: role) }
   scope :active, -> { where(deactivated_at: nil) }
