@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_15_200000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -84,12 +84,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_200000) do
     t.string "serial_number"
     t.string "status", default: "operational", null: false
     t.datetime "updated_at", null: false
+    t.string "public_code", null: false
     t.index ["asset_tag"], name: "index_assets_on_asset_tag"
     t.index ["custom_fields"], name: "index_assets_on_custom_fields", using: :gin
     t.index ["discarded_at"], name: "index_assets_on_discarded_at"
     t.index ["location_id"], name: "index_assets_on_location_id"
     t.index ["organization_id", "status"], name: "index_assets_on_organization_id_and_status"
     t.index ["organization_id"], name: "index_assets_on_organization_id"
+    t.index ["public_code"], name: "index_assets_on_public_code", unique: true
     t.index ["serial_number"], name: "index_assets_on_serial_number"
   end
 

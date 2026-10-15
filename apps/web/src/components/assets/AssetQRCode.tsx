@@ -16,6 +16,8 @@ interface AssetQRCodeProps {
   assetId: number
   assetTag: string
   assetName?: string
+  /** The random code for the public request form; without it the label links to the asset page (sign-in needed). */
+  publicCode?: string
   size?: QRSize
   showActions?: boolean
   className?: string
@@ -25,6 +27,7 @@ export function AssetQRCode({
   assetId,
   assetTag,
   assetName,
+  publicCode,
   size = 'md',
   showActions = true,
   className,
@@ -32,7 +35,10 @@ export function AssetQRCode({
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [dataUrl, setDataUrl] = useState<string>('')
   const px = SIZE_MAP[size]
-  const qrValue = `${window.location.origin}/assets/${assetId}`
+  const qrValue = publicCode
+    ? `${window.location.origin}/request?asset=${encodeURIComponent(publicCode)}`
+    : `${window.location.origin}/assets/${assetId}`
+  const caption = publicCode ? 'Scan to report a problem' : 'Scan to view asset'
 
   useEffect(() => {
     if (!canvasRef.current) return
@@ -68,7 +74,7 @@ export function AssetQRCode({
       <img src="${dataUrl}" width="${px}" height="${px}" alt="QR code for ${assetTag}" />
       ${assetName ? `<p>${assetName}</p>` : ''}
       <small>${assetTag}</small>
-      <small style="font-size:11px;color:#9ca3af">Scan to view asset</small>
+      <small style="font-size:11px;color:#9ca3af">${caption}</small>
       </body></html>
     `)
     win.document.close()
@@ -85,7 +91,7 @@ export function AssetQRCode({
         className="rounded-lg border border-gray-200 p-2 dark:border-gray-700"
         aria-label={`QR code for asset ${assetTag}`}
       />
-      <p className="text-xs text-gray-500 dark:text-gray-400">Scan to view asset</p>
+      <p className="text-xs text-gray-500 dark:text-gray-400">{caption}</p>
       {showActions && (
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={handleDownload} disabled={!dataUrl}>

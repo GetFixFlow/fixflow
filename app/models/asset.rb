@@ -18,11 +18,16 @@ class Asset < ApplicationRecord
   validates :name, presence: true
   validates :status, inclusion: { in: STATUSES }
 
+  # The random code printed in the QR label's link (see PublicWorkRequest).
+  has_secure_token :public_code, length: 24
+
   before_create :generate_asset_tag
 
   scope :by_status,             ->(status)      { where(status: status) }
   scope :by_location,           ->(location_id) { where(location_id: location_id) }
-  scope :search_by_name_or_tag, ->(query)       { where("name ILIKE :q OR asset_tag ILIKE :q", q: "%#{query}%") }
+  scope :search_by_name_or_tag, lambda { |query|
+    where("name ILIKE :q OR asset_tag ILIKE :q OR public_code = :exact", q: "%#{query}%", exact: query)
+  }
   scope :operational,           ->              { where(status: "operational") }
   scope :needs_attention,       ->              { where(status: %w[degraded down]) }
 

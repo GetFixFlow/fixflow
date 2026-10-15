@@ -39,9 +39,12 @@ export function QRScannerPage() {
           scanner.stop().catch(() => {})
           if (navigator.vibrate) navigator.vibrate(200)
 
-          // Parse QR: could be URL like /assets/123 or fixflow://assets/123
+          // Parse QR: a label's link to the request form (/request?asset=CODE), a URL like /assets/123, or fixflow://assets/123
           const match = decodedText.match(/\/assets\/(\d+)/)
-          if (match) {
+          const labelCode = decodedText.match(/\/request\?(?:.*&)?asset=([A-Za-z0-9]+)/)
+          if (labelCode) {
+            navigate(`/assets?search=${encodeURIComponent(labelCode[1])}`)
+          } else if (match) {
             navigate(`/assets/${match[1]}`)
           } else {
             // Try to treat as asset tag

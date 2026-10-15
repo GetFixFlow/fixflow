@@ -41,6 +41,23 @@ class Rack::Attack
     req.get_header("HTTP_AUTHORIZATION").presence || req.ip
   end
 
+  # Public work requests (no account, so the address is all there is to go on). A few reports an hour is
+  # normal; the overall cap keeps a spread-out flood from filling the managers' inboxes, at the price that
+  # a flood can also stop real reports for a while.
+  throttle("api/work_requests/create/ip", limit: 5, period: 10.minutes) do |req|
+    req.ip if req.path == "/api/v1/work_requests" && req.post?
+  end
+  throttle("api/work_requests/create/day", limit: 20, period: 1.day) do |req|
+    req.ip if req.path == "/api/v1/work_requests" && req.post?
+  end
+  throttle("api/work_requests/create/all", limit: 60, period: 1.hour) do |req|
+    "all" if req.path == "/api/v1/work_requests" && req.post?
+  end
+  # Looking a link or an asset code up: far more than a person would, and it is guessing.
+  throttle("api/work_requests/lookup/ip", limit: 60, period: 5.minutes) do |req|
+    req.ip if req.get? && (req.path.start_with?("/api/v1/work_requests/") || req.path.start_with?("/api/v1/public_assets/"))
+  end
+
   # ── Blocklist ──────────────────────────────────────────────────────────────
 
   blocklist("block bad ips") do |req|

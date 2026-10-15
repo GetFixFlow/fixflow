@@ -139,6 +139,8 @@ export interface Asset {
   id: number
   name: string
   asset_tag: string
+  /** Random code in the QR label's link, so the public request form cannot be used to list equipment. */
+  public_code?: string
   description?: string
   status: AssetStatus
   category?: string
@@ -270,18 +272,23 @@ export interface WorkOrder {
   iot_alert_id?: number | null
 }
 
+// What someone outside the team sees of their request (no account): where it stands, nothing about the team's work.
+export type WorkRequestStatus = 'received' | 'assigned' | 'in_progress' | 'completed' | 'cancelled'
+
 export interface WorkRequest {
-  id: number
-  token?: string
-  work_order_number?: string
+  token: string
   title: string
   description?: string
-  status: 'received' | 'created' | WorkOrderStatus
-  priority?: Priority
-  requester_name?: string
-  requester_email?: string
+  status: WorkRequestStatus
   created_at: string
   updated_at?: string
+}
+
+// What the public form is told about the equipment on a scanned QR label.
+export interface PublicAsset {
+  name: string
+  asset_tag: string
+  location: string | null
 }
 
 // ── Preventive Maintenance ────────────────────────────────────────────────────

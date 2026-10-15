@@ -226,6 +226,21 @@ The **Filters** panel on every report now works: places (including everything in
 
 **Reports are for managers and administrators on the server too**, not just on the screens: labor costs reveal what people are paid, so a technician or requester who calls a report directly gets "forbidden".
 
+## Reporting a problem without an account (QR labels)
+
+Every asset's QR label now links to a public form, `/request?asset=<code>`, where anyone (a visitor, a nurse, a tenant) can report a problem **without an account**. The form says which equipment the label is on, asks for a name (an email is optional), and what is wrong. It becomes an ordinary work order (priority and due date from **Settings → Company**), the managers are emailed, and the person gets a link, `/request/<token>`, to follow it: received, assigned, in progress, completed (or closed without work). If the link is lost the request cannot be looked up again, so the form says to keep it, and remembers the last five on that device.
+
+Print labels from **Assets → Print labels** (or an asset's page). **Labels printed before this change point at the asset page and still need a sign-in**: reprint them. A label that is not recognised (an asset since removed) still lets the person report the problem by typing the place and equipment.
+
+**What strangers can and cannot do.** The two public calls (`POST /api/v1/work_requests`, `GET /api/v1/work_requests/:token`) plus the label lookup (`GET /api/v1/public_assets/:code`) are the only ones that need no sign-in, and they are built for hostile callers:
+
+- The request link holds 128 random bits and the label code 140; neither can be counted up to or guessed, ids and work order numbers never appear on a public page, and a wrong link gets the same "not found" as one that never existed. The status shows only the title, the person's own words, a stage and two dates: never names, emails, the assignee, comments, costs, the team's cancel or reject reasons, or any other work order.
+- The caller chooses nothing but words: priority, status, company, assignee and token cannot be set. Each field has a size limit (description 2000 characters, name 100, email 254, place and equipment 200), control characters are removed, and anything over 16 KB is refused. Text is always shown as plain text, and emails are plain text.
+- Limits per address: **5 reports per 10 minutes, 20 per day, and 60 per hour from everyone together** (so a flood spread over many addresses still cannot bury the managers' inboxes; the cost is that a flood can also stop real reports for a while), and 60 link or label lookups per 5 minutes. Over the limit the answer is `429`. A hidden form field catches simple scripts: they are told it worked and nothing is created.
+- The pages are sent with `Cache-Control: no-store`, `X-Robots-Tag: noindex` and `Referrer-Policy: no-referrer`, so the link does not end up in caches, search results or other sites' logs. Server logs filter the `token` and `email` parameters, but a request's path (with the token) is logged by the web server in front: treat access logs as you would the work orders themselves.
+
+Behind a proxy the limits count the address the proxy reports (`X-Forwarded-For`); make sure your proxy sets it, or every visitor shares one allowance. There is no switch to turn the public form off yet.
+
 ## Localization
 
 **Settings → Localization** (administrators) sets how dates, times, numbers and money are shown to everyone: the **date format** (for example 05/10/2026, 05 Oct 2026, 2026-10-05), **12- or 24-hour time**, the **currency** (USD, EUR, GBP, JPY, CAD, AUD, CHF, INR, LKR, SGD), the **number style** (1,234.56 or 1.234,56 or with spaces) and the **first day of the week** in calendars and weekly reports. The page previews the result as you choose. The **time zone** is the same one as in Company settings and is used for schedules, such as when preventive maintenance falls due; dates and times on screen are shown in each person's own device time.

@@ -21,6 +21,8 @@ const AssetEditPage = lazy(() => import('@/pages/assets/AssetEditPage').then(m =
 const ImportPage = lazy(() => import('@/pages/import/ImportPage').then(m => ({ default: m.ImportPage })))
 const QRLabelPrintPage = lazy(() => import('@/pages/assets/QRLabelPrintPage').then(m => ({ default: m.QRLabelPrintPage })))
 const QRScannerPage = lazy(() => import('@/pages/assets/QRScannerPage').then(m => ({ default: m.QRScannerPage })))
+const WorkRequestPortalPage = lazy(() => import('@/pages/work-orders/WorkRequestPortalPage').then(m => ({ default: m.WorkRequestPortalPage })))
+const WorkRequestStatusPage = lazy(() => import('@/pages/work-orders/WorkRequestStatusPage').then(m => ({ default: m.WorkRequestStatusPage })))
 const PartsPage = lazy(() => import('@/pages/parts/PartsPage').then(m => ({ default: m.PartsPage })))
 const LocationsPage = lazy(() => import('@/pages/assets/LocationsPage').then(m => ({ default: m.LocationsPage })))
 const WorkOrdersListPage = lazy(() => import('@/pages/work-orders/WorkOrdersListPage').then(m => ({ default: m.WorkOrdersListPage })))
@@ -71,6 +73,9 @@ export const router = createBrowserRouter([
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
   { path: '/reset-password', element: <ResetPasswordPage /> },
   { path: '/register', element: <Navigate to="/setup" replace /> },
+  // Public, no account: report a problem (the QR label's link) and follow it
+  { path: '/request', element: <Lazy><WorkRequestPortalPage /></Lazy> },
+  { path: '/request/:token', element: <Lazy><WorkRequestStatusPage /></Lazy> },
   {
     element: <ProtectedRoute />,
     children: [

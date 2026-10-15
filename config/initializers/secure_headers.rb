@@ -16,3 +16,8 @@ SecureHeaders::Configuration.default do |config|
     script_src:     SecureHeaders::OPT_OUT
   }
 end
+
+# The public work request pages carry a secret link: nothing they load or open may be told where it came from.
+SecureHeaders::Configuration.override(:no_referrer) do |config|
+  config.referrer_policy = "no-referrer"
+end

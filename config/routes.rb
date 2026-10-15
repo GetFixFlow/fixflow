@@ -80,10 +80,9 @@ Rails.application.routes.draw do
         end
       end
 
-      scope "requests", as: "work_requests" do
-        post "/",       to: "work_requests#create", as: ""
-        get  "/:token", to: "work_requests#show",   as: "status"
-      end
+      # Public, no account: report a problem (from an asset's QR label) and follow it with a link
+      resources :work_requests, only: %i[create show], param: :token
+      get "public_assets/:code", to: "work_requests#asset"
 
       resources :preventive_maintenances do
         collection { get :dashboard }
