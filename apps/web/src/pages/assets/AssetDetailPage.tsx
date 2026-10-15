@@ -303,6 +303,7 @@ export function AssetDetailPage() {
                     assetId={asset.id}
                     assetTag={asset.asset_tag}
                     assetName={asset.name}
+                    publicCode={asset.public_code}
                     size="md"
                   />
                 </CardContent>

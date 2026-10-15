@@ -6,6 +6,7 @@ import type {
   ChecklistItem,
   WorkOrderPart,
   WorkRequest,
+  PublicAsset,
 } from '@/types'
 
 export const workOrdersApi = {
@@ -71,16 +72,24 @@ export const workOrdersApi = {
     }),
 }
 
-// Public work request portal (no auth)
+// Public work request portal (no account). The server limits how often and how much; see PublicWorkRequest.
 export const workRequestsApi = {
   create: (data: {
     requester_name: string
-    requester_email: string
+    requester_email?: string
     description: string
-    location_id?: number
+    location_description?: string
     asset_description?: string
+    /** From the QR label's link. */
+    asset_code?: string
+    /** A hidden field only a script fills in; people leave it empty. */
+    leave_empty?: string
   }) => apiClient.post<{ data: WorkRequest; token: string }>('/work_requests', { work_request: data }),
 
   get: (token: string) =>
-    apiClient.get<{ data: WorkRequest }>(`/work_requests/${token}`),
+    apiClient.get<{ data: WorkRequest }>(`/work_requests/${encodeURIComponent(token)}`),
+
+  /** What a scanned label is for, so the form can say what is being reported. */
+  asset: (code: string) =>
+    apiClient.get<{ data: PublicAsset }>(`/public_assets/${encodeURIComponent(code)}`),
 }

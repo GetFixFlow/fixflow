@@ -30,6 +30,7 @@ function AssetLabel({ asset, locationPath, qrSize }: LabelProps) {
       <AssetQRCode
         assetId={asset.id}
         assetTag={asset.asset_tag}
+        publicCode={asset.public_code}
         size={qrSize}
         showActions={false}
       />
