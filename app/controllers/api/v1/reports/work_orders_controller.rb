@@ -2,8 +2,6 @@ module Api
   module V1
     module Reports
       class WorkOrdersController < Reports::BaseController
-        before_action :require_manager!, only: :technician_performance
-
         # GET /api/v1/reports/work_orders/summary
         def summary
           from, to = date_range
