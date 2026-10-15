@@ -160,6 +160,10 @@ Rails.application.routes.draw do
         get "work_orders/backlog",                to: "work_orders#backlog"
         get "work_orders/technician_performance", to: "work_orders#technician_performance"
 
+        get "costs/summary",                      to: "costs#summary"
+        get "costs/by_asset",                     to: "costs#by_asset"
+        get "costs/by_location",                  to: "costs#by_location"
+
         get "assets/health",                      to: "assets#health"
         get "assets/cost_analysis",               to: "assets#cost_analysis"
         get "assets/:id/history",                 to: "assets#history", as: :asset_history

@@ -23,12 +23,12 @@ export function CostAnalysisPage() {
   const params = getParams()
   const dateRange = `${formatDate(dateFrom)} – ${formatDate(dateTo)}`
 
-  const { data: summary, isLoading } = useQuery({
+  const { data: summary, isLoading, isError } = useQuery({
     queryKey: ['reports', 'costs_summary', params],
     queryFn: () => reportsApi.costs.summary(params).then((r) => r.data as Record<string, unknown>),
   })
 
-  const { data: byAsset, isLoading: assetLoading } = useQuery({
+  const { data: byAsset, isLoading: assetLoading, isError: assetError } = useQuery({
     queryKey: ['reports', 'costs_by_asset', params],
     queryFn: () => reportsApi.costs.byAsset(params).then((r) => r.data as Record<string, unknown>),
   })
@@ -47,6 +47,18 @@ export function CostAnalysisPage() {
         </div>
       </div>
 
+      {(isError || assetError) && (
+        <p role="alert" className="rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">
+          The cost figures could not be loaded, so none are shown. Try again in a moment.
+        </p>
+      )}
+      {s && (s.work_orders_count as number) === 0 && (
+        <p role="status" className="rounded-md bg-gray-50 p-3 text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+          No work was finished in this period, so there are no costs to show. Costs count in the period a work order was completed, and
+          labor costs need an hourly rate (Settings, Company, or a person&apos;s own rate under Users).
+        </p>
+      )}
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {([
           ['Total Cost', s ? formatCurrency(s.total_cost as number) : '—'],
@@ -59,7 +71,7 @@ export function CostAnalysisPage() {
       </div>
 
       <ChartContainer title="Cost Trend" loading={isLoading}>
-        <CostTrendChart data={(s?.trend as Parameters<typeof CostTrendChart>[0]['data']) ?? []} />
+        <CostTrendChart data={(s?.trend as Parameters<typeof CostTrendChart>[0]['data']) ?? []} unit={s?.group_by as string | undefined} />
       </ChartContainer>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

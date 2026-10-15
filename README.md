@@ -218,6 +218,14 @@ A work order's **labor cost** is the hours recorded when it is completed times a
 
 Set the **default rate** in **Settings → Company** (Hourly labor rate) and, for a particular person, **Settings → Users → Edit → Hourly rate** (administrators only; leave it empty to use the default). Until a rate is set anywhere, labor counts as nothing, and the work order says so rather than guessing. Because wages are sensitive, only **managers and administrators** see labor costs and rates; technicians and requesters see the parts cost only.
 
+## Cost reports and report filters
+
+**Reports → Cost Analysis** shows what finished work cost: the total, labor and parts apart, the average per work order, a trend (a point per day, week or month, chosen by the length of the period), the assets that cost most, and the same by place. A cost counts **in the period the work was completed**, so a job opened last month and finished today is today's cost; only completed and verified work counts. Labor comes from [Labor cost](#labor-cost), so it needs an hourly rate to be more than nothing.
+
+The **Filters** panel on every report now works: places (including everything inside them), assets, the people who did the work, priorities, and where the work order came from (made by hand, from a PM schedule, or from an IoT rule). Choices combine, each narrowing further.
+
+**Reports are for managers and administrators on the server too**, not just on the screens: labor costs reveal what people are paid, so a technician or requester who calls a report directly gets "forbidden".
+
 ## Localization
 
 **Settings → Localization** (administrators) sets how dates, times, numbers and money are shown to everyone: the **date format** (for example 05/10/2026, 05 Oct 2026, 2026-10-05), **12- or 24-hour time**, the **currency** (USD, EUR, GBP, JPY, CAD, AUD, CHF, INR, LKR, SGD), the **number style** (1,234.56 or 1.234,56 or with spaces) and the **first day of the week** in calendars and weekly reports. The page previews the result as you choose. The **time zone** is the same one as in Company settings and is used for schedules, such as when preventive maintenance falls due; dates and times on screen are shown in each person's own device time.
