@@ -150,6 +150,8 @@ export function WorkOrderDetailPage() {
   const isVerified = wo.status === 'verified'
   const isCancelled = wo.status === 'cancelled'
   const isReadOnly = isVerified || isCancelled
+  // The server keeps a checklist as it was once the work is completed; until then the technician and managers can tick steps.
+  const checklistEditable = (isAssignedToMe || canManage) && ['assigned', 'in_progress', 'on_hold', 'pending_parts'].includes(wo.status)
 
   return (
     <div className="space-y-4">
@@ -318,15 +320,15 @@ export function WorkOrderDetailPage() {
           )}
 
           {/* Checklist */}
-          {wo.checklist_items && wo.checklist_items.length > 0 && (
+          {wo.checklist && wo.checklist.length > 0 && (
             <section className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
               <h2 className="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
                 Checklist
               </h2>
               <WorkOrderChecklist
                 workOrderId={wo.id}
-                items={wo.checklist_items}
-                editable={!isReadOnly && isAssignedToMe}
+                items={wo.checklist}
+                editable={checklistEditable}
               />
             </section>
           )}
@@ -517,7 +519,7 @@ export function WorkOrderDetailPage() {
       />
       <CompleteModal
         workOrderId={wo.id}
-        checklistItems={wo.checklist_items}
+        checklistItems={wo.checklist}
         open={openModal === 'complete'}
         onClose={() => setOpenModal(null)}
       />

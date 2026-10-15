@@ -36,7 +36,13 @@ module Api
         authorize_update!
         return if performed?
         attrs = work_order_params
-        attrs[:checklist] = merge_checklist(attrs[:checklist]) if attrs.key?(:checklist)
+        if attrs.key?(:checklist)
+          if @work_order.checklist_locked?
+            return render_error("This work order is #{@work_order.status}, so its checklist can no longer be changed.",
+                                :unprocessable_entity, code: "CHECKLIST_LOCKED")
+          end
+          attrs[:checklist] = merge_checklist(attrs[:checklist])
+        end
         @work_order.update!(attrs)
         render json: { data: WorkOrderBlueprint.render_as_hash(@work_order) }
       end
@@ -190,6 +196,8 @@ module Api
       # ─── AASM transition helper ──────────────────────────────────────────
 
       def fire_transition!(event)
+        return render_unfinished_checklist if event == :complete && @work_order.incomplete_required_steps.any?
+
         unless @work_order.public_send(:"may_#{event}?")
           return render_error(
             "Cannot #{event.to_s.tr('_', ' ')} a work order with status '#{@work_order.status}'",
@@ -206,6 +214,14 @@ module Api
         end
       rescue ActiveRecord::RecordInvalid => e
         render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
+      end
+
+      # Work cannot be completed with required checklist steps undone. Says which ones, so the
+      # technician can go and do them.
+      def render_unfinished_checklist
+        missing = @work_order.incomplete_required_steps
+        render_error("Complete the required steps first: #{missing.pluck('instruction').join('; ')}", :unprocessable_entity,
+                     code: "CHECKLIST_INCOMPLETE", details: { steps: missing.pluck("step") })
       end
 
       # ─── Authorization helpers ───────────────────────────────────────────
@@ -254,13 +270,24 @@ module Api
         scope.order(col => dir)
       end
 
-      # The client sends only { step, completed } per item. Merge that into the stored
-      # checklist so the instructions and "required" flags are not lost.
+      # The client sends only { step, completed } per item. Merge that into the stored checklist so the
+      # instructions and "required" flags are not lost, and note who did each step and when. Sending a
+      # step that is already done again (a replay after a lost connection) changes nothing.
       def merge_checklist(incoming)
         updates = Array(incoming).index_by { |item| item[:step].to_i }
         Array(@work_order.checklist).map do |item|
           update = updates[item["step"].to_i]
-          update ? item.merge("completed" => ActiveModel::Type::Boolean.new.cast(update[:completed]) || false) : item
+          next item unless update
+
+          done = ActiveModel::Type::Boolean.new.cast(update[:completed]) || false
+          next item if done == (item["completed"] == true)
+
+          if done
+            item.merge("completed" => true, "completed_at" => Time.current.iso8601,
+                                      "completed_by" => current_user.id, "completed_by_name" => current_user.full_name)
+          else
+            item.except("completed_at", "completed_by", "completed_by_name").merge("completed" => false)
+          end
         end
       end
 

@@ -64,7 +64,8 @@ export const workOrdersApi = {
     apiClient.delete(`/work_orders/${id}/parts/${partId}`),
 
   // Checklist
-  updateChecklist: (id: number, items: ChecklistItem[]) =>
+  /** Only the steps given are changed; the server keeps the instructions and the rest. */
+  updateChecklist: (id: number, items: Pick<ChecklistItem, 'step' | 'completed'>[]) =>
     apiClient.patch<{ data: WorkOrder }>(`/work_orders/${id}`, {
       work_order: { checklist: items.map(({ step, completed }) => ({ step, completed: !!completed })) },
     }),

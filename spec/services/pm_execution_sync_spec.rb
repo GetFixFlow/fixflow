@@ -7,8 +7,10 @@ RSpec.describe PmExecutionSync do
   let(:work_order) { PmSchedulerService.generate_work_order(pm).tap { |wo| wo.update!(assignee: tech, status: "in_progress") } }
   let(:execution)  { PmExecution.find_by!(work_order_id: work_order.id) }
 
+  # The work is done first: required checklist steps have to be ticked before a work order can complete.
   def complete!(order)
-    order.update!(completion_notes: "Replaced the belt and tested the drive")
+    done = order.checklist.map { |step| step.merge("completed" => true) }
+    order.update!(checklist: done, completion_notes: "Replaced the belt and tested the drive")
     order.complete!
   end
 

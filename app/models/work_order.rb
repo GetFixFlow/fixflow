@@ -80,7 +80,7 @@ class WorkOrder < ApplicationRecord
     end
 
     event :complete do
-      transitions from: :in_progress, to: :completed, guard: :completion_notes_present?
+      transitions from: :in_progress, to: :completed, guard: %i[completion_notes_present? required_steps_done?]
       before { self.completed_at = Time.current }
       after  { NotifyManagerJob.perform_later(id); PmExecutionSync.completed(self); log_activity("completed") }
     end
@@ -117,6 +117,17 @@ class WorkOrder < ApplicationRecord
   scope :search_by_keyword,  ->(q)         { where("title ILIKE :q OR description ILIKE :q", q: "%#{q}%") }
   scope :due_from,           ->(date)      { where("due_date >= ?", date) }
   scope :due_to,             ->(date)      { where("due_date <= ?", date) }
+
+  # The checklist steps that have to be done before the work can be completed and are not yet.
+  # A step is required unless it says otherwise.
+  def incomplete_required_steps
+    Array(checklist).select { |item| item["required"] != false && !item["completed"] }
+  end
+
+  # Work that is finished or cancelled keeps the checklist as it was.
+  def checklist_locked?
+    completed? || verified? || cancelled?
+  end
 
   # What the logged parts cost, kept on the work order so cost reports can sum it.
   def recalculate_parts_cost!
@@ -158,6 +169,10 @@ class WorkOrder < ApplicationRecord
 
   def completion_notes_present?
     completion_notes.present?
+  end
+
+  def required_steps_done?
+    incomplete_required_steps.empty?
   end
 
   def verifier_differs_from_assignee?

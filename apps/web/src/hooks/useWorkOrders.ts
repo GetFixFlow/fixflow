@@ -9,7 +9,7 @@ import { isNetworkError } from '@/lib/offlineSync'
 import { fileStore } from '@/lib/fileStore'
 import { prepareUpload } from '@/lib/imagePrep'
 import { useAuthStore } from '@/stores/authStore'
-import type { WorkOrder, WorkOrderComment, ChecklistItem } from '@/types'
+import type { WorkOrder, WorkOrderComment } from '@/types'
 
 export const WO_KEY = ['work_orders'] as const
 
@@ -180,7 +180,8 @@ export function useCompleteWorkOrder() {
       qc.invalidateQueries({ queryKey: [...WO_KEY, vars.id] })
       toast.success('Work order marked as complete.')
     },
-    onError: () => toast.error('Failed to complete work order.'),
+    onError: (error: AxiosError<{ error?: { message?: string } }>) =>
+      toast.error(error.response?.data?.error?.message ?? 'Failed to complete work order.'),
   })
 }
 
@@ -404,10 +405,46 @@ export function useRemovePart(workOrderId: number) {
 }
 
 // Checklist
-export function useUpdateChecklist(workOrderId: number) {
+
+/**
+ * Ticks or unticks one step. It shows at once (a checkbox that waits for the server feels broken on a
+ * phone), and with no connection it is kept on the device and sent later, in order with the rest.
+ */
+export function useToggleChecklistStep(workOrderId: number) {
   const qc = useQueryClient()
+  const key = [...WO_KEY, workOrderId]
   return useMutation({
-    mutationFn: (items: ChecklistItem[]) => workOrdersApi.updateChecklist(workOrderId, items),
-    onSuccess: () => qc.invalidateQueries({ queryKey: [...WO_KEY, workOrderId] }),
+    networkMode: 'always',
+    mutationFn: async ({ step, completed }: { step: number; completed: boolean }): Promise<{ queued: boolean }> => {
+      const keep = () => {
+        offlineQueue.enqueue({ type: 'checklist', workOrderId, step, completed, label: describe(qc, workOrderId, `Checklist step ${step}`) })
+        return { queued: true }
+      }
+      if (!navigator.onLine && offlineQueue.canQueue()) return keep()
+      try {
+        await workOrdersApi.updateChecklist(workOrderId, [{ step, completed }])
+        return { queued: false }
+      } catch (error) {
+        if (isNetworkError(error) && offlineQueue.canQueue()) return keep()
+        throw error
+      }
+    },
+    onMutate: async ({ step, completed }) => {
+      await qc.cancelQueries({ queryKey: key })
+      const before = qc.getQueryData<WorkOrder>(key)
+      if (before?.checklist) {
+        qc.setQueryData<WorkOrder>(key, { ...before, checklist: before.checklist.map((i) => (i.step === step ? { ...i, completed } : i)) })
+      }
+      return { before }
+    },
+    onSuccess: ({ queued }, _vars, context) => {
+      // Waiting changes are drawn from the queue, not the cache, so put the cache back as it was.
+      if (queued && context?.before) qc.setQueryData(key, context.before)
+      qc.invalidateQueries({ queryKey: key })
+    },
+    onError: (error: AxiosError<{ error?: { message?: string } }>, _vars, context) => {
+      if (context?.before) qc.setQueryData(key, context.before)
+      toast.error(error.response?.data?.error?.message ?? 'Could not update the checklist.')
+    },
   })
 }
