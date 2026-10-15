@@ -101,7 +101,7 @@ export function AssetsListPage() {
           <div className="flex gap-2">
             {canManage && (
               <>
-                <Button variant="outline" size="sm" onClick={() => navigate('/assets/import')}>
+                <Button variant="outline" size="sm" onClick={() => navigate('/import?kind=assets')}>
                   <Upload className="h-4 w-4" />
                   Import CSV
                 </Button>

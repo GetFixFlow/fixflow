@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Boxes, Pencil, Plus, Search, SlidersHorizontal, Trash2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Boxes, Pencil, Plus, Search, SlidersHorizontal, Trash2, Upload } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -48,7 +49,14 @@ export function PartsPage() {
       <PageHeader
         title="Parts & Inventory"
         description={meta ? `${meta.total_count} ${filtered ? 'matching' : 'in the catalog'}` : 'Spare parts and stock levels'}
-        actions={canManage && <Button size="sm" onClick={() => setEditing('new')}><Plus className="h-4 w-4" />Add part</Button>}
+        actions={
+          canManage && (
+            <>
+              <Link to="/import?kind=parts"><Button size="sm" variant="outline"><Upload className="h-4 w-4" />Import CSV</Button></Link>
+              <Button size="sm" onClick={() => setEditing('new')}><Plus className="h-4 w-4" />Add part</Button>
+            </>
+          )
+        }
       />
 
       <div className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">

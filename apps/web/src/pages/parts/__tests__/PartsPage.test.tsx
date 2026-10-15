@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { http, HttpResponse } from 'msw'
 import { toast } from 'sonner'
@@ -27,7 +28,7 @@ function signInAs(role: Role) {
 function renderPage() {
   render(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })}>
-      <PartsPage />
+      <MemoryRouter><PartsPage /></MemoryRouter>
     </QueryClientProvider>,
   )
 }
@@ -194,6 +195,12 @@ describe('PartsPage', () => {
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Hydraulic seal has been used on work orders.'))
   })
 
+  it('offers managers a way to import parts from a CSV file, and nobody else', async () => {
+    signInAs('manager')
+    renderPage()
+    expect(await screen.findByRole('link', { name: /import csv/i })).toHaveAttribute('href', '/import?kind=parts')
+  })
+
   it('leaves adding, editing and deleting to the people allowed to', async () => {
     signInAs('technician')
     renderPage()
@@ -201,6 +208,7 @@ describe('PartsPage', () => {
 
     expect(screen.getByLabelText('Adjust stock of Hydraulic seal')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /add part/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /import csv/i })).not.toBeInTheDocument()
     expect(screen.queryByLabelText('Edit Hydraulic seal')).not.toBeInTheDocument()
     expect(screen.queryByLabelText('Delete Hydraulic seal')).not.toBeInTheDocument()
   })
