@@ -29,7 +29,7 @@ export function CompleteModal({
   const [resolution, setResolution] = useState<ResolutionType>('fully_resolved')
   const complete = useCompleteWorkOrder()
 
-  const requiredIncomplete = checklistItems.filter((i) => i.required && !i.completed)
+  const requiredIncomplete = checklistItems.filter((i) => i.required !== false && !i.completed)
 
   const canSubmit =
     requiredIncomplete.length === 0 &&

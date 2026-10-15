@@ -51,7 +51,12 @@ export interface QueuedPhoto extends Base {
   size: number
   clientId: string
 }
-export type QueuedAction = QueuedTransition | QueuedComment | QueuedPhoto
+export interface QueuedChecklistStep extends Base {
+  type: 'checklist'
+  step: number
+  completed: boolean
+}
+export type QueuedAction = QueuedTransition | QueuedComment | QueuedPhoto | QueuedChecklistStep
 
 export interface RejectedAction {
   action: QueuedAction
@@ -126,7 +131,7 @@ export const offlineQueue = {
   /** False when nobody is signed in, as there is no one to keep the change for. */
   canQueue: () => currentKey() !== null,
 
-  enqueue(action: Omit<QueuedTransition, 'id' | 'queuedAt'> | Omit<QueuedComment, 'id' | 'queuedAt'> | Omit<QueuedPhoto, 'id' | 'queuedAt'>) {
+  enqueue(action: Omit<QueuedTransition, 'id' | 'queuedAt'> | Omit<QueuedComment, 'id' | 'queuedAt'> | Omit<QueuedPhoto, 'id' | 'queuedAt'> | Omit<QueuedChecklistStep, 'id' | 'queuedAt'>) {
     const queued = { ...action, id: newId(), queuedAt: Date.now() } as QueuedAction
     commit({ ...current(), queue: [...current().queue, queued] })
     return queued
@@ -150,10 +155,20 @@ export const offlineQueue = {
   },
 }
 
-/** The work order as the person left it: its status moved on by the changes still waiting to be sent. */
+/** The work order as the person left it: its status and checklist moved on by the changes still waiting to be sent. */
 export function applyPending(workOrder: WorkOrder, actions: QueuedAction[]): WorkOrder {
-  const mine = actions.filter((a): a is QueuedTransition => a.type === 'transition' && a.workOrderId === workOrder.id)
-  if (mine.length === 0) return workOrder
-  const last = mine[mine.length - 1]
-  return { ...workOrder, status: EVENT_RESULT_STATUS[last.event], pending_sync: mine.length }
+  const mine = actions.filter((a) => a.workOrderId === workOrder.id)
+  const transitions = mine.filter((a): a is QueuedTransition => a.type === 'transition')
+  const steps = mine.filter((a): a is QueuedChecklistStep => a.type === 'checklist')
+  if (transitions.length === 0 && steps.length === 0) return workOrder
+
+  const result: WorkOrder = { ...workOrder, pending_sync: transitions.length + steps.length }
+  if (transitions.length > 0) result.status = EVENT_RESULT_STATUS[transitions[transitions.length - 1].event]
+  if (steps.length > 0 && workOrder.checklist) {
+    result.checklist = workOrder.checklist.map((item) => {
+      const latest = [...steps].reverse().find((s) => s.step === item.step)
+      return latest ? { ...item, completed: latest.completed, pending: true } : item
+    })
+  }
+  return result
 }

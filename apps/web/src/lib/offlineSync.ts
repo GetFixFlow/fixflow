@@ -34,6 +34,8 @@ async function send(action: QueuedAction) {
     const blob = await fileStore.get(action.fileKey).catch(() => undefined)
     if (!blob) throw new PhotoMissing('The photo is no longer on this device.')
     await workOrdersApi.uploadAttachment(action.workOrderId, new File([blob], action.filename, { type: action.contentType }), action.clientId)
+  } else if (action.type === 'checklist') {
+    await workOrdersApi.updateChecklist(action.workOrderId, [{ step: action.step, completed: action.completed }])
   } else if (action.type === 'comment') {
     await workOrdersApi.createComment(action.workOrderId, action.body, action.internal, action.clientId)
   } else {

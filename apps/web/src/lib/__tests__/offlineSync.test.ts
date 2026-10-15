@@ -187,3 +187,42 @@ describe('syncQueue: photos', () => {
     expect(offlineQueue.getSnapshot().rejected[0]).toMatchObject({ message: 'The photo is no longer on this device.' })
   })
 })
+
+describe('syncQueue: checklist steps', () => {
+  const tick = (step: number, completed = true) =>
+    offlineQueue.enqueue({ type: 'checklist', workOrderId: 1, step, completed, label: `Checklist step ${step} on WO-000001` })
+
+  it('sends each tick as just that step, in the order they were made', async () => {
+    const sent: unknown[] = []
+    server.use(http.patch('/api/v1/work_orders/1', () => ok()))
+    const patch = vi.spyOn(apiClient, 'patch')
+    tick(2)
+    tick(1)
+    tick(2, false)
+
+    expect(await syncQueue()).toEqual({ synced: 3, rejected: 0 })
+
+    patch.mock.calls.forEach((call) => sent.push((call[1] as { work_order: { checklist: unknown } }).work_order.checklist))
+    expect(sent).toEqual([[{ step: 2, completed: true }], [{ step: 1, completed: true }], [{ step: 2, completed: false }]])
+  })
+
+  it('keeps ticks for the next try when there is no connection', async () => {
+    server.use(http.patch('/api/v1/work_orders/1', () => HttpResponse.error()))
+    tick(1)
+
+    expect(await syncQueue()).toEqual({ synced: 0, rejected: 0 })
+    expect(offlineQueue.getSnapshot().queue).toHaveLength(1)
+  })
+
+  it('tells the person when the work order was completed meanwhile, so the tick was not kept', async () => {
+    server.use(http.patch('/api/v1/work_orders/1', () =>
+      refuse(422, 'This work order is completed, so its checklist can no longer be changed.')))
+    tick(1)
+
+    expect(await syncQueue()).toEqual({ synced: 0, rejected: 1 })
+    expect(offlineQueue.getSnapshot().rejected[0]).toMatchObject({
+      message: 'This work order is completed, so its checklist can no longer be changed.',
+      action: { label: 'Checklist step 1 on WO-000001' },
+    })
+  })
+})

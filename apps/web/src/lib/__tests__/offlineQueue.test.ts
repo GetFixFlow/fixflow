@@ -88,4 +88,36 @@ describe('applyPending', () => {
   it('ignores comments and other work orders', () => {
     expect(applyPending(wo, queued(comment(), start(2)))).toBe(wo)
   })
+
+  describe('checklist steps', () => {
+    const tick = (step: number, completed: boolean, id = String(step)) =>
+      ({ id, type: 'checklist', workOrderId: 1, step, completed, label: 'x', queuedAt: Number(id) }) as QueuedAction
+    const checklist = (): WorkOrder =>
+      ({ ...wo, checklist: [{ step: 1, instruction: 'A', completed: false }, { step: 2, instruction: 'B', completed: true }] }) as WorkOrder
+
+    it('shows a waiting tick as done, marked as waiting, and leaves the other steps alone', () => {
+      const result = applyPending(checklist(), [tick(1, true)])
+
+      expect(result.checklist).toEqual([
+        { step: 1, instruction: 'A', completed: true, pending: true },
+        { step: 2, instruction: 'B', completed: true },
+      ])
+      expect(result.pending_sync).toBe(1)
+    })
+
+    it('uses the last thing done to a step: ticked, then unticked', () => {
+      const result = applyPending(checklist(), [tick(2, false, '1'), tick(2, true, '2'), tick(2, false, '3')])
+
+      expect(result.checklist?.[1]).toMatchObject({ step: 2, completed: false, pending: true })
+      expect(result.pending_sync).toBe(3)
+    })
+
+    it('counts ticks together with status changes, and ignores other work orders', () => {
+      const other = { ...tick(1, true), workOrderId: 9 } as QueuedAction
+      const result = applyPending(checklist(), [tick(1, true), { ...start(1), id: 'a', queuedAt: 5 } as QueuedAction, other])
+
+      expect(result).toMatchObject({ status: 'in_progress', pending_sync: 2 })
+      expect(applyPending(checklist(), [other])).toEqual(checklist())
+    })
+  })
 })

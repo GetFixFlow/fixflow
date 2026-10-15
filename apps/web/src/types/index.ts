@@ -183,6 +183,11 @@ export interface ChecklistItem {
   instruction: string
   required?: boolean
   completed?: boolean
+  /** Who ticked the step and when, as the server recorded it. */
+  completed_by_name?: string | null
+  completed_at?: string | null
+  /** Ticked without a connection and not sent yet. Set by the app, not the server. */
+  pending?: boolean
 }
 
 export interface PersonRef {
@@ -263,7 +268,6 @@ export interface WorkOrder {
   source?: WorkOrderSource
   pm_id?: number | null
   iot_alert_id?: number | null
-  checklist_items?: ChecklistItem[]
 }
 
 export interface WorkRequest {
