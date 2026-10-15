@@ -24,6 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Badge, statusBadge } from '@/components/ui/Badge'
 import { formatDateTime } from '@/lib/localeFormat'
+import { GettingStarted } from '@/components/dashboard/GettingStarted'
 
 export function DashboardPage() {
   const { data, isLoading } = useDashboard()
@@ -55,6 +56,9 @@ export function DashboardPage() {
         title={`Welcome back, ${user?.full_name?.split(' ')[0]}`}
         description="Here's what's happening with your maintenance operations"
       />
+
+      {/* The administrator's first steps, and a note when what is shown is sample data */}
+      {user?.role === 'admin' && <GettingStarted />}
 
       {/* Stat cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

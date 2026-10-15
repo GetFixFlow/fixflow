@@ -26,6 +26,11 @@ Rails.application.routes.draw do
       resource :branding, only: %i[show update], controller: "branding"
       resource :localization_settings, only: %i[show update], controller: "localization_settings"
 
+      # Example data to look around in, and the first things to do
+      resource :sample_data, only: %i[show create destroy], controller: "sample_data"
+      get  "getting_started",         to: "getting_started#show"
+      post "getting_started/dismiss", to: "getting_started#dismiss"
+
       # Bring assets, locations or parts in from a CSV file
       get  "imports/:kind/template", to: "imports#template"
       post "imports/:kind/preview",  to: "imports#preview"
