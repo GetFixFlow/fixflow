@@ -89,6 +89,8 @@ export interface OrgSettings {
   address?: string
   default_priority: string
   default_due_days: number
+  /** What an hour of work costs when the person has no rate of their own. */
+  labor_rate: number
   require_completion_notes: boolean
   auto_close_days: number
   wo_number_prefix: string

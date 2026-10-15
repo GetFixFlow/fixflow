@@ -9,6 +9,9 @@ class UserBlueprint < Blueprinter::Base
     user.invitation_accepted_at || (user.invitation_sent_at ? nil : user.created_at)
   end
 
+  # Pay is for administrators: pass `show_rate: true` to include it.
+  field(:hourly_rate) { |user, options| options[:show_rate] ? user.hourly_rate&.to_f : nil }
+
   view :extended do
     fields :email, :role, :first_name, :last_name, :phone, :job_title, :department,
       :organization_id, :sign_in_count, :last_sign_in_at, :created_at

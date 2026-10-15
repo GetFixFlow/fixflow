@@ -19,7 +19,7 @@ module Api
 
       # GET /api/v1/work_orders/:id
       def show
-        render json: { data: WorkOrderBlueprint.render_as_hash(@work_order, view: :extended) }
+        render json: { data: WorkOrderBlueprint.render_as_hash(@work_order, view: :extended, labor: current_user.manager_or_above?) }
       end
 
       # POST /api/v1/work_orders
@@ -200,7 +200,7 @@ module Api
         @work_order.public_send(:"#{event}!")
 
         if @work_order.valid?
-          render json: { data: WorkOrderBlueprint.render_as_hash(@work_order, view: :extended) }
+          render json: { data: WorkOrderBlueprint.render_as_hash(@work_order, view: :extended, labor: current_user.manager_or_above?) }
         else
           render json: { errors: @work_order.errors.full_messages }, status: :unprocessable_entity
         end

@@ -43,6 +43,8 @@ export interface User {
   avatar_url?: string
   phone?: string
   job_title?: string | null
+  /** What an hour of this person's work costs. Only administrators are sent it. */
+  hourly_rate?: number | null
   department?: string | null
   organization_name?: string
   created_at?: string
@@ -237,7 +239,9 @@ export interface WorkOrder {
   estimated_hours?: number | null
   actual_hours?: number | null
   parts_cost?: number | string
-  labor_cost?: number | string
+  /** Only managers and administrators are sent the labor figures (they reveal what people are paid). */
+  labor_cost?: number | string | null
+  labor_rate?: number | string | null
   completion_notes?: string | null
   rejection_reason?: string | null
   cancellation_reason?: string | null

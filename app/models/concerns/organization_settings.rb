@@ -28,6 +28,7 @@ module OrganizationSettings
     "wo_number_prefix" => "WO",
     "default_priority" => "medium",
     "default_due_days" => 7,
+    "labor_rate" => 0,
     "require_completion_notes" => false,
     "auto_close_days" => 30,
     "pm_compliance_target" => 90,
@@ -44,6 +45,7 @@ module OrganizationSettings
 
   INTEGER_KEYS = %w[default_due_days auto_close_days pm_compliance_target pm_reminder_days
                     iot_alert_cooldown iot_stale_threshold iot_data_retention_days].freeze
+  DECIMAL_KEYS = %w[labor_rate].freeze
   BOOLEAN_KEYS = %w[require_completion_notes pm_pause_on_down].freeze
   KEYS = DEFAULTS.keys.freeze
 
@@ -55,6 +57,9 @@ module OrganizationSettings
   end
 
   def default_priority = settings_with_defaults["default_priority"]
+
+  # What an hour of work costs when the person doing it has no rate of their own.
+  def default_labor_rate = BigDecimal(settings_with_defaults["labor_rate"].to_s)
   def default_due_days = settings_with_defaults["default_due_days"].to_i
 
   def timezone_or_default
@@ -79,6 +84,9 @@ module OrganizationSettings
     if INTEGER_KEYS.include?(key)
       # A fraction like 7.5 is kept as is, so validation rejects it instead of it being truncated.
       value.is_a?(Float) ? value : (Integer(value, exception: false) || value)
+    elsif DECIMAL_KEYS.include?(key)
+      # Kept as given when it is not a number, so validation says so instead of it being turned into zero.
+      Float(value, exception: false) || value
     elsif BOOLEAN_KEYS.include?(key)
       ActiveModel::Type::Boolean.new.cast(value)
     elsif key == "wo_number_prefix"
