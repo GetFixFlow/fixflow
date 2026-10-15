@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_15_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_15_200000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -263,6 +263,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_100000) do
     t.index ["status"], name: "index_preventive_maintenances_on_status"
   end
 
+  create_table "sample_records", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.string "record_type", null: false
+    t.bigint "record_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_sample_records_on_organization_id"
+    t.index ["record_type", "record_id"], name: "index_sample_records_on_record_type_and_record_id", unique: true
+  end
+
   create_table "sensor_aggregates", force: :cascade do |t|
     t.bigint "asset_id", null: false
     t.decimal "avg_value", precision: 15, scale: 6
@@ -439,6 +449,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_100000) do
   add_foreign_key "preventive_maintenances", "assets"
   add_foreign_key "preventive_maintenances", "organizations"
   add_foreign_key "preventive_maintenances", "users", column: "assigned_to_id"
+  add_foreign_key "sample_records", "organizations"
   add_foreign_key "sensor_aggregates", "assets"
   add_foreign_key "sensor_readings", "assets"
   add_foreign_key "sensor_readings", "organizations"

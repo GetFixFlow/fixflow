@@ -75,4 +75,36 @@ RSpec.describe "fixflow rake tasks", type: :task do
       expect { Rake::Task["fixflow:stats"].execute }.not_to raise_error
     end
   end
+
+  describe "fixflow:sample_data and fixflow:remove_sample_data" do
+    def run(task) = Rake::Task["fixflow:#{task}"].tap(&:reenable).invoke
+
+    let(:org) { create(:organization) }
+
+    before { create(:user, :admin, organization: org) }
+
+    it "adds the sample data to the company, then takes it out again" do
+      expect {
+        run("sample_data")
+      }.to output(/Sample data loaded: 3 places, 5 assets, 4 parts, 1 PM schedule, and 9 work orders\./).to_stdout
+      expect(org.assets.count).to eq(5)
+
+      expect {
+        run("remove_sample_data")
+      }.to output(/Removed: 3 places, 5 assets, 4 parts, 1 PM schedule, and 9 work orders\./).to_stdout
+      expect(org.assets.count).to eq(0)
+    end
+
+    it "says so, and stops, when it is already loaded" do
+      run("sample_data")
+
+      expect { run("sample_data") }.to raise_error(SystemExit).and output(/already loaded/).to_stderr
+    end
+
+    it "says so when there is no company yet" do
+      Organization.destroy_all
+
+      expect { run("sample_data") }.to raise_error(SystemExit).and output(/no company yet/).to_stderr
+    end
+  end
 end

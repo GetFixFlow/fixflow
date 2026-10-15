@@ -18,6 +18,13 @@ class Organization < ApplicationRecord
 
   store_accessor :settings, :date_format
 
+  # The "getting started" card on the administrator's dashboard has been put away.
+  def getting_started_dismissed? = (settings || {})["getting_started_dismissed_at"].present?
+
+  def dismiss_getting_started!
+    update!(settings: (settings || {}).merge("getting_started_dismissed_at" => Time.current.iso8601))
+  end
+
   # The mail server saved in the app, or an empty one.
   def smtp_config = SmtpConfig.load(self)
 

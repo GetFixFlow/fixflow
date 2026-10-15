@@ -4,6 +4,53 @@ import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
 import { useAuthStore } from '@/stores/authStore'
+import { useLoadSampleData, useRemoveSampleData, useSampleData } from '@/hooks/useSampleData'
+
+const SAMPLE_LABELS: Record<string, string> = {
+  Location: 'places', Asset: 'assets', Part: 'parts', PreventiveMaintenance: 'PM schedules', WorkOrder: 'work orders',
+}
+
+/** Example data to look around in, kept apart from the real data so it can be taken out cleanly. */
+function SampleDataSection() {
+  const { data: sample } = useSampleData()
+  const load = useLoadSampleData()
+  const remove = useRemoveSampleData()
+  const [kept, setKept] = useState<{ type: string; name: string; reason: string }[]>([])
+
+  const removeSample = () => {
+    if (!confirm('Remove the sample data? Anything you added yourself stays. Sample items you have since built on are kept.')) return
+    remove.mutate(undefined, { onSuccess: (result) => setKept(result.report.kept) })
+  }
+  const counts = sample ? Object.entries(sample.counts).filter(([, n]) => n > 0).map(([type, n]) => `${n} ${SAMPLE_LABELS[type] ?? type}`).join(', ') : ''
+
+  return (
+    <Card>
+      <CardContent className="p-5 space-y-3">
+        <h3 className="font-semibold text-gray-900 dark:text-gray-100">Sample data</h3>
+        <p className="text-sm text-gray-500">
+          Fills your company with a few places, assets, parts, a PM schedule and work orders (all named &ldquo;Sample: …&rdquo;) so you can see what FixFlow looks like with something in it.
+          It creates no accounts and sends no email, and you can remove it again at any time without touching what you have added yourself.
+        </p>
+        {sample?.loaded ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/10">
+            <p className="text-sm text-amber-800 dark:text-amber-300">Sample data is loaded: {counts}.</p>
+            <Button size="sm" variant="outline" onClick={removeSample} disabled={remove.isPending}>{remove.isPending ? 'Removing…' : 'Remove sample data'}</Button>
+          </div>
+        ) : (
+          <Button size="sm" variant="outline" onClick={() => load.mutate()} disabled={load.isPending || !sample}>
+            {load.isPending ? 'Adding…' : 'Add sample data'}
+          </Button>
+        )}
+        {kept.length > 0 && (
+          <div role="status" className="rounded-md bg-gray-50 p-3 text-sm text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+            <p className="font-medium">Kept, because you built on them (they are yours now):</p>
+            <ul className="mt-1 list-disc pl-5 text-xs">{kept.map((k) => <li key={`${k.type}-${k.name}`}>{k.name}: {k.reason}</li>)}</ul>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
 
 export function ImportExportPage() {
   const { user } = useAuthStore()
@@ -106,6 +153,8 @@ export function ImportExportPage() {
           </div>
         </CardContent>
       </Card>
+
+      <SampleDataSection />
 
       {/* Import Section */}
       <Card>

@@ -37,9 +37,15 @@ docker compose exec api bundle exec rails db:create db:migrate db:seed
 The API will be available at `http://localhost:3000`.
 MinIO console: `http://localhost:9001` (user: minioadmin / minioadmin)
 
-### Demo data
+### Sample data and the first steps
 
-To try FixFlow with a sample company (assets, work orders, PM schedules, IoT rules and sensor readings):
+On an install that is yours already, **sample data** lets an administrator look around a FixFlow that has something in it: **Settings, Import / Export, Sample data**, the **Add sample data** link on the dashboard's Getting started card, or `bin/rails fixflow:sample_data`. It adds a few places, assets, parts, a PM schedule (with a checklist to tick), open and finished work orders and some history, all named "Sample: …". It creates **no accounts and sends no email**. Take it out again with **Remove sample data** (or `bin/rails fixflow:remove_sample_data`): only the sample items go. Anything you added is untouched, and a sample item you have since built on (a work order on a sample asset, say) is **kept and listed**, as it is yours now.
+
+New administrators also see a **Getting started** card on the dashboard with three first steps (add equipment, create a work order, invite your team) that tick off from what is really in the install. Sample data does not count. It can be put away with the cross, and goes by itself when all three are done.
+
+### Demo company (trial installs)
+
+For a trial install with nothing in it, to try FixFlow with a whole sample company (assets, work orders, PM schedules, IoT rules and sensor readings):
 
 ```bash
 docker compose exec api rails fixflow:demo_data     # or: make demo-data

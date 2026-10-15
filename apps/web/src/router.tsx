@@ -60,9 +60,6 @@ const ImportExportPage = lazy(() => import('@/pages/settings/ImportExportPage').
 const AdvancedSettingsPage = lazy(() => import('@/pages/settings/AdvancedSettingsPage').then(m => ({ default: m.AdvancedSettingsPage })))
 const AISettingsPage = lazy(() => import('@/pages/settings/AISettingsPage').then(m => ({ default: m.AISettingsPage })))
 
-// Onboarding
-const OnboardingPage = lazy(() => import('@/pages/onboarding/OnboardingPage').then(m => ({ default: m.OnboardingPage })))
-
 function Lazy({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<PageLoader />}>{children}</Suspense>
 }
@@ -74,10 +71,6 @@ export const router = createBrowserRouter([
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
   { path: '/reset-password', element: <ResetPasswordPage /> },
   { path: '/register', element: <Navigate to="/setup" replace /> },
-  {
-    path: '/onboarding',
-    element: <Lazy><OnboardingPage /></Lazy>,
-  },
   {
     element: <ProtectedRoute />,
     children: [
