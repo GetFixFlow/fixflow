@@ -135,6 +135,34 @@ wo_count: 1 }])
     end
   end
 
+  describe ".iot_alerts_csv" do
+    let(:plant)  { create(:location, organization: organization, name: "Plant") }
+    let(:asset)  { create(:asset, organization: organization, name: "Pump 3", location: plant) }
+    let(:rule)   {
+      create(:iot_rule, asset: asset, organization: organization, name: "Pump too hot", wo_priority: :critical, unit: "°C")
+    }
+    let(:alert) do
+      create(:iot_alert, iot_rule: rule, asset: asset, triggered_value: 91.5, created_at: Time.zone.local(2026, 10, 1, 9, 30),
+                         sensor_reading: create(:sensor_reading, asset: asset, organization: organization),
+                         work_order: create(:work_order, organization: organization))
+    end
+
+    it "has a column for each fact about the alert" do
+      expect(parse(described_class.iot_alerts_csv([alert])).headers).to eq(
+        %w[raised_at asset location rule severity status metric reading threshold unit acknowledged_at resolved_at work_order]
+      )
+    end
+
+    it "writes the alert with its asset, place, rule, severity, readings and times" do
+      row = parse(described_class.iot_alerts_csv([alert])).first.to_h
+
+      expect(row).to include("raised_at" => "2026-10-01 09:30", "asset" => "Pump 3", "location" => "Plant", "rule" => "Pump too hot",
+                             "severity" => "critical", "status" => "open", "metric" => "temperature", "reading" => "91.5",
+                             "threshold" => "85.0", "unit" => "°C", "resolved_at" => nil,
+                             "work_order" => alert.work_order.work_order_number)
+    end
+  end
+
   describe ".sensor_readings_csv" do
     it "generates valid CSV" do
       rows = parse(described_class.sensor_readings_csv([

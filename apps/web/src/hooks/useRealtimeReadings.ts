@@ -50,13 +50,17 @@ export function useRealtimeReadings(
   useEffect(() => {
     if (!assetId || !isAuthenticated) return
     const sub = cable.subscriptions.create(
-      { channel: 'AssetSensorChannel', asset_id: assetId },
+      { channel: 'IotChannel', asset_id: assetId },
       {
         connected() { setIsConnected(true) },
         disconnected() { setIsConnected(false) },
-        received(data: { reading: SensorReading }) {
-          if (!data.reading) return
-          const r = data.reading
+        // The server announces each reading as { type: 'sensor_reading', metric, value, unit, recorded_at }.
+        received(data: { type?: string; asset_id?: number; metric?: string; value?: number; unit?: string; recorded_at?: string }) {
+          if (data.type !== 'sensor_reading' || !data.metric || data.value == null || !data.recorded_at) return
+          const r: SensorReading = {
+            id: 0, asset_id: data.asset_id ?? assetId, sensor_type: data.metric as SensorReading['sensor_type'],
+            value: Number(data.value), unit: data.unit ?? '', recorded_at: data.recorded_at,
+          }
           setReadings((prev) => {
             const key = r.sensor_type
             const existing = prev[key] ?? []

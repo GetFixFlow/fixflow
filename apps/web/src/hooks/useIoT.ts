@@ -213,13 +213,6 @@ export function useAssetReadings(assetId: number, params?: Record<string, unknow
   })
 }
 
-export function useReadingsActivity(params?: Record<string, unknown>) {
-  return useQuery({
-    queryKey: ['readings_activity', params],
-    queryFn: () => iotApi.readings.activity(params).then((r) => r.data),
-  })
-}
-
 // ── API Keys ──────────────────────────────────────────────────────────────────
 
 export function useApiKeys() {

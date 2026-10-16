@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/Button'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { cn } from '@/lib/utils'
 import { useIotDashboard, useIotAlerts, useAcknowledgeAlert } from '@/hooks/useIoT'
-import { useAlertNotifications } from '@/hooks/useAlertNotifications'
 import { useRealtimeStore } from '@/stores/realtimeStore'
 import { useAuthStore } from '@/stores/authStore'
 import { IoTAlertCard } from '@/components/iot/IoTAlertCard'
@@ -19,35 +18,25 @@ import type { IotAlertExtended } from '@/types'
 
 type SeverityTab = 'critical' | 'high' | 'medium' | 'all'
 
-const MOCK_DASHBOARD = {
-  active_sensors: 0, monitored_assets: 0, readings_per_hour: 0,
-  readings_per_hour_change: 0, open_alerts: 0, critical_alerts: 0,
-  high_alerts: 0, medium_alerts: 0, active_rules: 0, triggered_rules: 0,
-  recent_alerts: [] as IotAlertExtended[], hourly_readings: [], asset_status: [],
-}
-
 export function IoTDashboardPage() {
-  useAlertNotifications()
-
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const isManager = user?.role === 'admin' || user?.role === 'manager'
 
-  const { data: dashboardData, isLoading: dashLoading } = useIotDashboard()
+  const { data: dashboard, isLoading: dashLoading, isError: dashError, refetch, dataUpdatedAt } = useIotDashboard()
   const { data: alertsData } = useIotAlerts({ status: 'open' })
   const { mutate: acknowledge } = useAcknowledgeAlert()
 
   const connected = useRealtimeStore((s) => s.connected)
 
-  const [lastUpdated, setLastUpdated] = useState(0)
+  const [now, setNow] = useState(() => Date.now())
   const [severityTab, setSeverityTab] = useState<SeverityTab>('all')
 
   useEffect(() => {
-    const interval = setInterval(() => setLastUpdated((n) => n + 1), 1000)
+    const interval = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(interval)
   }, [])
 
-  const dashboard = dashboardData ?? MOCK_DASHBOARD
   const openAlerts = (alertsData?.iot_alerts ?? []) as IotAlertExtended[]
 
   const filteredAlerts = severityTab === 'all'
@@ -57,10 +46,11 @@ export function IoTDashboardPage() {
         return norm === severityTab
       })
 
-  const secondsAgo = lastUpdated
-  const updatedLabel = secondsAgo < 60
-    ? `Updated ${secondsAgo}s ago`
-    : `Updated ${Math.floor(secondsAgo / 60)}m ago`
+  // When the figures were really fetched, not how long this page has been open.
+  const secondsAgo = dataUpdatedAt ? Math.max(0, Math.floor((now - dataUpdatedAt) / 1000)) : null
+  const updatedLabel = secondsAgo === null
+    ? 'Not loaded yet'
+    : secondsAgo < 60 ? `Updated ${secondsAgo}s ago` : `Updated ${Math.floor(secondsAgo / 60)}m ago`
 
   return (
     <div className="space-y-6">
@@ -91,9 +81,16 @@ export function IoTDashboardPage() {
         }
       />
 
+      {dashError && !dashboard && (
+        <div role="alert" className="flex items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+          <span>The IoT figures could not be loaded. The open alerts below may still be up to date.</span>
+          <Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>
+        </div>
+      )}
+
       {/* Stat cards */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {dashLoading ? (
+      {(dashLoading || dashboard) && <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {dashLoading || !dashboard ? (
           Array.from({ length: 4 }).map((_, i) => (
             <Card key={i}><CardContent className="p-6"><Skeleton className="h-16 w-full" /></CardContent></Card>
           ))
@@ -112,7 +109,7 @@ export function IoTDashboardPage() {
             <StatCard title="Active Rules" value={dashboard.active_rules} subtitle={dashboard.triggered_rules > 0 ? `${dashboard.triggered_rules} triggered today` : 'No triggers today'} />
           </>
         )}
-      </div>
+      </div>}
 
       {/* Open Alerts panel */}
       <Card>
@@ -125,10 +122,10 @@ export function IoTDashboardPage() {
           {/* Severity tabs */}
           <div className="flex gap-2 mb-4">
             {([
-              { id: 'critical' as SeverityTab, label: '🔴 Critical', count: dashboard.critical_alerts },
-              { id: 'high' as SeverityTab, label: '🟠 High', count: dashboard.high_alerts },
-              { id: 'medium' as SeverityTab, label: '🟡 Medium', count: dashboard.medium_alerts },
-              { id: 'all' as SeverityTab, label: 'All', count: dashboard.open_alerts },
+              { id: 'critical' as SeverityTab, label: '🔴 Critical', count: dashboard?.critical_alerts ?? 0 },
+              { id: 'high' as SeverityTab, label: '🟠 High', count: dashboard?.high_alerts ?? 0 },
+              { id: 'medium' as SeverityTab, label: '🟡 Medium', count: dashboard?.medium_alerts ?? 0 },
+              { id: 'all' as SeverityTab, label: 'All', count: dashboard?.open_alerts ?? openAlerts.length },
             ]).map((tab) => (
               <button
                 key={tab.id}
@@ -166,7 +163,7 @@ export function IoTDashboardPage() {
       </Card>
 
       {/* Asset Sensor Grid */}
-      {dashboard.asset_status.length > 0 && (
+      {dashboard && dashboard.asset_status.length > 0 && (
         <div>
           <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-4">Asset Status</h2>
           <AssetSensorGrid assetStatus={dashboard.asset_status} isLoading={dashLoading} />
@@ -174,11 +171,13 @@ export function IoTDashboardPage() {
       )}
 
       {/* Readings Activity Chart */}
-      <Card>
-        <CardContent className="p-4">
-          <ReadingsActivityChart data={dashboard.hourly_readings} isLoading={dashLoading} />
-        </CardContent>
-      </Card>
+      {(dashLoading || dashboard) && (
+        <Card>
+          <CardContent className="p-4">
+            <ReadingsActivityChart data={dashboard?.hourly_readings ?? []} isLoading={dashLoading} />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Recent Alerts feed */}
       <Card>

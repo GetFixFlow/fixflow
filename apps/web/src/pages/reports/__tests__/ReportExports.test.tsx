@@ -11,6 +11,7 @@ import { AssetHealthReportPage } from '../AssetHealthReportPage'
 import { PMComplianceReportPage } from '../PMComplianceReportPage'
 import { CostAnalysisPage } from '../CostAnalysisPage'
 import { TechnicianPerformancePage } from '../TechnicianPerformancePage'
+import { IoTAnalyticsReportPage } from '../IoTAnalyticsReportPage'
 
 const saved = vi.hoisted(() => ({ files: [] as Array<{ blob: Blob; filename: string }> }))
 vi.mock('@/services/exportService', async (importOriginal) => ({
@@ -27,6 +28,8 @@ const REPORT_BODIES: Record<string, unknown> = {
     by_month: [], by_location: [], worst_performing_assets: [],
   },
   'pm/schedule_forecast': { forecast_days: 30, total_upcoming: 0, estimated_hours: 0, by_week: [] },
+  'iot/alerts': { total_alerts: 0, critical_count: 0, resolved_rate: 0, trend: [], sensor_series: [] },
+  'iot/rule_effectiveness': { active_count: 0, rules: [] },
 }
 
 /** Answers each report request with an empty report, and file requests with a small file, noting every request made. */
@@ -105,6 +108,7 @@ describe('Export on the report pages', () => {
   it.each([
     ['cost analysis', <CostAnalysisPage key="d" />, 'costs/by_asset'],
     ['technician performance', <TechnicianPerformancePage key="e" />, 'work_orders/technician_performance'],
+    ['IoT analytics', <IoTAnalyticsReportPage key="f" />, 'iot/alerts'],
   ])('%s: offers CSV only, because it has no PDF', async (_name, page, path) => {
     const user = userEvent.setup()
     const requests = serveReports()
@@ -117,6 +121,23 @@ describe('Export on the report pages', () => {
 
     await waitFor(() => expect(saved.files).toHaveLength(1))
     expect(exportRequests(requests).map((r) => r.path)).toEqual([`${path}.csv`])
+  })
+
+  it('the IoT report too: the same dates and filters as the screen asked for its data', async () => {
+    const user = userEvent.setup()
+    const requests = serveReports()
+    useReportStore.getState().setFilter?.('priorities', ['critical'])
+    renderPage(<IoTAnalyticsReportPage />)
+
+    await user.click(screen.getByRole('button', { name: /^export/i }))
+    await user.click(await screen.findByRole('menuitem', { name: /export as csv/i }))
+    await waitFor(() => expect(saved.files).toHaveLength(1))
+
+    const screenRequest = requests.find((r) => r.path === 'iot/alerts')!
+    const fileRequest = exportRequests(requests)[0]
+    expect(fileRequest.path).toBe('iot/alerts.csv')
+    expect(fileRequest.search.toString()).toBe(screenRequest.search.toString())
+    expect(fileRequest.search.getAll('priorities[]')).toEqual(['critical'])
   })
 
   it('asks for the file with the same dates and filters as the screen asked for its data', async () => {

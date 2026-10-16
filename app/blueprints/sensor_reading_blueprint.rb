@@ -3,4 +3,7 @@ class SensorReadingBlueprint < Blueprinter::Base
 
   fields :asset_id, :metric_name, :value, :unit, :source,
     :device_id, :quality, :recorded_at, :received_at
+
+  # What the screens call the metric.
+  field :metric_name, name: :sensor_type
 end

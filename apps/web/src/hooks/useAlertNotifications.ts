@@ -1,14 +1,14 @@
-// Subscribes to ActionCable IoT alerts channel.
-// Shows toast on new alert. Plays sound on critical.
-// Tracks shown alert IDs in sessionStorage.
-// Updates notification count in realtimeStore.
+// Live alerts for the signed-in person's company (the server's IotAlertChannel). Shows a toast for a serious alert,
+// plays a sound for a critical one, refreshes the alert lists and the IoT dashboard, and keeps the header's
+// "new alerts" mark and the dashboard's Live / Offline light up to date. Mounted once, in the app layout.
 
 import { useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { cable } from '@/lib/cable'
 import { useAuthStore } from '@/stores/authStore'
 import { useRealtimeStore } from '@/stores/realtimeStore'
-import type { IotAlert } from '@/types'
+import type { IotAlertExtended } from '@/types'
 
 const SHOWN_KEY = 'fixflow-shown-alert-ids'
 
@@ -18,8 +18,10 @@ function getShown(): Set<number> {
 }
 
 function markShown(id: number) {
-  const s = getShown(); s.add(id)
-  sessionStorage.setItem(SHOWN_KEY, JSON.stringify([...s].slice(-200)))
+  try {
+    const s = getShown(); s.add(id)
+    sessionStorage.setItem(SHOWN_KEY, JSON.stringify([...s].slice(-200)))
+  } catch { /* storage unavailable: an alert may show twice */ }
 }
 
 function getSoundEnabled() {
@@ -41,30 +43,35 @@ function playAlertTone() {
 export function useAlertNotifications() {
   const { isAuthenticated } = useAuthStore()
   const addAlert = useRealtimeStore((s) => s.addAlert)
+  const setConnected = useRealtimeStore((s) => s.setConnected)
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     if (!isAuthenticated) return
-    const sub = cable.subscriptions.create('IoTAlertChannel', {
-      received(data: { alert: IotAlert }) {
-        if (!data.alert) return
+    const sub = cable.subscriptions.create('IotAlertChannel', {
+      connected() { setConnected(true) },
+      disconnected() { setConnected(false) },
+      received(data: { alert?: IotAlertExtended }) {
         const alert = data.alert
-        addAlert(alert)
+        if (!alert) return
+        // Whoever is looking at a list or the dashboard sees the new alert without reloading.
+        queryClient.invalidateQueries({ queryKey: ['iot_alerts'] })
+        queryClient.invalidateQueries({ queryKey: ['iot_dashboard'] })
         if (getShown().has(alert.id)) return
         markShown(alert.id)
+        addAlert(alert)
+        const viewAlerts = { label: 'View', onClick: () => { window.location.href = '/iot/alerts' } }
         if (alert.severity === 'critical') {
           if (getSoundEnabled()) playAlertTone()
-          toast.error(`🔴 Critical Alert: ${alert.message}`, {
-            duration: 10_000,
-            action: { label: 'View', onClick: () => { window.location.href = '/iot/alerts' } },
-          })
-        } else if (alert.severity === 'warning') {
-          toast.warning(`⚠️ ${alert.message}`, {
-            duration: 5_000,
-            action: { label: 'View →', onClick: () => { window.location.href = '/iot/alerts' } },
-          })
+          toast.error(`Critical alert: ${alert.message}`, { duration: 10_000, action: viewAlerts })
+        } else if (alert.severity === 'high') {
+          toast.warning(alert.message, { duration: 5_000, action: viewAlerts })
         }
       },
     })
-    return () => sub.unsubscribe()
-  }, [isAuthenticated, addAlert])
+    return () => {
+      sub.unsubscribe()
+      setConnected(false)
+    }
+  }, [isAuthenticated, addAlert, setConnected, queryClient])
 }

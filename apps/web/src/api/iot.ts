@@ -79,8 +79,6 @@ export const iotApi = {
         params,
       }),
 
-    activity: (params?: Record<string, unknown>) =>
-      apiClient.get<{ hourly: { hour: string; count: number }[] }>('/iot_readings/activity', { params }),
   },
 
   alertSummary: () => apiClient.get('/reports/iot/alert_summary'),

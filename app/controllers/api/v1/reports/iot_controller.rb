@@ -2,6 +2,27 @@ module Api
   module V1
     module Reports
       class IotController < Reports::BaseController
+        # The IoT screen is for everyone who works with the equipment; it shows readings and alerts, which the
+        # other IoT endpoints already show to any signed-in person, and nothing about pay or cost.
+        skip_before_action :require_manager!, only: :dashboard
+
+        # GET /api/v1/reports/iot/dashboard
+        def dashboard
+          render json: ::Iot::DashboardStats.new(current_organization).call
+        end
+
+        # GET /api/v1/reports/iot/alerts  (the period and the Filters panel's assets, places and priorities)
+        # .csv lists the alerts themselves.
+        def alerts
+          report = alert_report
+          render_report(report.summary, "iot_alerts", csv: -> { ExportService.iot_alerts_csv(export_alerts(report)) })
+        end
+
+        # GET /api/v1/reports/iot/rule_effectiveness
+        def rule_effectiveness
+          render json: alert_report.rule_effectiveness
+        end
+
         # GET /api/v1/reports/iot/alert_summary
         def alert_summary
           from, to = date_range
@@ -26,7 +47,7 @@ module Api
             .each_with_object({}) do |((asset_name, status, _rule_id), count), h|
               h[asset_name] ||= { asset_name: asset_name, alert_count: 0, critical: 0, resolved: 0, total: 0 }
               h[asset_name][:alert_count] += count
-              h[asset_name][:resolved]    += count if status == 2
+              h[asset_name][:resolved]    += count if status.to_s == "resolved"
               h[asset_name][:total]       += count
             end.values
 
@@ -51,7 +72,7 @@ module Api
                       .each_with_object({}) do |((date, status), count), h|
                         h[date] ||= { date: date, alerts: 0, resolved: 0 }
                         h[date][:alerts]   += count
-                        h[date][:resolved] += count if status == 2
+                        h[date][:resolved] += count if status.to_s == "resolved"
                       end.values.sort_by { |t| t[:date] }
 
           render json: {
@@ -89,6 +110,19 @@ module Api
         end
 
         private
+
+        def alert_report
+          from, to = date_range
+          ::Iot::AlertReport.new(current_organization, from: from, to: to, asset_ids: filtered_asset_ids,
+                                                       priorities: list(:priorities) & WorkOrder::PRIORITIES)
+        end
+
+        # The alerts an export holds, newest first. Cut at MAX_EXPORT_ROWS, and says so.
+        def export_alerts(report)
+          rows = report.rows(MAX_EXPORT_ROWS + 1).to_a
+          response.set_header("X-Export-Truncated", "true") if rows.size > MAX_EXPORT_ROWS
+          rows.first(MAX_EXPORT_ROWS)
+        end
 
         def build_sensor_trends(asset, metrics, from, to, period_type, interval)
           metrics.index_with do |metric|

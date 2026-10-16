@@ -219,6 +219,22 @@ open → in_progress → pending_parts → in_progress
 
 An alert that cannot make the move you ask for is refused with the reason (before, acknowledging an alert twice counted it twice against its rule). **Bulk** acknowledge and resolve take up to 200 alerts: each one that can move does, and the answer says how many were skipped (already dealt with, or not found). Each asset's own alert history is at `GET /api/v1/assets/:id/iot_alerts`.
 
+### The IoT screens: monitor, report and live alerts
+
+**IoT → Monitor** (everyone signed in) shows what the sensors are doing now, counted from the stored readings and alerts:
+
+- **Active sensors**: each metric on each asset that has reported within the **stale limit** (Settings → Company, default 5 minutes); **assets monitored**: assets that reported in the last 24 hours.
+- **Readings per hour**: the last 60 minutes, and the change against the 60 before that.
+- **Open alerts** by severity, **active rules**, and rules that **set something off today**.
+- **Asset status**: each monitored asset's latest value for each metric, whether it is past its rule's limit, how close it is (for "above" rules the reading over the limit; for "below" rules the limit over the reading), and whether the sensor has gone quiet. Assets with a metric past its limit come first; 24 are shown.
+- **Readings activity**: one point per hour for the last week.
+
+If the figures cannot be loaded the page says so and offers **Try again**; it no longer shows zeros and "All clear" in their place. "Updated … ago" is when the figures were really fetched.
+
+**Live alerts.** While you are signed in, a new alert for your company appears as it happens: a toast for **critical** and **high** alerts (with a sound for critical, unless switched off in Settings → Notifications), the alert lists and the monitor refresh, the header bell shows a mark (click it to see the alerts and clear the mark), and the monitor shows **Live** when the connection is up. Live alerts are sent by the background worker (the one that also sends email) over a WebSocket at `/cable`; the browser sends its sign-in token in the address because a WebSocket cannot send a header. Your reverse proxy must pass WebSocket upgrades on `/cable`. A signed-out or ended session cannot connect.
+
+**IoT → Reports → IoT Analytics** (managers and administrators) counts the alerts of the period: total, critical, still open, those with a work order, and the **share resolved** (nothing here resolves alerts by itself, so it is not an "auto-resolved" rate), a trend by day (by week for periods over 92 days) split by severity, how each rule did (alerts, work orders, share resolved, average hours to resolve), and, when one asset is chosen in the Filters, its metrics as a daily average. The Filters panel's assets, places and severities apply.
+
 ## Importing data from a spreadsheet
 
 **Import** (managers and administrators; the Import button on Locations, Assets and Parts, or `/import`) brings **locations, assets and parts** in from a CSV file. Choose what you are importing, download its **template**, fill it in, and choose the file: it is **checked first and nothing is imported yet**. A clean file shows a preview and an Import button. A file with mistakes lists every one with its **row (as your spreadsheet numbers it), column and the problem**, and downloads as a list to work through. **If any row has a problem nothing is imported**, so after fixing the file you can upload it again without the rows that were fine being doubled up.
@@ -277,8 +293,9 @@ The **Export** menu on a report page downloads the report as a file made by the 
 | PM Compliance | one row per month: scheduled, completed, skipped, compliance rate | yes |
 | Cost Analysis | the cost of **every** asset that cost something (the screen shows the top 20): labor, parts, total, work orders | no |
 | Technician Performance | each person's figures | no |
+| IoT Analytics | every alert in the period matching the filters: when, asset, place, rule, severity, status, the reading and limit, who handled it, work order | no |
 
-The IoT report has no export yet. Files open in Excel as they are (UTF-8, so accents and non-Latin names are kept; times are `YYYY-MM-DD HH:MM` in the company's time zone, money is a plain number). A CSV holds at most **50,000 work orders**; if there are more, the file is cut and the page says so.
+Files open in Excel as they are (UTF-8, so accents and non-Latin names are kept; times are `YYYY-MM-DD HH:MM` in the company's time zone, money is a plain number). A CSV holds at most **50,000 work orders**; if there are more, the file is cut and the page says so.
 
 **Text that a spreadsheet would run as a formula is saved as text.** Titles and names can come from anyone (including people reporting a problem without an account), and Excel runs a cell that starts with `=`, `+`, `-` or `@`. Such cells are written with a leading `'`, so a title like `=HYPERLINK(...)` shows as text instead of running.
 
