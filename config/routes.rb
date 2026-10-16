@@ -17,6 +17,10 @@ Rails.application.routes.draw do
     namespace :v1 do
       get "auth/me", to: "auth/profile#show"
 
+      # Where the signed-in person is signed in, and ending one of those sessions
+      delete "sessions/all", to: "user_sessions#destroy_all"
+      resources :sessions, only: %i[index destroy], controller: "user_sessions"
+
       # Forgot password (public): ask for a link, then use it to choose a new password
       post  "auth/password", to: "auth/passwords#create"
       match "auth/password", to: "auth/passwords#update", via: %i[put patch]

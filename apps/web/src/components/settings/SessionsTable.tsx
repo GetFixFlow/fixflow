@@ -1,17 +1,10 @@
 import { formatDistanceToNow } from 'date-fns'
 import { Monitor, Smartphone } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
-
-interface Session {
-  id: string
-  device: string
-  location: string
-  last_active_at: string
-  current: boolean
-}
+import type { UserSession } from '@/api/settings'
 
 interface SessionsTableProps {
-  sessions: Session[]
+  sessions: UserSession[]
   onRevoke: (id: string) => void
   onRevokeAll: () => void
   isRevoking: boolean
@@ -25,7 +18,7 @@ export function SessionsTable({ sessions, onRevoke, onRevokeAll, isRevoking }: S
           <thead>
             <tr className="border-b border-gray-100 dark:border-gray-700 text-xs text-gray-400 uppercase">
               <th className="text-left py-2">Device</th>
-              <th className="text-left py-2">Location</th>
+              <th className="text-left py-2">Address</th>
               <th className="text-left py-2">Last Active</th>
               <th className="text-right py-2">Action</th>
             </tr>
@@ -35,7 +28,7 @@ export function SessionsTable({ sessions, onRevoke, onRevokeAll, isRevoking }: S
               <tr key={s.id} className="border-b border-gray-50 dark:border-gray-800">
                 <td className="py-2.5">
                   <div className="flex items-center gap-2">
-                    {s.device.toLowerCase().includes('mobile') || s.device.toLowerCase().includes('pwa')
+                    {/iOS|Android/.test(s.device)
                       ? <Smartphone className="h-4 w-4 text-gray-400" />
                       : <Monitor className="h-4 w-4 text-gray-400" />}
                     <span className="font-medium">{s.device}</span>
@@ -46,7 +39,7 @@ export function SessionsTable({ sessions, onRevoke, onRevokeAll, isRevoking }: S
                     )}
                   </div>
                 </td>
-                <td className="py-2.5 text-gray-500">{s.location}</td>
+                <td className="py-2.5 font-mono text-xs text-gray-500">{s.ip_address ?? 'Unknown'}</td>
                 <td className="py-2.5 text-gray-500">
                   {s.current
                     ? 'Now'
@@ -61,7 +54,7 @@ export function SessionsTable({ sessions, onRevoke, onRevokeAll, isRevoking }: S
                       disabled={isRevoking}
                       className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs"
                     >
-                      Revoke
+                      Sign out
                     </Button>
                   )}
                 </td>
@@ -73,10 +66,10 @@ export function SessionsTable({ sessions, onRevoke, onRevokeAll, isRevoking }: S
       <Button
         variant="outline"
         onClick={onRevokeAll}
-        disabled={isRevoking}
+        disabled={isRevoking || sessions.every((s) => s.current)}
         className="text-red-600 border-red-300 hover:bg-red-50 w-full sm:w-auto"
       >
-        Revoke All Other Sessions
+        Sign out of all other sessions
       </Button>
     </div>
   )

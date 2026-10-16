@@ -12,18 +12,10 @@ export const settingsApi = {
   },
 
   sessions: {
-    list: () =>
-      apiClient.get<{
-        sessions: Array<{
-          id: string
-          device: string
-          location: string
-          last_active_at: string
-          current: boolean
-        }>
-      }>('/sessions'),
-    revoke: (id: string) => apiClient.delete(`/sessions/${id}`),
-    revokeAll: () => apiClient.delete('/sessions/all'),
+    list: () => apiClient.get<{ sessions: UserSession[] }>('/sessions'),
+    revoke: (id: string) => apiClient.delete(`/sessions/${encodeURIComponent(id)}`),
+    /** Ends every session but the one asking. */
+    revokeAll: () => apiClient.delete<{ revoked: number }>('/sessions/all'),
   },
 
   notifications: {
@@ -69,6 +61,18 @@ export const settingsApi = {
     update: (data: Partial<LocalizationSettings>) =>
       apiClient.patch('/localization_settings', { localization: data }),
   },
+}
+
+/** One place the signed-in person is signed in (a browser or phone). */
+export interface UserSession {
+  id: string
+  /** "Chrome on macOS", worked out from the browser's own description. */
+  device: string
+  ip_address: string | null
+  created_at: string
+  last_active_at: string
+  /** The session this request came from. */
+  current: boolean
 }
 
 /** Which emails the signed-in person wants. Invitations and password reset links are not up to them. */
