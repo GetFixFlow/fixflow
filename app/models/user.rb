@@ -10,6 +10,7 @@ class User < ApplicationRecord
   INVITATION_TTL = 7.days
 
   include PasswordReset
+  include EmailPreferences
 
   belongs_to :organization
   belongs_to :invited_by, class_name: "User", optional: true

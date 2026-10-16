@@ -9,7 +9,7 @@ class PmOverdueNotificationJob < ApplicationJob
 
     # Notify managers per organization
     overdue_pms.group_by(&:organization).each do |org, org_pms|
-      org.users.managers.each do |manager|
+      org.users.managers.wanting_email("pm_overdue").each do |manager|
         PmMailer.overdue_summary(manager, org_pms).deliver_later
       end
     end

@@ -29,7 +29,7 @@ export const settingsApi = {
   notifications: {
     get: () => apiClient.get<{ preferences: NotificationPreferences }>('/notification_preferences'),
     update: (data: Partial<NotificationPreferences>) =>
-      apiClient.patch('/notification_preferences', { preferences: data }),
+      apiClient.patch<{ preferences: NotificationPreferences }>('/notification_preferences', { preferences: data }),
   },
 
   organization: {
@@ -71,13 +71,10 @@ export const settingsApi = {
   },
 }
 
+/** Which emails the signed-in person wants. Invitations and password reset links are not up to them. */
 export interface NotificationPreferences {
   email_enabled: boolean
-  push_enabled: boolean
-  sound_enabled: boolean
-  rules: Record<string, { email: boolean; push: boolean; in_app: boolean }>
-  daily_digest: { enabled: boolean; send_at: string; include: Record<string, boolean> }
-  weekly_report: { enabled: boolean; send_on: string; include: Record<string, boolean> }
+  rules: Record<string, { email: boolean }>
 }
 
 export interface OrgSettings {

@@ -9,12 +9,14 @@ class PmDueSoonNotificationJob < ApplicationJob
 
     # Group by assigned technician and email each one
     pms.select(&:assigned_to).group_by(&:assigned_to).each do |technician, tech_pms|
+      next unless technician.wants_email?("pm_due_soon")
+
       PmMailer.due_soon_summary(technician, tech_pms).deliver_later
     end
 
     # Notify all managers per organization
     pms.group_by(&:organization).each do |org, org_pms|
-      org.users.managers.each do |manager|
+      org.users.managers.wanting_email("pm_due_soon").each do |manager|
         PmMailer.due_soon_summary(manager, org_pms).deliver_later
       end
     end

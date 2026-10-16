@@ -91,6 +91,8 @@ export function useUpdateNotificationPreferences() {
       qc.invalidateQueries({ queryKey: ['notification_preferences'] })
       toast.success('Preferences saved.')
     },
+    onError: (error: AxiosError<{ error?: { message?: string } }>) =>
+      toast.error(error.response?.data?.error?.message ?? 'Could not save your preferences. Try again.'),
   })
 }
 

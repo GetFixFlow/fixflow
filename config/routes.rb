@@ -24,6 +24,7 @@ Rails.application.routes.draw do
       # Company settings: anyone signed in can read them, only admins change them
       resource :organization_settings, only: %i[show update], controller: "organization_settings"
       resource :branding, only: %i[show update], controller: "branding"
+      resource :notification_preferences, only: %i[show update], controller: "notification_preferences"
       resource :localization_settings, only: %i[show update], controller: "localization_settings"
 
       # Example data to look around in, and the first things to do

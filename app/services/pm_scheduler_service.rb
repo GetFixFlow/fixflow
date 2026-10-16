@@ -49,7 +49,7 @@ class PmSchedulerService
         times_generated: pm.times_generated + 1
       )
 
-      PmMailer.work_order_generated(pm, work_order).deliver_later if pm.assigned_to
+      PmMailer.work_order_generated(pm, work_order).deliver_later if pm.assigned_to&.wants_email?("pm_generated")
 
       work_order
     end

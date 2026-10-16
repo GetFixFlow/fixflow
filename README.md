@@ -277,6 +277,14 @@ FixFlow sends email for invitations, password resets, work order assignments and
 
 Emails are sent in the background, and a failure there is only logged. If people say they are not getting email, use **Send me a test email** first: it shows the actual error.
 
+### Choosing which emails you get
+
+Everyone chooses their own emails in **Settings → Notifications**: one switch for all email, and one tick per kind of email. The kinds are the ones the app sends today: a work order assigned to you, one you requested being finished, one needing verification (managers), a problem reported from a QR label (managers), a scheduled work order created for you, maintenance due this week, maintenance overdue (managers) and a part running low or out (managers). Until someone changes something they get everything, as before. **Invitations and password reset links are always sent**, and so is the "your request is done" email to someone who reported a problem through the public form (they have no account to choose in).
+
+Deactivated people are never emailed. Before this, several emails to managers (new problem reports, work awaiting verification, overdue and due maintenance) also went to deactivated managers.
+
+Not offered yet, because nothing sends them: push notifications, in-app notifications, daily and weekly digests, and emails about overdue work orders and sensor alerts. The **alert sound** switch applies to the browser it is set in (it is kept in that browser, not on the server).
+
 ## Architecture
 
 ```
