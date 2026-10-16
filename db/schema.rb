@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_110000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -312,6 +312,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_110000) do
     t.index ["recorded_at"], name: "index_sensor_readings_on_recorded_at"
   end
 
+  create_table "user_sessions", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "sid", null: false
+    t.string "jti", null: false
+    t.string "user_agent"
+    t.string "ip_address"
+    t.datetime "last_active_at", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "revoked_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sid"], name: "index_user_sessions_on_sid", unique: true
+    t.index ["user_id"], name: "index_user_sessions_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "current_sign_in_at"
@@ -456,6 +471,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_110000) do
   add_foreign_key "sensor_aggregates", "assets"
   add_foreign_key "sensor_readings", "assets"
   add_foreign_key "sensor_readings", "organizations"
+  add_foreign_key "user_sessions", "users"
   add_foreign_key "users", "organizations"
   add_foreign_key "users", "users", column: "invited_by_id"
   add_foreign_key "work_order_parts", "parts"

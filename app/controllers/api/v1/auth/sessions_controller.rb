@@ -2,6 +2,8 @@ module Api
   module V1
     module Auth
       class SessionsController < Devise::SessionsController
+        include RecordsClient
+
         respond_to :json
 
         # Devise has signed the user out by the time respond_to_on_destroy runs, so

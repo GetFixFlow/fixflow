@@ -18,6 +18,40 @@ class User < ApplicationRecord
   has_many :requested_work_orders, class_name: "WorkOrder", foreign_key: :requester_id, dependent: :nullify
   has_many :verified_work_orders,  class_name: "WorkOrder", foreign_key: :verified_by_id, dependent: :nullify
   has_many :comments, dependent: :destroy
+  has_many :user_sessions, dependent: :delete_all
+
+  # ── Sessions ────────────────────────────────────────────────────────────
+  #
+  # Each sign-in gets its own id (sid) inside the token and a row in user_sessions, so a person can
+  # see where they are signed in and end one. A token works while the user's jti still matches (a
+  # password change or deactivation replaces it, ending every session) and its own session is live.
+
+  def jwt_payload = super.merge("sid" => SecureRandom.uuid)
+
+  # Called when a token is made at sign-in or sign-up.
+  def on_jwt_dispatch(_token, payload)
+    user_sessions.where(expires_at: ...1.day.ago).delete_all
+    user_sessions.create!(
+      sid: payload["sid"], jti: payload["jti"], expires_at: Time.zone.at(payload["exp"]),
+      user_agent: UserSession.clean_agent(Current.user_agent), ip_address: Current.request_ip,
+      last_active_at: Time.current
+    )
+  end
+
+  # The session a token belongs to, when the token is still good; nil otherwise.
+  def self.live_session_for(payload, user)
+    return unless payload["jti"] == user.jti && payload["sid"].present?
+
+    session = user.user_sessions.live.find_by(sid: payload["sid"], jti: payload["jti"])
+    session&.tap { |s| s.update_column(:last_active_at, Time.current) if s.last_active_at < UserSession::TOUCH_EVERY.ago } # rubocop:disable Rails/SkipsModelValidations
+  end
+
+  def self.jwt_revoked?(payload, user) = live_session_for(payload, user).nil?
+
+  # Signing out ends this session only; the person's other sessions carry on.
+  def self.revoke_jwt(payload, user)
+    user.user_sessions.where(sid: payload["sid"], revoked_at: nil).find_each(&:revoke!)
+  end
 
   validates :role, inclusion: { in: ROLES }
   validates :first_name, :last_name, presence: true

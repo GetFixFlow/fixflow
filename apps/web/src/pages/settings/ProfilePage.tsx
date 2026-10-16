@@ -8,15 +8,12 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Skeleton } from '@/components/ui/Skeleton'
-import { SessionsTable } from '@/components/settings/SessionsTable'
+import { SessionsCard } from '@/components/settings/SessionsCard'
 import { useAuthStore } from '@/stores/authStore'
 import {
   useProfile,
   useUpdateProfile,
   useChangePassword,
-  useSessions,
-  useRevokeSession,
-  useRevokeAllSessions,
 } from '@/hooks/useSettings'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
@@ -73,9 +70,6 @@ export function ProfilePage() {
   const { data: profile, isLoading } = useProfile()
   const updateProfile = useUpdateProfile()
   const changePassword = useChangePassword()
-  const { data: sessions = [], isLoading: sessionsLoading } = useSessions()
-  const revokeSession = useRevokeSession()
-  const revokeAll = useRevokeAllSessions()
 
   const [pwVisible, setPwVisible] = useState<Record<string, boolean>>({})
   const [pwOpen, setPwOpen] = useState(false)
@@ -300,24 +294,7 @@ export function ProfilePage() {
         )}
       </Card>
 
-      {/* Sessions */}
-      <Card>
-        <CardContent className="p-5 space-y-3">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Active Sessions</h3>
-          {sessionsLoading ? (
-            <div className="space-y-2">
-              {[1, 2, 3].map((i) => <Skeleton key={i} className="h-10 w-full" />)}
-            </div>
-          ) : (
-            <SessionsTable
-              sessions={sessions}
-              onRevoke={(id) => revokeSession.mutate(id)}
-              onRevokeAll={() => revokeAll.mutate(undefined)}
-              isRevoking={revokeSession.isPending || revokeAll.isPending}
-            />
-          )}
-        </CardContent>
-      </Card>
+      <SessionsCard />
     </div>
   )
 }

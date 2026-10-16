@@ -69,6 +69,16 @@ Set `APP_URL` to the address your web app is served from, so invitation links po
 
 On the sign-in screen, **Forgot your password?** emails a reset link (if email is set up). If your server cannot send email, an administrator opens **Settings → Users → ⋯ → Reset Password**, copies the link and gives it to the person; the link works once and expires after 6 hours. The person's current password keeps working until they use the link. Using it signs them out everywhere.
 
+### Where you are signed in
+
+**Settings → My Profile → Where you are signed in** lists every browser or phone signed in to your account, with the device (for example "Chrome on macOS"), its address, and when it was last used, and lets you sign out of any one of them or of all the others. Use it when you used a shared computer, lost a phone, or see a device you do not recognise. A session lasts 24 hours.
+
+Each sign-in is its own session: **signing out ends only that one**, and your other devices stay signed in (before, signing out anywhere signed you out everywhere). **Changing your password, or an administrator deactivating your account, ends every session.** An ended session can no longer open a live-update connection, but a connection it already had open stays until the page is closed or reloaded. Ending one is written to the activity log.
+
+The address shown is the one the server sees, so behind a proxy it is the proxy's address unless the proxy passes `X-Forwarded-For`. Nothing is looked up from it: there is no location.
+
+**After upgrading, everyone signs in once more:** tokens made before this change have no session behind them and are no longer accepted (they would have expired within a day anyway).
+
 ---
 
 ## Local Development (without Docker)

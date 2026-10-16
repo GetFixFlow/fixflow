@@ -25,7 +25,8 @@ vi.mock('@/hooks/useSettings', () => ({
       {
         id: '1',
         device: 'Chrome Mac',
-        location: 'US',
+        ip_address: '203.0.113.7',
+        created_at: new Date().toISOString(),
         last_active_at: new Date().toISOString(),
         current: true,
       },
@@ -78,7 +79,7 @@ describe('ProfilePage', () => {
 
   it('shows sessions table', () => {
     render(<ProfilePage />, { wrapper: Wrapper })
-    expect(screen.getByText('Active Sessions')).toBeInTheDocument()
+    expect(screen.getByText('Where you are signed in')).toBeInTheDocument()
     expect(screen.getByText('Chrome Mac')).toBeInTheDocument()
   })
 

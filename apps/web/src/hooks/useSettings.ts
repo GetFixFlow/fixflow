@@ -58,10 +58,10 @@ export function useRevokeSession() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: settingsApi.sessions.revoke,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['sessions'] })
-      toast.success('Session revoked.')
-    },
+    onSuccess: () => toast.success('Session ended.'),
+    // Also when it was already gone (ended elsewhere): show the list as it is now.
+    onSettled: () => qc.invalidateQueries({ queryKey: ['sessions'] }),
+    onError: () => toast.error('Could not end that session. Try again.'),
   })
 }
 
@@ -69,10 +69,10 @@ export function useRevokeAllSessions() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: settingsApi.sessions.revokeAll,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['sessions'] })
-      toast.success('All other sessions revoked.')
-    },
+    onSuccess: (res) =>
+      toast.success(res.data.revoked === 1 ? '1 other session ended.' : `${res.data.revoked} other sessions ended.`),
+    onSettled: () => qc.invalidateQueries({ queryKey: ['sessions'] }),
+    onError: () => toast.error('Could not end the other sessions. Try again.'),
   })
 }
 

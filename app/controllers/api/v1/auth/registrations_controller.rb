@@ -2,6 +2,8 @@ module Api
   module V1
     module Auth
       class RegistrationsController < Devise::RegistrationsController
+        include RecordsClient
+
         respond_to :json
 
         # Arbitrary constant naming the Postgres advisory lock that serializes first-run setup.
