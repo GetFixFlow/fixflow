@@ -50,6 +50,57 @@ jobs:
       - name: Lint code for consistent style
         run: bin/rubocop -f github
 
+  # The backend specs, against a real PostgreSQL (the version production uses). Nothing else is needed: the specs
+  # run without Redis, mail or any key, which was checked by running them with an empty environment.
+  # Node is here because spec/lib also checks the web app's requests against the routes (skipped without it).
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      RAILS_ENV: test
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DEVISE_JWT_SECRET_KEY: ci-only-secret-not-used-for-anything-real
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install the web app's dependencies
+        run: npm ci --legacy-peer-deps
+        working-directory: apps/web
+
+      - name: Create the database from the schema
+        run: bin/rails db:create db:schema:load
+
+      - name: Run the backend specs
+        run: bundle exec rspec
+
   # Every request the web app makes must have a route in Rails (and no route may lead to a missing action).
   # Needs Ruby (to list the routes) and Node (to read the web app's requests); no database.
   web_routes:
