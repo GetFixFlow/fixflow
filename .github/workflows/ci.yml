@@ -50,6 +50,35 @@ jobs:
       - name: Lint code for consistent style
         run: bin/rubocop -f github
 
+  # Every request the web app makes must have a route in Rails (and no route may lead to a missing action).
+  # Needs Ruby (to list the routes) and Node (to read the web app's requests); no database.
+  web_routes:
+    runs-on: ubuntu-latest
+    env:
+      DEVISE_JWT_SECRET_KEY: ci-only-secret-not-used-for-anything-real
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install the web app's dependencies (the check reads its source with TypeScript)
+        run: npm ci --legacy-peer-deps
+        working-directory: apps/web
+
+      - name: Check that the web app and the routes agree
+        run: bin/rails web:check_routes
+
   web:
     runs-on: ubuntu-latest
     defaults:

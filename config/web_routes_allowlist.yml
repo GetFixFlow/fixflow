@@ -1,0 +1,7 @@
+# Requests the web app makes that `bin/rails web:check_routes` cannot match to a route, each with the reason.
+# Nothing should be added here to hide a missing endpoint: build the endpoint, or remove the request.
+- call: "GET /reports/:param.:param"
+  reason: >
+    The one place that builds a report download's address from the report and the format
+    (apps/web/src/api/reports.ts, `download`). Every caller is listed with its real address by the check
+    (as exportReport('work_orders/summary', 'csv', ...)), so each address is still checked.

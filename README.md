@@ -386,6 +386,18 @@ npm run test:ui       # Vitest UI
 npm run test:coverage # coverage report
 ```
 
+### Keeping the web app and the API in step
+
+```bash
+bin/rails web:check_routes
+```
+
+lists every request the web app makes (read from the TypeScript source in `apps/web/src`, through `apiClient`, and the report downloads made with `exportReport('report', 'csv')`) and checks that Rails has a route for each, with the same verb, and that no API route leads to a controller action that does not exist. It needs Node and the web app's dependencies (`npm ci` in `apps/web`), not a database, and it runs in CI. It prints what it finds and exits with an error if the web app and the routes disagree.
+
+If it reports **NO ROUTE**, either the endpoint is missing (build it) or the request should not be there (remove it). **PATH NOT IN THE SOURCE** means a request builds its address from a variable, so it cannot be checked: write the address out. The few requests that cannot be matched on purpose are listed, each with its reason, in `config/web_routes_allowlist.yml`; an entry that is no longer needed is reported too, so the list cannot go stale. The same check is part of `bundle exec rspec spec/lib`.
+
+The check compares addresses and verbs. It does not look at what an endpoint sends back, so a screen can still read a field the server does not provide; those need a test that runs the screen against the server's real answer.
+
 ---
 
 ## Roles and Permissions
