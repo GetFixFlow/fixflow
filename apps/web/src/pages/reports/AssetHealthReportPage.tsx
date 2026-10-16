@@ -17,29 +17,42 @@ import { useReportStore } from '@/stores/reportStore'
 import { reportsApi } from '@/api/reports'
 import { useReportExport } from '@/hooks/useReportExport'
 import { formatCurrency, formatPercent } from '@/utils/chartUtils'
-import type { Asset } from '@/types'
+import type { InventoryAsset } from '@/types/reports'
+import { format, parseISO } from 'date-fns'
 import { formatDate } from '@/lib/localeFormat'
 
 export function AssetHealthReportPage() {
   const [filtersOpen, setFiltersOpen] = useState(false)
-  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
+  const [selectedAsset, setSelectedAsset] = useState<InventoryAsset | null>(null)
   const { getParams, dateFrom, dateTo } = useReportStore()
   const params = getParams()
   const { exporting, exportReport } = useReportExport()
   const dateRange = `${formatDate(dateFrom)} – ${formatDate(dateTo)}`
 
-  const { data: health, isLoading } = useQuery({
+  const { data: h, isLoading } = useQuery({
     queryKey: ['reports', 'assets_health', params],
-    queryFn: () => reportsApi.assets.health().then((r) => r.data as Record<string, unknown>),
+    queryFn: () => reportsApi.assets.health(params).then((r) => r.data),
   })
 
-  const { data: cost, isLoading: costLoading } = useQuery({
-    queryKey: ['reports', 'assets_cost', params],
-    queryFn: () => reportsApi.assets.costAnalysis().then((r) => r.data as Record<string, unknown>),
+  // The same figures as the Cost Analysis page: work finished in the period, for the Filters' assets and places.
+  const { data: costSummary } = useQuery({
+    queryKey: ['reports', 'costs_summary', params],
+    queryFn: () => reportsApi.costs.summary(params).then((r) => r.data),
   })
 
-  const h = health as Record<string, unknown> | undefined
-  const c = cost as Record<string, unknown> | undefined
+  const { data: costByAsset, isLoading: costLoading } = useQuery({
+    queryKey: ['reports', 'costs_by_asset', params],
+    queryFn: () => reportsApi.costs.byAsset(params).then((r) => r.data),
+  })
+
+  const { data: history, isLoading: historyLoading } = useQuery({
+    queryKey: ['reports', 'asset_history', selectedAsset?.id],
+    queryFn: () => reportsApi.assets.history(selectedAsset!.id).then((r) => r.data),
+    enabled: selectedAsset !== null,
+  })
+
+  const averageCostPerAsset = costByAsset?.total_assets ? (costSummary?.total_cost ?? 0) / costByAsset.total_assets : 0
+  const statusCounts = Object.entries(h?.by_status ?? {}).filter(([, count]) => count > 0).map(([status, count]) => ({ status, count }))
 
   return (
     <div className="space-y-5">
@@ -50,18 +63,18 @@ export function AssetHealthReportPage() {
           <Button variant="outline" onClick={() => setFiltersOpen(true)}><SlidersHorizontal className="h-4 w-4 mr-1.5" />Filters</Button>
           <ExportDropdown
             isExporting={exporting}
-            onExportCSV={() => exportReport('assets/health', 'csv')}
-            onExportPDF={() => exportReport('assets/health', 'pdf')}
+            onExportCSV={() => exportReport('assets/health', 'csv', params)}
+            onExportPDF={() => exportReport('assets/health', 'pdf', params)}
           />
         </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {([
-          ['Health Score', h ? formatPercent(h.health_score as number) : '—'],
-          ['Operational', h ? formatPercent(((h.operational as number) / (h.total as number)) * 100) : '—'],
-          ['Assets Down', h?.down ?? 0],
-          ['Total Maintenance Cost', c ? formatCurrency(c.total_cost as number) : '—'],
+          ['Health Score', h ? formatPercent(h.health_score) : '—'],
+          ['Operational', h?.total ? formatPercent((h.by_status.operational / h.total) * 100) : '—'],
+          ['Assets Down', h?.by_status.down ?? 0],
+          ['Total Maintenance Cost', costSummary ? formatCurrency(costSummary.total_cost) : '—'],
         ] as [string, string | number][]).map(([title, value]) => (
           <KPICard key={title} title={title} value={value} loading={isLoading} />
         ))}
@@ -69,37 +82,47 @@ export function AssetHealthReportPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <ChartContainer title="Fleet Health Distribution" loading={isLoading}>
-          <AssetHealthDonut data={(h?.status_breakdown as Parameters<typeof AssetHealthDonut>[0]['data']) ?? []} healthScore={(h?.health_score as number) ?? 0} />
+          <AssetHealthDonut data={statusCounts} healthScore={h?.health_score ?? 0} />
         </ChartContainer>
         <ChartContainer title="Health by Location" className="lg:col-span-2" loading={isLoading}>
-          <AssetHealthByLocation data={(h?.by_location as Parameters<typeof AssetHealthByLocation>[0]['data']) ?? []} />
+          <AssetHealthByLocation data={h?.by_location ?? []} />
         </ChartContainer>
       </div>
 
       <ChartContainer title="Top Maintenance Costs by Asset" loading={costLoading}>
-        <AssetCostChart data={(c?.by_asset as Parameters<typeof AssetCostChart>[0]['data']) ?? []} avgCost={(c?.avg_cost_per_asset as number) ?? 0} />
+        <AssetCostChart data={costByAsset?.assets ?? []} avgCost={averageCostPerAsset} />
       </ChartContainer>
 
-      <ChartContainer title="Asset Inventory">
-        <DataTable data={(h?.assets as Record<string, unknown>[]) ?? []} keyField="id"
+      <ChartContainer title="Asset Inventory" subtitle={h && h.total > h.assets.length ? `Showing ${h.assets.length} of ${h.total} assets` : undefined} loading={isLoading}>
+        <DataTable data={h?.assets ?? []} keyField="id"
           searchable searchFields={['name', 'asset_tag']}
-          onRowClick={(row) => setSelectedAsset(row as unknown as Asset)}
+          onRowClick={(row) => setSelectedAsset(row)}
           columns={[
             { key: 'name', header: 'Asset Name', sortable: true },
             { key: 'asset_tag', header: 'Tag', sortable: true },
-            { key: 'health_score', header: 'Health %', sortable: true, align: 'right', render: (r) => <span className={`font-semibold ${(r.health_score as number) >= 80 ? 'text-green-600' : 'text-red-500'}`}>{String(r.health_score)}%</span> },
+            { key: 'status', header: 'Status', sortable: true, render: (r) => <span className="capitalize">{r.status}</span> },
+            { key: 'location', header: 'Location', sortable: true, render: (r) => r.location ?? '—' },
             { key: 'open_work_orders', header: 'Open WOs', sortable: true, align: 'right' },
             { key: 'total_work_orders', header: 'Total WOs', sortable: true, align: 'right' },
-            { key: 'sensor_alerts', header: 'IoT Alerts', sortable: true, align: 'right' },
+            { key: 'sensor_alerts', header: 'Open IoT Alerts', sortable: true, align: 'right' },
           ]} />
       </ChartContainer>
 
       {selectedAsset && (
         <div className="fixed inset-y-0 right-0 z-50 w-96 bg-white dark:bg-gray-900 shadow-xl border-l border-gray-200 dark:border-gray-700 overflow-y-auto p-5">
-          <AssetDetailReport asset={selectedAsset}
-            stats={{ total_wos: 0, total_cost: 0, avg_resolution_hours: 0, pm_compliance: 0, longest_downtime_hours: 0 }}
-            history={[]}
-            onClose={() => setSelectedAsset(null)} />
+          {historyLoading || !history ? (
+            <p className="text-sm text-gray-500">Loading {selectedAsset.name}…</p>
+          ) : (
+            <AssetDetailReport asset={selectedAsset}
+              stats={{
+                total_wos: history.summary.total_work_orders,
+                total_cost: history.summary.total_maintenance_cost,
+                avg_resolution_hours: history.summary.avg_resolution_hours,
+                pm_compliance: history.summary.pm_compliance_rate,
+              }}
+              history={history.monthly.map((row) => ({ ...row, month: format(parseISO(row.month), 'MMM') }))}
+              onClose={() => setSelectedAsset(null)} />
+          )}
         </div>
       )}
 

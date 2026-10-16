@@ -1,0 +1,94 @@
+{
+  "health_score": 66.7,
+  "total": 3,
+  "by_status": {
+    "operational": 1,
+    "degraded": 1,
+    "down": 1,
+    "decommissioned": 0
+  },
+  "by_location": [
+    {
+      "location": "Plant 1",
+      "total": 2,
+      "operational": 1,
+      "degraded": 0,
+      "down": 1,
+      "health_score": 50.0
+    },
+    {
+      "location": "Unassigned",
+      "total": 1,
+      "operational": 0,
+      "degraded": 1,
+      "down": 0,
+      "health_score": 100.0
+    }
+  ],
+  "recently_degraded": [
+    {
+      "id": 19,
+      "name": "Fan",
+      "asset_tag": "FF-000003",
+      "status": "degraded"
+    },
+    {
+      "id": 18,
+      "name": "Press",
+      "asset_tag": "FF-000002",
+      "status": "down"
+    }
+  ],
+  "most_maintained": [
+    {
+      "id": 19,
+      "name": "Fan",
+      "asset_tag": "FF-000003",
+      "work_order_count": 3
+    },
+    {
+      "id": 17,
+      "name": "Pump",
+      "asset_tag": "FF-000001",
+      "work_order_count": 2
+    },
+    {
+      "id": 18,
+      "name": "Press",
+      "asset_tag": "FF-000002",
+      "work_order_count": 2
+    }
+  ],
+  "assets": [
+    {
+      "id": 18,
+      "name": "Press",
+      "asset_tag": "FF-000002",
+      "status": "down",
+      "location": "Plant 1",
+      "open_work_orders": 2,
+      "total_work_orders": 2,
+      "sensor_alerts": 0
+    },
+    {
+      "id": 19,
+      "name": "Fan",
+      "asset_tag": "FF-000003",
+      "status": "degraded",
+      "location": null,
+      "open_work_orders": 1,
+      "total_work_orders": 3,
+      "sensor_alerts": 0
+    },
+    {
+      "id": 17,
+      "name": "Pump",
+      "asset_tag": "FF-000001",
+      "status": "operational",
+      "location": "Plant 1",
+      "open_work_orders": 0,
+      "total_work_orders": 2,
+      "sensor_alerts": 1
+    }
+  ]
+}

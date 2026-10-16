@@ -1,12 +1,11 @@
 import { Link } from 'react-router-dom'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { formatCurrency, formatHours } from '@/utils/chartUtils'
-import type { Asset } from '@/types'
 
 interface AssetHistory { month: string; corrective: number; pm: number; iot: number }
 interface AssetDetailReportProps {
-  asset: Asset
-  stats: { total_wos: number; total_cost: number; avg_resolution_hours: number; pm_compliance: number; longest_downtime_hours: number }
+  asset: { id: number; name: string; asset_tag: string }
+  stats: { total_wos: number; total_cost: number; avg_resolution_hours: number; pm_compliance: number }
   history: AssetHistory[]
   onClose?: () => void
 }

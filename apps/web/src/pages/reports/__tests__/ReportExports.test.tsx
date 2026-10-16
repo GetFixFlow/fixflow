@@ -21,8 +21,15 @@ vi.mock('@/services/exportService', async (importOriginal) => ({
 
 // Empty reports in the shape each page reads, so the pages render as they do on a company with no activity yet.
 const REPORT_BODIES: Record<string, unknown> = {
-  'work_orders/summary': { total: 0, completed: 0, overdue_rate: 0, avg_completion_hours: 0, by_status: {}, trend: [], by_priority_detail: [] },
-  'assets/health': { total: 1, operational: 1, down: 0, health_score: 100, by_location: [], status_breakdown: [], assets: [] },
+  'work_orders/summary': {
+    period: { from: '', to: '', days: 0 },
+    totals: { created: 0, completed: 0, cancelled: 0, avg_resolution_hours: 0, overdue_rate: 0, first_time_fix_rate: 0 },
+    by_priority: {}, by_priority_detail: [], by_status: {}, trend: [], completion_heatmap: [],
+  },
+  'assets/health': {
+    health_score: 100, total: 1, by_status: { operational: 1, degraded: 0, down: 0, decommissioned: 0 },
+    by_location: [], recently_degraded: [], most_maintained: [], assets: [],
+  },
   'pm/compliance': {
     overall_compliance_rate: 0, period: { from: '', to: '' }, summary: { scheduled: 0, completed: 0, skipped: 0, overdue: 0 },
     by_month: [], by_location: [], worst_performing_assets: [],

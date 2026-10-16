@@ -1,22 +1,28 @@
 import { apiClient } from './client'
+import type {
+  AssetHealth, AssetHistory, BacklogReport, CostByAsset, CostSummary, MttrReport, WorkOrderSummary,
+} from '@/types/reports'
+import type { TechnicianStats } from '@/components/reports/TechnicianScorecard'
 
 export const reportsApi = {
   dashboard: () => apiClient.get('/dashboard'),
 
   workOrders: {
     summary: (params?: Record<string, unknown>) =>
-      apiClient.get('/reports/work_orders/summary', { params }),
+      apiClient.get<WorkOrderSummary>('/reports/work_orders/summary', { params }),
     mttr: (params?: Record<string, unknown>) =>
-      apiClient.get('/reports/work_orders/mttr', { params }),
-    backlog: () => apiClient.get('/reports/work_orders/backlog'),
-    technicianPerformance: () =>
-      apiClient.get('/reports/work_orders/technician_performance'),
+      apiClient.get<MttrReport>('/reports/work_orders/mttr', { params }),
+    /** What is open now: the Filters apply, the period does not. */
+    backlog: (params?: Record<string, unknown>) =>
+      apiClient.get<BacklogReport>('/reports/work_orders/backlog', { params }),
+    technicianPerformance: (params?: Record<string, unknown>) =>
+      apiClient.get<{ technicians: TechnicianStats[] }>('/reports/work_orders/technician_performance', { params }),
   },
 
   assets: {
-    health: () => apiClient.get('/reports/assets/health'),
-    history: (id: number) => apiClient.get(`/reports/assets/${id}/history`),
-    costAnalysis: () => apiClient.get('/reports/assets/cost_analysis'),
+    health: (params?: Record<string, unknown>) =>
+      apiClient.get<AssetHealth>('/reports/assets/health', { params }),
+    history: (id: number) => apiClient.get<AssetHistory>(`/reports/assets/${id}/history`),
   },
 
   pm: {
@@ -34,9 +40,9 @@ export const reportsApi = {
 
   costs: {
     summary: (params?: Record<string, unknown>) =>
-      apiClient.get('/reports/costs/summary', { params }),
+      apiClient.get<CostSummary>('/reports/costs/summary', { params }),
     byAsset: (params?: Record<string, unknown>) =>
-      apiClient.get('/reports/costs/by_asset', { params }),
+      apiClient.get<CostByAsset>('/reports/costs/by_asset', { params }),
     byLocation: (params?: Record<string, unknown>) =>
       apiClient.get('/reports/costs/by_location', { params }),
   },

@@ -42,7 +42,8 @@ RSpec.describe "Work Order Reports", type: :request do
 
       expect(response).to have_http_status(:ok)
       body = response.parsed_body
-      expect(body).to include("overall_mttr_hours", "by_asset", "by_technician", "by_location")
+      expect(body).to include("overall_avg", "by_group")
+      expect(body["by_group"].keys).to eq(%w[asset location technician])
     end
   end
 
@@ -52,8 +53,8 @@ RSpec.describe "Work Order Reports", type: :request do
 
       expect(response).to have_http_status(:ok)
       body = response.parsed_body
-      expect(body).to include("total_open", "aging_buckets", "oldest_work_orders")
-      expect(body["aging_buckets"]).to have_key("0_7_days")
+      expect(body).to include("total_open", "aging", "oldest_wos")
+      expect(body["aging"].first).to include("bucket" => "0-7 days")
     end
   end
 

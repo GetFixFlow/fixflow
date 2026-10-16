@@ -1,57 +1,40 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TechnicianPerformancePage } from '../TechnicianPerformancePage'
+import { useReportStore } from '@/stores/reportStore'
+import { fixtures, kpiValue, serveReportFixtures } from '@/test/reportFixtures'
 
-vi.mock('@/api/reports', () => ({
-  reportsApi: {
-    workOrders: {
-      technicianPerformance: () => Promise.resolve({
-        data: { technicians: [], avg_resolution_hours: 5.2, avg_first_fix_rate: 72.3, workload_heatmap: [] }
-      }),
-    },
-  },
-}))
-
-vi.mock('@/stores/reportStore', () => ({
-  useReportStore: () => ({
-    getParams: () => ({}), dateFrom: new Date('2026-01-01'), dateTo: new Date('2026-01-31'),
-    toggleCompare: vi.fn(), compareMode: false, filters: { priorities: [], sources: [], location_ids: [], asset_ids: [], user_ids: [] },
-    setDateRange: vi.fn(), setFilter: vi.fn(), resetFilters: vi.fn(),
-  }),
-}))
-
-vi.mock('@/components/reports/KPICard', () => ({
-  KPICard: ({ title }: { title: string }) => <div data-testid="kpi-card">{title}</div>,
-}))
-
-vi.mock('@/components/reports/ChartContainer', () => ({
-  ChartContainer: ({ title, children }: { title: string; children: React.ReactNode }) => <div>{title}{children}</div>,
-}))
-
-vi.mock('@/components/reports/ExportDropdown', () => ({ ExportDropdown: () => <div>Export</div> }))
-vi.mock('@/components/reports/PrintHeader', () => ({ PrintHeader: () => null }))
 vi.mock('@/components/reports/ReportFiltersSidebar', () => ({ ReportFiltersSidebar: () => null }))
-vi.mock('@/components/reports/TechnicianScorecard', () => ({ TechnicianScorecard: () => <div>TechnicianScorecard</div> }))
-vi.mock('@/components/reports/TechnicianComparisonChart', () => ({ TechnicianComparisonChart: () => <div>TechnicianComparisonChart</div> }))
-vi.mock('@/components/reports/WorkloadHeatmap', () => ({ WorkloadHeatmap: () => <div>WorkloadHeatmap</div> }))
-vi.mock('@/components/reports/TechnicianDetailPanel', () => ({ TechnicianDetailPanel: () => null }))
 
-vi.mock('@/utils/chartUtils', () => ({
-  formatHours: (v: number) => `${v} hrs`,
-  formatPercent: (v: number) => `${v}%`,
-}))
-
-function Wrapper({ children }: { children: React.ReactNode }) {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  return <QueryClientProvider client={qc}><MemoryRouter>{children}</MemoryRouter></QueryClientProvider>
+function renderPage() {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(<QueryClientProvider client={client}><MemoryRouter><TechnicianPerformancePage /></MemoryRouter></QueryClientProvider>)
 }
 
-describe('TechnicianPerformancePage', () => {
-  it('renders performance metrics', () => {
-    render(<TechnicianPerformancePage />, { wrapper: Wrapper })
-    expect(screen.getByText('Total Technicians')).toBeInTheDocument()
-    expect(screen.getByText('Team Avg Resolution')).toBeInTheDocument()
+describe('TechnicianPerformancePage with the server\'s real responses', () => {
+  let asked: URL[]
+  beforeEach(() => {
+    useReportStore.getState().resetFilters()
+    asked = serveReportFixtures()
+  })
+
+  it('shows a card for each technician and the team totals', async () => {
+    const { technicians } = fixtures.technicians
+    expect(technicians.length).toBeGreaterThan(1)
+    renderPage()
+    for (const tech of technicians) expect(await screen.findByText(tech.name)).toBeInTheDocument()
+    expect(await kpiValue(screen, 'Total Technicians')).toBe(String(technicians.length))
+    expect(await kpiValue(screen, 'Total WOs Completed')).toBe(String(technicians.reduce((sum, tech) => sum + tech.completed, 0)))
+  })
+
+  it('sends the period and the Filters panel\'s choices, so the figures match the chosen period', async () => {
+    useReportStore.getState().setFilter('priorities', ['high'])
+    renderPage()
+    await waitFor(() => expect(asked.length).toBeGreaterThan(0))
+    const url = asked.find((candidate) => candidate.pathname.endsWith('/technician_performance'))!
+    expect(url.searchParams.has('from') && url.searchParams.has('to')).toBe(true)
+    expect(url.searchParams.getAll('priorities[]')).toEqual(['high'])
   })
 })
