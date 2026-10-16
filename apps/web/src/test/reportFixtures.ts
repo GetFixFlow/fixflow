@@ -6,6 +6,7 @@ import type {
   AssetHealth, AssetHistory, BacklogReport, CostByAsset, CostSummary, MttrReport, WorkOrderSummary,
 } from '@/types/reports'
 import type { TechnicianStats } from '@/components/reports/TechnicianScorecard'
+import type { DashboardStats, RequesterDashboardStats, TechnicianDashboardStats } from '@/types'
 import workOrdersSummary from './fixtures/reports/work_orders_summary.json'
 import workOrdersMttr from './fixtures/reports/work_orders_mttr.json'
 import workOrdersBacklog from './fixtures/reports/work_orders_backlog.json'
@@ -14,6 +15,9 @@ import assetsHealth from './fixtures/reports/assets_health.json'
 import assetsHistory from './fixtures/reports/assets_history.json'
 import costsSummary from './fixtures/reports/costs_summary.json'
 import costsByAsset from './fixtures/reports/costs_by_asset.json'
+import dashboardFull from './fixtures/reports/dashboard_full.json'
+import dashboardTechnician from './fixtures/reports/dashboard_technician.json'
+import dashboardRequester from './fixtures/reports/dashboard_requester.json'
 
 export const fixtures: {
   workOrderSummary: WorkOrderSummary
@@ -24,6 +28,9 @@ export const fixtures: {
   assetHistory: AssetHistory
   costSummary: CostSummary
   costByAsset: CostByAsset
+  dashboardFull: DashboardStats
+  dashboardTechnician: TechnicianDashboardStats
+  dashboardRequester: RequesterDashboardStats
 } = {
   workOrderSummary: workOrdersSummary,
   mttr: workOrdersMttr,
@@ -33,6 +40,9 @@ export const fixtures: {
   assetHistory: assetsHistory,
   costSummary: costsSummary,
   costByAsset: costsByAsset,
+  dashboardFull,
+  dashboardTechnician,
+  dashboardRequester,
 }
 
 const routes: [string, unknown][] = [

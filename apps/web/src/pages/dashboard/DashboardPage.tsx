@@ -25,6 +25,7 @@ import { PageHeader } from '@/components/ui/PageHeader'
 import { Badge, statusBadge } from '@/components/ui/Badge'
 import { formatDateTime } from '@/lib/localeFormat'
 import { GettingStarted } from '@/components/dashboard/GettingStarted'
+import { RequesterDashboard, TechnicianDashboard } from '@/components/dashboard/RoleDashboards'
 
 export function DashboardPage() {
   const { data, isLoading } = useDashboard()
@@ -42,6 +43,11 @@ export function DashboardPage() {
   }
 
   if (!data) return null
+
+  // The server decides what each kind of person sees (see DashboardResponse); a technician or requester has no
+  // company-wide figures to draw.
+  if ('my_requests' in data) return <RequesterDashboard data={data} name={user?.full_name} />
+  if ('my_work_orders' in data) return <TechnicianDashboard data={data} name={user?.full_name} />
 
   const assetsByStatus = [
     { name: 'operational', value: data.assets.operational },
@@ -77,7 +83,7 @@ export function DashboardPage() {
         />
         <StatCard
           title="PM Compliance"
-          value={`${data.preventive_maintenance.compliance_rate_30d}%`}
+          value={data.preventive_maintenance.compliance_rate_30d === null ? '—' : `${data.preventive_maintenance.compliance_rate_30d}%`}
           subtitle={`${data.preventive_maintenance.overdue} overdue schedules`}
           icon={Wrench}
         />

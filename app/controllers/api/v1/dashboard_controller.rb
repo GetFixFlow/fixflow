@@ -1,10 +1,11 @@
 module Api
   module V1
     class DashboardController < Api::V1::BaseController
+      # What each kind of person sees first. The three shapes differ (see the web app's types): managers and
+      # administrators get the whole company, technicians their own work, requesters their own requests. Counted
+      # fresh each time: they are plain counts, and a cached figure only made finished work look unfinished.
       def index
-        cache_key = "dashboard/#{current_organization.id}/#{current_user.role}/#{current_user.id}"
-        data = Rails.cache.fetch(cache_key, expires_in: 5.minutes) { build_dashboard }
-        render json: data
+        render json: build_dashboard
       end
 
       private
@@ -35,8 +36,8 @@ module Api
         wo        = org.work_orders
         open_st   = %w[open assigned in_progress on_hold pending_parts]
         completed = wo.where(status: %w[completed verified])
-        avg_hours = wo.where.not(started_at: nil, completed_at: nil)
-                      .average(Arel.sql("EXTRACT(EPOCH FROM (completed_at - started_at)) / 3600"))
+        avg_hours = completed.where.not(started_at: nil).where.not(completed_at: nil)
+                             .average(Arel.sql("EXTRACT(EPOCH FROM (completed_at - started_at)) / 3600"))
 
         {
           open:                   wo.where(status: "open").count,
@@ -45,7 +46,7 @@ module Api
           completed_today:        completed.where(completed_at: Time.current.all_day).count,
           completed_this_week:    completed.where(completed_at: 1.week.ago..).count,
           critical_open:          wo.where(status: open_st, priority: "critical").count,
-          avg_resolution_hours:   avg_hours&.round(1) || 0
+          avg_resolution_hours:   avg_hours.to_f.round(1)
         }
       end
 
@@ -65,14 +66,10 @@ module Api
         }
       end
 
+      # Compliance is the PM dashboard's: of the executions that came due in the last 30 days, the share completed
+      # (skipped and missed ones count against it); nil when none came due, which is "no data", not 0 or 100.
       def pm_stats(org)
-        pms        = org.preventive_maintenances.status_active
-        executions = PmExecution.joins(:preventive_maintenance)
-                                .where(preventive_maintenances: { organization_id: org.id })
-                                .where(scheduled_date: 30.days.ago..Date.today)
-        actionable = executions.where(status: %w[2 3]).count  # skipped=2, completed=3
-        completed  = executions.where(status: 3).count
-        rate       = actionable.positive? ? (completed.to_f / actionable * 100).round(1) : 0
+        pms = org.preventive_maintenances.status_active
 
         next_due = pms.where.not(next_due_at: nil).order(:next_due_at).limit(3)
                       .includes(:asset).map do |pm|
@@ -80,9 +77,9 @@ module Api
         end
 
         {
-          due_this_week:       pms.due_within(7).count,
+          due_this_week:       pms.where(next_due_at: Time.current..7.days.from_now).count,
           overdue:             pms.overdue.count,
-          compliance_rate_30d: rate,
+          compliance_rate_30d: PmDashboardService.new(org, days: 30).overall_compliance,
           next_due:            next_due
         }
       end

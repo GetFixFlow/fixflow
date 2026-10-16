@@ -615,7 +615,8 @@ export interface DashboardStats {
   preventive_maintenance: {
     due_this_week: number
     overdue: number
-    compliance_rate_30d: number
+    /** Share of the last 30 days' due executions that were completed; null when none came due. */
+    compliance_rate_30d: number | null
     next_due: { id: number; name: string; asset: string; due_date: string }[]
   }
   iot: {
@@ -627,6 +628,21 @@ export interface DashboardStats {
   recent_activity: { type: string; description: string; user?: string; timestamp: string }[]
   generated_at: string
 }
+
+/** What a technician sees first: their own work, their maintenance and their own activity. */
+export interface TechnicianDashboardStats {
+  my_work_orders: { assigned: number; in_progress: number; overdue: number; completed_today: number }
+  upcoming_pms: { id: number; name: string; asset: string; due_date: string | null }[]
+  recent_activity: { type: string; description: string; timestamp: string }[]
+}
+
+/** What a requester sees first: how their own requests are going. */
+export interface RequesterDashboardStats {
+  my_requests: { total: number; open: number; completed: number }
+}
+
+/** The dashboard endpoint answers differently for each kind of person. */
+export type DashboardResponse = DashboardStats | TechnicianDashboardStats | RequesterDashboardStats
 
 export interface WorkOrderSummary {
   period: string

@@ -13,10 +13,13 @@ class PmDashboardService
     @today        = today
   end
 
+  # The share of executions due in the period that were completed; nil when none came due.
+  def overall_compliance = compliance(tally(period))
+
   def call
     {
       period_days:          @days,
-      overall_compliance:   compliance(tally(period)),
+      overall_compliance:   overall_compliance,
       compliance_change:    compliance_change,
       due_this_week:        upcoming.count,
       overdue_count:        active.overdue.count,

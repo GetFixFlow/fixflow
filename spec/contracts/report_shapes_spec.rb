@@ -60,8 +60,8 @@ RSpec.describe "Report response shapes", type: :request do
     create(:work_order, organization: org, asset: asset, title: "Job on #{asset.name}", description: "Details", **notes, **attrs)
   end
 
-  def fetch(path, **params)
-    get "/api/v1/#{path}", params: params, headers: auth_headers_for(manager)
+  def fetch(path, as: manager, **params)
+    get "/api/v1/#{path}", params: params, headers: auth_headers_for(as)
     expect(response).to have_http_status(:ok)
     response.parsed_body
   end
@@ -83,6 +83,9 @@ RSpec.describe "Report response shapes", type: :request do
     make(fan, priority: "low", status: "cancelled", cancellation_reason: "Duplicate", created_at: now - 4.days)
     rule = create(:iot_rule, organization: org, asset: pump)
     create(:iot_alert, iot_rule: rule, asset: pump, created_at: now - 2.days)
+    create(:pm_execution, :completed, preventive_maintenance: schedule, scheduled_date: now.to_date - 3)
+    create(:preventive_maintenance, organization: org, asset: pump, assigned_to: alice, next_due_at: now + 2.days)
+    create(:activity_log, organization: org, user: alice, resource_name: "WO-1")
   end
 
   it "work_orders_summary" do
@@ -107,6 +110,20 @@ RSpec.describe "Report response shapes", type: :request do
 
   it "assets_history" do
     expect_fixture("assets_history", fetch("reports/assets/#{pump.id}/history"))
+  end
+
+  it "dashboard_full (managers and administrators)" do
+    expect_fixture("dashboard_full", fetch("dashboard"))
+  end
+
+  it "dashboard_technician" do
+    expect_fixture("dashboard_technician", fetch("dashboard", as: alice))
+  end
+
+  it "dashboard_requester" do
+    customer = create(:user, :requester, organization: org)
+    make(pump, status: "open", requester: customer)
+    expect_fixture("dashboard_requester", fetch("dashboard", as: customer))
   end
 
   it "costs_summary" do
