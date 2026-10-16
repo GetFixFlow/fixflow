@@ -377,6 +377,8 @@ bundle exec rspec spec/requests/   # request specs only
 bundle exec rspec spec/models/     # model specs only
 ```
 
+These run in CI on every pull request (the `test` job: a real PostgreSQL 16 and Redis 7, the schema loaded fresh, `bundle exec rspec`), so a change that breaks one cannot be merged unnoticed. They need PostgreSQL and Redis running (Redis for `rake fixflow:stats`, which reports on it), but no mail server or API key.
+
 ### Frontend (Vitest)
 
 ```bash
