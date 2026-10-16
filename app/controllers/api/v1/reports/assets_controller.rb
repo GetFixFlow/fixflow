@@ -2,10 +2,15 @@ module Api
   module V1
     module Reports
       class AssetsController < Reports::BaseController
-        # GET /api/v1/reports/assets/health
+        # The most assets the inventory table lists. `total` says how many there are.
+        INVENTORY_LIMIT = 500
+        MONTHS_SHOWN = 12
+
+        # GET /api/v1/reports/assets/health  (a status, and the Filters panel's assets and places)
         def health
-          # What was asked for is part of the key: a location or status filter must not get another's answer.
-          cache_key = "reports/asset_health/#{current_organization.id}/#{params[:status]}/#{params[:location_id]}"
+          # What was asked for is part of the key: a filter must not get another's answer.
+          asked = [params[:status].to_s, id_list(:asset_ids, :asset_id).sort, id_list(:location_ids, :location_id).sort]
+          cache_key = "reports/asset_health/#{current_organization.id}/#{Digest::SHA256.hexdigest(asked.to_json)}"
           data = Rails.cache.fetch(cache_key, expires_in: 10.minutes) do
             build_health_report
           end
@@ -36,19 +41,20 @@ module Api
           all_events += alt_events  unless type_filter.present? && type_filter != "iot_alert"
           timeline = all_events.sort_by { |e| e[:date] }.reverse
 
-          completed_wo = asset.work_orders.where(status: %w[completed verified])
-          downtime = completed_wo.where.not(started_at: nil)
-                                 .sum(Arel.sql("EXTRACT(EPOCH FROM (completed_at - started_at)) / 3600"))
+          repaired = asset.work_orders.where(status: %w[completed verified]).where.not(started_at: nil)
+          repair_hours = Arel.sql("EXTRACT(EPOCH FROM (completed_at - started_at)) / 3600")
 
           render json: {
             asset:   { id: asset.id, name: asset.name, tag: asset.asset_tag },
             summary: {
               total_work_orders:     asset.work_orders.count,
-              total_downtime_hours:  downtime.round(1),
-              total_maintenance_cost: asset.work_orders.sum("labor_cost + parts_cost").round(2),
+              total_downtime_hours:  repaired.sum(repair_hours).to_f.round(1),
+              avg_resolution_hours:  repaired.average(repair_hours).to_f.round(1),
+              total_maintenance_cost: asset.work_orders.sum("labor_cost + parts_cost").to_f.round(2),
               pm_compliance_rate:    pm_compliance_for_asset(asset),
               iot_alerts_total:      asset.iot_alerts.count
             },
+            monthly: monthly_activity(asset),
             timeline: timeline
           }
         end
@@ -107,9 +113,8 @@ module Api
           org    = current_organization
           assets = org.assets.kept
           assets = assets.where(status: params[:status]) if params[:status].present?
-          if params[:location_id].present?
-            assets = assets.where(location_id: Location.find(params[:location_id]).subtree_ids)
-          end
+          wanted = filtered_asset_ids
+          assets = assets.where(id: wanted) if wanted
 
           total = assets.count
           op    = assets.where(status: "operational").count
@@ -135,7 +140,7 @@ module Api
             { id: a.id, name: a.name, asset_tag: a.asset_tag, status: a.status }
           end
 
-          most_maintained = org.assets.kept
+          most_maintained = assets
             .joins(:work_orders)
             .where(work_orders: { created_at: 90.days.ago.. })
             .group("assets.id, assets.name, assets.asset_tag")
@@ -152,8 +157,44 @@ module Api
                                   decommissioned: assets.where(status: "decommissioned").count },
             by_location:        by_location,
             recently_degraded:  recently_degraded,
-            most_maintained:    most_maintained
+            most_maintained:    most_maintained,
+            assets:             inventory(assets)
           }
+        end
+
+        # What the inventory table lists: each asset with its status and how much work and alerting it has had (all
+        # time; `sensor_alerts` is the alerts still open). Those that need attention come first.
+        def inventory(assets)
+          rows = assets.includes(:location)
+                       .order(Arel.sql("CASE assets.status WHEN 'down' THEN 0 WHEN 'degraded' THEN 1 ELSE 2 END"), :name, :id)
+                       .limit(INVENTORY_LIMIT).to_a
+          ids = rows.map(&:id)
+          work = WorkOrder.where(asset_id: ids)
+          totals = work.group(:asset_id).count
+          open_counts = work.open.group(:asset_id).count
+          alerts = IotAlert.where(asset_id: ids, status: :open).group(:asset_id).count
+          rows.map do |asset|
+            {
+              id: asset.id, name: asset.name, asset_tag: asset.asset_tag, status: asset.status, location: asset.location&.name,
+              open_work_orders: open_counts.fetch(asset.id, 0), total_work_orders: totals.fetch(asset.id, 0),
+              sensor_alerts: alerts.fetch(asset.id, 0)
+            }
+          end
+        end
+
+        # One row for each of the last 12 months (the company's months, this one last, none left out): work orders
+        # made by a schedule (`pm`), other work orders (`corrective`) and IoT alerts raised (`iot`).
+        def monthly_activity(asset)
+          first = Time.zone.today.beginning_of_month.prev_month(MONTHS_SHOWN - 1)
+          since = first.beginning_of_day
+          created = asset.work_orders.where(created_at: since..)
+          by_month = ->(scope, column) { scope.group(local_period_sql(column, "month")).count }
+          pm = by_month.call(created.where.not(preventive_maintenance_id: nil), "work_orders.created_at")
+          corrective = by_month.call(created.where(preventive_maintenance_id: nil), "work_orders.created_at")
+          iot = by_month.call(asset.iot_alerts.where(created_at: since..), "iot_alerts.created_at")
+          Array.new(MONTHS_SHOWN) { |n| first.next_month(n) }.map do |date|
+            { month: date.iso8601, corrective: corrective.fetch(date, 0), pm: pm.fetch(date, 0), iot: iot.fetch(date, 0) }
+          end
         end
 
         def build_wo_events(asset, from, to)

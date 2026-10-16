@@ -2,6 +2,14 @@ module Api
   module V1
     module Reports
       class WorkOrdersController < Reports::BaseController
+        OPEN_STATUSES = %w[open assigned in_progress on_hold pending_parts].freeze
+        FINISHED = %w[completed verified].freeze
+        HEATMAP_WEEKS = 13
+        # The age bands of the backlog chart, in whole days open.
+        AGE_BUCKETS = { "0-7 days" => 0..7, "8-14 days" => 8..14, "15-30 days" => 15..30, "Over 30 days" => 31.. }.freeze
+        OLDEST_SHOWN = 5
+        REPAIR_HOURS_SQL = "EXTRACT(EPOCH FROM (work_orders.completed_at - work_orders.started_at)) / 3600".freeze
+
         # GET /api/v1/reports/work_orders/summary
         def summary
           from, to = date_range
@@ -27,13 +35,15 @@ module Api
               created:                total_all,
               completed:              total_comp,
               cancelled:              scope.where(status: "cancelled").count,
-              avg_resolution_hours:   avg_hours&.round(1) || 0,
+              avg_resolution_hours:   avg_hours.to_f.round(1),
               overdue_rate:           overdue_rate,
               first_time_fix_rate:    first_fix
             },
             by_priority: by_priority_stats(scope),
+            by_priority_detail: by_priority_detail(scope),
             by_status:   scope.group(:status).count,
-            trend:       trend_data(scope, from, to, group_by_param)
+            trend:       trend_data(scope, from, to, group_by_param),
+            completion_heatmap: completion_heatmap
           }
 
           # .csv lists the work orders behind the figures (same period and filters); .pdf is the summary.
@@ -42,51 +52,33 @@ module Api
                         pdf: -> { PdfReportService.work_order_summary(data, org_name: current_organization.name) })
         end
 
-        # GET /api/v1/reports/work_orders/mttr
+        # GET /api/v1/reports/work_orders/mttr  (the period and the Filters panel)
+        # Mean time to repair: hours from the work starting to it being finished, for work orders created in the
+        # period. `by_group` has the rows the chart draws for each way of grouping, slowest first.
         def mttr
           from, to = date_range
-          scope    = base_wo_scope(from, to)
-                       .where(status: %w[completed verified])
-                       .where.not(started_at: nil, completed_at: nil)
-          overall  = scope.average(Arel.sql("EXTRACT(EPOCH FROM (completed_at - started_at)) / 3600"))
-
-          group_by = params.fetch(:group_by, "asset")
+          scope    = base_wo_scope(from, to).where(status: FINISHED).where.not(started_at: nil).where.not(completed_at: nil)
 
           render json: {
-            overall_mttr_hours: overall&.round(2) || 0,
-            by_asset:           mttr_by_asset(scope),
-            by_technician:      mttr_by_technician(scope),
-            by_location:        mttr_by_location(scope)
+            overall_avg: repair_hours.call(scope).to_f.round(1),
+            by_group: {
+              asset: mttr_rows(scope.joins(:asset), "assets.id", "assets.name"),
+              location: mttr_rows(scope.joins(asset: :location), "locations.id", "locations.name"),
+              technician: mttr_rows(scope.joins(:assignee), "users.id", "users.first_name || ' ' || users.last_name")
+            }
           }
         end
 
-        # GET /api/v1/reports/work_orders/backlog
+        # GET /api/v1/reports/work_orders/backlog  (the Filters panel; the period does not matter: it is what is open now)
         def backlog
-          open_wo    = current_organization.work_orders.open.includes(:asset, :assignee)
-          now        = Time.current
-          buckets    = { "0_7_days" => [], "8_14_days" => [], "15_30_days" => [], "over_30_days" => [] }
-
-          open_wo.each do |wo|
-            age = (now - wo.created_at).to_i / 86400
-            key = case age
-                  when 0..7    then "0_7_days"
-                  when 8..14   then "8_14_days"
-                  when 15..30  then "15_30_days"
-                  else              "over_30_days"
-                  end
-            buckets[key] << wo
-          end
-
-          aging_buckets = buckets.transform_values do |wos|
-            { count: wos.size, critical: wos.count { |w| w.priority == "critical" } }
-          end
-
-          oldest = open_wo.order(created_at: :asc).limit(5)
+          open_wo = apply_report_filters(current_organization.work_orders.open)
+          now = Time.current
+          ages = open_wo.pluck(:created_at, :priority).map { |created, priority| [(now - created).to_i / 86_400, priority] }
 
           render json: {
-            total_open:            open_wo.count,
-            aging_buckets:         aging_buckets,
-            oldest_work_orders:    WorkOrderBlueprint.render_as_hash(oldest, view: :extended)
+            total_open: ages.size,
+            aging: AGE_BUCKETS.map { |label, days| aging_row(label, ages.select { |age, _| days.cover?(age) }) },
+            oldest_wos: open_wo.includes(:asset, :assignee).order(:created_at, :id).limit(OLDEST_SHOWN).map { |wo| oldest_row(wo, now) }
           }
         end
 
@@ -94,10 +86,11 @@ module Api
         def technician_performance
           from, to = date_range
           users    = current_organization.users.where(role: %w[admin manager technician])
-          users    = users.where(id: params[:user_id]) if params[:user_id].present?
+          wanted   = id_list(:user_ids, :user_id, :assignee_id)
+          users    = users.where(id: wanted) if wanted.any?
 
           technicians = users.map do |user|
-            wo         = current_organization.work_orders
+            wo         = apply_report_filters(current_organization.work_orders)
                            .where(assignee_id: user.id, created_at: from..to)
             completed  = wo.where(status: %w[completed verified])
             total      = wo.count
@@ -112,9 +105,7 @@ module Api
               assigned:              total,
               completed:             comp_count,
               completion_rate:       total.positive? ? (comp_count.to_f / total * 100).round(1) : 0,
-              avg_resolution_hours:  completed.where.not(started_at: nil)
-                                              .average(Arel.sql("EXTRACT(EPOCH FROM (completed_at - started_at)) / 3600"))
-                                              &.round(1) || 0,
+              avg_resolution_hours:  repair_hours.call(completed.where.not(started_at: nil)).to_f.round(1),
               on_time_rate:          due_total.positive? ? (on_time.to_f / due_total * 100).round(1) : 0,
               first_time_fix_rate:   comp_count.positive? ?
                 (completed.where(rejection_reason: [nil, ""]).count.to_f / comp_count * 100).round(1) : 0,
@@ -142,56 +133,79 @@ module Api
             {
               created:   sub.count,
               completed: comp.count,
-              avg_hours: comp.average(Arel.sql("EXTRACT(EPOCH FROM (completed_at - started_at)) / 3600"))
-                            &.round(1) || 0
+              avg_hours: comp.average(Arel.sql("EXTRACT(EPOCH FROM (completed_at - started_at)) / 3600")).to_f.round(1)
             }
           end
         end
 
-        def mttr_by_asset(scope)
-          scope.joins(:asset)
-               .group("assets.id, assets.name, assets.asset_tag")
-               .select(
-                 "assets.id as asset_id, assets.name as asset_name, assets.asset_tag,
-                  COUNT(*) as work_orders_count,
-                  ROUND(AVG(EXTRACT(EPOCH FROM (completed_at - started_at)) / 3600)::numeric, 2) as avg_resolution_hours,
-                  ROUND(MIN(EXTRACT(EPOCH FROM (completed_at - started_at)) / 3600)::numeric, 2) as min_hours,
-                  ROUND(MAX(EXTRACT(EPOCH FROM (completed_at - started_at)) / 3600)::numeric, 2) as max_hours"
-               ).map do |r|
+        # What the "By Priority" chart draws, one row for each priority: created in the period, how many of those are
+        # finished and how many still open, the average hours from start to finish, and the share that missed their due
+        # date (finished late, or still open and past it) of those that have one.
+        def by_priority_detail(scope)
+          WorkOrder::PRIORITIES.map do |priority|
+            sub = scope.where(priority: priority)
+            done = sub.where(status: FINISHED)
+            hours = done.where.not(started_at: nil).average(Arel.sql("EXTRACT(EPOCH FROM (completed_at - started_at)) / 3600"))
             {
-              asset_id: r.asset_id, asset_name: r.asset_name, asset_tag: r.asset_tag,
-              work_orders_count: r.work_orders_count, avg_resolution_hours: r.avg_resolution_hours,
-              min_hours: r.min_hours, max_hours: r.max_hours
+              priority: priority, created: sub.count, completed: done.count, open: sub.where(status: OPEN_STATUSES).count,
+              avg_hours: hours.to_f.round(1), overdue_pct: overdue_percent(sub.where.not(due_date: nil))
             }
           end
         end
 
-        def mttr_by_technician(scope)
-          scope.where.not(assignee_id: nil)
-               .joins("INNER JOIN users ON users.id = work_orders.assignee_id")
-               .group("users.id, users.first_name, users.last_name")
-               .select(
-                 "users.id as user_id, users.first_name, users.last_name,
-                  COUNT(*) as completed_count,
-                  ROUND(AVG(EXTRACT(EPOCH FROM (completed_at - started_at)) / 3600)::numeric, 2) as avg_resolution_hours"
-               ).map do |r|
-            {
-              user_id: r.user_id, name: "#{r.first_name} #{r.last_name}".strip,
-              completed_count: r.completed_count, avg_resolution_hours: r.avg_resolution_hours
-            }
-          end
+        # Of work orders that have a due date, the per cent that missed it: finished after it, or still open and past it.
+        def overdue_percent(with_due)
+          open_late = with_due.where(status: OPEN_STATUSES).where(due_date: ...Time.current).count
+          finished = with_due.where(status: FINISHED)
+          judged = finished.count + open_late
+          return 0 if judged.zero?
+
+          (((finished.where("completed_at > due_date").count + open_late).to_f / judged) * 100).round(1)
         end
 
-        def mttr_by_location(scope)
-          scope.joins(asset: :location)
-               .group("locations.id, locations.name")
-               .select(
-                 "locations.name as location_name, COUNT(*) as work_orders_count,
-                  ROUND(AVG(EXTRACT(EPOCH FROM (completed_at - started_at)) / 3600)::numeric, 2) as avg_resolution_hours"
-               ).map do |r|
-            { location: r.location_name, work_orders_count: r.work_orders_count,
-              avg_resolution_hours: r.avg_resolution_hours }
-          end
+        # Work orders finished on each of the last 13 weeks' days (the company's days), as { date, count }, only the days
+        # that had any. It is a picture of recent activity, so it follows the Filters but not the period chosen.
+        def completion_heatmap
+          since = (Time.zone.today - ((HEATMAP_WEEKS * 7) - 1)).beginning_of_day
+          rows = apply_report_filters(current_organization.work_orders)
+                   .where(status: %w[completed verified], completed_at: since..)
+                   .group(local_period_sql("work_orders.completed_at", "day")).count
+          rows.sort_by { |date, _| date }.map { |date, count| { date: date, count: count } }
+        end
+
+        # The average hours from the work starting to it being finished (nil when there is nothing to average).
+        def repair_hours
+          ->(scope) { scope.average(Arel.sql(REPAIR_HOURS_SQL)) }
+        end
+
+        # One row for each asset (or place, or person): { name, avg_hours, wo_count, min_hours, max_hours }, slowest
+        # first. `key` and `label` are our own column expressions, never anything from a request.
+        def mttr_rows(scope, key, label)
+          columns = [label, "COUNT(*)", "AVG(#{REPAIR_HOURS_SQL})", "MIN(#{REPAIR_HOURS_SQL})", "MAX(#{REPAIR_HOURS_SQL})"]
+          rows = scope.group(Arel.sql(key), Arel.sql(label)).pluck(*columns.map { |column| Arel.sql(column) })
+          rows = rows.map { |name, count, avg, min, max| mttr_row(name, count, avg, min, max) }
+          rows.sort_by { |row| [-row[:avg_hours], row[:name]] }
+        end
+
+        def mttr_row(name, count, avg, min, max)
+          {
+            name: name.to_s.strip, wo_count: count, avg_hours: avg.to_f.round(1),
+            min_hours: min.to_f.round(1), max_hours: max.to_f.round(1)
+          }
+        end
+
+        # How many open work orders of each priority fall in one age band.
+        def aging_row(label, ages)
+          counts = ages.map(&:last).tally
+          { bucket: label }.merge(WorkOrder::PRIORITIES.index_with { |priority| counts.fetch(priority, 0) })
+        end
+
+        def oldest_row(work_order, now)
+          {
+            id: work_order.id, work_order_number: work_order.work_order_number, title: work_order.title,
+            asset_name: work_order.asset&.name, priority: work_order.priority, days_open: (now - work_order.created_at).to_i / 86_400,
+            assignee_name: work_order.assignee&.full_name
+          }
         end
       end
     end

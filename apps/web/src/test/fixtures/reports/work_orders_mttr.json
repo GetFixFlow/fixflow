@@ -1,0 +1,46 @@
+{
+  "overall_avg": 10.0,
+  "by_group": {
+    "asset": [
+      {
+        "name": "Fan",
+        "wo_count": 1,
+        "avg_hours": 24.0,
+        "min_hours": 24.0,
+        "max_hours": 24.0
+      },
+      {
+        "name": "Pump",
+        "wo_count": 2,
+        "avg_hours": 3.0,
+        "min_hours": 2.0,
+        "max_hours": 4.0
+      }
+    ],
+    "location": [
+      {
+        "name": "Plant 1",
+        "wo_count": 2,
+        "avg_hours": 3.0,
+        "min_hours": 2.0,
+        "max_hours": 4.0
+      }
+    ],
+    "technician": [
+      {
+        "name": "Alice Silva",
+        "wo_count": 2,
+        "avg_hours": 14.0,
+        "min_hours": 4.0,
+        "max_hours": 24.0
+      },
+      {
+        "name": "Bob Perera",
+        "wo_count": 1,
+        "avg_hours": 2.0,
+        "min_hours": 2.0,
+        "max_hours": 2.0
+      }
+    ]
+  }
+}

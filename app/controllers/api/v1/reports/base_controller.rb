@@ -95,32 +95,30 @@ module Api
           conditions.empty? ? scope.none : scope.where(conditions.join(" OR "))
         end
 
-        def trend_data(scope, from, to, group_by)
-          trunc = case group_by
-                  when "week"  then "week"
-                  when "month" then "month"
-                  else "day"
-                  end
+        # One point for each day, week or month in which something was created or completed:
+        # { date, created, completed, resolution_hours }. `resolution_hours` is the average time from creation to
+        # completion of the work orders completed in that period (0 when none were). Days are the company's.
+        def trend_data(scope, _from, _to, group_by)
+          unit = %w[week month].include?(group_by) ? group_by : "day"
+          created = scope.group(local_period_sql("work_orders.created_at", unit)).count
+          done = scope.where(status: %w[completed verified]).where.not(completed_at: nil)
+          completed = done.group(local_period_sql("work_orders.completed_at", unit)).count
+          hours = done.group(local_period_sql("work_orders.completed_at", unit))
+                      .average(Arel.sql("EXTRACT(EPOCH FROM (work_orders.completed_at - work_orders.created_at)) / 3600"))
 
-          created_by_period = scope
-            .group(Arel.sql("DATE_TRUNC('#{trunc}', created_at)::date"))
-            .count
-
-          completed_by_period = scope
-            .where(status: %w[completed verified])
-            .where.not(completed_at: nil)
-            .group(Arel.sql("DATE_TRUNC('#{trunc}', completed_at)::date"))
-            .count
-
-          all_dates = (created_by_period.keys + completed_by_period.keys).uniq.sort
-          all_dates.map do |date|
-            { date: date, created: created_by_period[date].to_i, completed: completed_by_period[date].to_i }
+          (created.keys + completed.keys).uniq.sort.map do |date|
+            { date: date, created: created[date].to_i, completed: completed[date].to_i, resolution_hours: hours[date].to_f.round(1) }
           end
         end
 
-        # Answers a report request: the file when .csv or .pdf was asked for, JSON otherwise. `csv` and `pdf`
-        # are only run when asked for; a report with no PDF answers 406 for .pdf instead of sending JSON.
-        # The filters and dates are the ones the screen sent, so the file holds what the screen shows.
+        # The day (or week, or month) a time falls in, in the company's time zone, as a date. `column` is one of our
+        # own "table.column" names, never anything from a request.
+        def local_period_sql(column, unit)
+          connection = ActiveRecord::Base.connection
+          local = "#{connection.quote_table_name(column)} AT TIME ZONE 'UTC' AT TIME ZONE #{connection.quote(Time.zone.tzinfo.name)}"
+          Arel.sql("DATE_TRUNC(#{connection.quote(unit)}, #{local})::date")
+        end
+
         def render_report(data, name, csv: nil, pdf: nil)
           case params[:format]
           when "csv" then send_report(csv, "text/csv", "#{name}_#{Time.zone.today}.csv")

@@ -8,7 +8,7 @@ import { ChartContainer } from '@/components/reports/ChartContainer'
 import { ExportDropdown } from '@/components/reports/ExportDropdown'
 import { PrintHeader } from '@/components/reports/PrintHeader'
 import { ReportFiltersSidebar } from '@/components/reports/ReportFiltersSidebar'
-import { TechnicianScorecard, type TechnicianStats } from '@/components/reports/TechnicianScorecard'
+import { TechnicianScorecard } from '@/components/reports/TechnicianScorecard'
 import { TechnicianComparisonChart } from '@/components/reports/TechnicianComparisonChart'
 import { TechnicianDetailPanel } from '@/components/reports/TechnicianDetailPanel'
 import { useReportStore } from '@/stores/reportStore'
@@ -30,7 +30,7 @@ export function TechnicianPerformancePage() {
 
   const { data: techData, isLoading } = useQuery({
     queryKey: ['reports', 'technician_performance', params],
-    queryFn: () => reportsApi.workOrders.technicianPerformance().then((r) => r.data as { technicians: TechnicianStats[] }),
+    queryFn: () => reportsApi.workOrders.technicianPerformance(params).then((r) => r.data),
   })
 
   const technicians = techData?.technicians ?? []
@@ -58,7 +58,7 @@ export function TechnicianPerformancePage() {
           <Button variant="outline" onClick={() => setFiltersOpen(true)}><SlidersHorizontal className="h-4 w-4 mr-1.5" />Filters</Button>
           <ExportDropdown
             isExporting={exporting}
-            onExportCSV={() => exportReport('work_orders/technician_performance', 'csv')}
+            onExportCSV={() => exportReport('work_orders/technician_performance', 'csv', params)}
           />
         </div>
       </div>

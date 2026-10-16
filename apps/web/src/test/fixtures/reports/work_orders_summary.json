@@ -1,0 +1,126 @@
+{
+  "period": {
+    "from": "2026-09-16T00:00:00Z",
+    "to": "2026-10-16T23:59:59Z",
+    "days": 30
+  },
+  "totals": {
+    "created": 6,
+    "completed": 3,
+    "cancelled": 1,
+    "avg_resolution_hours": 25.0,
+    "overdue_rate": 50.0,
+    "first_time_fix_rate": 100.0
+  },
+  "by_priority": {
+    "critical": {
+      "created": 1,
+      "completed": 1,
+      "avg_hours": 2.0
+    },
+    "high": {
+      "created": 2,
+      "completed": 1,
+      "avg_hours": 4.0
+    },
+    "medium": {
+      "created": 1,
+      "completed": 1,
+      "avg_hours": 24.0
+    },
+    "low": {
+      "created": 2,
+      "completed": 0,
+      "avg_hours": 0.0
+    }
+  },
+  "by_priority_detail": [
+    {
+      "priority": "critical",
+      "created": 1,
+      "completed": 1,
+      "open": 0,
+      "avg_hours": 2.0,
+      "overdue_pct": 0.0
+    },
+    {
+      "priority": "high",
+      "created": 2,
+      "completed": 1,
+      "open": 1,
+      "avg_hours": 4.0,
+      "overdue_pct": 100.0
+    },
+    {
+      "priority": "medium",
+      "created": 1,
+      "completed": 1,
+      "open": 0,
+      "avg_hours": 24.0,
+      "overdue_pct": 0
+    },
+    {
+      "priority": "low",
+      "created": 2,
+      "completed": 0,
+      "open": 1,
+      "avg_hours": 0.0,
+      "overdue_pct": 0
+    }
+  ],
+  "by_status": {
+    "assigned": 1,
+    "cancelled": 1,
+    "completed": 2,
+    "open": 1,
+    "verified": 1
+  },
+  "trend": [
+    {
+      "date": "2026-09-24",
+      "created": 1,
+      "completed": 0,
+      "resolution_hours": 0.0
+    },
+    {
+      "date": "2026-09-26",
+      "created": 1,
+      "completed": 1,
+      "resolution_hours": 48.0
+    },
+    {
+      "date": "2026-10-10",
+      "created": 1,
+      "completed": 0,
+      "resolution_hours": 0.0
+    },
+    {
+      "date": "2026-10-11",
+      "created": 1,
+      "completed": 2,
+      "resolution_hours": 13.5
+    },
+    {
+      "date": "2026-10-12",
+      "created": 1,
+      "completed": 0,
+      "resolution_hours": 0.0
+    },
+    {
+      "date": "2026-10-13",
+      "created": 1,
+      "completed": 0,
+      "resolution_hours": 0.0
+    }
+  ],
+  "completion_heatmap": [
+    {
+      "date": "2026-09-26",
+      "count": 1
+    },
+    {
+      "date": "2026-10-11",
+      "count": 2
+    }
+  ]
+}

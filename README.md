@@ -267,6 +267,14 @@ The **Filters** panel on every report now works: places (including everything in
 
 **Reports are for managers and administrators on the server too**, not just on the screens: labor costs reveal what people are paid, so a technician or requester who calls a report directly gets "forbidden".
 
+## What the report screens show
+
+Each report screen reads the figures the server sends for it, and the Filters panel applies to all of them:
+
+- **Work Orders**: the cards are the period's work orders created, the share completed, the average hours from creation to completion, and the share of those with a due date that missed it. **By Priority** gives, for each priority, what was created, completed and is still open, the average hours from start to finish, and the share overdue (finished late, or still open and past its due date). **MTTR** (mean time to repair) is the average hours from work starting to it being finished, by asset, place and technician, slowest first; work that was never started is left out. **Backlog Aging** counts what is open *now* by age (0-7, 8-14, 15-30 and over 30 days) and priority, and lists the five oldest; it follows the Filters but not the period. The **heatmap** shows work completed on each of the last 13 weeks' days; it follows the Filters but not the period. Days, weeks and months are the company's (Settings, time zone), not UTC.
+- **Asset Health**: the health score and counts by status, health by place, and an **inventory** of the assets (those down or degraded first) with place, open and total work orders and open IoT alerts. The maintenance cost is the same figure as on Cost Analysis, for the same period and Filters. Clicking an asset opens its figures: total work orders, cost, average hours to finish work, PM compliance, and its last twelve months of work orders (made by a schedule or not) and IoT alerts. There is no health percentage for a single asset, because nothing defines one.
+- **Technician Performance**: each person's work orders in the period and the Filters.
+
 ## Reporting a problem without an account (QR labels)
 
 Every asset's QR label now links to a public form, `/request?asset=<code>`, where anyone (a visitor, a nurse, a tenant) can report a problem **without an account**. The form says which equipment the label is on, asks for a name (an email is optional), and what is wrong. It becomes an ordinary work order (priority and due date from **Settings → Company**), the managers are emailed, and the person gets a link, `/request/<token>`, to follow it: received, assigned, in progress, completed (or closed without work). If the link is lost the request cannot be looked up again, so the form says to keep it, and remembers the last five on that device.
@@ -299,7 +307,7 @@ Files open in Excel as they are (UTF-8, so accents and non-Latin names are kept;
 
 **Text that a spreadsheet would run as a formula is saved as text.** Titles and names can come from anyone (including people reporting a problem without an account), and Excel runs a cell that starts with `=`, `+`, `-` or `@`. Such cells are written with a leading `'`, so a title like `=HYPERLINK(...)` shows as text instead of running.
 
-The Asset Health and Technician Performance pages do not apply the Filters panel on screen yet, so their files do not either; they always cover everything. For other tools, the same files are at `GET /api/v1/reports/work_orders/summary.csv`, `assets/health.pdf` and so on (the screen's address with `.csv` or `.pdf` on the end, signed in as a manager); a report that has no PDF answers `406`.
+The files follow the same Filters as the screen: Technician Performance the period, assets, places, people, priorities and source; Asset Health the assets and places (it describes the fleet as it is now, so the period does not apply). For other tools, the same files are at `GET /api/v1/reports/work_orders/summary.csv`, `assets/health.pdf` and so on (the screen's address with `.csv` or `.pdf` on the end, signed in as a manager); a report that has no PDF answers `406`.
 
 ## Localization
 
@@ -398,7 +406,13 @@ lists every request the web app makes (read from the TypeScript source in `apps/
 
 If it reports **NO ROUTE**, either the endpoint is missing (build it) or the request should not be there (remove it). **PATH NOT IN THE SOURCE** means a request builds its address from a variable, so it cannot be checked: write the address out. The few requests that cannot be matched on purpose are listed, each with its reason, in `config/web_routes_allowlist.yml`; an entry that is no longer needed is reported too, so the list cannot go stale. The same check is part of `bundle exec rspec spec/lib`.
 
-The check compares addresses and verbs. It does not look at what an endpoint sends back, so a screen can still read a field the server does not provide; those need a test that runs the screen against the server's real answer.
+The check compares addresses and verbs. What the report endpoints send back is checked separately, from both ends: `spec/contracts/report_shapes_spec.rb` builds fixed data, calls each report and compares the response, field by field and kind of value, with a JSON file in `apps/web/src/test/fixtures/reports`; the web tests load the same files into the types the screens read (`apps/web/src/types/reports.ts`) and render the real pages with them. A field renamed on either side fails a test. After changing a report on purpose, regenerate the files with
+
+```bash
+UPDATE_REPORT_FIXTURES=1 bundle exec rspec spec/contracts/report_shapes_spec.rb
+```
+
+and commit them with the web change. Only the reports above are covered so far; the PM, IoT and Cost screens still read their responses without that check.
 
 ---
 

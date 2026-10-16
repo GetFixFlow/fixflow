@@ -1,0 +1,37 @@
+{
+  "technicians": [
+    {
+      "user_id": 12,
+      "name": "Karie Wisozk",
+      "assigned": 0,
+      "completed": 0,
+      "completion_rate": 0,
+      "avg_resolution_hours": 0.0,
+      "on_time_rate": 0,
+      "first_time_fix_rate": 0,
+      "critical_completed": 0
+    },
+    {
+      "user_id": 10,
+      "name": "Alice Silva",
+      "assigned": 3,
+      "completed": 2,
+      "completion_rate": 66.7,
+      "avg_resolution_hours": 14.0,
+      "on_time_rate": 0.0,
+      "first_time_fix_rate": 100.0,
+      "critical_completed": 0
+    },
+    {
+      "user_id": 11,
+      "name": "Bob Perera",
+      "assigned": 2,
+      "completed": 1,
+      "completion_rate": 50.0,
+      "avg_resolution_hours": 2.0,
+      "on_time_rate": 100.0,
+      "first_time_fix_rate": 100.0,
+      "critical_completed": 1
+    }
+  ]
+}

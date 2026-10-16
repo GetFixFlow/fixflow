@@ -15,43 +15,42 @@ import { MTTRChart } from '@/components/reports/MTTRChart'
 import { BacklogAgingChart } from '@/components/reports/BacklogAgingChart'
 import { ResolutionHeatmap } from '@/components/reports/ResolutionHeatmap'
 import { useReportStore } from '@/stores/reportStore'
-import { useComparisonData } from '@/hooks/useComparisonData'
 import { reportsApi } from '@/api/reports'
 import { useReportExport } from '@/hooks/useReportExport'
 import { formatHours, formatPercent } from '@/utils/chartUtils'
+import { withoutPeriod } from '@/utils/reportParams'
 import { formatDate } from '@/lib/localeFormat'
 
 export function WorkOrderReportsPage() {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const { getParams, dateFrom, dateTo } = useReportStore()
-  const { change } = useComparisonData()
   const { exporting, exportReport } = useReportExport()
 
   const params = getParams()
   const dateRange = `${formatDate(dateFrom)} – ${formatDate(dateTo)}`
 
-  const { data: summary, isLoading } = useQuery({
+  const { data: s, isLoading } = useQuery({
     queryKey: ['reports', 'wo_summary', params],
-    queryFn: () => reportsApi.workOrders.summary(params).then((r) => r.data as Record<string, unknown>),
+    queryFn: () => reportsApi.workOrders.summary(params).then((r) => r.data),
   })
 
   const { data: mttr, isLoading: mttrLoading } = useQuery({
     queryKey: ['reports', 'wo_mttr', params],
-    queryFn: () => reportsApi.workOrders.mttr(params).then((r) => r.data as Record<string, unknown>),
+    queryFn: () => reportsApi.workOrders.mttr(params).then((r) => r.data),
   })
 
+  const backlogParams = withoutPeriod(params)
   const { data: backlog } = useQuery({
-    queryKey: ['reports', 'wo_backlog'],
-    queryFn: () => reportsApi.workOrders.backlog().then((r) => r.data as Record<string, unknown>),
+    queryKey: ['reports', 'wo_backlog', backlogParams],
+    queryFn: () => reportsApi.workOrders.backlog(backlogParams).then((r) => r.data),
   })
 
-  const s = summary
-
+  const totals = s?.totals
   const kpis = [
-    { title: 'Total Work Orders', value: Number(s?.total ?? 0), metric: 'total' },
-    { title: 'Completion Rate', value: s?.total ? formatPercent(((s.completed as number) / (s.total as number)) * 100) : '—', metric: 'completion' },
-    { title: 'Avg Resolution Time', value: s?.avg_completion_hours ? formatHours(s.avg_completion_hours as number) : '—', metric: 'avg_resolution_hours' },
-    { title: 'Overdue Rate', value: s?.overdue_rate ? formatPercent(s.overdue_rate as number) : '0%', metric: 'overdue_rate' },
+    { title: 'Total Work Orders', value: totals?.created ?? 0 },
+    { title: 'Completion Rate', value: totals?.created ? formatPercent((totals.completed / totals.created) * 100) : '—' },
+    { title: 'Avg Resolution Time', value: totals?.avg_resolution_hours ? formatHours(totals.avg_resolution_hours) : '—' },
+    { title: 'Overdue Rate', value: formatPercent(totals?.overdue_rate ?? 0) },
   ]
 
   return (
@@ -79,28 +78,28 @@ export function WorkOrderReportsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <ChartContainer title="WO Trend" className="lg:col-span-2" loading={isLoading}>
-          <WOTrendChart data={(s?.trend as Parameters<typeof WOTrendChart>[0]['data']) ?? []} />
+          <WOTrendChart data={s?.trend ?? []} />
         </ChartContainer>
         <ChartContainer title="Status Distribution" loading={isLoading}>
-          <WOStatusDonutChart data={Object.entries((s?.by_status as Record<string, number>) ?? {}).map(([status, count]) => ({ status, count }))} />
+          <WOStatusDonutChart data={Object.entries(s?.by_status ?? {}).map(([status, count]) => ({ status, count }))} />
         </ChartContainer>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <ChartContainer title="By Priority" loading={isLoading}>
-          <WOByPriorityChart data={(s?.by_priority_detail as Parameters<typeof WOByPriorityChart>[0]['data']) ?? []} />
+          <WOByPriorityChart data={s?.by_priority_detail ?? []} />
         </ChartContainer>
         <ChartContainer title="MTTR Analysis" loading={mttrLoading}>
-          <MTTRChart data={(mttr?.by_group as Parameters<typeof MTTRChart>[0]['data']) ?? { asset: [], location: [], technician: [] }} overall_avg={(mttr?.overall_avg as number) ?? 0} />
+          <MTTRChart data={mttr?.by_group ?? { asset: [], location: [], technician: [] }} overall_avg={mttr?.overall_avg ?? 0} />
         </ChartContainer>
       </div>
 
       <ChartContainer title="Backlog Aging">
-        <BacklogAgingChart data={(backlog?.aging as Parameters<typeof BacklogAgingChart>[0]['data']) ?? []} oldestWOs={(backlog?.oldest_wos as Parameters<typeof BacklogAgingChart>[0]['oldestWOs']) ?? []} />
+        <BacklogAgingChart data={backlog?.aging ?? []} oldestWOs={backlog?.oldest_wos ?? []} />
       </ChartContainer>
 
       <ChartContainer title="Resolution Heatmap (Last 13 Weeks)" subtitle="Daily completed work orders">
-        <ResolutionHeatmap data={(s?.completion_heatmap as Parameters<typeof ResolutionHeatmap>[0]['data']) ?? []} />
+        <ResolutionHeatmap data={s?.completion_heatmap ?? []} />
       </ChartContainer>
 
       <ReportFiltersSidebar open={filtersOpen} onClose={() => setFiltersOpen(false)} />

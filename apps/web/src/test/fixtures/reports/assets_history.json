@@ -1,0 +1,113 @@
+{
+  "asset": {
+    "id": 21,
+    "name": "Pump",
+    "tag": "FF-000001"
+  },
+  "summary": {
+    "total_work_orders": 2,
+    "total_downtime_hours": 6.0,
+    "avg_resolution_hours": 3.0,
+    "total_maintenance_cost": 180.5,
+    "pm_compliance_rate": 0,
+    "iot_alerts_total": 1
+  },
+  "monthly": [
+    {
+      "month": "2025-11-01",
+      "corrective": 0,
+      "pm": 0,
+      "iot": 0
+    },
+    {
+      "month": "2025-12-01",
+      "corrective": 0,
+      "pm": 0,
+      "iot": 0
+    },
+    {
+      "month": "2026-01-01",
+      "corrective": 0,
+      "pm": 0,
+      "iot": 0
+    },
+    {
+      "month": "2026-02-01",
+      "corrective": 0,
+      "pm": 0,
+      "iot": 0
+    },
+    {
+      "month": "2026-03-01",
+      "corrective": 0,
+      "pm": 0,
+      "iot": 0
+    },
+    {
+      "month": "2026-04-01",
+      "corrective": 0,
+      "pm": 0,
+      "iot": 0
+    },
+    {
+      "month": "2026-05-01",
+      "corrective": 0,
+      "pm": 0,
+      "iot": 0
+    },
+    {
+      "month": "2026-06-01",
+      "corrective": 0,
+      "pm": 0,
+      "iot": 0
+    },
+    {
+      "month": "2026-07-01",
+      "corrective": 0,
+      "pm": 0,
+      "iot": 0
+    },
+    {
+      "month": "2026-08-01",
+      "corrective": 0,
+      "pm": 0,
+      "iot": 0
+    },
+    {
+      "month": "2026-09-01",
+      "corrective": 0,
+      "pm": 0,
+      "iot": 0
+    },
+    {
+      "month": "2026-10-01",
+      "corrective": 1,
+      "pm": 1,
+      "iot": 1
+    }
+  ],
+  "timeline": [
+    {
+      "date": "2026-10-14",
+      "type": "iot_alert",
+      "title": "temperature Alert (95.0 — threshold 85.0)",
+      "status": "open"
+    },
+    {
+      "date": "2026-10-11",
+      "type": "work_order",
+      "title": "WO-000037 Job on Pump",
+      "status": "verified",
+      "hours": 0,
+      "technician": "Bob Perera"
+    },
+    {
+      "date": "2026-10-11",
+      "type": "work_order",
+      "title": "WO-000036 Job on Pump",
+      "status": "completed",
+      "hours": 0,
+      "technician": "Alice Silva"
+    }
+  ]
+}

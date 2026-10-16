@@ -1,0 +1,31 @@
+{
+  "assets": [
+    {
+      "labor_cost": 150.0,
+      "parts_cost": 30.5,
+      "total_cost": 180.5,
+      "wo_count": 2,
+      "asset_id": 29,
+      "asset_name": "Pump"
+    },
+    {
+      "labor_cost": 30.0,
+      "parts_cost": 5.0,
+      "total_cost": 35.0,
+      "wo_count": 1,
+      "asset_id": 31,
+      "asset_name": "Fan"
+    }
+  ],
+  "treemap": [
+    {
+      "name": "Pump",
+      "cost": 180.5
+    },
+    {
+      "name": "Fan",
+      "cost": 35.0
+    }
+  ],
+  "total_assets": 2
+}

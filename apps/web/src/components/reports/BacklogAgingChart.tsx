@@ -2,7 +2,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { PRIORITY_COLORS } from '@/utils/chartUtils'
 
 interface AgingDataPoint { bucket: string; critical: number; high: number; medium: number; low: number }
-interface OldestWO { id: number; work_order_number: string; title: string; asset_name: string; priority: string; days_open: number; assignee_name?: string }
+interface OldestWO { id: number; work_order_number: string; title: string; asset_name: string | null; priority: string; days_open: number; assignee_name: string | null }
 
 interface BacklogAgingChartProps { data: AgingDataPoint[]; oldestWOs: OldestWO[] }
 
