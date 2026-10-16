@@ -17,7 +17,7 @@ import { ResolutionHeatmap } from '@/components/reports/ResolutionHeatmap'
 import { useReportStore } from '@/stores/reportStore'
 import { useComparisonData } from '@/hooks/useComparisonData'
 import { reportsApi } from '@/api/reports'
-import { exportToCSV } from '@/services/exportService'
+import { useReportExport } from '@/hooks/useReportExport'
 import { formatHours, formatPercent } from '@/utils/chartUtils'
 import { formatDate } from '@/lib/localeFormat'
 
@@ -25,6 +25,7 @@ export function WorkOrderReportsPage() {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const { getParams, dateFrom, dateTo } = useReportStore()
   const { change } = useComparisonData()
+  const { exporting, exportReport } = useReportExport()
 
   const params = getParams()
   const dateRange = `${formatDate(dateFrom)} – ${formatDate(dateTo)}`
@@ -62,7 +63,11 @@ export function WorkOrderReportsPage() {
           <Button variant="outline" onClick={() => setFiltersOpen(true)}>
             <SlidersHorizontal className="h-4 w-4 mr-1.5" /> Filters
           </Button>
-          <ExportDropdown onExportCSV={() => s && exportToCSV([s], 'work_order_report', dateFrom, dateTo)} />
+          <ExportDropdown
+            isExporting={exporting}
+            onExportCSV={() => exportReport('work_orders/summary', 'csv', params)}
+            onExportPDF={() => exportReport('work_orders/summary', 'pdf', params)}
+          />
         </div>
       </div>
 

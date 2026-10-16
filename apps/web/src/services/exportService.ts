@@ -3,7 +3,7 @@ import { format } from 'date-fns'
 // Install check: use dynamic imports for optional deps
 // npm install papaparse @types/papaparse xlsx
 
-function triggerDownload(blob: Blob, filename: string) {
+export function triggerDownload(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url; a.download = filename
@@ -67,12 +67,6 @@ export function exportToExcel(sheets: { name: string; data: object[] }[], filena
   }).catch(() => {
     console.warn('xlsx not installed. Run: npm install xlsx')
   })
-}
-
-export async function exportToPDF(apiPath: string, params?: Record<string, unknown>, filename = 'report.pdf'): Promise<void> {
-  const { apiClient } = await import('@/api/client')
-  const response = await apiClient.get(apiPath, { params, responseType: 'blob' })
-  triggerDownload(new Blob([response.data as BlobPart], { type: 'application/pdf' }), filename)
 }
 
 export function copyShareLink(extraParams?: Record<string, string>): void {

@@ -36,23 +36,10 @@ module Api
             trend:       trend_data(scope, from, to, group_by_param)
           }
 
-          # Dispatch on the explicit `format` param rather than `respond_to`'s
-          # Accept-header negotiation — ActionController::API doesn't register
-          # a default format the way ActionController::Base does, so an
-          # ordinary browser/axios Accept header (e.g. "application/json,
-          # text/plain, */*") can raise ActionController::UnknownFormat.
-          case params[:format]
-          when "csv"
-            require_export_permission!
-            send_data ExportService.work_orders_csv(data[:trend]),
-              filename: "work_orders_#{Date.today}.csv", type: "text/csv"
-          when "pdf"
-            require_export_permission!
-            send_data PdfReportService.work_order_summary(data, org_name: current_organization.name),
-              filename: "work_orders_#{Date.today}.pdf", type: "application/pdf"
-          else
-            render json: data
-          end
+          # .csv lists the work orders behind the figures (same period and filters); .pdf is the summary.
+          render_report(data, "work_orders",
+                        csv: -> { ExportService.work_orders_csv(export_work_orders(scope)) },
+                        pdf: -> { PdfReportService.work_order_summary(data, org_name: current_organization.name) })
         end
 
         # GET /api/v1/reports/work_orders/mttr
@@ -135,10 +122,18 @@ module Api
             }
           end
 
-          render json: { technicians: technicians }
+          render_report({ technicians: technicians }, "technician_performance",
+                        csv: -> { ExportService.technician_performance_csv(technicians) })
         end
 
         private
+
+        # The work orders an export holds, newest first. Cut at MAX_EXPORT_ROWS, and says so.
+        def export_work_orders(scope)
+          rows = scope.includes(:asset, :assignee).order(created_at: :desc, id: :desc).limit(MAX_EXPORT_ROWS + 1).to_a
+          response.set_header("X-Export-Truncated", "true") if rows.size > MAX_EXPORT_ROWS
+          rows.first(MAX_EXPORT_ROWS)
+        end
 
         def by_priority_stats(scope)
           WorkOrder::PRIORITIES.index_with do |priority|

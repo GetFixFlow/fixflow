@@ -251,6 +251,24 @@ Print labels from **Assets → Print labels** (or an asset's page). **Labels pri
 
 Behind a proxy the limits count the address the proxy reports (`X-Forwarded-For`); make sure your proxy sets it, or every visitor shares one allowance. There is no switch to turn the public form off yet.
 
+## Exporting reports
+
+The **Export** menu on a report page downloads the report as a file made by the server, with the same dates and filters as the screen (managers and administrators only, like the reports themselves):
+
+| Report | CSV holds | PDF |
+| --- | --- | --- |
+| Work Orders | every work order in the period matching the filters: number, title, priority, status, asset, assignee, due, started and completed times, labor, parts and total cost | the summary (figures, by priority, trend) |
+| Asset Health | one row per place: total, operational, degraded, down, health score | yes |
+| PM Compliance | one row per month: scheduled, completed, skipped, compliance rate | yes |
+| Cost Analysis | the cost of **every** asset that cost something (the screen shows the top 20): labor, parts, total, work orders | no |
+| Technician Performance | each person's figures | no |
+
+The IoT report has no export yet. Files open in Excel as they are (UTF-8, so accents and non-Latin names are kept; times are `YYYY-MM-DD HH:MM` in the company's time zone, money is a plain number). A CSV holds at most **50,000 work orders**; if there are more, the file is cut and the page says so.
+
+**Text that a spreadsheet would run as a formula is saved as text.** Titles and names can come from anyone (including people reporting a problem without an account), and Excel runs a cell that starts with `=`, `+`, `-` or `@`. Such cells are written with a leading `'`, so a title like `=HYPERLINK(...)` shows as text instead of running.
+
+The Asset Health and Technician Performance pages do not apply the Filters panel on screen yet, so their files do not either; they always cover everything. For other tools, the same files are at `GET /api/v1/reports/work_orders/summary.csv`, `assets/health.pdf` and so on (the screen's address with `.csv` or `.pdf` on the end, signed in as a manager); a report that has no PDF answers `406`.
+
 ## Localization
 
 **Settings → Localization** (administrators) sets how dates, times, numbers and money are shown to everyone: the **date format** (for example 05/10/2026, 05 Oct 2026, 2026-10-05), **12- or 24-hour time**, the **currency** (USD, EUR, GBP, JPY, CAD, AUD, CHF, INR, LKR, SGD), the **number style** (1,234.56 or 1.234,56 or with spaces) and the **first day of the week** in calendars and weekly reports. The page previews the result as you choose. The **time zone** is the same one as in Company settings and is used for schedules, such as when preventive maintenance falls due; dates and times on screen are shown in each person's own device time.

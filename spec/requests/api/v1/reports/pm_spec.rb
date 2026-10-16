@@ -26,6 +26,33 @@ RSpec.describe "PM Reports", type: :request do
                               "by_month", "by_location", "worst_performing_assets")
     end
 
+    it "breaks the figures down by month, by place and by asset, not just in total" do
+      get "/api/v1/reports/pm/compliance",
+        params: { from: 30.days.ago.iso8601, to: Time.current.iso8601 },
+        headers: headers
+
+      month_rows = response.parsed_body["by_month"]
+      expect(month_rows.sum { |m| m["scheduled"] }).to eq(2)
+      expect(month_rows.sum { |m| m["completed"] }).to eq(1)
+      expect(month_rows.sum { |m| m["skipped"] }).to eq(1)
+      expect(month_rows.first["compliance_rate"]).to eq(50.0)
+      expect(response.parsed_body["worst_performing_assets"].first)
+        .to include("completed" => 1, "missed" => 1, "compliance_rate" => 50.0)
+    end
+
+    it "breaks the figures down by place" do
+      place = create(:location, organization: org, name: "Plant")
+      asset.update!(location: place)
+
+      get "/api/v1/reports/pm/compliance",
+        params: { from: 30.days.ago.iso8601, to: Time.current.iso8601 },
+        headers: headers
+
+      expect(response.parsed_body["by_location"]).to contain_exactly(
+        include("location" => "Plant", "scheduled" => 2, "completed" => 1, "compliance_rate" => 50.0)
+      )
+    end
+
     it "returns CSV" do
       get "/api/v1/reports/pm/compliance.csv",
         params: { from: 30.days.ago.iso8601, to: Time.current.iso8601 },
