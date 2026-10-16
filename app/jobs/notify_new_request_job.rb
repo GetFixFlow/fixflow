@@ -5,7 +5,7 @@ class NotifyNewRequestJob < ApplicationJob
     work_order = WorkOrder.find_by(id: work_order_id)
     return unless work_order
 
-    work_order.organization.users.managers.each do |manager|
+    work_order.organization.users.managers.wanting_email("wo_new_request").each do |manager|
       WorkOrderMailer.new_request(work_order, manager).deliver_later
     end
   end

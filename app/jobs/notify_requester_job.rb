@@ -6,7 +6,8 @@ class NotifyRequesterJob < ApplicationJob
     return unless work_order
 
     if work_order.requester
-      WorkOrderMailer.verified(work_order).deliver_later
+      # A person with an account chooses; someone who reported through the public form has no account to choose in.
+      WorkOrderMailer.verified(work_order).deliver_later if work_order.requester.wants_email?("wo_verified")
     elsif work_order.requester_email.present?
       WorkOrderMailer.verified_public(work_order).deliver_later
     end

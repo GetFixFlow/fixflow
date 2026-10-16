@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_110000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -339,6 +339,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_100000) do
     t.string "department"
     t.datetime "deactivated_at"
     t.decimal "hourly_rate", precision: 8, scale: 2
+    t.jsonb "notification_preferences", default: {}, null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["invitation_token_digest"], name: "index_users_on_invitation_token_digest", unique: true
     t.index ["invited_by_id"], name: "index_users_on_invited_by_id"

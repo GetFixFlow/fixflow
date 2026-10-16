@@ -7,397 +7,245 @@ import { useNotificationPreferences, useUpdateNotificationPreferences } from '@/
 import type { NotificationPreferences } from '@/api/settings'
 import { cn } from '@/lib/utils'
 
-// Simple Toggle component
-function Toggle({ checked, onChange, id }: { checked: boolean; onChange: (v: boolean) => void; id?: string }) {
+function Toggle({ checked, onChange, id, label }: { checked: boolean; onChange: (v: boolean) => void; id?: string; label: string }) {
   return (
     <button
       id={id}
       type="button"
       role="switch"
       aria-checked={checked}
+      aria-label={label}
       onClick={() => onChange(!checked)}
       className={cn(
         'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors',
         checked ? 'bg-brand-600' : 'bg-gray-200 dark:bg-gray-700',
       )}
     >
-      <span className={cn(
-        'pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform',
-        checked ? 'translate-x-4' : 'translate-x-0',
-      )} />
+      <span
+        className={cn(
+          'pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform',
+          checked ? 'translate-x-4' : 'translate-x-0',
+        )}
+      />
     </button>
   )
 }
 
-interface NotifEvent {
+interface EmailEvent {
   key: string
   label: string
+  hint: string
   group: string
-  minRole?: 'manager' | 'admin'
+  /** Who is sent it: everyone, or managers and administrators only. */
+  minRole?: 'manager'
 }
 
-const NOTIF_EVENTS: NotifEvent[] = [
-  // Work Orders
-  { key: 'wo_assigned', label: 'WO assigned to me', group: 'Work Orders' },
-  { key: 'wo_completed', label: 'WO completed (my requests)', group: 'Work Orders' },
-  { key: 'wo_overdue', label: 'WO overdue (assigned to me)', group: 'Work Orders' },
-  { key: 'wo_verified', label: 'WO verified (my WOs)', group: 'Work Orders' },
-  // Preventive Maintenance
-  { key: 'pm_due_soon', label: 'PM due in 7 days', group: 'Preventive Maintenance' },
-  { key: 'pm_overdue', label: 'PM overdue', group: 'Preventive Maintenance' },
-  { key: 'pm_generated', label: 'PM work order generated', group: 'Preventive Maintenance' },
-  // IoT Alerts (manager+)
-  { key: 'iot_critical', label: 'Critical IoT alert', group: 'IoT Alerts', minRole: 'manager' },
-  { key: 'iot_high', label: 'High IoT alert', group: 'IoT Alerts', minRole: 'manager' },
-  { key: 'iot_medium', label: 'Medium IoT alert', group: 'IoT Alerts', minRole: 'manager' },
-  { key: 'iot_resolved', label: 'Alert resolved', group: 'IoT Alerts', minRole: 'manager' },
-  // System (admin+)
-  { key: 'user_joined', label: 'New user joined', group: 'System', minRole: 'admin' },
-  { key: 'api_key', label: 'API key created/revoked', group: 'System', minRole: 'admin' },
-  { key: 'daily_digest', label: 'Daily digest', group: 'System', minRole: 'admin' },
+// Exactly the emails the server sends (EmailPreferences::EMAIL_EVENTS). An email that is not
+// sent yet is not listed: a switch for it would do nothing.
+const EMAIL_EVENTS: EmailEvent[] = [
+  { key: 'wo_assigned', label: 'A work order is assigned to me', hint: 'Sent to the technician it is assigned to.', group: 'Work orders' },
+  { key: 'wo_verified', label: 'A work order I requested is finished', hint: 'Sent to the person who asked for the work, once it is verified.', group: 'Work orders' },
+  { key: 'wo_needs_verification', label: 'Work is finished and needs verifying', hint: 'Sent when a technician completes a work order.', group: 'Work orders', minRole: 'manager' },
+  { key: 'wo_new_request', label: 'Someone reports a problem', hint: 'Sent when a person without an account reports a problem from a QR label.', group: 'Work orders', minRole: 'manager' },
+  { key: 'pm_generated', label: 'A scheduled work order is created for me', hint: 'Sent when a preventive maintenance schedule creates a work order assigned to you.', group: 'Preventive maintenance' },
+  { key: 'pm_due_soon', label: 'Maintenance is due this week', hint: 'A summary of your schedules due within 7 days (managers get all of them).', group: 'Preventive maintenance' },
+  { key: 'pm_overdue', label: 'Maintenance is overdue', hint: 'A summary of overdue schedules.', group: 'Preventive maintenance', minRole: 'manager' },
+  { key: 'part_low_stock', label: 'A part is running low or out', hint: 'Sent once each time stock reaches its reorder point, and again if it runs out.', group: 'Inventory', minRole: 'manager' },
 ]
 
-const DEFAULT_PREFS: NotificationPreferences = {
-  email_enabled: true,
-  push_enabled: false,
-  sound_enabled: true,
-  rules: Object.fromEntries(
-    NOTIF_EVENTS.map((e) => [e.key, { email: true, push: false, in_app: true }])
-  ),
-  daily_digest: {
-    enabled: true,
-    send_at: '08:00',
-    include: { open_wos: true, overdue_wos: true, pm_due: true, alerts: false },
-  },
-  weekly_report: {
-    enabled: false,
-    send_on: 'monday',
-    include: { wo_summary: true, pm_compliance: true, costs: false },
-  },
+const SOUND_KEY = 'fixflow-alert-sound'
+
+function readSound() {
+  try {
+    return localStorage.getItem(SOUND_KEY) !== 'false'
+  } catch {
+    return true
+  }
 }
 
-function roleAllows(userRole: string, minRole?: 'manager' | 'admin') {
-  if (!minRole) return true
-  if (minRole === 'manager') return userRole === 'manager' || userRole === 'admin'
-  if (minRole === 'admin') return userRole === 'admin'
-  return false
+function playSampleSound() {
+  try {
+    const ctx = new AudioContext()
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.frequency.value = 880
+    gain.gain.setValueAtTime(0.3, ctx.currentTime)
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5)
+    osc.start()
+    osc.stop(ctx.currentTime + 0.5)
+  } catch {
+    // This browser cannot play sounds.
+  }
 }
 
-export function NotificationsPage() {
-  const { user } = useAuthStore()
-  const { data: serverPrefs } = useNotificationPreferences()
-  const updatePrefs = useUpdateNotificationPreferences()
+function sameChoices(a: NotificationPreferences, b: NotificationPreferences) {
+  return a.email_enabled === b.email_enabled && EMAIL_EVENTS.every((e) => a.rules[e.key]?.email === b.rules[e.key]?.email)
+}
 
-  const [prefs, setPrefs] = useState<NotificationPreferences>(() => ({
-    ...DEFAULT_PREFS,
-    ...serverPrefs,
-  }))
+function PreferencesForm({ saved }: { saved: NotificationPreferences }) {
+  const role = useAuthStore((s) => s.user?.role ?? 'technician')
+  const update = useUpdateNotificationPreferences()
+  const [prefs, setPrefs] = useState(saved)
+  const [sound, setSound] = useState(readSound)
 
-  // Sync from server when it loads
-  const mergedPrefs: NotificationPreferences = serverPrefs
-    ? { ...DEFAULT_PREFS, ...serverPrefs }
-    : prefs
+  const isManager = role === 'manager' || role === 'admin'
+  const events = EMAIL_EVENTS.filter((e) => !e.minRole || isManager)
+  const groups = Array.from(new Set(events.map((e) => e.group)))
+  const changed = !sameChoices(prefs, saved)
 
-  const [localPrefs, setLocalPrefs] = useState<NotificationPreferences>(mergedPrefs)
+  const setRule = (key: string, email: boolean) =>
+    setPrefs((p) => ({ ...p, rules: { ...p.rules, [key]: { email } } }))
 
-  const role = user?.role ?? 'technician'
-
-  const setChannel = (key: keyof NotificationPreferences, value: boolean) => {
-    setLocalPrefs((prev) => ({ ...prev, [key]: value }))
-  }
-
-  const setRule = (eventKey: string, channel: 'email' | 'push' | 'in_app', value: boolean) => {
-    setLocalPrefs((prev) => ({
-      ...prev,
-      rules: {
-        ...prev.rules,
-        [eventKey]: { ...(prev.rules[eventKey] ?? { email: true, push: false, in_app: true }), [channel]: value },
-      },
-    }))
-  }
-
-  const handleSave = () => {
-    updatePrefs.mutate(localPrefs)
-    setPrefs(localPrefs)
-  }
-
-  const requestPushPermission = async () => {
-    if (!('Notification' in window)) {
-      alert('Push notifications are not supported in this browser.')
-      return
-    }
-    const permission = await Notification.requestPermission()
-    if (permission === 'granted') {
-      setChannel('push_enabled', true)
-    }
-  }
-
-  const playSampleSound = () => {
+  const setSoundEnabled = (on: boolean) => {
+    setSound(on)
     try {
-      const ctx = new AudioContext()
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.connect(gain)
-      gain.connect(ctx.destination)
-      osc.frequency.value = 880
-      gain.gain.setValueAtTime(0.3, ctx.currentTime)
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5)
-      osc.start()
-      osc.stop(ctx.currentTime + 0.5)
+      localStorage.setItem(SOUND_KEY, String(on))
     } catch {
-      // AudioContext not available
+      // Not remembered, but this session still follows the switch.
     }
   }
-
-  const visibleGroups = Array.from(new Set(NOTIF_EVENTS.map((e) => e.group)))
 
   return (
-    <div className="space-y-6 max-w-2xl">
-      <PageHeader title="Notifications" description="Control how and when you receive notifications" />
+    <div className="max-w-2xl space-y-6">
+      <PageHeader title="Notifications" description="Choose which emails you get" />
 
-      {/* Channel Toggles */}
       <Card>
-        <CardContent className="p-5 space-y-4">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Notification Channels</h3>
-
-          <div className="space-y-3">
-            {/* Email */}
-            <div className="flex items-center justify-between py-2 border-b border-gray-50 dark:border-gray-700">
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Email Notifications</p>
-                <p className="text-xs text-gray-400">Receive notifications via email</p>
-              </div>
-              <Toggle checked={localPrefs.email_enabled} onChange={(v) => setChannel('email_enabled', v)} />
+        <CardContent className="space-y-4 p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Email</h3>
+              <p className="mt-0.5 text-xs text-gray-400">
+                Turn this off to get none of the emails below. Your choices are kept for when you turn it back on.
+              </p>
             </div>
-
-            {/* Push */}
-            <div className="flex items-center justify-between py-2 border-b border-gray-50 dark:border-gray-700">
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Push Notifications</p>
-                <p className="text-xs text-gray-400">Browser push notifications</p>
-              </div>
-              <div className="flex items-center gap-2">
-                {!localPrefs.push_enabled && (
-                  <Button variant="ghost" size="sm" onClick={requestPushPermission} className="text-xs text-brand-600">
-                    Enable
-                  </Button>
-                )}
-                <Toggle checked={localPrefs.push_enabled} onChange={(v) => setChannel('push_enabled', v)} />
-              </div>
-            </div>
-
-            {/* Sound */}
-            <div className="flex items-center justify-between py-2">
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">IoT Alert Sound</p>
-                <p className="text-xs text-gray-400">Play a sound for critical IoT alerts</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={playSampleSound} className="text-xs text-gray-500">
-                  Test
-                </Button>
-                <Toggle checked={localPrefs.sound_enabled} onChange={(v) => setChannel('sound_enabled', v)} />
-              </div>
-            </div>
+            <Toggle
+              id="email-enabled"
+              label="Email notifications"
+              checked={prefs.email_enabled}
+              onChange={(v) => setPrefs((p) => ({ ...p, email_enabled: v }))}
+            />
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Notification Rules */}
-      <Card>
-        <CardContent className="p-5 space-y-4">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Notification Rules</h3>
 
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-100 dark:border-gray-700">
-                  <th className="text-left py-2 text-xs text-gray-400 uppercase font-medium">Event</th>
-                  <th className="text-center py-2 text-xs text-gray-400 uppercase font-medium w-16">Email</th>
-                  <th className="text-center py-2 text-xs text-gray-400 uppercase font-medium w-16">Push</th>
-                  <th className="text-center py-2 text-xs text-gray-400 uppercase font-medium w-16">In-App</th>
+              <thead className="sr-only">
+                <tr>
+                  <th>Email</th>
+                  <th>Send me this</th>
                 </tr>
               </thead>
               <tbody>
-                {visibleGroups.map((group) => {
-                  const events = NOTIF_EVENTS.filter(
-                    (e) => e.group === group && roleAllows(role, e.minRole),
-                  )
-                  if (events.length === 0) return null
-                  return (
-                    <>
-                      <tr key={`group-${group}`}>
-                        <td colSpan={4} className="pt-3 pb-1">
-                          <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                            {group}
-                          </span>
-                        </td>
-                      </tr>
-                      {events.map((event) => {
-                        const rule = localPrefs.rules[event.key] ?? { email: true, push: false, in_app: true }
-                        return (
-                          <tr key={event.key} className="border-b border-gray-50 dark:border-gray-800">
-                            <td className="py-2 text-gray-700 dark:text-gray-300">{event.label}</td>
-                            <td className="py-2 text-center">
-                              <input
-                                type="checkbox"
-                                checked={rule.email}
-                                onChange={(e) => setRule(event.key, 'email', e.target.checked)}
-                                disabled={!localPrefs.email_enabled}
-                                className="rounded"
-                              />
-                            </td>
-                            <td className="py-2 text-center">
-                              <input
-                                type="checkbox"
-                                checked={rule.push}
-                                onChange={(e) => setRule(event.key, 'push', e.target.checked)}
-                                disabled={!localPrefs.push_enabled}
-                                className="rounded"
-                              />
-                            </td>
-                            <td className="py-2 text-center">
-                              <input
-                                type="checkbox"
-                                checked={rule.in_app}
-                                onChange={(e) => setRule(event.key, 'in_app', e.target.checked)}
-                                className="rounded"
-                              />
-                            </td>
-                          </tr>
-                        )
-                      })}
-                    </>
-                  )
-                })}
+                {groups.map((group) => (
+                  <GroupRows
+                    key={group}
+                    group={group}
+                    events={events.filter((e) => e.group === group)}
+                    prefs={prefs}
+                    onChange={setRule}
+                  />
+                ))}
               </tbody>
             </table>
           </div>
+
+          <p className="text-xs text-gray-400">
+            Invitations and password reset links are always sent, because you could not use the app without them.
+            Emails about overdue work orders and sensor alerts, push notifications and digests are not available yet.
+          </p>
+
+          <Button
+            onClick={() => update.mutate(prefs, { onSuccess: (res) => setPrefs(res.data.preferences) })}
+            disabled={!changed || update.isPending}
+          >
+            {update.isPending ? 'Saving…' : 'Save preferences'}
+          </Button>
         </CardContent>
       </Card>
 
-      {/* Daily Digest */}
       <Card>
-        <CardContent className="p-5 space-y-4">
+        <CardContent className="space-y-3 p-5">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Daily Digest</h3>
-              <p className="text-xs text-gray-400 mt-0.5">Receive a daily summary email</p>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Alert sound on this device</h3>
+              <p className="mt-0.5 text-xs text-gray-400">
+                Play a sound when a critical sensor alert arrives while FixFlow is open. Applies to this browser only.
+              </p>
             </div>
-            <Toggle
-              checked={localPrefs.daily_digest.enabled}
-              onChange={(v) => setLocalPrefs((p) => ({ ...p, daily_digest: { ...p.daily_digest, enabled: v } }))}
-            />
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" onClick={playSampleSound} className="text-xs text-gray-500">
+                Test
+              </Button>
+              <Toggle id="alert-sound" label="Alert sound" checked={sound} onChange={setSoundEnabled} />
+            </div>
           </div>
-          {localPrefs.daily_digest.enabled && (
-            <div className="space-y-3 pt-2 border-t border-gray-50 dark:border-gray-700">
-              <div>
-                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Send at</label>
-                <input
-                  type="time"
-                  value={localPrefs.daily_digest.send_at}
-                  onChange={(e) =>
-                    setLocalPrefs((p) => ({ ...p, daily_digest: { ...p.daily_digest, send_at: e.target.value } }))
-                  }
-                  className="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1.5 text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Include</label>
-                <div className="space-y-1.5">
-                  {Object.entries(localPrefs.daily_digest.include).map(([k, v]) => (
-                    <label key={k} className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={v}
-                        onChange={(e) =>
-                          setLocalPrefs((p) => ({
-                            ...p,
-                            daily_digest: {
-                              ...p.daily_digest,
-                              include: { ...p.daily_digest.include, [k]: e.target.checked },
-                            },
-                          }))
-                        }
-                        className="rounded"
-                      />
-                      <span className="text-gray-700 dark:text-gray-300">
-                        {k.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
-
-      {/* Weekly Report */}
-      <Card>
-        <CardContent className="p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Weekly Report</h3>
-              <p className="text-xs text-gray-400 mt-0.5">Receive a weekly summary email</p>
-            </div>
-            <Toggle
-              checked={localPrefs.weekly_report.enabled}
-              onChange={(v) => setLocalPrefs((p) => ({ ...p, weekly_report: { ...p.weekly_report, enabled: v } }))}
-            />
-          </div>
-          {localPrefs.weekly_report.enabled && (
-            <div className="space-y-3 pt-2 border-t border-gray-50 dark:border-gray-700">
-              <div>
-                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Send on</label>
-                <select
-                  value={localPrefs.weekly_report.send_on}
-                  onChange={(e) =>
-                    setLocalPrefs((p) => ({ ...p, weekly_report: { ...p.weekly_report, send_on: e.target.value } }))
-                  }
-                  className="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1.5 text-sm"
-                >
-                  {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((d) => (
-                    <option key={d} value={d}>
-                      {d.charAt(0).toUpperCase() + d.slice(1)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Include</label>
-                <div className="space-y-1.5">
-                  {Object.entries(localPrefs.weekly_report.include).map(([k, v]) => (
-                    <label key={k} className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={v}
-                        onChange={(e) =>
-                          setLocalPrefs((p) => ({
-                            ...p,
-                            weekly_report: {
-                              ...p.weekly_report,
-                              include: { ...p.weekly_report.include, [k]: e.target.checked },
-                            },
-                          }))
-                        }
-                        className="rounded"
-                      />
-                      <span className="text-gray-700 dark:text-gray-300">
-                        {k.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Button onClick={handleSave} disabled={updatePrefs.isPending}>
-        {updatePrefs.isPending ? 'Saving…' : 'Save Preferences'}
-      </Button>
     </div>
   )
+}
+
+function GroupRows({
+  group,
+  events,
+  prefs,
+  onChange,
+}: {
+  group: string
+  events: EmailEvent[]
+  prefs: NotificationPreferences
+  onChange: (key: string, email: boolean) => void
+}) {
+  return (
+    <>
+      <tr>
+        <td colSpan={2} className="pb-1 pt-4">
+          <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">{group}</span>
+        </td>
+      </tr>
+      {events.map((event) => (
+        <tr key={event.key} className="border-b border-gray-50 dark:border-gray-800">
+          <td className="py-2 pr-3">
+            <label htmlFor={`rule-${event.key}`} className="block cursor-pointer text-gray-700 dark:text-gray-300">
+              {event.label}
+              <span className="block text-xs text-gray-400">{event.hint}</span>
+            </label>
+          </td>
+          <td className="w-16 py-2 text-center">
+            <input
+              id={`rule-${event.key}`}
+              type="checkbox"
+              checked={prefs.rules[event.key]?.email ?? true}
+              onChange={(e) => onChange(event.key, e.target.checked)}
+              disabled={!prefs.email_enabled}
+              className="rounded"
+            />
+          </td>
+        </tr>
+      ))}
+    </>
+  )
+}
+
+export function NotificationsPage() {
+  const { data, isLoading, refetch } = useNotificationPreferences()
+
+  if (isLoading) {
+    return <p className="text-sm text-gray-500 dark:text-gray-400">Loading your preferences…</p>
+  }
+  if (!data) {
+    return (
+      <div className="max-w-2xl space-y-3">
+        <PageHeader title="Notifications" description="Choose which emails you get" />
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+          Your preferences could not be loaded, so nothing is shown that could be saved over them.
+        </p>
+        <Button variant="outline" onClick={() => refetch()}>
+          Try again
+        </Button>
+      </div>
+    )
+  }
+  return <PreferencesForm saved={data} />
 }
