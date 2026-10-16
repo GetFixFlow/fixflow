@@ -275,6 +275,12 @@ Each report screen reads the figures the server sends for it, and the Filters pa
 - **Asset Health**: the health score and counts by status, health by place, and an **inventory** of the assets (those down or degraded first) with place, open and total work orders and open IoT alerts. The maintenance cost is the same figure as on Cost Analysis, for the same period and Filters. Clicking an asset opens its figures: total work orders, cost, average hours to finish work, PM compliance, and its last twelve months of work orders (made by a schedule or not) and IoT alerts. There is no health percentage for a single asset, because nothing defines one.
 - **Technician Performance**: each person's work orders in the period and the Filters.
 
+## The dashboard
+
+The first screen differs by role, and the server decides what each person gets. **Managers and administrators** see the company: open and overdue work orders, asset health, PM compliance, open and critical IoT alerts, what was completed this week, schedules due this week, and recent activity. **Technicians** see their own work (assigned, in progress, overdue, completed today), the maintenance assigned to them and their own recent activity. **Requesters** see how many requests they have made, how many are still open and how many are completed. The figures are counted each time the page loads, not cached.
+
+**PM Compliance** is the same figure as on the PM dashboard: of the maintenance that came due in the last 30 days, the share that was completed; skipped and missed ones count against it. It shows "—" when nothing came due. "Due this week" counts schedules due in the next seven days; overdue schedules are counted apart.
+
 ## Reporting a problem without an account (QR labels)
 
 Every asset's QR label now links to a public form, `/request?asset=<code>`, where anyone (a visitor, a nurse, a tenant) can report a problem **without an account**. The form says which equipment the label is on, asks for a name (an email is optional), and what is wrong. It becomes an ordinary work order (priority and due date from **Settings → Company**), the managers are emailed, and the person gets a link, `/request/<token>`, to follow it: received, assigned, in progress, completed (or closed without work). If the link is lost the request cannot be looked up again, so the form says to keep it, and remembers the last five on that device.
@@ -412,7 +418,7 @@ The check compares addresses and verbs. What the report endpoints send back is c
 UPDATE_REPORT_FIXTURES=1 bundle exec rspec spec/contracts/report_shapes_spec.rb
 ```
 
-and commit them with the web change. Only the reports above are covered so far; the PM, IoT and Cost screens still read their responses without that check.
+and commit them with the web change. The Work Orders, Asset Health and Technician reports and the dashboard (for each role) are covered so far; the PM, IoT and Cost screens still read their responses without that check.
 
 ---
 
