@@ -26,7 +26,7 @@ export function IoTRuleEditPage() {
         mode="edit"
         isLoading={updateRule.isPending}
         onSubmit={async (data) => {
-          await updateRule.mutateAsync(data, { onSuccess: () => navigate('/iot/rules') })
+          await updateRule.mutateAsync(data).then(() => navigate('/iot/rules'), () => undefined)
         }}
       />
     </div>

@@ -8,6 +8,7 @@ import { server } from '@/test/server'
 import { TestRuleModal } from '../TestRuleModal'
 import type { IotRuleExtended } from '@/types'
 import { vi } from 'vitest'
+import { unhandledRejectionsDuring } from '@/test/unhandled'
 
 const mockRule: IotRuleExtended = {
   id: 1, name: 'Pump-01 High Vibration', asset_id: 1, metric_name: 'vibration', metric_unit: 'mm/s',
@@ -69,5 +70,59 @@ describe('TestRuleModal', () => {
     const btns = screen.getAllByRole('button', { name: /close|cancel/i })
     await userEvent.click(btns[btns.length - 1])
     expect(onClose).toHaveBeenCalled()
+  })
+
+  it('sends the value as test_value', async () => {
+    let body: unknown
+    server.use(
+      http.post('/api/v1/iot_rules/1/test', async ({ request }) => {
+        body = await request.json()
+        return HttpResponse.json({ would_trigger: false, reason: 'nothing would happen', recent_readings: [] })
+      }),
+    )
+    render(<TestRuleModal open rule={mockRule} onClose={() => {}} />, { wrapper })
+    const input = screen.getByRole('spinbutton')
+    await userEvent.clear(input)
+    await userEvent.type(input, '9.2')
+    await userEvent.click(screen.getByRole('button', { name: /run test/i }))
+
+    await waitFor(() => expect(body).toEqual({ test_value: 9.2 }))
+  })
+
+  it("shows the server's explanation and the recent readings with what each would have done", async () => {
+    server.use(
+      http.post('/api/v1/iot_rules/1/test', () =>
+        HttpResponse.json({
+          would_trigger: true,
+          reason: 'A reading of 9.2 mm/s is above 8.5 mm/s. It would raise an alert and create a work order.',
+          recent_readings: [
+            { value: 9.9, unit: 'mm/s', recorded_at: '2026-10-16T08:00:00Z', would_trigger: true },
+            { value: 4.1, unit: 'mm/s', recorded_at: '2026-10-16T07:00:00Z', would_trigger: false },
+          ],
+        }),
+      ),
+    )
+    render(<TestRuleModal open rule={mockRule} onClose={() => {}} />, { wrapper })
+    await userEvent.click(screen.getByRole('button', { name: /run test/i }))
+
+    expect(await screen.findByText(/it would raise an alert and create a work order/i)).toBeInTheDocument()
+    expect(screen.getByText(/9\.9/)).toBeInTheDocument()
+    expect(screen.getByText(/4\.1/)).toBeInTheDocument()
+  })
+
+  it('stays usable, with no result shown, when the server refuses the test', async () => {
+    server.use(
+      http.post('/api/v1/iot_rules/1/test', () =>
+        HttpResponse.json({ error: { code: 'VALIDATION_ERROR', message: 'test_value must be a number' } }, { status: 422 }),
+      ),
+    )
+    render(<TestRuleModal open rule={mockRule} onClose={() => {}} />, { wrapper })
+
+    const unhandled = await unhandledRejectionsDuring(() => userEvent.click(screen.getByRole('button', { name: /run test/i })))
+
+    expect(unhandled).toEqual([])
+    await waitFor(() => expect(screen.getByRole('button', { name: /run test/i })).toBeEnabled())
+    expect(screen.queryByText(/would trigger/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/nothing would happen/i)).not.toBeInTheDocument()
   })
 })

@@ -28,9 +28,7 @@ module Iot
 
         broadcast_reading(sensor_reading)
 
-        alert = Iot::RuleEvaluatorService.evaluate(asset, sensor_reading)
-
-        if alert.is_a?(IotAlert)
+        Array(Iot::RuleEvaluatorService.evaluate(asset, sensor_reading)).each do |alert|
           results[:alerts_triggered] += 1
           results[:work_orders_created] += 1 if alert.work_order_id.present?
         end

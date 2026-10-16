@@ -3,7 +3,7 @@ module Api
     class AssetsController < Api::V1::BaseController
       before_action :require_manager!, only: %i[create update]
       before_action :require_admin!,   only: %i[destroy]
-      before_action :set_asset,              only: %i[show update destroy work_orders sensor_readings iot_rules qr_code]
+      before_action :set_asset,              only: %i[show update destroy work_orders sensor_readings iot_rules iot_alerts qr_code]
       before_action :set_asset_with_history, only: %i[history]
 
       # GET /api/v1/assets
@@ -71,6 +71,13 @@ module Api
       def sensor_readings
         readings = @asset.sensor_readings.since(24.hours.ago).recent.limit(500)
         render json: { sensor_readings: SensorReadingBlueprint.render_as_hash(readings) }
+      end
+
+      # GET /api/v1/assets/:id/iot_alerts  (status, from, to) the asset's alerts, newest first
+      def iot_alerts
+        alerts = @asset.iot_alerts.includes(:iot_rule, :work_order, :acknowledged_by, asset: :location).recent
+        alerts = alerts.where(status: params[:status]) if params[:status].present?
+        render_paginated(alerts, IotAlertBlueprint, key: :iot_alerts)
       end
 
       # GET /api/v1/assets/:id/iot_rules

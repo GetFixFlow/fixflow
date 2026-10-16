@@ -23,6 +23,7 @@ class IotRule < ApplicationRecord
   validates :threshold,       numericality: true
   validates :cooldown_minutes, numericality: { greater_than_or_equal_to: 0 }
   validates :threshold_max,   numericality: true, if: :outside_range?
+  validate  :assignee_is_active_in_company, if: -> { assigned_to_id.present? }
 
   # ─── Scopes ────────────────────────────────────────────────────────────────
 
@@ -45,6 +46,35 @@ class IotRule < ApplicationRecord
     end
   end
 
+  # In words, what a reading of this value would do: for the "test this rule" box.
+  def explain(value, cooldown_active: on_cooldown?)
+    reading = [number(value), unit.presence].compact.join(" ")
+    return "A reading of #{reading} is not #{limit_words}, so nothing would happen." unless breach?(value)
+
+    outcome = if !active?
+                "The rule is #{status}, so nothing happens until it is switched on."
+              elsif !auto_create_wo
+                "It would raise an alert (this rule does not create work orders)."
+              elsif cooldown_active
+                "It would raise an alert but no work order, because one was created for this rule " \
+                  "within the last #{cooldown_minutes} minutes."
+              else
+                "It would raise an alert and create a work order."
+              end
+    "A reading of #{reading} is #{limit_words}. #{outcome}"
+  end
+
+  # A paused copy with fresh counts, so it does not start raising a second set of alerts the moment it exists.
+  def duplicate!
+    copy = dup
+    copy.assign_attributes(
+      name: "#{name} (copy)".first(255), status: :paused, trigger_count: 0, times_acknowledged: 0,
+      last_triggered_at: nil, last_wo_created_at: nil, breach_started_at: nil
+    )
+    copy.save!
+    copy
+  end
+
   def on_cooldown?
     return false unless last_wo_created_at && cooldown_minutes.to_i > 0
     last_wo_created_at > cooldown_minutes.minutes.ago
@@ -59,6 +89,22 @@ class IotRule < ApplicationRecord
   end
 
   private
+
+  # "above 85 °C", "outside 10 to 90 %", ...
+  def limit_words
+    words = IotAlert::OPERATOR_WORDS.fetch(operator, operator)
+    limit = outside_range? ? "#{number(threshold)} to #{number(threshold_max)}" : number(threshold)
+    "#{words} #{[limit, unit.presence].compact.join(' ')}"
+  end
+
+  def number(value) = value.to_d.to_s("F").sub(/\.0\z/, "")
+
+  def assignee_is_active_in_company
+    person = User.find_by(id: assigned_to_id)
+    return if person&.active? && person.organization_id == organization_id
+
+    errors.add(:assigned_to, "must be an active person in your company")
+  end
 
   def interpolate(template, vars)
     vars.reduce(template.dup) { |t, (k, v)| t.gsub("{#{k}}", v.to_s) }
