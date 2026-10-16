@@ -60,6 +60,7 @@ Rails.application.routes.draw do
           get  :work_orders
           get  :sensor_readings
           get  :iot_rules
+          get  :iot_alerts
           get  :history
           post :qr_code
         end
@@ -116,9 +117,14 @@ Rails.application.routes.draw do
 
       # ── IoT alerts ────────────────────────────────────────────────────────
       resources :iot_alerts, only: %i[index show] do
+        collection do
+          patch :bulk_acknowledge
+          patch :bulk_resolve
+        end
         member do
           patch :acknowledge
           patch :resolve
+          patch :suppress
         end
       end
 
@@ -127,6 +133,8 @@ Rails.application.routes.draw do
         member do
           patch :pause
           patch :resume
+          patch :archive
+          post  :duplicate
           post  :test
         end
       end

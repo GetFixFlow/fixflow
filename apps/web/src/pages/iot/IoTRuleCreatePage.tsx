@@ -20,7 +20,8 @@ export function IoTRuleCreatePage() {
         mode="create"
         isLoading={createRule.isPending}
         onSubmit={async (data) => {
-          await createRule.mutateAsync(data, { onSuccess: () => navigate('/iot/rules') })
+          // A refusal is shown by the hook; the form stays as it is so the person can correct it.
+          await createRule.mutateAsync(data).then(() => navigate('/iot/rules'), () => undefined)
         }}
       />
     </div>

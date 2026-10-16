@@ -204,6 +204,21 @@ open → in_progress → pending_parts → in_progress
 
 ---
 
+## IoT alerts and rules
+
+**Rules** (**IoT → Rules**, managers and administrators) say when a sensor reading is a problem: a metric on an asset, a limit (or a range), how long it must last, and whether to open a work order (with a cooldown so one fault does not open a hundred). A rule can be **paused**, **resumed**, **archived** (it stops; nothing is deleted) or **duplicated** (the copy is **paused**, with fresh counts, so it does not raise a second set of alerts until you switch it on). **Test** asks "what would happen if a sensor read 91?": it answers in words (alert, work order, cooldown, paused) and shows the last five readings and which of them would have set the rule off. A rule's assignee must be an active person in your company.
+
+**Alerts** (**IoT → Alerts**) are raised by rules. An alert's **severity** is its rule's work order priority (critical, high, medium or low). Managers and administrators can move an alert along:
+
+| From | Can become |
+| --- | --- |
+| open | acknowledged, resolved, suppressed |
+| acknowledged | resolved, suppressed |
+| suppressed | resolved |
+| resolved | nothing |
+
+An alert that cannot make the move you ask for is refused with the reason (before, acknowledging an alert twice counted it twice against its rule). **Bulk** acknowledge and resolve take up to 200 alerts: each one that can move does, and the answer says how many were skipped (already dealt with, or not found). Each asset's own alert history is at `GET /api/v1/assets/:id/iot_alerts`.
+
 ## Importing data from a spreadsheet
 
 **Import** (managers and administrators; the Import button on Locations, Assets and Parts, or `/import`) brings **locations, assets and parts** in from a CSV file. Choose what you are importing, download its **template**, fill it in, and choose the file: it is **checked first and nothing is imported yet**. A clean file shows a preview and an Import button. A file with mistakes lists every one with its **row (as your spreadsheet numbers it), column and the problem**, and downloads as a list to work through. **If any row has a problem nothing is imported**, so after fixing the file you can upload it again without the rows that were fine being doubled up.

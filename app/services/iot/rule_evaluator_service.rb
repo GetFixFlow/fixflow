@@ -1,18 +1,20 @@
 module Iot
   class RuleEvaluatorService
     # Evaluate all active rules for the given asset + sensor reading.
+    # Returns the alerts this reading raised (none when no rule was set off, or one is cooling down).
     def self.evaluate(asset, sensor_reading)
       rules = IotRule
         .where(asset_id: asset.id, metric_name: sensor_reading.metric_name)
         .where(status: :active)
 
-      rules.each do |rule|
+      rules.filter_map do |rule|
         if check_threshold(rule, sensor_reading.value)
           handle_breach(rule, sensor_reading)
         else
           handle_clear(rule)
+          nil
         end
-      end
+      end.grep(IotAlert)
     end
 
     # Returns true when the reading value breaches the rule threshold.

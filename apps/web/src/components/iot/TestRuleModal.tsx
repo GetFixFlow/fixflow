@@ -27,8 +27,11 @@ export function TestRuleModal({ open, rule, onClose }: TestRuleModalProps) {
   const handleTest = async () => {
     const value = parseFloat(testValue)
     if (isNaN(value)) return
-    const res = await testRule.mutateAsync({ id: rule.id, value })
-    setResult(res as TestResult)
+    try {
+      setResult((await testRule.mutateAsync({ id: rule.id, value })) as TestResult)
+    } catch {
+      setResult(null) // the hook has told the person what went wrong
+    }
   }
 
   const opLabel = { gt: '>', lt: '<', gte: '≥', lte: '≤', eq: '=', outside_range: 'not between' }[rule.operator] ?? rule.operator
