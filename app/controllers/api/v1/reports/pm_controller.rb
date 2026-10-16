@@ -6,26 +6,15 @@ module Api
         def compliance
           from, to = date_range
           org      = current_organization
-          cache_key = "reports/pm_compliance/#{org.id}/#{from.to_date}/#{to.to_date}"
+          cache_key = "reports/pm_compliance/#{org.id}/#{from.to_date}/#{to.to_date}/#{params[:location_id]}"
 
           data = Rails.cache.fetch(cache_key, expires_in: 15.minutes) do
             build_compliance_report(org, from, to)
           end
 
-          # Dispatch on the explicit `format` param — see note in
-          # Reports::WorkOrdersController#summary.
-          case params[:format]
-          when "csv"
-            require_export_permission!
-            send_data ExportService.pm_compliance_csv(data[:by_month]),
-              filename: "pm_compliance_#{Date.today}.csv", type: "text/csv"
-          when "pdf"
-            require_export_permission!
-            send_data PdfReportService.pm_compliance_report(data, org_name: org.name),
-              filename: "pm_compliance_#{Date.today}.pdf", type: "application/pdf"
-          else
-            render json: data
-          end
+          render_report(data, "pm_compliance",
+                        csv: -> { ExportService.pm_compliance_csv(data[:by_month]) },
+                        pdf: -> { PdfReportService.pm_compliance_report(data, org_name: org.name) })
         end
 
         # GET /api/v1/reports/pm/schedule_forecast
@@ -91,6 +80,7 @@ module Api
           actionable = completed + skipped
           rate       = actionable.positive? ? (completed.to_f / actionable * 100).round(1) : 0
 
+          # Grouping by status gives its name ("completed"), not its number, so the figures below compare names.
           # Monthly breakdown
           by_month = base.group(Arel.sql("TO_CHAR(scheduled_date, 'YYYY-MM')"))
                          .group(:status)
@@ -98,8 +88,8 @@ module Api
                          .each_with_object({}) do |((month, status), count), h|
             h[month] ||= { month: month, scheduled: 0, completed: 0, skipped: 0 }
             h[month][:scheduled] += count
-            h[month][:completed] += count if status == 3
-            h[month][:skipped]   += count if status == 2
+            h[month][:completed] += count if status.to_s == "completed"
+            h[month][:skipped]   += count if status.to_s == "skipped"
           end
                          .values
                          .sort_by { |m| m[:month] }
@@ -118,7 +108,7 @@ module Api
             .each_with_object({}) do |((loc, status), count), h|
               h[loc] ||= { location: loc, scheduled: 0, completed: 0 }
               h[loc][:scheduled] += count
-              h[loc][:completed] += count if status == 3
+              h[loc][:completed] += count if status.to_s == "completed"
             end
             .values
             .map { |l| l.merge(compliance_rate: l[:scheduled].positive? ? (l[:completed].to_f / l[:scheduled] * 100).round(1) : 0) }
@@ -135,7 +125,7 @@ module Api
             .each_with_object({}) do |((asset_name, status), count), h|
               h[asset_name] ||= { asset_name: asset_name, total: 0, completed: 0 }
               h[asset_name][:total]     += count
-              h[asset_name][:completed] += count if status == 3
+              h[asset_name][:completed] += count if status.to_s == "completed"
             end
             .values
             .map { |a| a.merge(compliance_rate: (a[:completed].to_f / a[:total] * 100).round(1), missed: a[:total] - a[:completed]) }

@@ -13,7 +13,7 @@ import { CostTreemap } from '@/components/reports/CostTreemap'
 import { DataTable } from '@/components/reports/DataTable'
 import { useReportStore } from '@/stores/reportStore'
 import { reportsApi } from '@/api/reports'
-import { exportToCSV } from '@/services/exportService'
+import { useReportExport } from '@/hooks/useReportExport'
 import { formatCurrency } from '@/utils/chartUtils'
 import { formatDate } from '@/lib/localeFormat'
 
@@ -21,6 +21,7 @@ export function CostAnalysisPage() {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const { getParams, dateFrom, dateTo } = useReportStore()
   const params = getParams()
+  const { exporting, exportReport } = useReportExport()
   const dateRange = `${formatDate(dateFrom)} – ${formatDate(dateTo)}`
 
   const { data: summary, isLoading, isError } = useQuery({
@@ -43,7 +44,7 @@ export function CostAnalysisPage() {
         <PageHeader title="Cost Analysis" description={dateRange} />
         <div className="flex items-center gap-2 pt-1">
           <Button variant="outline" onClick={() => setFiltersOpen(true)}><SlidersHorizontal className="h-4 w-4 mr-1.5" />Filters</Button>
-          <ExportDropdown onExportCSV={() => a?.assets && exportToCSV(a.assets as object[], 'cost_by_asset', dateFrom, dateTo)} />
+          <ExportDropdown isExporting={exporting} onExportCSV={() => exportReport('costs/by_asset', 'csv', params)} />
         </div>
       </div>
 

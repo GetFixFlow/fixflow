@@ -41,15 +41,29 @@ export const reportsApi = {
       apiClient.get('/reports/costs/by_location', { params }),
   },
 
-  exportCsv: (type: string, params?: Record<string, unknown>) =>
-    apiClient.get(`/reports/${type}/export.csv`, {
-      params,
-      responseType: 'blob',
-    }),
+  /**
+   * A report as a file: the same address and parameters as the screen's own request, with .csv or .pdf on
+   * the end, so the file holds what the screen shows.
+   */
+  download: async (path: string, format: ReportFormat, params?: Record<string, unknown>): Promise<ReportFile> => {
+    const res = await apiClient.get<Blob>(`/reports/${path}.${format}`, { params, responseType: 'blob' })
+    return {
+      blob: res.data,
+      filename: filenameFrom(res.headers['content-disposition']) ?? `${path.replace(/\//g, '_')}.${format}`,
+      truncated: res.headers['x-export-truncated'] === 'true',
+    }
+  },
+}
 
-  exportPdf: (type: string, params?: Record<string, unknown>) =>
-    apiClient.get(`/reports/${type}/export.pdf`, {
-      params,
-      responseType: 'blob',
-    }),
+export type ReportFormat = 'csv' | 'pdf'
+
+export interface ReportFile {
+  blob: Blob
+  filename: string
+  /** The server stopped at its row limit: the file is not everything. */
+  truncated: boolean
+}
+
+function filenameFrom(disposition: unknown): string | undefined {
+  return typeof disposition === 'string' ? /filename="?([^";]+)"?/i.exec(disposition)?.[1] : undefined
 }

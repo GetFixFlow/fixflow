@@ -4,25 +4,15 @@ module Api
       class AssetsController < Reports::BaseController
         # GET /api/v1/reports/assets/health
         def health
-          cache_key = "reports/asset_health/#{current_organization.id}"
+          # What was asked for is part of the key: a location or status filter must not get another's answer.
+          cache_key = "reports/asset_health/#{current_organization.id}/#{params[:status]}/#{params[:location_id]}"
           data = Rails.cache.fetch(cache_key, expires_in: 10.minutes) do
             build_health_report
           end
 
-          # Dispatch on the explicit `format` param — see note in
-          # Reports::WorkOrdersController#summary.
-          case params[:format]
-          when "csv"
-            require_export_permission!
-            send_data ExportService.assets_csv(data[:by_location]),
-              filename: "asset_health_#{Date.today}.csv", type: "text/csv"
-          when "pdf"
-            require_export_permission!
-            send_data PdfReportService.asset_health_report(data, org_name: current_organization.name),
-              filename: "asset_health_#{Date.today}.pdf", type: "application/pdf"
-          else
-            render json: data
-          end
+          render_report(data, "asset_health",
+                        csv: -> { ExportService.asset_health_csv(data[:by_location]) },
+                        pdf: -> { PdfReportService.asset_health_report(data, org_name: current_organization.name) })
         end
 
         # GET /api/v1/reports/assets/:id/history

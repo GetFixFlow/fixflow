@@ -15,7 +15,7 @@ import { AssetDetailReport } from '@/components/reports/AssetDetailReport'
 import { DataTable } from '@/components/reports/DataTable'
 import { useReportStore } from '@/stores/reportStore'
 import { reportsApi } from '@/api/reports'
-import { exportToCSV } from '@/services/exportService'
+import { useReportExport } from '@/hooks/useReportExport'
 import { formatCurrency, formatPercent } from '@/utils/chartUtils'
 import type { Asset } from '@/types'
 import { formatDate } from '@/lib/localeFormat'
@@ -25,6 +25,7 @@ export function AssetHealthReportPage() {
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
   const { getParams, dateFrom, dateTo } = useReportStore()
   const params = getParams()
+  const { exporting, exportReport } = useReportExport()
   const dateRange = `${formatDate(dateFrom)} – ${formatDate(dateTo)}`
 
   const { data: health, isLoading } = useQuery({
@@ -47,7 +48,11 @@ export function AssetHealthReportPage() {
         <PageHeader title="Asset Health" description={dateRange} />
         <div className="flex items-center gap-2 pt-1">
           <Button variant="outline" onClick={() => setFiltersOpen(true)}><SlidersHorizontal className="h-4 w-4 mr-1.5" />Filters</Button>
-          <ExportDropdown onExportCSV={() => h?.assets && exportToCSV(h.assets as object[], 'asset_health', dateFrom, dateTo)} />
+          <ExportDropdown
+            isExporting={exporting}
+            onExportCSV={() => exportReport('assets/health', 'csv')}
+            onExportPDF={() => exportReport('assets/health', 'pdf')}
+          />
         </div>
       </div>
 

@@ -28,18 +28,27 @@ class CostReport
   end
 
   def by_asset
-    rows = grouped_costs(:asset)
-    names = Asset.unscoped.where(id: rows.keys.compact).pluck(:id, :name).to_h
-    list = rows.map { |asset_id, row| row.merge(asset_id: asset_id, asset_name: names[asset_id] || "No asset") }
-    list = list.sort_by { |row| -row[:total_cost] }
+    list = asset_rows
     { assets: list.first(TOP_ASSETS), treemap: treemap(list), total_assets: list.size }
   end
 
+  # Every asset that cost something, dearest first (the screen shows only the top few).
+  def asset_rows
+    rows = grouped_costs(:asset)
+    names = Asset.unscoped.where(id: rows.keys.compact).pluck(:id, :name).to_h
+    list = rows.map { |asset_id, row| row.merge(asset_id: asset_id, asset_name: names[asset_id] || "No asset") }
+    list.sort_by { |row| -row[:total_cost] }
+  end
+
   def by_location
+    { locations: location_rows }
+  end
+
+  def location_rows
     rows = grouped_costs(:location)
     names = Location.unscoped.where(id: rows.keys.compact).to_h { |location| [location.id, location.full_path] }
     list = rows.map { |location_id, row| row.merge(location_id: location_id, location_name: names[location_id] || "No location") }
-    { locations: list.sort_by { |row| -row[:total_cost] } }
+    list.sort_by { |row| -row[:total_cost] }
   end
 
   private

@@ -1,81 +1,97 @@
 require "csv"
 
+# The CSV files behind the Export menus: one builder per report, each taking what that report
+# actually produces. Opens cleanly in Excel (UTF-8 with a byte order mark).
+#
+# Text in these files can come from anyone, including people who report a problem without an
+# account (a work order's title, an asset's name), and a spreadsheet runs a cell that starts with
+# = + - or @ as a formula. Such text is written with a leading ' so it stays text.
 class ExportService
+  BYTE_ORDER_MARK = "﻿".freeze
+  FORMULA_START = /\A[=+\-@\t\r]/
+
+  # `work_orders` are WorkOrder records (with asset and assignee loaded).
   def self.work_orders_csv(work_orders)
-    headers = %w[
-      work_order_number title priority status
-      asset assignee due_date started_at completed_at
-      labor_cost parts_cost created_at
-    ]
-
-    CSV.generate(headers: true) do |csv|
-      csv << headers
-      Array(work_orders).each do |wo|
+    build(%w[work_order_number title priority status asset assignee due_date started_at completed_at
+             labor_cost parts_cost total_cost created_at]) do |csv|
+      work_orders.each do |wo|
         csv << [
-          wo[:work_order_number] || wo["work_order_number"],
-          wo[:title]             || wo["title"],
-          wo[:priority]          || wo["priority"],
-          wo[:status]            || wo["status"],
-          (wo[:asset] || wo["asset"]).then { |a| a.is_a?(Hash) ? a[:name] : a.to_s },
-          (wo[:assignee] || wo["assignee"]).then { |u| u.is_a?(Hash) ? u[:full_name] : u.to_s },
-          wo[:due_date]          || wo["due_date"],
-          wo[:started_at]        || wo["started_at"],
-          wo[:completed_at]      || wo["completed_at"],
-          wo[:labor_cost]        || wo["labor_cost"],
-          wo[:parts_cost]        || wo["parts_cost"],
-          wo[:created_at]        || wo["created_at"]
+          wo.work_order_number, wo.title, wo.priority, wo.status, wo.asset&.name, wo.assignee&.full_name,
+          wo.due_date, wo.started_at, wo.completed_at, wo.labor_cost, wo.parts_cost,
+          wo.labor_cost.to_d + wo.parts_cost.to_d, wo.created_at
         ]
       end
     end
   end
 
-  def self.assets_csv(assets)
-    headers = %w[id name asset_tag status location operational degraded down health_score]
-
-    CSV.generate(headers: true) do |csv|
-      csv << headers
-      Array(assets).each do |asset|
-        csv << [
-          asset[:asset_id]    || asset["asset_id"],
-          asset[:location]    || asset["location"],
-          asset[:total]       || asset["total"],
-          asset[:operational] || asset["operational"],
-          asset[:degraded]    || asset["degraded"],
-          asset[:down]        || asset["down"],
-          asset[:health_score] || asset["health_score"]
-        ]
-      end
-    end
+  # The asset health report's table: one row per place.
+  def self.asset_health_csv(by_location)
+    table(%w[location total operational degraded down health_score], by_location,
+          %i[location total operational degraded down health_score])
   end
 
-  def self.pm_compliance_csv(data)
-    headers = %w[period scheduled completed skipped compliance_rate]
+  def self.pm_compliance_csv(by_month)
+    table(%w[month scheduled completed skipped compliance_rate], by_month,
+          %i[month scheduled completed skipped compliance_rate])
+  end
 
-    CSV.generate(headers: true) do |csv|
-      csv << headers
-      Array(data).each do |row|
-        csv << [
-          row[:month]            || row["month"],
-          row[:scheduled]        || row["scheduled"],
-          row[:completed]        || row["completed"],
-          row[:skipped]          || row["skipped"],
-          row[:compliance_rate]  || row["compliance_rate"]
-        ]
-      end
-    end
+  def self.technician_performance_csv(technicians)
+    table(%w[name assigned completed completion_rate avg_resolution_hours on_time_rate first_time_fix_rate
+             critical_completed],
+          technicians,
+          %i[name assigned completed completion_rate avg_resolution_hours on_time_rate first_time_fix_rate
+             critical_completed])
+  end
+
+  def self.cost_by_asset_csv(assets)
+    table(%w[asset labor_cost parts_cost total_cost work_orders], assets,
+          %i[asset_name labor_cost parts_cost total_cost wo_count])
+  end
+
+  def self.cost_by_location_csv(locations)
+    table(%w[location labor_cost parts_cost total_cost work_orders], locations,
+          %i[location_name labor_cost parts_cost total_cost wo_count])
   end
 
   def self.sensor_readings_csv(readings)
-    headers = %w[id asset_id metric_name value unit source device_id quality recorded_at]
+    table(%w[id asset_id metric_name value unit source device_id quality recorded_at], readings,
+          %i[id asset_id metric_name value unit source device_id quality recorded_at])
+  end
 
-    CSV.generate(headers: true) do |csv|
+  # One cell: text that a spreadsheet would run is made plain text, times are written the same way
+  # everywhere, anything else is left to CSV.
+  def self.cell(value)
+    case value
+    when String then value.match?(FORMULA_START) ? "'#{value}" : value
+    when Time, DateTime, ActiveSupport::TimeWithZone then value.in_time_zone.strftime("%Y-%m-%d %H:%M")
+    when Date then value.iso8601
+    else value
+    end
+  end
+
+  def self.build(headers)
+    body = CSV.generate do |csv|
       csv << headers
-      Array(readings).each do |r|
-        csv << [
-          r[:id], r[:asset_id], r[:metric_name], r[:value],
-          r[:unit], r[:source], r[:device_id], r[:quality], r[:recorded_at]
-        ]
-      end
+      yield(Cells.new(csv))
+    end
+    BYTE_ORDER_MARK + body
+  end
+  private_class_method :build
+
+  # A table of hashes: each header takes the value under its key (symbol or string).
+  def self.table(headers, rows, keys)
+    build(headers) do |csv|
+      Array(rows).each { |row| csv << keys.map { |key| row[key] || row[key.to_s] } }
+    end
+  end
+  private_class_method :table
+
+  # Adds a row, passing every cell through `cell`.
+  class Cells
+    def initialize(csv) = @csv = csv
+
+    def <<(values)
+      @csv << values.map { |value| ExportService.cell(value) }
     end
   end
 end

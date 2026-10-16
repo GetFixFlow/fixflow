@@ -6,8 +6,9 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
     resource "/api/*",
       headers: :any,
       methods: [:get, :post, :patch, :put, :delete, :options, :head],
-      expose:  ["Authorization", "X-Request-ID", "X-Total-Count",
-                "X-Page", "X-Per-Page", "X-Total-Pages"],
+      expose:  %w[Authorization X-Request-ID X-Total-Count
+                  X-Page X-Per-Page X-Total-Pages
+                  Content-Disposition X-Export-Truncated],
       max_age: 600
 
     # WebSocket endpoint for ActionCable

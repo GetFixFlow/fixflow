@@ -13,13 +13,16 @@ module Api
         # GET /api/v1/reports/costs/by_asset
         def by_asset
           from, to = date_range
-          render json: report(from, to).by_asset
+          report = report(from, to)
+          render_report(report.by_asset, "cost_by_asset", csv: -> { ExportService.cost_by_asset_csv(report.asset_rows) })
         end
 
         # GET /api/v1/reports/costs/by_location
         def by_location
           from, to = date_range
-          render json: report(from, to).by_location
+          report = report(from, to)
+          render_report(report.by_location, "cost_by_location",
+                        csv: -> { ExportService.cost_by_location_csv(report.location_rows) })
         end
 
         private

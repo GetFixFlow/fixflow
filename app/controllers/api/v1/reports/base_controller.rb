@@ -3,6 +3,10 @@ module Api
     module Reports
       class BaseController < Api::V1::BaseController
         VALID_GROUP_BY = %w[day week month].freeze
+        # The most work orders one export holds. A bigger result is cut here and says so (X-Export-Truncated).
+        MAX_EXPORT_ROWS = 50_000
+        # A date on its own, like 2026-10-16, as the screens send it.
+        DATE_ONLY = /\A\d{4}-\d{2}-\d{2}\z/
         SOURCES = %w[manual pm iot].freeze
 
         # Where a work order came from: a schedule, an IoT rule, or made by hand.
@@ -19,15 +23,21 @@ module Api
 
         private
 
-        # Returns [from, to] Time objects, defaulting to last 30 days
+        # Returns [from, to] Time objects, defaulting to last 30 days. A date on its own (what the screens send)
+        # means the whole day: from is the start of it, to is the end of it, so today's work is in the report.
         def date_range
           from = params[:from].present? ? Time.zone.parse(params[:from]) : 30.days.ago.beginning_of_day
-          to   = params[:to].present?   ? Time.zone.parse(params[:to])   : Time.current.end_of_day
+          to   = params[:to].present?   ? end_of_day_if_date(params[:to]) : Time.current.end_of_day
 
           raise ArgumentError, "from must be before to" if from >= to
           [from, to]
         rescue ArgumentError => e
           raise ActionController::BadRequest, e.message
+        end
+
+        def end_of_day_if_date(text)
+          time = Time.zone.parse(text)
+          text.to_s.match?(DATE_ONLY) ? time&.end_of_day : time
         end
 
         def group_by_param
@@ -108,8 +118,26 @@ module Api
           end
         end
 
-        def require_export_permission!
-          require_manager!
+        # Answers a report request: the file when .csv or .pdf was asked for, JSON otherwise. `csv` and `pdf`
+        # are only run when asked for; a report with no PDF answers 406 for .pdf instead of sending JSON.
+        # The filters and dates are the ones the screen sent, so the file holds what the screen shows.
+        def render_report(data, name, csv: nil, pdf: nil)
+          case params[:format]
+          when "csv" then send_report(csv, "text/csv", "#{name}_#{Time.zone.today}.csv")
+          when "pdf" then send_report(pdf, "application/pdf", "#{name}_#{Time.zone.today}.pdf")
+          when nil, "json" then render json: data
+          else render_unsupported_format
+          end
+        end
+
+        def send_report(builder, type, filename)
+          return render_unsupported_format unless builder
+
+          send_data builder.call, type: type, filename: filename
+        end
+
+        def render_unsupported_format
+          render_error("This report is not available in that format", :not_acceptable, code: "UNSUPPORTED_FORMAT")
         end
       end
     end
