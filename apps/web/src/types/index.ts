@@ -424,7 +424,8 @@ export interface PMDashboardStats {
 // ── IoT ───────────────────────────────────────────────────────────────────────
 
 export type SensorType = 'temperature' | 'humidity' | 'vibration' | 'pressure' | 'current' | 'voltage' | 'custom'
-export type AlertSeverity = 'info' | 'warning' | 'critical'
+// An alert's severity is its rule's priority; 'info' and 'warning' are older names some screens still accept.
+export type AlertSeverity = 'critical' | 'high' | 'medium' | 'low' | 'info' | 'warning'
 export type AlertStatus = 'open' | 'acknowledged' | 'resolved'
 
 export interface SensorReading {

@@ -14,7 +14,7 @@ export function Header() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const { darkMode, toggleDarkMode, sidebarCollapsed, setCommandPaletteOpen } = useUiStore()
-  const { newAlerts } = useRealtimeStore()
+  const { newAlerts, clearAlerts } = useRealtimeStore()
   const { mutate: logout } = useLogout()
 
   const initials = user?.full_name
@@ -46,7 +46,13 @@ export function Header() {
           {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>
 
-        <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative"
+          aria-label={newAlerts.length > 0 ? `Notifications: ${newAlerts.length} new alerts` : 'Notifications'}
+          onClick={() => { clearAlerts(); navigate('/iot/alerts') }}
+        >
           <Bell className="h-4 w-4" />
           {newAlerts.length > 0 && (
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />

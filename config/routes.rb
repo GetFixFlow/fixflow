@@ -183,6 +183,9 @@ Rails.application.routes.draw do
         get "pm/compliance",                      to: "pm#compliance"
         get "pm/schedule_forecast",               to: "pm#schedule_forecast"
 
+        get "iot/dashboard",                      to: "iot#dashboard"
+        get "iot/alerts",                         to: "iot#alerts"
+        get "iot/rule_effectiveness",             to: "iot#rule_effectiveness"
         get "iot/alert_summary",                  to: "iot#alert_summary"
         get "iot/sensor_trends",                  to: "iot#sensor_trends"
       end

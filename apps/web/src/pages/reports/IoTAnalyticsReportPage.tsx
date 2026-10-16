@@ -13,6 +13,7 @@ import { SensorTrendComparison } from '@/components/reports/SensorTrendCompariso
 import { DataTable } from '@/components/reports/DataTable'
 import { useReportStore } from '@/stores/reportStore'
 import { reportsApi } from '@/api/reports'
+import { useReportExport } from '@/hooks/useReportExport'
 import { formatPercent } from '@/utils/chartUtils'
 import { formatDate } from '@/lib/localeFormat'
 
@@ -21,6 +22,7 @@ export function IoTAnalyticsReportPage() {
   const { getParams, dateFrom, dateTo } = useReportStore()
   const params = getParams()
   const dateRange = `${formatDate(dateFrom)} – ${formatDate(dateTo)}`
+  const { exporting, exportReport } = useReportExport()
 
   const { data: alerts, isLoading } = useQuery({
     queryKey: ['reports', 'iot_alerts', params],
@@ -42,7 +44,7 @@ export function IoTAnalyticsReportPage() {
         <PageHeader title="IoT Analytics" description={dateRange} />
         <div className="flex items-center gap-2 pt-1">
           <Button variant="outline" onClick={() => setFiltersOpen(true)}><SlidersHorizontal className="h-4 w-4 mr-1.5" />Filters</Button>
-          <ExportDropdown />
+          <ExportDropdown isExporting={exporting} onExportCSV={() => exportReport('iot/alerts', 'csv', params)} />
         </div>
       </div>
 
@@ -50,7 +52,7 @@ export function IoTAnalyticsReportPage() {
         {([
           ['Total Alerts', a?.total_alerts ?? 0],
           ['Critical Alerts', a?.critical_count ?? 0],
-          ['Auto-Resolved Rate', a?.auto_resolved_rate ? formatPercent(a.auto_resolved_rate as number) : '0%'],
+          ['Resolved Rate', a?.resolved_rate ? formatPercent(a.resolved_rate as number) : '0%'],
           ['Active Rules', r?.active_count ?? 0],
         ] as [string, string | number][]).map(([title, value]) => (
           <KPICard key={title} title={title} value={value} loading={isLoading} />
@@ -72,7 +74,7 @@ export function IoTAnalyticsReportPage() {
           columns={[
             { key: 'rule_name', header: 'Rule Name', sortable: true },
             { key: 'trigger_count', header: 'Triggers', sortable: true, align: 'right' },
-            { key: 'auto_resolve_rate', header: 'Auto-Resolve %', sortable: true, align: 'right', render: (row) => formatPercent(row.auto_resolve_rate as number) },
+            { key: 'resolve_rate', header: 'Resolved %', sortable: true, align: 'right', render: (row) => formatPercent(row.resolve_rate as number) },
             { key: 'wo_created', header: 'WOs Created', sortable: true, align: 'right' },
             { key: 'avg_resolution_hours', header: 'Avg Resolve Time', sortable: true, align: 'right', render: (row) => `${(row.avg_resolution_hours as number).toFixed(1)}h` },
           ]} />

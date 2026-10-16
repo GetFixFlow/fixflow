@@ -53,6 +53,20 @@ class ExportService
           %i[location_name labor_cost parts_cost total_cost wo_count])
   end
 
+  # IotAlert records (with rule, asset and work order loaded).
+  def self.iot_alerts_csv(alerts)
+    build(%w[raised_at asset location rule severity status metric reading threshold unit acknowledged_at resolved_at
+             work_order]) do |csv|
+      alerts.each do |alert|
+        csv << [
+          alert.created_at, alert.asset.name, alert.asset.location&.full_path, alert.iot_rule.name, alert.severity, alert.status,
+          alert.metric_name, alert.triggered_value, alert.threshold, alert.iot_rule.unit, alert.acknowledged_at,
+          alert.resolved_at, alert.work_order&.work_order_number
+        ]
+      end
+    end
+  end
+
   def self.sensor_readings_csv(readings)
     table(%w[id asset_id metric_name value unit source device_id quality recorded_at], readings,
           %i[id asset_id metric_name value unit source device_id quality recorded_at])

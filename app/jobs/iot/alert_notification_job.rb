@@ -3,13 +3,22 @@ module Iot
     queue_as :notifications
 
     def perform(iot_alert_id)
-      alert = IotAlert.includes(:iot_rule, :asset, :work_order).find_by(id: iot_alert_id)
+      alert = IotAlert.includes(:iot_rule, :work_order, :acknowledged_by, asset: :location).find_by(id: iot_alert_id)
       return unless alert
 
       broadcast_alert(alert)
+      broadcast_to_company(alert)
     end
 
     private
+
+    # The IoT screens' live feed: the alert as the alert list shows it.
+    def broadcast_to_company(alert)
+      ActionCable.server.broadcast(
+        IotAlertChannel.stream_for_company(alert.asset.organization_id),
+        { alert: IotAlertBlueprint.render_as_hash(alert) }
+      )
+    end
 
     def broadcast_alert(alert)
       ActionCable.server.broadcast(
