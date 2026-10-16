@@ -50,8 +50,9 @@ jobs:
       - name: Lint code for consistent style
         run: bin/rubocop -f github
 
-  # The backend specs, against a real PostgreSQL (the version production uses). Nothing else is needed: the specs
-  # run without Redis, mail or any key, which was checked by running them with an empty environment.
+  # The backend specs, against a real PostgreSQL and Redis (the versions production uses). No mail server or key is
+  # needed. Redis is for the one task that reports on it (fixflow:stats): the specs passed on a machine that had Redis
+  # running and failed here without it, which is how that was found.
   # Node is here because spec/lib also checks the web app's requests against the routes (skipped without it).
   test:
     runs-on: ubuntu-latest
@@ -68,8 +69,18 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
       RAILS_ENV: test
+      REDIS_URL: redis://localhost:6379/0
       DB_HOST: localhost
       DB_PORT: 5432
       DB_USERNAME: postgres
