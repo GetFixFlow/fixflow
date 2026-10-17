@@ -469,6 +469,12 @@ and commit them with the web change. Every report screen (Work Orders, Asset Hea
 
 ---
 
+## Contributing
+
+Bug reports, ideas, documentation fixes and code are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md) for how to set up, what a pull request needs (a test that fails without the change, an update here and in the CHANGELOG, and an honest list of what was not tried), and the checks CI runs. Everyone taking part follows the [Code of Conduct](CODE_OF_CONDUCT.md). **Security problems are reported privately, not in an issue:** see [SECURITY.md](SECURITY.md). Issues labelled [`good first issue`](https://github.com/GetFixFlow/fixflow/labels/good%20first%20issue) are a good place to start.
+
+---
+
 ## License
 
 AGPLv3 — see [LICENSE](LICENSE).

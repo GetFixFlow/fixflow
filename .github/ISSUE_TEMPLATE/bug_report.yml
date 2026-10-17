@@ -1,0 +1,56 @@
+name: Bug report
+description: Something does not work, or works differently from what the documentation says
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time. **Do not report security problems here** (see the Security tab, or SECURITY.md in the repository). Please do not paste passwords, tokens or customer data.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead. Screenshots help.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Start from a fresh page or a fresh install if you can.
+      placeholder: |
+        1. Sign in as a manager
+        2. Open Reports, Work Orders
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: FixFlow version
+      description: From the address /api/v1/health on your install, or the commit you are running.
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How it is installed
+      options:
+        - Docker (production compose)
+        - Docker (development compose)
+        - Without Docker (local development)
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: client
+    attributes:
+      label: Browser or phone, and your role
+      description: For example "Safari on iPhone 14, technician".
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error messages and logs
+      description: Anything shown on screen, in the browser console, or in the server log around the time. Remove secrets first.
+      render: shell
