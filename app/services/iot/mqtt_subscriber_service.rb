@@ -13,6 +13,7 @@ module Iot
       def stop
         @running = false
         @client&.disconnect
+        Iot::MqttStatus.disconnected!
         Rails.logger.info "[MQTT] Subscriber stopped"
       end
 
@@ -56,18 +57,35 @@ module Iot
               Rails.logger.info "[MQTT] Connected to #{mqtt_host}:#{mqtt_port}"
               backoff = 1
               c.subscribe("fixflow/#")
-
-              c.get do |topic, payload|
-                process_message(topic, payload)
-              end
+              listen(c)
             end
           rescue MQTT::Exception, Errno::ECONNREFUSED, SocketError => e
+            Iot::MqttStatus.disconnected!
             Rails.logger.error "[MQTT] Connection error: #{e.message}. Reconnecting in #{backoff}s"
             sleep backoff
             backoff = [backoff * 2, 60].min
             retry if @running
           end
         end
+      end
+
+      # Reads messages until the connection ends, telling the health page that FixFlow is connected (renewed every
+      # 30 seconds, and it expires on its own if this process dies) and when the last message came.
+      def listen(client)
+        Iot::MqttStatus.connected!
+        heartbeat = Thread.new do
+          loop do
+            sleep 30
+            Iot::MqttStatus.connected!
+          end
+        end
+        client.get do |topic, payload|
+          process_message(topic, payload)
+          Iot::MqttStatus.message_received!
+        end
+      ensure
+        heartbeat&.kill&.join(1)
+        Iot::MqttStatus.disconnected!
       end
 
       def build_client

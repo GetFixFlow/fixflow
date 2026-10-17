@@ -143,6 +143,7 @@ npm run dev     # Dev server on :3001
 | `MINIO_ENDPOINT`, `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY`, `MINIO_BUCKET` | For file uploads | The S3-compatible file storage |
 | `MQTT_HOST`, `MQTT_PORT`, `MQTT_USERNAME`, `MQTT_PASSWORD` | For IoT over MQTT | The sensor broker |
 | `IOT_API_KEY` | For IoT over HTTP | The key sensors send to `POST /api/v1/iot/readings`; without one that route refuses everything |
+| `FIXFLOW_UPDATE_CHECK` | No | `false` stops the System Health page from asking GitHub for the latest release (anything else leaves it on) |
 | `SKIP_CONFIG_CHECK` | No | `true` skips the start-up check below (for an emergency) |
 
 Generate secrets:
@@ -305,6 +306,22 @@ Report figures are counted each time you open a report; none are cached.
 The first screen differs by role, and the server decides what each person gets. **Managers and administrators** see the company: open and overdue work orders, asset health, PM compliance, open and critical IoT alerts, what was completed this week, schedules due this week, and recent activity. **Technicians** see their own work (assigned, in progress, overdue, completed today), the maintenance assigned to them and their own recent activity. **Requesters** see how many requests they have made, how many are still open and how many are completed. The figures are counted each time the page loads, not cached.
 
 **PM Compliance** is the same figure as on the PM dashboard: of the maintenance that came due in the last 30 days, the share that was completed; skipped and missed ones count against it. It shows "—" when nothing came due. "Due this week" counts schedules due in the next seven days; overdue schedules are counted apart.
+
+## System health
+
+**Settings, System Health** (administrators only) says whether this install is working, checked live when you open it and again every 30 seconds:
+
+- **FixFlow**: the version, the mode it runs in, how long it has been up.
+- **Database** and **Redis**: whether they answer and how fast, their versions, and, for the database, whether migrations are waiting to be run.
+- **Background jobs**: whether a Sidekiq worker is running (without one, emails, scheduled PM work orders, IoT alerts and the nightly jobs silently stop, so this is shown as *Down*; a worker that has just stopped can still show as running for about a minute, Sidekiq's own liveness window), how much is waiting and for how long, what is being retried, and how many jobs failed for good.
+- **Email**: whether a mail server is set up (in Settings, Email, or the server's environment) and answers.
+- **IoT over MQTT**: when a broker is configured, whether it answers, whether FixFlow is subscribed to it, and when the last message arrived. With no broker it says *Not set up*; sensors can still send readings over HTTP.
+- **File storage**: whether uploads can be reached.
+- **Updates**: whether a newer FixFlow release exists.
+
+Each check says *Working*, *Needs attention* (works, but look at it) or *Down*, with a sentence that says what it means and what to do. The short public `GET /api/v1/health` (used by Docker's health check) says only that a check failed, never why, because anyone can read it; the reasons are on this page and in the server log.
+
+**The update check** asks GitHub for the latest release of FixFlow, only when an administrator opens this page, at most twice a day, and sends nothing about your install except the version in the request's user agent. Turn it off with the checkbox on the page, or for the whole server with `FIXFLOW_UPDATE_CHECK=false` in the environment (which the checkbox cannot override), for example on a server with no internet access. A failed lookup is shown as *unknown*, never as "up to date". Until a release is published on GitHub it says so.
 
 ## Reporting a problem without an account (QR labels)
 

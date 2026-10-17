@@ -183,6 +183,10 @@ class FixflowConfigCheck
     if present?("IOT_RETENTION_DAYS") && !value("IOT_RETENTION_DAYS").match?(/\A\d+\z/)
       found << problem(:error, "IOT_RETENTION_DAYS", "must be a whole number of days.")
     end
+    if present?("FIXFLOW_UPDATE_CHECK") && %w[true false].exclude?(value("FIXFLOW_UPDATE_CHECK").downcase)
+      found << problem(:warning, "FIXFLOW_UPDATE_CHECK", "is \"#{value('FIXFLOW_UPDATE_CHECK')}\": only `false` turns the " \
+                                                         "update check off, anything else leaves it on.")
+    end
     key = value("ANTHROPIC_API_KEY")
     if value("AI_ENABLED") == "true" && (key.empty? || self.class.placeholder?(key))
       found << problem(:warning, "ANTHROPIC_API_KEY", "is missing or the example value, so the AI assistant will not work " \

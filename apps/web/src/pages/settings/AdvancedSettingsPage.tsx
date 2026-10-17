@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { AlertTriangle, Copy, Check, ExternalLink } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
@@ -8,16 +9,6 @@ import { useAuthStore } from '@/stores/authStore'
 import { cn } from '@/lib/utils'
 
 const PUBLIC_PORTAL_URL = 'https://fixflow.io/request/demo-manufacturing'
-
-const SYSTEM_INFO = [
-  { label: 'FixFlow Version', value: '0.1.0 (Session 15)' },
-  { label: 'Environment', value: 'Production' },
-  { label: 'Rails Version', value: '7.2.0' },
-  { label: 'Ruby Version', value: '3.3.0' },
-  { label: 'PostgreSQL Version', value: '16.2' },
-  { label: 'Redis Version', value: '7.2.3' },
-  { label: 'Node Version', value: '20.11.0' },
-]
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -46,8 +37,6 @@ export function AdvancedSettingsPage() {
   const [publicPortalEnabled, setPublicPortalEnabled] = useState(true)
   const [maintenanceMode, setMaintenanceMode] = useState(false)
   const [maintenanceMessage, setMaintenanceMessage] = useState("FixFlow is temporarily down for maintenance. We'll be back shortly.")
-  const [checking, setChecking] = useState(false)
-  const [updateStatus, setUpdateStatus] = useState<'idle' | 'latest' | 'available'>('idle')
   const [copiedUrl, setCopiedUrl] = useState(false)
 
   // Delete org dialog
@@ -69,14 +58,6 @@ export function AdvancedSettingsPage() {
         </Card>
       </div>
     )
-  }
-
-  const handleCheckUpdates = () => {
-    setChecking(true)
-    setTimeout(() => {
-      setChecking(false)
-      setUpdateStatus('latest')
-    }, 1500)
   }
 
   const copyPortalUrl = () => {
@@ -172,35 +153,16 @@ export function AdvancedSettingsPage() {
         </CardContent>
       </Card>
 
-      {/* System Information */}
+      {/* The version, the services and the update check are real on their own page */}
       <Card>
-        <CardContent className="p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100">System Information</h3>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleCheckUpdates}
-              disabled={checking}
-            >
-              {checking ? 'Checking…' : 'Check for Updates'}
-            </Button>
+        <CardContent className="flex items-center justify-between gap-4 p-5">
+          <div>
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100">System health</h3>
+            <p className="mt-0.5 text-xs text-gray-500">
+              The version, the database, Redis, the background worker, email, IoT and storage, checked live, and whether a newer release exists.
+            </p>
           </div>
-
-          {updateStatus === 'latest' && (
-            <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 dark:bg-green-900/10 rounded-lg px-3 py-2">
-              <Check className="h-4 w-4" /> You're running the latest version.
-            </div>
-          )}
-
-          <div className="divide-y divide-gray-50 dark:divide-gray-700">
-            {SYSTEM_INFO.map((info) => (
-              <div key={info.label} className="flex items-center justify-between py-2">
-                <span className="text-sm text-gray-500">{info.label}</span>
-                <span className="text-sm font-mono text-gray-700 dark:text-gray-300">{info.value}</span>
-              </div>
-            ))}
-          </div>
+          <Link to="/settings/system-health" className="shrink-0 text-sm text-brand-600 hover:underline">Open System Health →</Link>
         </CardContent>
       </Card>
 

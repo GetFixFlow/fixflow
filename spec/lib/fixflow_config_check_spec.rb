@@ -114,6 +114,15 @@ RSpec.describe FixflowConfigCheck do
       expect(about("MQTT_PORT", "MQTT_HOST" => "mqtt", "MQTT_PORT" => "0").first.level).to eq(:error)
     end
 
+    it "warns when the update check is switched with a word that does not switch it off" do
+      warned = about("FIXFLOW_UPDATE_CHECK", "FIXFLOW_UPDATE_CHECK" => "off").first
+      expect(warned).to have_attributes(level: :warning, message: include("only `false` turns the update check off"))
+      expect(about("FIXFLOW_UPDATE_CHECK", "FIXFLOW_UPDATE_CHECK" => "0")).not_to be_empty
+      expect(about("FIXFLOW_UPDATE_CHECK", "FIXFLOW_UPDATE_CHECK" => "false")).to be_empty
+      expect(about("FIXFLOW_UPDATE_CHECK", "FIXFLOW_UPDATE_CHECK" => "TRUE")).to be_empty
+      expect(about("FIXFLOW_UPDATE_CHECK", "FIXFLOW_UPDATE_CHECK" => "")).to be_empty
+    end
+
     it "warns about demo data and a missing AI key, and refuses a retention that is not a number of days" do
       expect(about("SEED_DB", "SEED_DB" => "true").first).to have_attributes(level: :warning, message: include("well-known password"))
       expect(about("SEED_DB", "SEED_DB" => "false")).to be_empty
