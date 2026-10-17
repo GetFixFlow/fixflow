@@ -11,7 +11,7 @@ module Api
 
       # POST /api/v1/sample_data
       def create
-        SampleDataService.load!(current_organization, current_user)
+        Auditable.silenced { SampleDataService.load!(current_organization, current_user) }
         ActivityLogService.log(action: "sample_data.loaded", resource: current_organization,
 metadata: SampleDataService.counts(current_organization))
         render json: status_payload, status: :created
@@ -21,7 +21,7 @@ metadata: SampleDataService.counts(current_organization))
 
       # DELETE /api/v1/sample_data
       def destroy
-        report = SampleDataService.remove!(current_organization)
+        report = Auditable.silenced { SampleDataService.remove!(current_organization) }
         ActivityLogService.log(action: "sample_data.removed", resource: current_organization,
 metadata: { removed: report[:removed], kept: report[:kept].size })
         render json: status_payload.merge(report: report)

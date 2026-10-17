@@ -1,5 +1,8 @@
 class Location < ApplicationRecord
+  include Auditable
+
   acts_as_tenant :organization
+  audited
   has_ancestry orphan_strategy: :destroy
 
   TYPES = %w[site building floor zone room outdoor].freeze

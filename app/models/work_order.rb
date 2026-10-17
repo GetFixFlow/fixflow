@@ -3,6 +3,11 @@ class WorkOrder < ApplicationRecord
   include AASM
 
   has_paper_trail only: %i[status assignee_id verified_by_id completed_at verified_at]
+  include Auditable
+
+  # Moving a work order through its states is logged by the transition itself (log_activity); an update is only an
+  # edit of what the work is.
+  audited watch: %w[title description priority due_date asset_id estimated_hours]
 
   # ─── Constants ─────────────────────────────────────────────────────────────
 

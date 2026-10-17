@@ -146,14 +146,15 @@ RSpec.describe "Api::V1::OrganizationSettings", type: :request do
     describe "time zone" do
       it "reads dates without an offset as the company's local time" do
         # 01:30 on 2 Oct in Sri Lanka (UTC+5:30) is 20:00 on 1 Oct UTC.
-        create(:activity_log, organization: org, user: admin, created_at: Time.utc(2026, 10, 1, 20, 0))
+        create(:activity_log, organization: org, user: admin, action: "asset.updated", created_at: Time.utc(2026, 10, 1, 20, 0))
         headers = auth_headers_for(admin)
+        params = { from: "2026-10-02", log_action: "asset.updated" } # the sign-in and the save write lines of their own
 
-        get "/api/v1/activity_logs", params: { from: "2026-10-02" }, headers: headers
+        get "/api/v1/activity_logs", params: params, headers: headers
         utc_count = json_body["activity_logs"].size
 
         save_settings(timezone: "Asia/Colombo")
-        get "/api/v1/activity_logs", params: { from: "2026-10-02" }, headers: headers
+        get "/api/v1/activity_logs", params: params, headers: headers
         local_count = json_body["activity_logs"].size
 
         expect([utc_count, local_count]).to eq([0, 1])

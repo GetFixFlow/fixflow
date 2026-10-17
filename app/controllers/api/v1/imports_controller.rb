@@ -17,7 +17,8 @@ module Api
       end
 
       def create
-        result = @importer.import!(file_content)
+        # One line for the whole import (below), not one for every row.
+        result = Auditable.silenced { @importer.import!(file_content) }
         return render json: payload(result), status: :unprocessable_content unless result.valid?
 
         ActivityLogService.log(action: "import.#{params[:kind]}", resource: current_organization, metadata: { created: result.created })

@@ -72,6 +72,6 @@ export interface ReportFile {
   truncated: boolean
 }
 
-function filenameFrom(disposition: unknown): string | undefined {
+export function filenameFrom(disposition: unknown): string | undefined {
   return typeof disposition === 'string' ? /filename="?([^";]+)"?/i.exec(disposition)?.[1] : undefined
 }

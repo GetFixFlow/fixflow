@@ -1,4 +1,9 @@
 class IotRule < ApplicationRecord
+  include Auditable
+
+  # The counters and times the system keeps up to date as the rule fires are not edits.
+  audited ignore: %w[trigger_count times_acknowledged last_triggered_at last_wo_created_at breach_started_at]
+
   # ─── Enums ─────────────────────────────────────────────────────────────────
 
   enum :status, { active: 0, paused: 1, archived: 2 }, default: :active

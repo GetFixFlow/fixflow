@@ -1,5 +1,9 @@
 class PreventiveMaintenance < ApplicationRecord
+  include Auditable
+
   acts_as_tenant :organization
+  # The scheduler moves the due date and the counters on; only a person's edits are worth a line.
+  audited ignore: %w[next_due_at last_run_at times_generated times_completed times_skipped]
 
   # ─── Enums ────────────────────────────────────────────────────────────────
 

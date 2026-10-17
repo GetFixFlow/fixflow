@@ -67,6 +67,19 @@ class ExportService
     end
   end
 
+  # ActivityLog records (with the person loaded): the audit log, newest first. Only the names of changed fields are
+  # kept in the log, so only those are exported.
+  def self.activity_logs_csv(logs)
+    build(%w[when who email what record record_type fields_changed ip_address]) do |csv|
+      logs.each do |log|
+        csv << [
+          log.created_at, log.user&.full_name || "System", log.user&.email, log.action, log.resource_name,
+          log.resource_type, Array(log.metadata["changed"]).join("; "), log.ip_address
+        ]
+      end
+    end
+  end
+
   def self.sensor_readings_csv(readings)
     table(%w[id asset_id metric_name value unit source device_id quality recorded_at], readings,
           %i[id asset_id metric_name value unit source device_id quality recorded_at])

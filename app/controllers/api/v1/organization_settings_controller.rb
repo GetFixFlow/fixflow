@@ -11,10 +11,12 @@ module Api
       # PATCH /api/v1/organization_settings
       def update
         org = current_organization
+        before = payload
         attrs = settings_params
         org.name = attrs.delete(:name) if attrs.key?(:name)
         org.assign_company_settings(attrs)
         org.save!
+        log_changes(before)
         render json: { organization: payload }
       end
 
@@ -30,6 +32,15 @@ module Api
             { work_hours: %i[start end], work_days: [], holidays: [%i[date name repeating]] }
           ]
         )
+      end
+
+      # One line naming the settings that changed (not their values).
+      def log_changes(before)
+        changed = payload.reject { |key, value| before[key] == value }.keys
+        return if changed.empty?
+
+        ActivityLogService.log(action: "organization_settings.updated", resource: current_organization,
+                               metadata: { changed: changed })
       end
 
       def payload
