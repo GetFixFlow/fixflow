@@ -9,7 +9,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { auditApi, type AuditFilters, type AuditLine } from '@/api/audit'
 import { isAxiosError } from 'axios'
 import { triggerDownload } from '@/services/exportService'
-import { changedFields, describeAction, RECORD_TYPES, roleChange, VERBS } from '@/lib/auditText'
+import { changedFields, describeAction, RECORD_TYPES, removalSummary, roleChange, VERBS } from '@/lib/auditText'
 import { formatDateTime } from '@/lib/localeFormat'
 
 /** The text, once it has stopped changing for a moment, so typing does not ask the server for every letter. */
@@ -37,9 +37,11 @@ function Who({ line }: { line: AuditLine }) {
 function Details({ line }: { line: AuditLine }) {
   const fields = changedFields(line)
   const role = roleChange(line)
-  if (fields.length === 0 && !role) return <span className="text-xs text-gray-400">—</span>
+  const removed = removalSummary(line)
+  if (fields.length === 0 && !role && !removed) return <span className="text-xs text-gray-400">—</span>
   return (
     <div className="text-xs text-gray-600 dark:text-gray-400">
+      {removed && <p>{removed}</p>}
       {fields.length > 0 && <p>Changed: {fields.join(', ')}</p>}
       {role && <p>Role: {role}</p>}
     </div>

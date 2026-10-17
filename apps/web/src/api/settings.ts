@@ -101,6 +101,8 @@ export interface OrgSettings {
   iot_alert_cooldown: number
   iot_stale_threshold: number
   iot_data_retention_days: number
+  /** Days of audit log kept; 0 keeps it for ever. */
+  audit_log_retention_days: number
   iot_auto_wo_threshold: string
   /** Whether the System Health page may ask GitHub for the latest release. */
   update_check: boolean

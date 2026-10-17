@@ -37,6 +37,8 @@ const SPECIAL: Record<string, string> = {
   'session.revoked_all': 'All other signed-in devices ended',
   'user.signed_in': 'Signed in',
   'part.stock_adjusted': 'Part stock adjusted',
+  'retention.sensor_data_removed': 'Old sensor data deleted',
+  'retention.audit_log_removed': 'Old audit log lines deleted',
 }
 
 const words = (text: string) => text.replace(/_/g, ' ')
@@ -63,4 +65,17 @@ export function changedFields(line: AuditLine): string[] {
 export function roleChange(line: AuditLine): string | null {
   const pair = line.metadata.values?.role
   return Array.isArray(pair) ? `${pair[0]} → ${pair[1]}` : null
+}
+
+/** What a retention cleanup removed ("1,200 readings, 30 hourly summaries, older than 1 year"), or null for any other line. */
+export function removalSummary(line: AuditLine): string | null {
+  if (!line.action.startsWith('retention.')) return null
+  const { readings, summaries, lines, older_than_days: olderThan } = line.metadata as Record<string, unknown>
+  const parts = [
+    typeof readings === 'number' && readings > 0 ? `${readings.toLocaleString()} readings` : null,
+    typeof summaries === 'number' && summaries > 0 ? `${summaries.toLocaleString()} hourly summaries` : null,
+    typeof lines === 'number' && lines > 0 ? `${lines.toLocaleString()} lines` : null,
+  ].filter(Boolean)
+  if (parts.length === 0) return null
+  return `Deleted ${parts.join(', ')}${typeof olderThan === 'number' ? `, older than ${olderThan} days` : ''}`
 }

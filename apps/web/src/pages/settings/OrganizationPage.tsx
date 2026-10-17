@@ -389,9 +389,12 @@ export function OrganizationPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Data Retention (days)
+                  Keep sensor readings for (days)
                 </label>
                 <Input {...form.register('iot_data_retention_days')} type="number" min={1} />
+                <p className="mt-1 text-xs text-gray-500">
+                  Older sensor readings are deleted every night. See what that will remove under Settings, Data Retention.
+                </p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
