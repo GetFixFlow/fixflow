@@ -26,7 +26,7 @@ module Api
             :name, :industry, :size, :website, :address, :timezone, :wo_number_prefix,
             :default_priority, :default_due_days, :labor_rate, :require_completion_notes, :auto_close_days,
             :pm_compliance_target, :pm_reminder_days, :pm_pause_on_down, :iot_alert_cooldown,
-            :iot_stale_threshold, :iot_data_retention_days, :iot_auto_wo_threshold, :update_check,
+            :iot_stale_threshold, :iot_data_retention_days, :iot_auto_wo_threshold, :update_check, :public_requests_enabled,
             { work_hours: %i[start end], work_days: [], holidays: [%i[date name repeating]] }
           ]
         )

@@ -13,6 +13,7 @@ module Api
       before_action { use_secure_headers_override(:no_referrer) }
       before_action :limit_body_size, only: :create
       before_action :load_company
+      before_action :require_form_open, only: %i[create asset]
       around_action :within_company
       after_action  :keep_private
 
@@ -26,6 +27,12 @@ module Api
 
         render json: { data: PublicWorkRequest.status_view(work_order), token: work_order.public_token },
                status: :created
+      end
+
+      # GET /api/v1/public_request_form  whether the company accepts requests from people with no account right now,
+      # so the page can say so before anyone types a request. (Following a request already made always works.)
+      def form
+        render json: { data: { open: form_open? } }
       end
 
       # GET /api/v1/work_requests/:token
@@ -68,6 +75,17 @@ module Api
         return if request.content_length.to_i <= MAX_BODY
 
         render_error("The request is too large", :content_too_large, code: "PAYLOAD_TOO_LARGE")
+      end
+
+      def form_open? = @company.settings_with_defaults["public_requests_enabled"] != false
+
+      # An administrator can turn the form off (Settings, Advanced). New requests, and the lookup the QR label's page
+      # makes, are then refused with a message a person can act on; links to requests already made still work.
+      def require_form_open
+        return if form_open?
+
+        render_error("This request form is turned off. Please contact your maintenance team directly.", :forbidden,
+                     code: "PUBLIC_REQUESTS_OFF")
       end
 
       # One company per install; before setup there is nothing to report on.

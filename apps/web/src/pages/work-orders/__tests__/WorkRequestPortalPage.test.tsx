@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/test/server'
 import { WorkRequestPortalPage } from '../WorkRequestPortalPage'
+import { rememberRequest } from '@/lib/recentRequests'
 
 const TOKEN = 'abcdefghijklmnopqrstuv'
 
@@ -40,7 +41,10 @@ async function fillAndSubmit(user: ReturnType<typeof userEvent.setup>, { locatio
 }
 
 describe('WorkRequestPortalPage', () => {
-  beforeEach(() => localStorage.clear())
+  beforeEach(() => {
+    localStorage.clear()
+    server.use(http.get('/api/v1/public_request_form', () => HttpResponse.json({ data: { open: true } })))
+  })
 
   it('sends the request and shows the link to follow it', async () => {
     const user = userEvent.setup()
@@ -206,5 +210,57 @@ describe('WorkRequestPortalPage', () => {
 
     expect(screen.queryByText(/ext\. 200/i)).not.toBeInTheDocument()
     expect(screen.getByText(/do not use this form/i)).toBeInTheDocument()
+  })
+
+  describe('when an administrator has turned the form off', () => {
+    const off = () => HttpResponse.json({ data: { open: false } })
+
+    it('says so instead of showing a form people would fill in for nothing', async () => {
+      server.use(http.get('/api/v1/public_request_form', off))
+      renderPortal()
+
+      expect(await screen.findByRole('status')).toHaveTextContent('This request form is turned off. Please contact your maintenance team directly.')
+      expect(screen.queryByLabelText(/your name/i)).toBeNull()
+      expect(screen.queryByRole('button', { name: /submit request/i })).toBeNull()
+    })
+
+    it('does not look up the QR label\'s asset (the server would refuse it)', async () => {
+      let lookups = 0
+      server.use(
+        http.get('/api/v1/public_request_form', off),
+        http.get('/api/v1/public_assets/:code', () => { lookups += 1; return HttpResponse.json({ data: {} }) }),
+      )
+      renderPortal('/request?asset=ABCD2345')
+
+      await screen.findByRole('status')
+      expect(lookups).toBe(0)
+    })
+
+    it('still shows the requests this device made, so people can follow them', async () => {
+      rememberRequest({ token: TOKEN, title: 'The door will not close', created_at: new Date().toISOString() })
+      server.use(http.get('/api/v1/public_request_form', off))
+      renderPortal()
+
+      expect(await screen.findByRole('link', { name: 'The door will not close' })).toHaveAttribute('href', `/request/${TOKEN}`)
+    })
+
+    it('shows the same message when it was turned off while someone was typing', async () => {
+      const user = userEvent.setup()
+      captureCreate(() => HttpResponse.json(
+        { success: false, error: { code: 'PUBLIC_REQUESTS_OFF', message: 'This request form is turned off.' } }, { status: 403 },
+      ))
+      renderPortal()
+
+      await fillAndSubmit(user)
+
+      expect(await screen.findByRole('status')).toHaveTextContent('turned off')
+      expect(screen.queryByText(/request submitted/i)).toBeNull()
+    })
+
+    it('shows the form as before while it is on', async () => {
+      renderPortal()
+      expect(await screen.findByLabelText(/your name/i)).toBeInTheDocument()
+      expect(screen.queryByText(/turned off/i)).toBeNull()
+    })
   })
 })
