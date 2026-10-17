@@ -2,33 +2,34 @@ module Api
   module V1
     module Reports
       class PmController < Reports::BaseController
-        # GET /api/v1/reports/pm/compliance
+        # How many of the best-known worst assets the report lists.
+        WORST_ASSETS_SHOWN = 5
+
+        # GET /api/v1/reports/pm/compliance  (the period and the Filters panel's assets and places)
+        #
+        # Compliance is the PM dashboard's: of the maintenance that came due in the period, the share completed.
+        # Skipped maintenance and maintenance past its date and still not done ("missed") count against it;
+        # maintenance not due yet is left out. With nothing due the rate is null ("no data"), not 0 or 100.
         def compliance
           from, to = date_range
-          org      = current_organization
-          cache_key = "reports/pm_compliance/#{org.id}/#{from.to_date}/#{to.to_date}/#{params[:location_id]}"
-
-          data = Rails.cache.fetch(cache_key, expires_in: 15.minutes) do
-            build_compliance_report(org, from, to)
-          end
+          data = build_compliance_report(from, to)
 
           render_report(data, "pm_compliance",
                         csv: -> { ExportService.pm_compliance_csv(data[:by_month]) },
-                        pdf: -> { PdfReportService.pm_compliance_report(data, org_name: org.name) })
+                        pdf: -> { PdfReportService.pm_compliance_report(data, org_name: current_organization.name) })
         end
 
-        # GET /api/v1/reports/pm/schedule_forecast
+        # GET /api/v1/reports/pm/schedule_forecast  (the Filters panel's assets, places and people)
         def schedule_forecast
           days  = [params.fetch(:days, 30).to_i, 90].min
           org   = current_organization
 
           scope = org.preventive_maintenances.status_active
                      .where(next_due_at: ..days.days.from_now)
-          scope = scope.where(assigned_to_id: params[:assignee_id]) if params[:assignee_id].present?
-          if params[:location_id].present?
-            asset_ids = org.assets.where(location_id: Location.find(params[:location_id]).subtree_ids).kept.pluck(:id)
-            scope = scope.where(asset_id: asset_ids)
-          end
+          assignees = id_list(:user_ids, :assignee_id)
+          scope = scope.where(assigned_to_id: assignees) if assignees.any?
+          asset_ids = filtered_asset_ids
+          scope = scope.where(asset_id: asset_ids) if asset_ids
 
           pms = scope.includes(:asset, :assigned_to).order(:next_due_at).to_a
 
@@ -39,17 +40,7 @@ module Api
             {
               week_start:              week_start,
               total_estimated_hours:   week_pms.sum { |pm| pm.estimated_hours.to_f }.round(1),
-              pms: week_pms.map { |pm|
-                {
-                  pm_id:             pm.id,
-                  name:              pm.name,
-                  priority:          pm.priority,
-                  asset:             pm.asset.name,
-                  due_date:          pm.next_due_at&.to_date,
-                  estimated_hours:   pm.estimated_hours.to_f,
-                  assigned_to:       pm.assigned_to&.full_name
-                }
-              }
+              pms: week_pms.map { |pm| forecast_row(pm) }
             }
           end
 
@@ -63,83 +54,93 @@ module Api
 
         private
 
-        def build_compliance_report(org, from, to)
-          base = PmExecution.joins(:preventive_maintenance)
-                            .where(preventive_maintenances: { organization_id: org.id })
-                            .where(scheduled_date: from.to_date..to.to_date)
-
-          if params[:location_id].present?
-            asset_ids = org.assets.where(location_id: Location.find(params[:location_id]).subtree_ids).kept.pluck(:id)
-            base = base.where(preventive_maintenances: { asset_id: asset_ids })
-          end
-
-          scheduled  = base.count
-          completed  = base.where(status: 3).count   # completed
-          skipped    = base.where(status: 2).count   # skipped
-          overdue    = base.where(status: [0, 1]).where("scheduled_date < ?", Date.today).count
-          actionable = completed + skipped
-          rate       = actionable.positive? ? (completed.to_f / actionable * 100).round(1) : 0
-
-          # Grouping by status gives its name ("completed"), not its number, so the figures below compare names.
-          # Monthly breakdown
-          by_month = base.group(Arel.sql("TO_CHAR(scheduled_date, 'YYYY-MM')"))
-                         .group(:status)
-                         .count
-                         .each_with_object({}) do |((month, status), count), h|
-            h[month] ||= { month: month, scheduled: 0, completed: 0, skipped: 0 }
-            h[month][:scheduled] += count
-            h[month][:completed] += count if status.to_s == "completed"
-            h[month][:skipped]   += count if status.to_s == "skipped"
-          end
-                         .values
-                         .sort_by { |m| m[:month] }
-                         .map { |m|
-                           act = m[:completed] + m[:skipped]
-                           m.merge(compliance_rate: act.positive? ? (m[:completed].to_f / act * 100).round(1) : 0)
-                         }
-
-          # By location
-          by_location = PmExecution.joins(preventive_maintenance: { asset: :location })
-            .where(preventive_maintenances: { organization_id: org.id })
-            .where(scheduled_date: from.to_date..to.to_date)
-            .group("locations.name")
-            .group(:status)
-            .count
-            .each_with_object({}) do |((loc, status), count), h|
-              h[loc] ||= { location: loc, scheduled: 0, completed: 0 }
-              h[loc][:scheduled] += count
-              h[loc][:completed] += count if status.to_s == "completed"
-            end
-            .values
-            .map { |l| l.merge(compliance_rate: l[:scheduled].positive? ? (l[:completed].to_f / l[:scheduled] * 100).round(1) : 0) }
-            .sort_by { |l| l[:compliance_rate] }
-
-          # Worst performing assets
-          worst = PmExecution.joins(preventive_maintenance: :asset)
-            .where(preventive_maintenances: { organization_id: org.id })
-            .where(scheduled_date: from.to_date..to.to_date)
-            .where(status: [2, 3])
-            .group("assets.name")
-            .group(:status)
-            .count
-            .each_with_object({}) do |((asset_name, status), count), h|
-              h[asset_name] ||= { asset_name: asset_name, total: 0, completed: 0 }
-              h[asset_name][:total]     += count
-              h[asset_name][:completed] += count if status.to_s == "completed"
-            end
-            .values
-            .map { |a| a.merge(compliance_rate: (a[:completed].to_f / a[:total] * 100).round(1), missed: a[:total] - a[:completed]) }
-            .sort_by { |a| a[:compliance_rate] }
-            .first(5)
-
+        def forecast_row(schedule)
           {
-            overall_compliance_rate: rate,
-            period: { from: from.to_date.to_s, to: to.to_date.to_s },
-            summary: { scheduled: scheduled, completed: completed, skipped: skipped, overdue: overdue },
-            by_month:                by_month,
-            by_location:             by_location,
-            worst_performing_assets: worst
+            pm_id: schedule.id, name: schedule.name, priority: schedule.priority, asset: schedule.asset.name,
+            due_date: schedule.next_due_at.to_date,
+            frequency_type: schedule.frequency_type, frequency_value: schedule.frequency_value, frequency_unit: schedule.frequency_unit,
+            estimated_hours: schedule.estimated_hours.to_f, assigned_to: schedule.assigned_to&.full_name
           }
+        end
+
+        def build_compliance_report(from, to)
+          base = PmExecution.joins(:preventive_maintenance)
+                            .where(preventive_maintenances: { organization_id: current_organization.id })
+                            .where(scheduled_date: from.to_date..to.to_date)
+          asset_ids = filtered_asset_ids
+          base = base.where(preventive_maintenances: { asset_id: asset_ids }) if asset_ids
+
+          overall = overall_tally(base)
+          {
+            overall_compliance_rate: compliance_rate(overall),
+            period: { from: from.to_date.to_s, to: to.to_date.to_s },
+            summary: {
+              scheduled: scheduled(overall), completed: overall[:completed], skipped: overall[:skipped], missed: overall[:missed]
+            },
+            by_month: by_month(base),
+            by_location: by_location(base),
+            worst_performing_assets: worst_assets(base)
+          }
+        end
+
+        def by_month(base)
+          tallies(base, "TO_CHAR(pm_executions.scheduled_date, 'YYYY-MM')").sort.map do |month, tally|
+            { month: month, scheduled: scheduled(tally), completed: tally[:completed], skipped: tally[:skipped],
+              missed: tally[:missed], compliance_rate: compliance_rate(tally) }
+          end
+        end
+
+        def by_location(base)
+          rows = tallies(base.joins(preventive_maintenance: { asset: :location }), "locations.name").map do |name, tally|
+            { location: name, scheduled: scheduled(tally), completed: tally[:completed], skipped: tally[:skipped],
+              missed: tally[:missed], compliance_rate: compliance_rate(tally) }
+          end
+          rows.sort_by { |row| worst_first(row[:compliance_rate], row[:location]) }
+        end
+
+        # The assets with the lowest compliance (only those with maintenance that came due).
+        def worst_assets(base)
+          rows = tallies(base.joins(preventive_maintenance: :asset), "assets.name").filter_map do |name, tally|
+            due = due_count(tally)
+            next if due.zero?
+
+            { asset_name: name, total: due, completed: tally[:completed], missed: due - tally[:completed],
+              compliance_rate: compliance_rate(tally) }
+          end
+          rows.sort_by { |row| worst_first(row[:compliance_rate], row[:asset_name]) }.first(WORST_ASSETS_SHOWN)
+        end
+
+        def worst_first(rate, name) = [rate.nil? ? 1 : 0, rate || 0, name.to_s]
+
+        # { key => { completed:, skipped:, missed:, upcoming: } } counted by `key` (our own SQL expression). An execution
+        # is completed, skipped, missed (not done and past its date) or upcoming (not done and not yet due).
+        def tallies(scope, key)
+          counts = scope.group(Arel.sql(key), outcome_sql).count
+          counts.each_with_object(Hash.new { |hash, key_name| hash[key_name] = empty_tally }) do |((name, outcome), count), hash|
+            hash[name][outcome.to_sym] += count
+          end
+        end
+
+        def overall_tally(scope)
+          scope.group(outcome_sql).count.each_with_object(empty_tally) { |(outcome, count), tally| tally[outcome.to_sym] += count }
+        end
+
+        def empty_tally = { completed: 0, skipped: 0, missed: 0, upcoming: 0 }
+
+        def outcome_sql
+          statuses = PmExecution.statuses
+          today = ActiveRecord::Base.connection.quote(Date.current)
+          Arel.sql("CASE WHEN pm_executions.status = #{statuses.fetch('completed')} THEN 'completed' " \
+                   "WHEN pm_executions.status = #{statuses.fetch('skipped')} THEN 'skipped' " \
+                   "WHEN pm_executions.scheduled_date < #{today} THEN 'missed' ELSE 'upcoming' END")
+        end
+
+        def scheduled(tally) = tally.values.sum
+        def due_count(tally) = tally[:completed] + tally[:skipped] + tally[:missed]
+
+        def compliance_rate(tally)
+          due = due_count(tally)
+          due.zero? ? nil : ((tally[:completed].to_f / due) * 100).round(1)
         end
       end
     end

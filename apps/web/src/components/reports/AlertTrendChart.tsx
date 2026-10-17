@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
-interface AlertTrendPoint { period: string; critical: number; high: number; medium: number; low: number; auto_resolved: number }
+interface AlertTrendPoint { period: string; critical: number; high: number; medium: number; low: number; resolved: number }
 
 export function AlertTrendChart({ data }: { data: AlertTrendPoint[] }) {
   const [stacked, setStacked] = useState(true)

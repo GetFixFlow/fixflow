@@ -15,33 +15,8 @@ import { reportsApi } from '@/api/reports'
 import { useReportExport } from '@/hooks/useReportExport'
 import { formatPercent } from '@/utils/chartUtils'
 import { formatDate } from '@/lib/localeFormat'
-
-interface PMComplianceResponse {
-  overall_compliance_rate: number
-  period: { from: string; to: string }
-  summary: { scheduled: number; completed: number; skipped: number; overdue: number }
-  by_month: { month: string; scheduled: number; completed: number; skipped: number; compliance_rate: number }[]
-  by_location: unknown[]
-  worst_performing_assets: unknown[]
-}
-
-interface PMForecastResponse {
-  forecast_days: number
-  total_upcoming: number
-  estimated_hours: number
-  by_week: {
-    week_start: string
-    total_estimated_hours: number
-    pms: {
-      pm_id: number
-      name: string
-      asset: string
-      due_date: string
-      estimated_hours: number
-      assigned_to?: string
-    }[]
-  }[]
-}
+import { formatFrequency } from '@/components/pm/PMFrequencyBadge'
+import type { PmFrequencyType, PmFrequencyUnit } from '@/types'
 
 export function PMComplianceReportPage() {
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -52,12 +27,12 @@ export function PMComplianceReportPage() {
 
   const { data: compliance, isLoading } = useQuery({
     queryKey: ['reports', 'pm_compliance', params],
-    queryFn: () => reportsApi.pm.compliance(params).then((r) => r.data as PMComplianceResponse),
+    queryFn: () => reportsApi.pm.compliance(params).then((r) => r.data),
   })
 
   const { data: forecast, isLoading: forecastLoading } = useQuery({
-    queryKey: ['reports', 'pm_forecast'],
-    queryFn: () => reportsApi.pm.forecast().then((r) => r.data as PMForecastResponse),
+    queryKey: ['reports', 'pm_forecast', params],
+    queryFn: () => reportsApi.pm.forecast(params).then((r) => r.data),
   })
 
   const c = compliance
@@ -65,7 +40,7 @@ export function PMComplianceReportPage() {
     period: m.month,
     scheduled: m.scheduled,
     completed: m.completed,
-    missed: m.skipped,
+    missed: m.skipped + m.missed,
     compliance_rate: m.compliance_rate,
   }))
 
@@ -78,10 +53,10 @@ export function PMComplianceReportPage() {
         id: pm.pm_id,
         pm_title: pm.name,
         asset_name: pm.asset,
-        frequency: '—',
+        frequency: formatFrequency(pm.frequency_type as PmFrequencyType, pm.frequency_value ?? undefined, (pm.frequency_unit ?? undefined) as PmFrequencyUnit | undefined),
         next_due_date: pm.due_date,
         days_until_due: daysUntilDue,
-        assignee_name: pm.assigned_to,
+        assignee_name: pm.assigned_to ?? undefined,
         estimated_hours: pm.estimated_hours,
         status: (daysUntilDue < 0 ? 'overdue' : daysUntilDue <= 7 ? 'due_soon' : 'on_track') as
           | 'overdue'
@@ -108,10 +83,10 @@ export function PMComplianceReportPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {([
-          ['Compliance Rate', c ? formatPercent(c.overall_compliance_rate) : '—'],
+          ['Compliance Rate', c && c.overall_compliance_rate !== null ? formatPercent(c.overall_compliance_rate) : '—'],
           ['Scheduled', c?.summary.scheduled ?? 0],
           ['Completed', c?.summary.completed ?? 0],
-          ['Skipped', c?.summary.skipped ?? 0],
+          ['Skipped or Missed', c ? c.summary.skipped + c.summary.missed : 0],
         ] as [string, string | number][]).map(([title, value]) => (
           <KPICard key={title} title={title} value={value} loading={isLoading} />
         ))}

@@ -3,7 +3,8 @@
 import { http, HttpResponse } from 'msw'
 import { server } from './server'
 import type {
-  AssetHealth, AssetHistory, BacklogReport, CostByAsset, CostSummary, MttrReport, WorkOrderSummary,
+  AssetHealth, AssetHistory, BacklogReport, CostByAsset, CostSummary, IotAlertsReport, IotRuleEffectiveness, MttrReport,
+  PmCompliance, PmForecast, WorkOrderSummary,
 } from '@/types/reports'
 import type { TechnicianStats } from '@/components/reports/TechnicianScorecard'
 import type { DashboardStats, RequesterDashboardStats, TechnicianDashboardStats } from '@/types'
@@ -15,6 +16,10 @@ import assetsHealth from './fixtures/reports/assets_health.json'
 import assetsHistory from './fixtures/reports/assets_history.json'
 import costsSummary from './fixtures/reports/costs_summary.json'
 import costsByAsset from './fixtures/reports/costs_by_asset.json'
+import pmCompliance from './fixtures/reports/pm_compliance.json'
+import pmForecast from './fixtures/reports/pm_forecast.json'
+import iotAlerts from './fixtures/reports/iot_alerts.json'
+import iotRuleEffectiveness from './fixtures/reports/iot_rule_effectiveness.json'
 import dashboardFull from './fixtures/reports/dashboard_full.json'
 import dashboardTechnician from './fixtures/reports/dashboard_technician.json'
 import dashboardRequester from './fixtures/reports/dashboard_requester.json'
@@ -28,6 +33,10 @@ export const fixtures: {
   assetHistory: AssetHistory
   costSummary: CostSummary
   costByAsset: CostByAsset
+  pmCompliance: PmCompliance
+  pmForecast: PmForecast
+  iotAlerts: IotAlertsReport
+  iotRules: IotRuleEffectiveness
   dashboardFull: DashboardStats
   dashboardTechnician: TechnicianDashboardStats
   dashboardRequester: RequesterDashboardStats
@@ -40,6 +49,10 @@ export const fixtures: {
   assetHistory: assetsHistory,
   costSummary: costsSummary,
   costByAsset: costsByAsset,
+  pmCompliance,
+  pmForecast,
+  iotAlerts,
+  iotRules: iotRuleEffectiveness,
   dashboardFull,
   dashboardTechnician,
   dashboardRequester,
@@ -54,6 +67,10 @@ const routes: [string, unknown][] = [
   ['/api/v1/reports/costs/summary', fixtures.costSummary],
   ['/api/v1/reports/costs/by_asset', fixtures.costByAsset],
   ['/api/v1/reports/assets/:id/history', fixtures.assetHistory],
+  ['/api/v1/reports/pm/compliance', fixtures.pmCompliance],
+  ['/api/v1/reports/pm/schedule_forecast', fixtures.pmForecast],
+  ['/api/v1/reports/iot/alerts', fixtures.iotAlerts],
+  ['/api/v1/reports/iot/rule_effectiveness', fixtures.iotRules],
 ]
 
 /** Serve the fixtures as the server would; returns the URLs asked for, so a test can see what was sent. */

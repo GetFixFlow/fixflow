@@ -24,18 +24,15 @@ export function CostAnalysisPage() {
   const { exporting, exportReport } = useReportExport()
   const dateRange = `${formatDate(dateFrom)} – ${formatDate(dateTo)}`
 
-  const { data: summary, isLoading, isError } = useQuery({
+  const { data: s, isLoading, isError } = useQuery({
     queryKey: ['reports', 'costs_summary', params],
-    queryFn: () => reportsApi.costs.summary(params).then((r) => r.data as Record<string, unknown>),
+    queryFn: () => reportsApi.costs.summary(params).then((r) => r.data),
   })
 
-  const { data: byAsset, isLoading: assetLoading, isError: assetError } = useQuery({
+  const { data: a, isLoading: assetLoading, isError: assetError } = useQuery({
     queryKey: ['reports', 'costs_by_asset', params],
-    queryFn: () => reportsApi.costs.byAsset(params).then((r) => r.data as Record<string, unknown>),
+    queryFn: () => reportsApi.costs.byAsset(params).then((r) => r.data),
   })
-
-  const s = summary as Record<string, unknown> | undefined
-  const a = byAsset as Record<string, unknown> | undefined
 
   return (
     <div className="space-y-5">
@@ -53,7 +50,7 @@ export function CostAnalysisPage() {
           The cost figures could not be loaded, so none are shown. Try again in a moment.
         </p>
       )}
-      {s && (s.work_orders_count as number) === 0 && (
+      {s && s.work_orders_count === 0 && (
         <p role="status" className="rounded-md bg-gray-50 p-3 text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-300">
           No work was finished in this period, so there are no costs to show. Costs count in the period a work order was completed, and
           labor costs need an hourly rate (Settings, Company, or a person&apos;s own rate under Users).
@@ -62,30 +59,30 @@ export function CostAnalysisPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {([
-          ['Total Cost', s ? formatCurrency(s.total_cost as number) : '—'],
-          ['Labor Costs', s ? formatCurrency(s.labor_cost as number) : '—'],
-          ['Parts Costs', s ? formatCurrency(s.parts_cost as number) : '—'],
-          ['Cost per WO', s ? formatCurrency(s.avg_cost_per_wo as number) : '—'],
+          ['Total Cost', s ? formatCurrency(s.total_cost) : '—'],
+          ['Labor Costs', s ? formatCurrency(s.labor_cost) : '—'],
+          ['Parts Costs', s ? formatCurrency(s.parts_cost) : '—'],
+          ['Cost per WO', s ? formatCurrency(s.avg_cost_per_wo) : '—'],
         ] as [string, string | number][]).map(([title, value]) => (
           <KPICard key={title} title={title} value={value} loading={isLoading} />
         ))}
       </div>
 
       <ChartContainer title="Cost Trend" loading={isLoading}>
-        <CostTrendChart data={(s?.trend as Parameters<typeof CostTrendChart>[0]['data']) ?? []} unit={s?.group_by as string | undefined} />
+        <CostTrendChart data={s?.trend ?? []} unit={s?.group_by} />
       </ChartContainer>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <ChartContainer title="Cost by Asset (Treemap)" loading={assetLoading}>
-          <CostTreemap data={(a?.treemap as Parameters<typeof CostTreemap>[0]['data']) ?? []} />
+          <CostTreemap data={a?.treemap ?? []} />
         </ChartContainer>
         <ChartContainer title="Top Assets by Cost" loading={assetLoading}>
-          <DataTable data={(a?.assets as Record<string, unknown>[]) ?? []} compact
+          <DataTable data={a?.assets ?? []} compact
             columns={[
               { key: 'asset_name', header: 'Asset', sortable: true },
-              { key: 'labor_cost', header: 'Labor', align: 'right', render: (r) => formatCurrency(r.labor_cost as number) },
-              { key: 'parts_cost', header: 'Parts', align: 'right', render: (r) => formatCurrency(r.parts_cost as number) },
-              { key: 'total_cost', header: 'Total', align: 'right', sortable: true, render: (r) => <strong>{formatCurrency(r.total_cost as number)}</strong> },
+              { key: 'labor_cost', header: 'Labor', align: 'right', render: (r) => formatCurrency(r.labor_cost) },
+              { key: 'parts_cost', header: 'Parts', align: 'right', render: (r) => formatCurrency(r.parts_cost) },
+              { key: 'total_cost', header: 'Total', align: 'right', sortable: true, render: (r) => <strong>{formatCurrency(r.total_cost)}</strong> },
               { key: 'wo_count', header: 'WOs', align: 'right', sortable: true },
             ]} />
         </ChartContainer>

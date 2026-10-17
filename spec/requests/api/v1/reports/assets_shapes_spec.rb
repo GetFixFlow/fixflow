@@ -8,7 +8,7 @@ RSpec.describe "Asset report figures", type: :request do
   let(:annex)   { create(:location, organization: org, name: "Annex") }
   let!(:pump)   { create(:asset, organization: org, name: "Pump", location: plant, status: "operational") }
   let!(:press)  { create(:asset, organization: org, name: "Press", location: annex, status: "down") }
-  let!(:fan)    { create(:asset, organization: org, name: "Fan", location: plant, status: "degraded") }
+  let(:fan)     { create(:asset, organization: org, name: "Fan", location: plant, status: "degraded") }
   let(:headers) { auth_headers_for(manager) }
   let(:now)     { Time.utc(2026, 10, 16, 12, 0) }
 
@@ -17,6 +17,8 @@ RSpec.describe "Asset report figures", type: :request do
     expect(response).to have_http_status(:ok)
     response.parsed_body
   end
+
+  before { fan }
 
   around { |example| travel_to(now) { example.run } }
 
@@ -58,12 +60,12 @@ RSpec.describe "Asset report figures", type: :request do
       expect(get_json("assets/health", status: "down")["assets"].pluck("name")).to eq(["Press"])
     end
 
-    it "gives a filtered answer even when an unfiltered one is cached" do
+    it "counts what has just happened, without waiting for a cache to expire" do
       allow(Rails).to receive(:cache).and_return(ActiveSupport::Cache::MemoryStore.new)
       expect(get_json("assets/health")["total"]).to eq(3)
+      create(:asset, organization: org, name: "New", status: "operational")
+      expect(get_json("assets/health")["total"]).to eq(4)
       expect(get_json("assets/health", location_ids: [annex.id])["total"]).to eq(1)
-      expect(get_json("assets/health", asset_ids: [pump.id, fan.id])["total"]).to eq(2)
-      expect(get_json("assets/health")["total"]).to eq(3)
     end
 
     it "does not list another company's assets" do
