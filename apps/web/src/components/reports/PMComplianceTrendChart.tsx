@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts'
 import { cn } from '@/lib/utils'
 
-interface PMCompliancePoint { period: string; scheduled: number; completed: number; missed: number; compliance_rate: number }
+interface PMCompliancePoint { period: string; scheduled: number; completed: number; missed: number; compliance_rate: number | null }
 interface PMComplianceTrendChartProps { data: PMCompliancePoint[]; target?: number }
 
 export function PMComplianceTrendChart({ data, target = 95 }: PMComplianceTrendChartProps) {

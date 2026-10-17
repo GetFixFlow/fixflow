@@ -1,0 +1,42 @@
+{
+  "overall_compliance_rate": 33.3,
+  "period": {
+    "from": "2026-09-16",
+    "to": "2026-10-16"
+  },
+  "summary": {
+    "scheduled": 3,
+    "completed": 1,
+    "skipped": 1,
+    "missed": 1
+  },
+  "by_month": [
+    {
+      "month": "2026-10",
+      "scheduled": 3,
+      "completed": 1,
+      "skipped": 1,
+      "missed": 1,
+      "compliance_rate": 33.3
+    }
+  ],
+  "by_location": [
+    {
+      "location": "Plant 1",
+      "scheduled": 3,
+      "completed": 1,
+      "skipped": 1,
+      "missed": 1,
+      "compliance_rate": 33.3
+    }
+  ],
+  "worst_performing_assets": [
+    {
+      "asset_name": "Pump",
+      "total": 3,
+      "completed": 1,
+      "missed": 2,
+      "compliance_rate": 33.3
+    }
+  ]
+}

@@ -84,6 +84,9 @@ RSpec.describe "Report response shapes", type: :request do
     rule = create(:iot_rule, organization: org, asset: pump)
     create(:iot_alert, iot_rule: rule, asset: pump, created_at: now - 2.days)
     create(:pm_execution, :completed, preventive_maintenance: schedule, scheduled_date: now.to_date - 3)
+    create(:pm_execution, :skipped, preventive_maintenance: schedule, scheduled_date: now.to_date - 5)
+    create(:pm_execution, :generated, preventive_maintenance: schedule, scheduled_date: now.to_date - 6)
+    create(:sensor_reading, organization: org, asset: pump, recorded_at: now - 1.day)
     create(:preventive_maintenance, organization: org, asset: pump, assigned_to: alice, next_due_at: now + 2.days)
     create(:activity_log, organization: org, user: alice, resource_name: "WO-1")
   end
@@ -124,6 +127,22 @@ RSpec.describe "Report response shapes", type: :request do
     customer = create(:user, :requester, organization: org)
     make(pump, status: "open", requester: customer)
     expect_fixture("dashboard_requester", fetch("dashboard", as: customer))
+  end
+
+  it "pm_compliance" do
+    expect_fixture("pm_compliance", fetch("reports/pm/compliance", **period))
+  end
+
+  it "pm_forecast" do
+    expect_fixture("pm_forecast", fetch("reports/pm/schedule_forecast", days: 30))
+  end
+
+  it "iot_alerts (with one asset chosen, so the sensor series is there)" do
+    expect_fixture("iot_alerts", fetch("reports/iot/alerts", **period, "asset_ids" => [pump.id]))
+  end
+
+  it "iot_rule_effectiveness" do
+    expect_fixture("iot_rule_effectiveness", fetch("reports/iot/rule_effectiveness", **period))
   end
 
   it "costs_summary" do

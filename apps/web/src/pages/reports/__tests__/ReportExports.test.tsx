@@ -31,7 +31,7 @@ const REPORT_BODIES: Record<string, unknown> = {
     by_location: [], recently_degraded: [], most_maintained: [], assets: [],
   },
   'pm/compliance': {
-    overall_compliance_rate: 0, period: { from: '', to: '' }, summary: { scheduled: 0, completed: 0, skipped: 0, overdue: 0 },
+    overall_compliance_rate: null, period: { from: '', to: '' }, summary: { scheduled: 0, completed: 0, skipped: 0, missed: 0 },
     by_month: [], by_location: [], worst_performing_assets: [],
   },
   'pm/schedule_forecast': { forecast_days: 30, total_upcoming: 0, estimated_hours: 0, by_week: [] },

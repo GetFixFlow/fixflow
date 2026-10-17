@@ -1,0 +1,37 @@
+{
+  "forecast_days": 30,
+  "total_upcoming": 2,
+  "estimated_hours": 0.0,
+  "by_week": [
+    {
+      "week_start": "2026-10-12",
+      "total_estimated_hours": 0.0,
+      "pms": [
+        {
+          "pm_id": 21,
+          "name": "PM Schedule 21",
+          "priority": "medium",
+          "asset": "Pump",
+          "due_date": "2026-10-17",
+          "frequency_type": "time_based",
+          "frequency_value": 30,
+          "frequency_unit": "days",
+          "estimated_hours": 0.0,
+          "assigned_to": null
+        },
+        {
+          "pm_id": 22,
+          "name": "PM Schedule 22",
+          "priority": "medium",
+          "asset": "Pump",
+          "due_date": "2026-10-18",
+          "frequency_type": "time_based",
+          "frequency_value": 30,
+          "frequency_unit": "days",
+          "estimated_hours": 0.0,
+          "assigned_to": "Alice Silva"
+        }
+      ]
+    }
+  ]
+}

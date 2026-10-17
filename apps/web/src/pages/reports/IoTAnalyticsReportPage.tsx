@@ -24,18 +24,15 @@ export function IoTAnalyticsReportPage() {
   const dateRange = `${formatDate(dateFrom)} – ${formatDate(dateTo)}`
   const { exporting, exportReport } = useReportExport()
 
-  const { data: alerts, isLoading } = useQuery({
+  const { data: a, isLoading } = useQuery({
     queryKey: ['reports', 'iot_alerts', params],
-    queryFn: () => reportsApi.iot.alerts(params).then((r) => r.data as Record<string, unknown>),
+    queryFn: () => reportsApi.iot.alerts(params).then((r) => r.data),
   })
 
-  const { data: rules } = useQuery({
+  const { data: r } = useQuery({
     queryKey: ['reports', 'iot_rule_effectiveness', params],
-    queryFn: () => reportsApi.iot.ruleEffectiveness(params).then((r) => r.data as Record<string, unknown>),
+    queryFn: () => reportsApi.iot.ruleEffectiveness(params).then((r) => r.data),
   })
-
-  const a = alerts as Record<string, unknown> | undefined
-  const r = rules as Record<string, unknown> | undefined
 
   return (
     <div className="space-y-5">
@@ -52,7 +49,7 @@ export function IoTAnalyticsReportPage() {
         {([
           ['Total Alerts', a?.total_alerts ?? 0],
           ['Critical Alerts', a?.critical_count ?? 0],
-          ['Resolved Rate', a?.resolved_rate ? formatPercent(a.resolved_rate as number) : '0%'],
+          ['Resolved Rate', formatPercent(a?.resolved_rate ?? 0)],
           ['Active Rules', r?.active_count ?? 0],
         ] as [string, string | number][]).map(([title, value]) => (
           <KPICard key={title} title={title} value={value} loading={isLoading} />
@@ -60,23 +57,23 @@ export function IoTAnalyticsReportPage() {
       </div>
 
       <ChartContainer title="Alert Trend by Severity" loading={isLoading}>
-        <AlertTrendChart data={(a?.trend as Parameters<typeof AlertTrendChart>[0]['data']) ?? []} />
+        <AlertTrendChart data={a?.trend ?? []} />
       </ChartContainer>
 
-      {(a?.sensor_series as unknown[])?.length > 0 && (
+      {a && a.sensor_series.length > 0 && (
         <ChartContainer title="Sensor Metric Comparison">
-          <SensorTrendComparison series={a!.sensor_series as Parameters<typeof SensorTrendComparison>[0]['series']} />
+          <SensorTrendComparison series={a.sensor_series} />
         </ChartContainer>
       )}
 
       <ChartContainer title="Rule Effectiveness">
-        <DataTable data={(r?.rules as Record<string, unknown>[]) ?? []}
+        <DataTable data={r?.rules ?? []}
           columns={[
             { key: 'rule_name', header: 'Rule Name', sortable: true },
             { key: 'trigger_count', header: 'Triggers', sortable: true, align: 'right' },
-            { key: 'resolve_rate', header: 'Resolved %', sortable: true, align: 'right', render: (row) => formatPercent(row.resolve_rate as number) },
+            { key: 'resolve_rate', header: 'Resolved %', sortable: true, align: 'right', render: (row) => formatPercent(row.resolve_rate) },
             { key: 'wo_created', header: 'WOs Created', sortable: true, align: 'right' },
-            { key: 'avg_resolution_hours', header: 'Avg Resolve Time', sortable: true, align: 'right', render: (row) => `${(row.avg_resolution_hours as number).toFixed(1)}h` },
+            { key: 'avg_resolution_hours', header: 'Avg Resolve Time', sortable: true, align: 'right', render: (row) => `${row.avg_resolution_hours.toFixed(1)}h` },
           ]} />
       </ChartContainer>
 

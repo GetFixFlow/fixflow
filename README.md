@@ -274,6 +274,10 @@ Each report screen reads the figures the server sends for it, and the Filters pa
 - **Work Orders**: the cards are the period's work orders created, the share completed, the average hours from creation to completion, and the share of those with a due date that missed it. **By Priority** gives, for each priority, what was created, completed and is still open, the average hours from start to finish, and the share overdue (finished late, or still open and past its due date). **MTTR** (mean time to repair) is the average hours from work starting to it being finished, by asset, place and technician, slowest first; work that was never started is left out. **Backlog Aging** counts what is open *now* by age (0-7, 8-14, 15-30 and over 30 days) and priority, and lists the five oldest; it follows the Filters but not the period. The **heatmap** shows work completed on each of the last 13 weeks' days; it follows the Filters but not the period. Days, weeks and months are the company's (Settings, time zone), not UTC.
 - **Asset Health**: the health score and counts by status, health by place, and an **inventory** of the assets (those down or degraded first) with place, open and total work orders and open IoT alerts. The maintenance cost is the same figure as on Cost Analysis, for the same period and Filters. Clicking an asset opens its figures: total work orders, cost, average hours to finish work, PM compliance, and its last twelve months of work orders (made by a schedule or not) and IoT alerts. There is no health percentage for a single asset, because nothing defines one.
 - **Technician Performance**: each person's work orders in the period and the Filters.
+- **PM Compliance**: of the maintenance that came due in the period, the share completed; maintenance that was skipped, or is past its date and still not done ("missed"), counts against it, and maintenance not due yet is left out. The same definition as the PM dashboard and the main dashboard. With nothing due the rate shows "—". It is broken down by month, place and asset, and the forecast table shows what repeats how often and who has it. The assets, places and (for the forecast) people in the Filters panel apply.
+- **IoT Analytics** and **Cost Analysis**: as described above; their answers are now under the same check as the others.
+
+Report figures are counted each time you open a report; none are cached.
 
 ## The dashboard
 
@@ -418,7 +422,7 @@ The check compares addresses and verbs. What the report endpoints send back is c
 UPDATE_REPORT_FIXTURES=1 bundle exec rspec spec/contracts/report_shapes_spec.rb
 ```
 
-and commit them with the web change. The Work Orders, Asset Health and Technician reports and the dashboard (for each role) are covered so far; the PM, IoT and Cost screens still read their responses without that check.
+and commit them with the web change. Every report screen (Work Orders, Asset Health, Technician Performance, PM Compliance, IoT Analytics, Cost Analysis) and the dashboard (for each role) is covered. Anything else the web app reads from the server is not, yet.
 
 ---
 

@@ -8,12 +8,7 @@ module Api
 
         # GET /api/v1/reports/assets/health  (a status, and the Filters panel's assets and places)
         def health
-          # What was asked for is part of the key: a filter must not get another's answer.
-          asked = [params[:status].to_s, id_list(:asset_ids, :asset_id).sort, id_list(:location_ids, :location_id).sort]
-          cache_key = "reports/asset_health/#{current_organization.id}/#{Digest::SHA256.hexdigest(asked.to_json)}"
-          data = Rails.cache.fetch(cache_key, expires_in: 10.minutes) do
-            build_health_report
-          end
+          data = build_health_report
 
           render_report(data, "asset_health",
                         csv: -> { ExportService.asset_health_csv(data[:by_location]) },

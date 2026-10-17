@@ -1,43 +1,58 @@
-import { describe, expect, it } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { http, HttpResponse } from 'msw'
-import { server } from '@/test/server'
 import { IoTAnalyticsReportPage } from '../IoTAnalyticsReportPage'
+import { useReportStore } from '@/stores/reportStore'
+import { fixtures, kpiValue, serveReportFixtures } from '@/test/reportFixtures'
+
+// Real page, cards and table, fed what the server really sends (see reportFixtures.ts).
+vi.mock('@/components/reports/ReportFiltersSidebar', () => ({ ReportFiltersSidebar: () => null }))
 
 function renderPage() {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  return render(
-    <QueryClientProvider client={qc}>
-      <MemoryRouter>
-        <IoTAnalyticsReportPage />
-      </MemoryRouter>
-    </QueryClientProvider>,
-  )
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(<QueryClientProvider client={client}><MemoryRouter><IoTAnalyticsReportPage /></MemoryRouter></QueryClientProvider>)
 }
 
-describe('IoT analytics report', () => {
-  it("shows the server's figures, and calls the resolved share what it is (nothing here resolves alerts by itself)", async () => {
-    server.use(
-      http.get('/api/v1/reports/iot/alerts', () => HttpResponse.json({
-        total_alerts: 37, critical_count: 5, resolved_rate: 62.5, open_count: 14, work_orders_created: 9, trend: [], sensor_series: [],
-      })),
-      http.get('/api/v1/reports/iot/rule_effectiveness', () => HttpResponse.json({
-        active_count: 6,
-        rules: [{ rule_id: 1, rule_name: 'Pump too hot', asset_name: 'Pump 3', trigger_count: 12, wo_created: 4, resolve_rate: 75, avg_resolution_hours: 3.5 }],
-      })),
-    )
-    renderPage()
+describe('IoTAnalyticsReportPage with the server\'s real responses', () => {
+  let asked: URL[]
+  beforeEach(() => {
+    useReportStore.getState().resetFilters()
+    asked = serveReportFixtures()
+  })
 
-    expect(await screen.findByText('37')).toBeInTheDocument()
-    expect(screen.getByText('5')).toBeInTheDocument()
-    expect(screen.getByText('62.5%')).toBeInTheDocument()
-    expect(screen.getByText('Resolved Rate')).toBeInTheDocument()
-    expect(screen.queryByText(/auto-resolved/i)).not.toBeInTheDocument()
-    expect(await screen.findByText('Pump too hot')).toBeInTheDocument()
-    expect(screen.getByText('Resolved %')).toBeInTheDocument()
-    expect(screen.getByText('75.0%')).toBeInTheDocument()
-    expect(screen.getByText('3.5h')).toBeInTheDocument()
+  it('shows the alert totals, the resolved share and the active rules', async () => {
+    const { total_alerts, critical_count, resolved_rate } = fixtures.iotAlerts
+    expect(total_alerts).toBeGreaterThan(0)
+    renderPage()
+    await waitFor(async () => expect(await kpiValue(screen, 'Total Alerts')).toBe(String(total_alerts)))
+    expect(await kpiValue(screen, 'Critical Alerts')).toBe(String(critical_count))
+    expect(await kpiValue(screen, 'Resolved Rate')).toBe(`${resolved_rate.toFixed(1)}%`)
+    expect(await kpiValue(screen, 'Active Rules')).toBe(String(fixtures.iotRules.active_count))
+  })
+
+  it('lists how each rule did', async () => {
+    renderPage()
+    const rule = fixtures.iotRules.rules[0]
+    const row = (await screen.findByText(rule.rule_name)).closest('tr')!
+    expect(Array.from(row.querySelectorAll('td')).map((cell) => cell.textContent)).toEqual(
+      [rule.rule_name, String(rule.trigger_count), `${rule.resolve_rate.toFixed(1)}%`, String(rule.wo_created), `${rule.avg_resolution_hours.toFixed(1)}h`])
+  })
+
+  it('shows the sensor comparison when the server sends a series (one asset chosen)', async () => {
+    expect(fixtures.iotAlerts.sensor_series.length).toBeGreaterThan(0)
+    renderPage()
+    expect(await screen.findByText('Sensor Metric Comparison')).toBeInTheDocument()
+  })
+
+  it('asks for both reports with the period and the Filters', async () => {
+    useReportStore.getState().setFilter('asset_ids', [9])
+    renderPage()
+    await screen.findByText(fixtures.iotRules.rules[0].rule_name)
+    for (const path of ['/iot/alerts', '/iot/rule_effectiveness']) {
+      const url = asked.find((candidate) => candidate.pathname.endsWith(path))!
+      expect(url.searchParams.getAll('asset_ids[]'), path).toEqual(['9'])
+      expect(url.searchParams.has('from') && url.searchParams.has('to'), path).toBe(true)
+    }
   })
 })

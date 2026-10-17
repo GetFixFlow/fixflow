@@ -1,6 +1,7 @@
 import { apiClient } from './client'
 import type {
-  AssetHealth, AssetHistory, BacklogReport, CostByAsset, CostSummary, MttrReport, WorkOrderSummary,
+  AssetHealth, AssetHistory, BacklogReport, CostByAsset, CostSummary, IotAlertsReport, IotRuleEffectiveness, MttrReport,
+  PmCompliance, PmForecast, WorkOrderSummary,
 } from '@/types/reports'
 import type { TechnicianStats } from '@/components/reports/TechnicianScorecard'
 
@@ -27,15 +28,16 @@ export const reportsApi = {
 
   pm: {
     compliance: (params?: Record<string, unknown>) =>
-      apiClient.get('/reports/pm/compliance', { params }),
-    forecast: () => apiClient.get('/reports/pm/schedule_forecast'),
+      apiClient.get<PmCompliance>('/reports/pm/compliance', { params }),
+    forecast: (params?: Record<string, unknown>) =>
+      apiClient.get<PmForecast>('/reports/pm/schedule_forecast', { params }),
   },
 
   iot: {
     alerts: (params?: Record<string, unknown>) =>
-      apiClient.get('/reports/iot/alerts', { params }),
+      apiClient.get<IotAlertsReport>('/reports/iot/alerts', { params }),
     ruleEffectiveness: (params?: Record<string, unknown>) =>
-      apiClient.get('/reports/iot/rule_effectiveness', { params }),
+      apiClient.get<IotRuleEffectiveness>('/reports/iot/rule_effectiveness', { params }),
   },
 
   costs: {

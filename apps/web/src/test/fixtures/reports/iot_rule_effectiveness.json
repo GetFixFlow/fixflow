@@ -1,0 +1,15 @@
+{
+  "active_count": 1,
+  "rules": [
+    {
+      "rule_id": 13,
+      "rule_name": "temperature threshold alert",
+      "asset_name": "Pump",
+      "status": "active",
+      "trigger_count": 1,
+      "wo_created": 0,
+      "resolve_rate": 0.0,
+      "avg_resolution_hours": 0.0
+    }
+  ]
+}

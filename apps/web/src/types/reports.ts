@@ -103,9 +103,74 @@ export type CostSummary = {
   parts_cost: number
   work_orders_count: number
   avg_cost_per_wo: number
+  group_by: string
+  trend: { period: string; labor: number; parts: number; total: number; wo_count: number }[]
 }
 
 export type CostByAsset = {
   assets: { asset_id: number | null; asset_name: string; labor_cost: number; parts_cost: number; total_cost: number; wo_count: number }[]
+  treemap: { name: string; cost: number }[]
   total_assets: number
+}
+
+/** A rate that is null when nothing has come due: "no data", not 0 or 100. */
+type PmTally = { scheduled: number; completed: number; skipped: number; missed: number; compliance_rate: number | null }
+
+export interface PmCompliance {
+  overall_compliance_rate: number | null
+  period: { from: string; to: string }
+  summary: { scheduled: number; completed: number; skipped: number; missed: number }
+  by_month: (PmTally & { month: string })[]
+  by_location: (PmTally & { location: string })[]
+  worst_performing_assets: { asset_name: string; total: number; completed: number; missed: number; compliance_rate: number | null }[]
+}
+
+export interface PmForecast {
+  forecast_days: number
+  total_upcoming: number
+  estimated_hours: number
+  by_week: {
+    week_start: string
+    total_estimated_hours: number
+    pms: {
+      pm_id: number
+      name: string
+      priority: string
+      asset: string
+      due_date: string
+      /** One of time_based, meter_based, calendar_based, condition_based. */
+      frequency_type: string
+      frequency_value: number | null
+      frequency_unit: string | null
+      estimated_hours: number
+      assigned_to: string | null
+    }[]
+  }[]
+}
+
+export interface IotAlertsReport {
+  total_alerts: number
+  critical_count: number
+  resolved_rate: number
+  open_count: number
+  work_orders_created: number
+  trend: { period: string; critical: number; high: number; medium: number; low: number; resolved: number }[]
+  /** Only when exactly one asset is chosen in the Filters. */
+  sensor_series: { metric: string; unit: string; data: { time: string; value: number }[] }[]
+}
+
+export type IotRuleRow = {
+  rule_id: number
+  rule_name: string
+  asset_name: string | null
+  status: string
+  trigger_count: number
+  wo_created: number
+  resolve_rate: number
+  avg_resolution_hours: number
+}
+
+export interface IotRuleEffectiveness {
+  active_count: number
+  rules: IotRuleRow[]
 }
