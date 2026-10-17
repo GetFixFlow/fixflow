@@ -4,9 +4,14 @@ class DatabaseBackupJob < ApplicationJob
   queue_as :scheduled
 
   RETENTION_DAYS = 30
+  # When the nightly backup runs (config/sidekiq.yml: "0 3 * * *"; the application's time zone is UTC).
+  RUNS_AT = "03:00 UTC".freeze
+
+  # Backups are made by the production server only (a development database is not worth keeping).
+  def self.runs_here? = Rails.env.production?
 
   def perform
-    return unless Rails.env.production?
+    return unless self.class.runs_here?
 
     started_at  = Time.current
     filename    = "fixflow_#{started_at.strftime('%Y%m%d_%H%M%S')}.sql.gz"

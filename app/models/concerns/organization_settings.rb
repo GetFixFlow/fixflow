@@ -37,6 +37,7 @@ module OrganizationSettings
     "iot_alert_cooldown" => 60,
     "iot_stale_threshold" => 300,
     "iot_data_retention_days" => 365,
+    "audit_log_retention_days" => 0, # 0: keep the audit log for ever
     "update_check" => true,
     "public_requests_enabled" => true,
     "iot_auto_wo_threshold" => "critical",
@@ -46,7 +47,7 @@ module OrganizationSettings
   }.freeze
 
   INTEGER_KEYS = %w[default_due_days auto_close_days pm_compliance_target pm_reminder_days
-                    iot_alert_cooldown iot_stale_threshold iot_data_retention_days].freeze
+                    iot_alert_cooldown iot_stale_threshold iot_data_retention_days audit_log_retention_days].freeze
   DECIMAL_KEYS = %w[labor_rate].freeze
   BOOLEAN_KEYS = %w[require_completion_notes pm_pause_on_down update_check public_requests_enabled].freeze
   KEYS = DEFAULTS.keys.freeze
@@ -55,7 +56,7 @@ module OrganizationSettings
 
   # Stored values over the defaults.
   def settings_with_defaults
-    DEFAULTS.deep_merge((settings || {}).slice(*KEYS))
+    DEFAULTS.merge(environment_defaults).deep_merge((settings || {}).slice(*KEYS))
   end
 
   def default_priority = settings_with_defaults["default_priority"]
@@ -69,7 +70,25 @@ module OrganizationSettings
     ActiveSupport::TimeZone[zone] ? zone : "UTC"
   end
 
+  # How many days of sensor readings (and their hourly summaries) are kept: what the company chose, else the
+  # IOT_RETENTION_DAYS the server was started with (how this was set before it was a company setting), else a year.
+  # The settings screens show this same number (see settings_with_defaults), so what is shown is what is applied.
+  def sensor_retention_days = settings_with_defaults["iot_data_retention_days"].to_i
+
+  # How many days of audit log are kept; nil when it is kept for ever.
+  def audit_log_retention_days
+    days = settings_with_defaults["audit_log_retention_days"].to_i
+    days.positive? ? days : nil
+  end
+
   def prefix_for_work_orders = settings_with_defaults["wo_number_prefix"].presence || "WO"
+
+  # Settings whose default can be set in the server's environment. A value that is not a whole number in the allowed
+  # range is ignored, not applied (a typo must not decide how much data is deleted).
+  def environment_defaults
+    days = ENV["IOT_RETENTION_DAYS"].to_s
+    days.match?(/\A\d+\z/) && days.to_i.between?(1, 3650) ? { "iot_data_retention_days" => days.to_i } : {}
+  end
 
   # Merge changes into the stored settings, coercing values from form or JSON input.
   def assign_company_settings(changes)

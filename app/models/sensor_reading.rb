@@ -36,9 +36,4 @@ class SensorReading < ApplicationRecord
       .where(asset_id: asset_id)
       .order("metric_name, recorded_at DESC")
   end
-
-  def self.cleanup_old_readings(retention_days: ENV.fetch("IOT_RETENTION_DAYS", 90).to_i)
-    cutoff = retention_days.days.ago
-    where("recorded_at < ?", cutoff).delete_all
-  end
 end
