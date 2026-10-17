@@ -1,0 +1,67 @@
+{
+  "status": "ok",
+  "checked_at": "2026-10-16T12:00:00Z",
+  "app": {
+    "version": "0.1.0",
+    "environment": "test",
+    "ruby": "3.3.6",
+    "rails": "8.1.4",
+    "uptime_seconds": 0
+  },
+  "database": {
+    "status": "ok",
+    "message": "The database answers.",
+    "latency_ms": 0.3,
+    "server": "18.1 (Postgres.app)",
+    "pending_migrations": 0
+  },
+  "redis": {
+    "status": "ok",
+    "message": "Redis answers.",
+    "latency_ms": 0.8,
+    "server": "8.4.0",
+    "memory": "5.17M"
+  },
+  "background_jobs": {
+    "status": "ok",
+    "message": "The background worker is running.",
+    "workers": 1,
+    "busy": 0,
+    "queued": 0,
+    "scheduled": 0,
+    "retrying": 0,
+    "dead": 0,
+    "latency_seconds": 0
+  },
+  "email": {
+    "status": "ok",
+    "message": "Email is set up (in the server's environment).",
+    "source": "environment",
+    "host": "smtp.acme.test",
+    "port": 587,
+    "reachable": true
+  },
+  "mqtt": {
+    "status": "ok",
+    "message": "FixFlow is connected to the MQTT broker.",
+    "configured": true,
+    "broker": "mqtt.acme.test:1883",
+    "reachable": true,
+    "connected": true,
+    "last_message_at": "2026-10-16T11:55:00Z"
+  },
+  "storage": {
+    "status": "ok",
+    "message": "File storage (Disk) answers.",
+    "service": "Disk"
+  },
+  "update": {
+    "enabled": true,
+    "locked": false,
+    "status": "warning",
+    "message": "Version 0.2.0 is available (you have 0.1.0).",
+    "current": "0.1.0",
+    "latest": "0.2.0",
+    "url": "https://github.com/GetFixFlow/fixflow/releases/tag/v0.2.0"
+  }
+}

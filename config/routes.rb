@@ -49,6 +49,7 @@ Rails.application.routes.draw do
         patch :password
       end
       get "health",  to: "health#show"
+      get "system_health", to: "system_health#show"
       get "setup/status", to: "setup#status"
 
       resources :locations do

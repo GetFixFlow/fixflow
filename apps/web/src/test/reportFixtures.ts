@@ -7,6 +7,7 @@ import type {
   PmCompliance, PmForecast, WorkOrderSummary,
 } from '@/types/reports'
 import type { TechnicianStats } from '@/components/reports/TechnicianScorecard'
+import type { SystemHealth } from '@/types/system'
 import type { DashboardStats, RequesterDashboardStats, TechnicianDashboardStats } from '@/types'
 import workOrdersSummary from './fixtures/reports/work_orders_summary.json'
 import workOrdersMttr from './fixtures/reports/work_orders_mttr.json'
@@ -20,9 +21,16 @@ import pmCompliance from './fixtures/reports/pm_compliance.json'
 import pmForecast from './fixtures/reports/pm_forecast.json'
 import iotAlerts from './fixtures/reports/iot_alerts.json'
 import iotRuleEffectiveness from './fixtures/reports/iot_rule_effectiveness.json'
+import systemHealth from './fixtures/reports/system_health.json'
 import dashboardFull from './fixtures/reports/dashboard_full.json'
 import dashboardTechnician from './fixtures/reports/dashboard_technician.json'
 import dashboardRequester from './fixtures/reports/dashboard_requester.json'
+
+// JSON files give every text field the type `string`, so a type with a fixed set of words (HealthStatus) cannot be
+// assigned from one directly. `Widen<T>` is T with those words widened to `string`: the JSON must still have every
+// field, of the right kind, and nothing under another name, before it is accepted as a T.
+type Widen<T> = T extends string ? string : T extends object ? { [K in keyof T]: Widen<T[K]> } : T
+function typed<T>(json: Widen<T>): T { return json as T }
 
 export const fixtures: {
   workOrderSummary: WorkOrderSummary
@@ -37,6 +45,7 @@ export const fixtures: {
   pmForecast: PmForecast
   iotAlerts: IotAlertsReport
   iotRules: IotRuleEffectiveness
+  systemHealth: SystemHealth
   dashboardFull: DashboardStats
   dashboardTechnician: TechnicianDashboardStats
   dashboardRequester: RequesterDashboardStats
@@ -53,6 +62,7 @@ export const fixtures: {
   pmForecast,
   iotAlerts,
   iotRules: iotRuleEffectiveness,
+  systemHealth: typed<SystemHealth>(systemHealth),
   dashboardFull,
   dashboardTechnician,
   dashboardRequester,
@@ -67,6 +77,7 @@ const routes: [string, unknown][] = [
   ['/api/v1/reports/costs/summary', fixtures.costSummary],
   ['/api/v1/reports/costs/by_asset', fixtures.costByAsset],
   ['/api/v1/reports/assets/:id/history', fixtures.assetHistory],
+  ['/api/v1/system_health', fixtures.systemHealth],
   ['/api/v1/reports/pm/compliance', fixtures.pmCompliance],
   ['/api/v1/reports/pm/schedule_forecast', fixtures.pmForecast],
   ['/api/v1/reports/iot/alerts', fixtures.iotAlerts],

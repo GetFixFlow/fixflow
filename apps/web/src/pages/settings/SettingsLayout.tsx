@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/authStore'
 import {
   User, Bell, Lock, Building2, Palette, Mail, Globe, Users, Shield,
-  Radio, Database, FileArchive, Search, Settings, AlertTriangle, ChevronRight, Sparkles,
+  Radio, Database, FileArchive, Search, Settings, AlertTriangle, ChevronRight, Sparkles, Activity,
 } from 'lucide-react'
 
 interface NavItem {
@@ -63,6 +63,7 @@ const NAV_SECTIONS: NavSection[] = [
       { href: '/settings/import-export', label: 'Import / Export', icon: FileArchive },
       { href: '/settings/data-retention', label: 'Data Retention', icon: Database },
       { href: '/settings/audit-log', label: 'Audit Log', icon: Search },
+      { href: '/settings/system-health', label: 'System Health', icon: Activity },
     ],
   },
   {

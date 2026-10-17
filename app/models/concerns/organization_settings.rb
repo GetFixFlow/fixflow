@@ -37,6 +37,7 @@ module OrganizationSettings
     "iot_alert_cooldown" => 60,
     "iot_stale_threshold" => 300,
     "iot_data_retention_days" => 365,
+    "update_check" => true,
     "iot_auto_wo_threshold" => "critical",
     "work_hours" => { "start" => "08:00", "end" => "17:00" },
     "work_days" => [1, 2, 3, 4, 5],
@@ -46,7 +47,7 @@ module OrganizationSettings
   INTEGER_KEYS = %w[default_due_days auto_close_days pm_compliance_target pm_reminder_days
                     iot_alert_cooldown iot_stale_threshold iot_data_retention_days].freeze
   DECIMAL_KEYS = %w[labor_rate].freeze
-  BOOLEAN_KEYS = %w[require_completion_notes pm_pause_on_down].freeze
+  BOOLEAN_KEYS = %w[require_completion_notes pm_pause_on_down update_check].freeze
   KEYS = DEFAULTS.keys.freeze
 
   include Validation

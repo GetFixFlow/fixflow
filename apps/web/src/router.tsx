@@ -60,6 +60,7 @@ const DataRetentionPage = lazy(() => import('@/pages/settings/DataRetentionPage'
 const AuditLogPage = lazy(() => import('@/pages/settings/AuditLogPage').then(m => ({ default: m.AuditLogPage })))
 const ImportExportPage = lazy(() => import('@/pages/settings/ImportExportPage').then(m => ({ default: m.ImportExportPage })))
 const AdvancedSettingsPage = lazy(() => import('@/pages/settings/AdvancedSettingsPage').then(m => ({ default: m.AdvancedSettingsPage })))
+const SystemHealthPage = lazy(() => import('@/pages/settings/SystemHealthPage').then(m => ({ default: m.SystemHealthPage })))
 const AISettingsPage = lazy(() => import('@/pages/settings/AISettingsPage').then(m => ({ default: m.AISettingsPage })))
 
 function Lazy({ children }: { children: React.ReactNode }) {
@@ -153,6 +154,7 @@ export const router = createBrowserRouter([
                       { path: 'data-retention', element: <Lazy><DataRetentionPage /></Lazy> },
                       { path: 'audit-log', element: <Lazy><AuditLogPage /></Lazy> },
                       { path: 'import-export', element: <Lazy><ImportExportPage /></Lazy> },
+                      { path: 'system-health', element: <Lazy><SystemHealthPage /></Lazy> },
                       { path: 'advanced', element: <Lazy><AdvancedSettingsPage /></Lazy> },
                       { path: 'ai', element: <Lazy><AISettingsPage /></Lazy> },
                     ],

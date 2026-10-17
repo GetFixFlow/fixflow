@@ -1,4 +1,5 @@
 require "rails_helper"
+require "sidekiq/api"
 
 # What the report screens read, pinned from both ends. Each response below is compared, field by field and type by
 # type, with a JSON file in apps/web/src/test/fixtures/reports. The web app's tests load the same files into the
@@ -64,6 +65,22 @@ RSpec.describe "Report response shapes", type: :request do
     get "/api/v1/#{path}", params: params, headers: auth_headers_for(as)
     expect(response).to have_http_status(:ok)
     response.parsed_body
+  end
+
+  # Everything the health page looks at, set up and answering: mail, an MQTT broker, a worker, a newer release.
+  def stub_working_install
+    stub_const("ENV", ENV.to_h.merge("SMTP_HOST" => "smtp.acme.test", "MQTT_HOST" => "mqtt.acme.test", "APP_VERSION" => "0.1.0"))
+    allow(EmailSetup).to receive(:source).and_return(:environment)
+    allow(Socket).to receive(:tcp).and_call_original
+    allow(Socket).to receive(:tcp).with("smtp.acme.test", any_args)
+    allow(Socket).to receive(:tcp).with("mqtt.acme.test", any_args)
+    allow(Iot::MqttStatus).to receive(:read).and_return({ connected: true, last_message_at: now - 5.minutes })
+    allow(Sidekiq::ProcessSet).to receive(:new).and_return(instance_double(Sidekiq::ProcessSet, size: 1, sum: 0))
+    stats = instance_double(Sidekiq::Stats, enqueued: 0, scheduled_size: 0, retry_size: 0, dead_size: 0)
+    allow(Sidekiq::Stats).to receive(:new).and_return(stats)
+    allow(Sidekiq::Queue).to receive(:all).and_return([instance_double(Sidekiq::Queue, latency: 0)])
+    body = { tag_name: "v0.2.0", html_url: "https://github.com/GetFixFlow/fixflow/releases/tag/v0.2.0" }.to_json
+    stub_request(:get, "https://api.github.com/repos/GetFixFlow/fixflow/releases/latest").to_return(status: 200, body: body)
   end
 
   around { |example| travel_to(now) { example.run } }
@@ -143,6 +160,12 @@ RSpec.describe "Report response shapes", type: :request do
 
   it "iot_rule_effectiveness" do
     expect_fixture("iot_rule_effectiveness", fetch("reports/iot/rule_effectiveness", **period))
+  end
+
+  it "system_health (an install where everything is set up and working)" do
+    admin = create(:user, :admin, organization: org)
+    stub_working_install
+    expect_fixture("system_health", fetch("system_health", as: admin))
   end
 
   it "costs_summary" do

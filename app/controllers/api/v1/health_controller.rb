@@ -1,3 +1,5 @@
+require "sidekiq/api"
+
 module Api
   module V1
     class HealthController < Api::V1::BaseController
@@ -37,7 +39,7 @@ module Api
         latency = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - start) * 1000).round(2)
         { status: "ok", latency_ms: latency }
       rescue StandardError => e
-        { status: "error", error: e.message }
+        failed("database", e)
       end
 
       def check_redis
@@ -47,14 +49,21 @@ module Api
         latency   = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - start) * 1000).round(2)
         result == "PONG" ? { status: "ok", latency_ms: latency } : { status: "error" }
       rescue StandardError => e
-        { status: "error", error: e.message }
+        failed("redis", e)
       end
 
       def check_sidekiq
         stats = Sidekiq::Stats.new
         { status: "ok", queued_jobs: stats.enqueued, failed_jobs: stats.failed }
       rescue StandardError => e
-        { status: "error", error: e.message }
+        failed("sidekiq", e)
+      end
+
+      # Anyone can read this endpoint, so it says that a check failed but not why (the reason can name servers and
+      # users). The administrator's System Health page and the server log have the detail.
+      def failed(name, error)
+        Rails.logger.warn "[health] #{name} check failed: #{error.class}: #{error.message}"
+        { status: "error", error: "did not answer" }
       end
 
       def check_storage
