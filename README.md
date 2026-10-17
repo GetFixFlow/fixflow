@@ -129,27 +129,48 @@ npm run dev     # Dev server on :3001
 
 ## Environment Variables
 
-| Variable | Required | Description |
+`.env.example` lists every setting with a note on what it does. These are the ones that matter (the **Needed** column is for a production install):
+
+| Variable | Needed | What it is |
 |---|---|---|
-| `RAILS_MASTER_KEY` | Yes | From `config/master.key` |
-| `DEVISE_JWT_SECRET_KEY` | Yes | Random 64-char hex string |
-| `DATABASE_URL` | Docker only | Full PostgreSQL URL |
-| `DB_HOST / DB_USERNAME / DB_PASSWORD` | Local | PostgreSQL connection |
-| `REDIS_URL` | Yes | Redis connection URL |
-| `IOT_API_KEY` | Yes | API key for IoT sensor ingestion |
-| `CORS_ORIGINS` | Yes | Comma-separated allowed origins |
-| `MINIO_ENDPOINT` | Yes | MinIO/S3 endpoint |
-| `MINIO_ACCESS_KEY_ID` | Yes | MinIO access key |
-| `MINIO_SECRET_ACCESS_KEY` | Yes | MinIO secret key |
+| `SECRET_KEY_BASE` | Yes | Signs sessions and cookies: at least 64 characters. `bin/rails secret` makes one. |
+| `DEVISE_JWT_SECRET_KEY` | Yes | Signs sign-in tokens: at least 32 characters. `openssl rand -base64 64` makes one. |
+| `DATABASE_URL` | Yes | `postgres://user:password@host:5432/database` |
+| `REDIS_URL` | Yes | `redis://:password@host:6379/0` (background jobs, live updates) |
+| `APP_URL` | Yes | Where people open FixFlow, e.g. `https://fixflow.example.com`. Used in links in emails (invitations, password resets). |
+| `ALLOWED_ORIGINS` | If the web app has another address than the API | Comma-separated web addresses allowed to call the API, e.g. `https://fixflow.example.com` |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD` | No | A mail server, if you do not set one under Settings, Email |
+| `MINIO_ENDPOINT`, `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY`, `MINIO_BUCKET` | For file uploads | The S3-compatible file storage |
+| `MQTT_HOST`, `MQTT_PORT`, `MQTT_USERNAME`, `MQTT_PASSWORD` | For IoT over MQTT | The sensor broker |
+| `IOT_API_KEY` | For IoT over HTTP | The key sensors send to `POST /api/v1/iot/readings`; without one that route refuses everything |
+| `SKIP_CONFIG_CHECK` | No | `true` skips the start-up check below (for an emergency) |
 
 Generate secrets:
 ```bash
-# DEVISE_JWT_SECRET_KEY
-ruby -e "require 'securerandom'; puts SecureRandom.hex(64)"
-
-# IOT_API_KEY
-ruby -e "require 'securerandom'; puts SecureRandom.hex(32)"
+bin/rails secret                  # SECRET_KEY_BASE
+openssl rand -base64 64           # DEVISE_JWT_SECRET_KEY
+openssl rand -hex 32              # IOT_API_KEY
 ```
+
+### The server checks its settings when it starts
+
+A production server (and the Docker entrypoint) checks the settings above before doing anything else, and **refuses to start with a plain message** when:
+
+- `SECRET_KEY_BASE` or `DEVISE_JWT_SECRET_KEY` is missing, too short, or still the example value from `.env.example`;
+- `DATABASE_URL` or `REDIS_URL` is not a valid address, or has the example password in it;
+- `APP_URL`, `ALLOWED_ORIGINS`, `SMTP_PORT`, `MQTT_PORT` or `MINIO_ENDPOINT` is malformed;
+- the database or Redis does not answer, or the mail server set in the environment does not answer.
+
+Things that do not stop it but are printed as **warnings**: `APP_URL` not set (email links would point at localhost), `ALLOWED_ORIGINS` missing the web app's address, example passwords for the file storage, the MQTT broker or the mail server, `SEED_DB=true` (demo accounts with a well-known password), an AI key missing while `AI_ENABLED=true`, and the file storage or the MQTT broker not answering.
+
+Run the same check yourself, without starting anything:
+
+```bash
+bin/rails fixflow:check_config            # settings and whether the services answer
+bin/rails "fixflow:check_config[static]"  # settings only, no network
+```
+
+The Docker entrypoint also stops waiting for the database after two minutes with a message, instead of waiting for ever.
 
 ---
 
