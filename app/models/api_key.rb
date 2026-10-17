@@ -3,8 +3,11 @@ class ApiKey < ApplicationRecord
 
   # ─── Associations ──────────────────────────────────────────────────────────
 
+  include Auditable
+
   acts_as_tenant :organization
   belongs_to :organization
+  audited ignore: %w[last_used_at key_digest]
 
   # ─── Validations ───────────────────────────────────────────────────────────
 
@@ -39,5 +42,12 @@ class ApiKey < ApplicationRecord
 
   def touch_last_used
     update_column(:last_used_at, Time.current)
+  end
+
+  private
+
+  # Revoking a key is the thing to see in the log, not "updated".
+  def audit_update_verb
+    "revoked" if saved_change_to_active? && !active
   end
 end

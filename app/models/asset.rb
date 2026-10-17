@@ -1,6 +1,8 @@
 class Asset < ApplicationRecord
   include Discard::Model
+  include Auditable
   acts_as_tenant :organization
+  audited ignore: %w[public_code]
 
   STATUSES = %w[operational degraded down decommissioned].freeze
 
@@ -32,6 +34,13 @@ class Asset < ApplicationRecord
   scope :needs_attention,       ->              { where(status: %w[degraded down]) }
 
   private
+
+  # Putting an asset away (soft delete) is a delete as far as the log is concerned.
+  def audit_update_verb
+    return unless saved_change_to_discarded_at?
+
+    discarded_at.present? ? "deleted" : "restored"
+  end
 
   def generate_asset_tag
     return if asset_tag.present?

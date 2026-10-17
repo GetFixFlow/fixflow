@@ -42,7 +42,7 @@ namespace :fixflow do
 
   desc "Load a demo company with sample data (empty installs only; set CONFIRM=yes in production)"
   task demo_data: :environment do
-    logins = DemoDataService.load!(confirmed: ENV["CONFIRM"] == "yes")
+    logins = Auditable.silenced { DemoDataService.load!(confirmed: ENV["CONFIRM"] == "yes") }
     puts "Demo data loaded. Sign in with any of these (password: #{DemoDataService::DEMO_PASSWORD}):"
     logins.each { |email| puts "  #{email}" }
   rescue DemoDataService::Refused => e

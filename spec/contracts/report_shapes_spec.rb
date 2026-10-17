@@ -85,7 +85,10 @@ RSpec.describe "Report response shapes", type: :request do
 
   around { |example| travel_to(now) { example.run } }
 
-  before do
+  # The company's data. Written without audit lines (every record would otherwise add one, made by "the system"),
+  # so the activity feed holds only the line made on purpose below.
+  def build_company
+    manager
     schedule = create(:preventive_maintenance, organization: org, asset: pump)
     make(pump, priority: "high", status: "completed", assignee: alice, created_at: now - 6.days, started_at: now - 5.days - 4.hours,
                completed_at: now - 5.days, due_date: now - 5.days - 2.hours, labor_cost: 100, parts_cost: 20.5)
@@ -98,6 +101,10 @@ RSpec.describe "Report response shapes", type: :request do
     make(fan, priority: "medium", status: "completed", assignee: alice, created_at: now - 22.days, started_at: now - 21.days,
               completed_at: now - 20.days, labor_cost: 30, parts_cost: 5)
     make(fan, priority: "low", status: "cancelled", cancellation_reason: "Duplicate", created_at: now - 4.days)
+    build_alerts_and_schedules(schedule)
+  end
+
+  def build_alerts_and_schedules(schedule)
     rule = create(:iot_rule, organization: org, asset: pump)
     create(:iot_alert, iot_rule: rule, asset: pump, created_at: now - 2.days)
     create(:pm_execution, :completed, preventive_maintenance: schedule, scheduled_date: now.to_date - 3)
@@ -107,6 +114,8 @@ RSpec.describe "Report response shapes", type: :request do
     create(:preventive_maintenance, organization: org, asset: pump, assigned_to: alice, next_due_at: now + 2.days)
     create(:activity_log, organization: org, user: alice, resource_name: "WO-1")
   end
+
+  before { Auditable.silenced { build_company } }
 
   it "work_orders_summary" do
     expect_fixture("work_orders_summary", fetch("reports/work_orders/summary", **period))
@@ -166,6 +175,20 @@ RSpec.describe "Report response shapes", type: :request do
     admin = create(:user, :admin, organization: org)
     stub_working_install
     expect_fixture("system_health", fetch("system_health", as: admin))
+  end
+
+  it "activity_logs (the audit log: a line by a person, one by the system, and one with a role change)" do
+    admin = create(:user, :admin, organization: org)
+    Auditable.silenced do
+      create(:activity_log, organization: org, user: alice, action: "asset.updated", resource_type: "Asset", resource_id: 7,
+                            resource_name: "Pump", metadata: { "changed" => %w[name status] }, ip_address: "10.0.0.5")
+      create(:activity_log, organization: org, user: nil, action: "work_order.created", resource_type: "WorkOrder", resource_id: 3,
+                            resource_name: "WO-000003", metadata: {}, ip_address: nil)
+      create(:activity_log, organization: org, user: alice, action: "user.updated", resource_type: "User", resource_id: 9,
+                            resource_name: "Bo Technician",
+                            metadata: { "changed" => ["role"], "values" => { "role" => %w[technician manager] } })
+    end
+    expect_fixture("activity_logs", fetch("activity_logs", as: admin))
   end
 
   it "costs_summary" do

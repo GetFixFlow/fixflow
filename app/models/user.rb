@@ -10,6 +10,12 @@ class User < ApplicationRecord
   INVITATION_TTL = 7.days
 
   include PasswordReset
+  include Auditable
+
+  # A whitelist: sign-in counters, tokens and preferences change all the time and are not edits. The password is
+  # logged as "password" (that it changed, never what it is), pay by its name only.
+  audited watch: %w[first_name last_name email role phone job_title department hourly_rate encrypted_password],
+          values: %w[role]
   include EmailPreferences
 
   belongs_to :organization
@@ -31,11 +37,12 @@ class User < ApplicationRecord
   # Called when a token is made at sign-in or sign-up.
   def on_jwt_dispatch(_token, payload)
     user_sessions.where(expires_at: ...1.day.ago).delete_all
-    user_sessions.create!(
+    session = user_sessions.create!(
       sid: payload["sid"], jti: payload["jti"], expires_at: Time.zone.at(payload["exp"]),
       user_agent: UserSession.clean_agent(Current.user_agent), ip_address: Current.request_ip,
       last_active_at: Time.current
     )
+    ActivityLogService.log(action: "user.signed_in", resource: self, user: self, metadata: { device: session.device })
   end
 
   # The session a token belongs to, when the token is still good; nil otherwise.
@@ -61,6 +68,9 @@ class User < ApplicationRecord
   scope :active, -> { where(deactivated_at: nil) }
   scope :technicians, -> { where(role: "technician") }
   scope :managers, -> { where(role: %w[admin manager]) }
+
+  # What the audit log calls this person.
+  def audit_name = full_name.presence || email
 
   def full_name
     "#{first_name} #{last_name}".strip
@@ -137,5 +147,14 @@ class User < ApplicationRecord
 
   def manager_or_above?
     role.in?(%w[admin manager])
+  end
+
+  private
+
+  # Deactivating and reactivating a person are events of their own in the log.
+  def audit_update_verb
+    return unless saved_change_to_deactivated_at?
+
+    deactivated_at.present? ? "deactivated" : "reactivated"
   end
 end

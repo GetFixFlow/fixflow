@@ -28,6 +28,8 @@ class ActivityLogService
   end
 
   private_class_method def self.name_for(resource)
+    return resource.audit_name if resource.respond_to?(:audit_name) && resource.audit_name.present?
+
     %i[work_order_number name title].each do |attr|
       return resource.public_send(attr).to_s if resource.respond_to?(attr)
     end

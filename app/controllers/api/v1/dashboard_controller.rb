@@ -98,7 +98,7 @@ module Api
       end
 
       def recent_activity(org)
-        ActivityLog.where(organization_id: org.id).recent.limit(10).map do |log|
+        ActivityLog.where(organization_id: org.id).without_sign_ins.recent.limit(10).map do |log|
           {
             type:        log.action,
             description: log.resource_name,
@@ -129,7 +129,7 @@ module Api
             { id: pm.id, name: pm.name, asset: pm.asset.name, due_date: pm.next_due_at&.to_date }
           },
           recent_activity: ActivityLog.where(organization_id: org.id, user_id: uid)
-                                      .recent.limit(10).map { |log|
+                                      .without_sign_ins.recent.limit(10).map { |log|
             { type: log.action, description: log.resource_name, timestamp: log.created_at }
           }
         }
