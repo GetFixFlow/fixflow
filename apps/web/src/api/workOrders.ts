@@ -86,6 +86,9 @@ export const workRequestsApi = {
     leave_empty?: string
   }) => apiClient.post<{ data: WorkRequest; token: string }>('/work_requests', { work_request: data }),
 
+  /** Whether the company takes requests from people with no account right now (an administrator can turn the form off). */
+  form: () => apiClient.get<{ data: { open: boolean } }>('/public_request_form'),
+
   get: (token: string) =>
     apiClient.get<{ data: WorkRequest }>(`/work_requests/${encodeURIComponent(token)}`),
 

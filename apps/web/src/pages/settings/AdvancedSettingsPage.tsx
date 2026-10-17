@@ -1,24 +1,23 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AlertTriangle, Copy, Check, ExternalLink } from 'lucide-react'
+import { Check, Copy } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
 import { Card, CardContent } from '@/components/ui/Card'
 import { useAuthStore } from '@/stores/authStore'
+import { useOrgSettings, useUpdateOrgSettings } from '@/hooks/useSettings'
 import { cn } from '@/lib/utils'
 
-const PUBLIC_PORTAL_URL = 'https://fixflow.io/request/demo-manufacturing'
-
-function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
+function Toggle({ checked, onChange, disabled, label }: { checked: boolean; onChange: (v: boolean) => void; disabled?: boolean; label: string }) {
   return (
     <button
       type="button"
       role="switch"
       aria-checked={checked}
+      aria-label={label}
+      disabled={disabled}
       onClick={() => onChange(!checked)}
       className={cn(
-        'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors',
+        'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors disabled:cursor-not-allowed disabled:opacity-60',
         checked ? 'bg-brand-600' : 'bg-gray-200 dark:bg-gray-700',
       )}
     >
@@ -32,128 +31,83 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
 
 export function AdvancedSettingsPage() {
   const { user } = useAuthStore()
-
-  const [allowRegistration, setAllowRegistration] = useState(false)
-  const [publicPortalEnabled, setPublicPortalEnabled] = useState(true)
-  const [maintenanceMode, setMaintenanceMode] = useState(false)
-  const [maintenanceMessage, setMaintenanceMessage] = useState("FixFlow is temporarily down for maintenance. We'll be back shortly.")
-  const [copiedUrl, setCopiedUrl] = useState(false)
-
-  // Delete org dialog
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [deleteConfirmText, setDeleteConfirmText] = useState('')
-  const ORG_NAME = 'Demo Manufacturing Co.'
-
-  // Reset demo data dialog
-  const [showResetDialog, setShowResetDialog] = useState(false)
+  const { data: settings, isLoading, isError } = useOrgSettings()
+  const save = useUpdateOrgSettings()
+  const [copied, setCopied] = useState(false)
 
   if (user?.role !== 'admin') {
     return (
       <div className="space-y-6 max-w-2xl">
-        <PageHeader title="Advanced Settings" description="Advanced system configuration" />
+        <PageHeader title="Advanced Settings" />
         <Card>
           <CardContent className="p-8 text-center">
-            <p className="text-gray-500">Access Denied. Only administrators can access advanced settings.</p>
+            <p className="text-gray-500">Only administrators can change advanced settings.</p>
           </CardContent>
         </Card>
       </div>
     )
   }
 
-  const copyPortalUrl = () => {
-    navigator.clipboard.writeText(PUBLIC_PORTAL_URL)
-    setCopiedUrl(true)
-    setTimeout(() => setCopiedUrl(false), 2000)
+  const formOpen = settings?.public_requests_enabled ?? true
+  const formAddress = `${window.location.origin}/request`
+
+  const copyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(formAddress)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setCopied(false) // the address is on the page to copy by hand
+    }
   }
 
   return (
     <div className="space-y-6 max-w-2xl">
-      <PageHeader title="Advanced Settings" description="Advanced system configuration and danger zone" />
+      <PageHeader title="Advanced Settings" description="Settings that change how FixFlow behaves for people outside your team" />
 
-      {/* Application Settings */}
       <Card>
-        <CardContent className="p-5 space-y-4">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Application Settings</h3>
-
-          {/* User Registration */}
-          <div className="flex items-start justify-between py-3 border-b border-gray-50 dark:border-gray-700">
+        <CardContent className="space-y-4 p-5">
+          <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Allow Self-Registration</p>
-              <p className="text-xs text-gray-400 mt-0.5">
-                Allow new users to sign up without an invitation link.
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Public request form</h3>
+              <p className="mt-0.5 text-xs text-gray-500">
+                Anyone with the address, or who scans an asset&apos;s QR label, can report a problem without an account. Each request
+                becomes a work order and your managers are told.
               </p>
             </div>
-            <Toggle checked={allowRegistration} onChange={setAllowRegistration} />
+            <Toggle
+              label="Accept requests from people with no account"
+              checked={formOpen}
+              disabled={isLoading || isError || save.isPending}
+              onChange={(open) => save.mutate({ public_requests_enabled: open })}
+            />
           </div>
 
-          {/* Public Portal */}
-          <div className="py-3 border-b border-gray-50 dark:border-gray-700 space-y-2">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Public Work Request Portal</p>
-                <p className="text-xs text-gray-400 mt-0.5">
-                  Allow external users to submit maintenance requests without logging in.
-                </p>
-              </div>
-              <Toggle checked={publicPortalEnabled} onChange={setPublicPortalEnabled} />
+          {isError ? (
+            <p role="alert" className="text-sm text-red-600">Could not load this setting, so it cannot be changed now. Reload the page to try again.</p>
+          ) : (
+            <p role="status" className={cn('text-sm', formOpen ? 'text-green-700 dark:text-green-400' : 'text-amber-700 dark:text-amber-400')}>
+              {formOpen
+                ? 'On: the form takes requests.'
+                : 'Off: the form refuses new requests and tells people to contact your maintenance team. Links people already have still show how their request is going.'}
+            </p>
+          )}
+
+          <div>
+            <p className="mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Address of the form</p>
+            <div className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-800">
+              <code className="flex-1 truncate font-mono text-xs text-gray-600 dark:text-gray-400">{formAddress}</code>
+              <button type="button" onClick={copyAddress} aria-label="Copy the address" className="shrink-0 text-gray-400 hover:text-gray-600">
+                {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+              </button>
             </div>
-            {publicPortalEnabled && (
-              <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2">
-                <code className="text-xs font-mono text-gray-600 dark:text-gray-400 flex-1 truncate">
-                  {PUBLIC_PORTAL_URL}
-                </code>
-                <button onClick={copyPortalUrl} className="text-gray-400 hover:text-gray-600 shrink-0">
-                  {copiedUrl ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                </button>
-                <a
-                  href={PUBLIC_PORTAL_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-brand-600 shrink-0"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </a>
-              </div>
-            )}
+            <p className="mt-1 text-xs text-gray-500">
+              An asset&apos;s own QR label (Assets, then the QR Code action on its row) opens this form with that asset already chosen.
+            </p>
           </div>
-
-          {/* Maintenance Mode */}
-          <div className="py-3 space-y-2">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Maintenance Mode</p>
-                <p className="text-xs text-gray-400 mt-0.5">
-                  Show a maintenance page to all non-admin users.
-                </p>
-              </div>
-              <Toggle checked={maintenanceMode} onChange={setMaintenanceMode} />
-            </div>
-            {maintenanceMode && (
-              <div className="space-y-2">
-                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400">
-                  Maintenance Message
-                </label>
-                <textarea
-                  value={maintenanceMessage}
-                  onChange={(e) => setMaintenanceMessage(e.target.value)}
-                  rows={2}
-                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm bg-white dark:bg-gray-800 resize-none"
-                />
-                <div className="flex items-center gap-2 p-2 bg-amber-50 dark:bg-amber-900/10 rounded-lg border border-amber-200">
-                  <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
-                  <p className="text-xs text-amber-700 dark:text-amber-300">
-                    Maintenance mode is active. Only admins can access FixFlow.
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <Button size="sm">Save Application Settings</Button>
         </CardContent>
       </Card>
 
-      {/* The version, the services and the update check are real on their own page */}
       <Card>
         <CardContent className="flex items-center justify-between gap-4 p-5">
           <div>
@@ -165,136 +119,6 @@ export function AdvancedSettingsPage() {
           <Link to="/settings/system-health" className="shrink-0 text-sm text-brand-600 hover:underline">Open System Health →</Link>
         </CardContent>
       </Card>
-
-      {/* Danger Zone */}
-      <Card className="border-red-200 dark:border-red-800">
-        <CardContent className="p-5 space-y-4">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-red-500" />
-            <h3 className="font-semibold text-red-700 dark:text-red-400">Danger Zone</h3>
-          </div>
-          <p className="text-xs text-gray-500">
-            These actions are irreversible. Proceed with extreme caution.
-          </p>
-
-          <div className="space-y-3">
-            {/* Reset Demo Data */}
-            {process.env.NODE_ENV === 'development' && (
-              <div className="flex items-start justify-between gap-4 p-4 rounded-lg border border-dashed border-red-200 dark:border-red-800">
-                <div>
-                  <p className="font-medium text-sm text-red-700 dark:text-red-400">Reset Demo Data</p>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    Wipe all demo data and re-seed with factory defaults. Dev only.
-                  </p>
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="border-red-300 text-red-600 hover:bg-red-50 shrink-0"
-                  onClick={() => setShowResetDialog(true)}
-                >
-                  Reset Data
-                </Button>
-              </div>
-            )}
-
-            {/* Delete Organization */}
-            <div className="flex items-start justify-between gap-4 p-4 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/10">
-              <div>
-                <p className="font-medium text-sm text-red-700 dark:text-red-400">Delete Organization</p>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  Permanently delete this organization and all its data. This cannot be undone.
-                </p>
-              </div>
-              <Button
-                size="sm"
-                variant="destructive"
-                className="shrink-0"
-                onClick={() => setShowDeleteDialog(true)}
-              >
-                Delete
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Reset Demo Dialog */}
-      {showResetDialog && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl p-6 max-w-sm w-full">
-            <div className="flex items-center gap-3 mb-3">
-              <AlertTriangle className="h-6 w-6 text-amber-500" />
-              <h3 className="font-semibold">Reset Demo Data?</h3>
-            </div>
-            <p className="text-sm text-gray-500 mb-4">
-              This will delete all current data and replace it with demo data. This cannot be undone.
-            </p>
-            <div className="flex gap-2">
-              <Button variant="outline" className="flex-1" onClick={() => setShowResetDialog(false)}>
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                className="flex-1"
-                onClick={() => {
-                  setShowResetDialog(false)
-                  alert('Demo data would be reset (dev only)')
-                }}
-              >
-                Reset Data
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Organization Dialog */}
-      {showDeleteDialog && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl p-6 max-w-sm w-full">
-            <div className="flex items-center gap-3 mb-3">
-              <AlertTriangle className="h-6 w-6 text-red-500" />
-              <h3 className="font-semibold text-red-700">Delete Organization</h3>
-            </div>
-            <p className="text-sm text-gray-500 mb-4">
-              This will permanently delete <strong>{ORG_NAME}</strong> and all associated data.
-              This action is <strong>irreversible</strong>.
-            </p>
-            <div className="mb-4">
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                Type <strong>{ORG_NAME}</strong> to confirm:
-              </label>
-              <Input
-                value={deleteConfirmText}
-                onChange={(e) => setDeleteConfirmText(e.target.value)}
-                placeholder={ORG_NAME}
-                className="border-red-300"
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => { setShowDeleteDialog(false); setDeleteConfirmText('') }}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                className="flex-1"
-                disabled={deleteConfirmText !== ORG_NAME}
-                onClick={() => {
-                  setShowDeleteDialog(false)
-                  alert('Organization deletion would be triggered (requires backend confirmation)')
-                }}
-              >
-                Delete Forever
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

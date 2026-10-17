@@ -336,7 +336,9 @@ Print labels from **Assets → Print labels** (or an asset's page). **Labels pri
 - Limits per address: **5 reports per 10 minutes, 20 per day, and 60 per hour from everyone together** (so a flood spread over many addresses still cannot bury the managers' inboxes; the cost is that a flood can also stop real reports for a while), and 60 link or label lookups per 5 minutes. Over the limit the answer is `429`. A hidden form field catches simple scripts: they are told it worked and nothing is created.
 - The pages are sent with `Cache-Control: no-store`, `X-Robots-Tag: noindex` and `Referrer-Policy: no-referrer`, so the link does not end up in caches, search results or other sites' logs. Server logs filter the `token` and `email` parameters, but a request's path (with the token) is logged by the web server in front: treat access logs as you would the work orders themselves.
 
-Behind a proxy the limits count the address the proxy reports (`X-Forwarded-For`); make sure your proxy sets it, or every visitor shares one allowance. There is no switch to turn the public form off yet.
+Behind a proxy the limits count the address the proxy reports (`X-Forwarded-For`); make sure your proxy sets it, or every visitor shares one allowance.
+
+**Turning the form off.** An administrator can switch the public form off under **Settings, Advanced Settings** (a company setting, on by default). While it is off, `POST /api/v1/work_requests` and the label lookup answer `403` with the code `PUBLIC_REQUESTS_OFF`, the form shows "This request form is turned off. Please contact your maintenance team directly." before anyone types a request (it asks `GET /api/v1/public_request_form`, which says only whether the form is open), nothing is created and no manager is notified, and a script that fills the hidden field is refused the same way. Links to requests already made keep showing their progress. Turning it back on takes effect at once.
 
 ## Exporting reports
 

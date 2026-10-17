@@ -104,6 +104,8 @@ export interface OrgSettings {
   iot_auto_wo_threshold: string
   /** Whether the System Health page may ask GitHub for the latest release. */
   update_check: boolean
+  /** Whether people with no account may send maintenance requests (the QR label's form). */
+  public_requests_enabled: boolean
   work_hours: { start: string; end: string }
   work_days: number[]
   holidays: Holiday[]

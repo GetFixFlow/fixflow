@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/authStore'
 import {
   User, Bell, Lock, Building2, Palette, Mail, Globe, Users, Shield,
-  Radio, Database, FileArchive, Search, Settings, AlertTriangle, ChevronRight, Sparkles, Activity,
+  Radio, Database, FileArchive, Search, Settings, ChevronRight, Sparkles, Activity,
 } from 'lucide-react'
 
 interface NavItem {
@@ -67,10 +67,10 @@ const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
-    title: 'Danger Zone',
+    title: 'Advanced',
     roles: ['admin'],
     items: [
-      { href: '/settings/advanced', label: 'Advanced Settings', icon: AlertTriangle },
+      { href: '/settings/advanced', label: 'Advanced Settings', icon: Settings },
     ],
   },
 ]

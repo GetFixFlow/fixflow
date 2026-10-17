@@ -31,11 +31,14 @@ function makeSchema(hasAsset: boolean) {
 
 type FormValues = z.infer<ReturnType<typeof makeSchema>>
 
+const FORM_OFF = 'This request form is turned off. Please contact your maintenance team directly.'
+
 /** What to tell the person when sending failed. Never a success message for a request that was not made. */
 function failureMessage(error: unknown): string {
   if (isAxiosError(error)) {
     const status = error.response?.status
     if (status === 429) return 'Too many requests from this device. Please wait a few minutes and try again.'
+    if (status === 403 && error.response?.data?.error?.code === 'PUBLIC_REQUESTS_OFF') return FORM_OFF
     if (status === 413) return 'That request is too long. Please shorten it and try again.'
     if (status === 422) return error.response?.data?.error?.message ?? 'Please check the details and try again.'
     if (!error.response) return 'Could not reach the server. Check your connection and try again.'
@@ -59,10 +62,19 @@ export function WorkRequestPortalPage() {
     return () => meta.remove()
   }, [])
 
+  // An administrator can turn the form off. People are told so before they type a request, not after.
+  const formQuery = useQuery({
+    queryKey: ['public_request_form'],
+    queryFn: () => workRequestsApi.form().then((r) => r.data.data.open),
+    retry: false,
+  })
+  const [closedByServer, setClosedByServer] = useState(false)
+  const closed = formQuery.data === false || closedByServer
+
   const assetQuery = useQuery({
     queryKey: ['public_asset', code],
     queryFn: () => workRequestsApi.asset(code!).then((r) => r.data.data),
-    enabled: !!code,
+    enabled: !!code && formQuery.data === true,
     retry: false,
   })
   // A label that is not recognised is not sent along: the person describes the equipment instead.
@@ -109,7 +121,9 @@ export function WorkRequestPortalPage() {
       })
       setSubmitted({ token, email: values.requester_email })
     } catch (error) {
-      setSendError(failureMessage(error))
+      const message = failureMessage(error)
+      if (message === FORM_OFF) setClosedByServer(true)
+      setSendError(message)
     }
   }
 
@@ -122,6 +136,38 @@ export function WorkRequestPortalPage() {
     } catch {
       setCopied(false) // the link is on the page to copy by hand
     }
+  }
+
+  const recentRequests = recent.length > 0 && (
+    <div className="rounded-2xl border border-gray-200 bg-white p-4 text-sm dark:border-gray-700 dark:bg-gray-800">
+      <p className="mb-2 font-medium text-gray-700 dark:text-gray-300">Your recent requests on this device</p>
+      <ul className="space-y-1">
+        {recent.map((r) => (
+          <li key={r.token}>
+            <Link to={`/request/${r.token}`} className="text-brand-600 hover:underline dark:text-brand-400">
+              {r.title}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+
+  if (closed) {
+    return (
+      <div className="flex min-h-screen items-start justify-center bg-gray-50 p-4 dark:bg-gray-900">
+        <div className="w-full max-w-lg space-y-6 py-12">
+          <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Report a problem</h1>
+            <p role="status" className="mt-3 text-gray-600 dark:text-gray-400">{FORM_OFF}</p>
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-500">
+              For an emergency, contact your supervisor or the emergency services.
+            </p>
+          </div>
+          {recentRequests}
+        </div>
+      </div>
+    )
   }
 
   if (submitted) {
@@ -305,20 +351,7 @@ export function WorkRequestPortalPage() {
           </form>
         </div>
 
-        {recent.length > 0 && (
-          <div className="rounded-2xl border border-gray-200 bg-white p-4 text-sm dark:border-gray-700 dark:bg-gray-800">
-            <p className="mb-2 font-medium text-gray-700 dark:text-gray-300">Your recent requests on this device</p>
-            <ul className="space-y-1">
-              {recent.map((r) => (
-                <li key={r.token}>
-                  <Link to={`/request/${r.token}`} className="text-brand-600 hover:underline dark:text-brand-400">
-                    {r.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {recentRequests}
       </div>
     </div>
   )

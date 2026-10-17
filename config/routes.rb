@@ -90,6 +90,7 @@ Rails.application.routes.draw do
       # Public, no account: report a problem (from an asset's QR label) and follow it with a link
       resources :work_requests, only: %i[create show], param: :token
       get "public_assets/:code", to: "work_requests#asset"
+      get "public_request_form", to: "work_requests#form"
 
       resources :preventive_maintenances do
         collection { get :dashboard }
