@@ -59,7 +59,8 @@ module Api
       end
 
       def blob_path(attachment)
-        Rails.application.routes.url_helpers.rails_blob_path(attachment, only_path: true) if attachment.attached?
+        # Through the app, not a redirect to the file storage (its address is internal; no browser can open it).
+        Rails.application.routes.url_helpers.rails_storage_proxy_path(attachment, only_path: true) if attachment.attached?
       end
     end
   end

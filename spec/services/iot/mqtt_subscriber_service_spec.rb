@@ -9,6 +9,25 @@ RSpec.describe Iot::MqttSubscriberService do
     allow(described_class).to receive(:process_message)
   end
 
+  describe ".start_here?" do
+    it "is the background worker, and only the worker, unless it is told otherwise" do
+      expect(described_class.start_here?({}, worker: true)).to be(true)
+      expect(described_class.start_here?({}, worker: false)).to be(false)
+      expect(described_class.start_here?({ "MQTT_SUBSCRIBER" => "" }, worker: false)).to be(false)
+    end
+
+    it "does what MQTT_SUBSCRIBER says, whichever process this is" do
+      expect(described_class.start_here?({ "MQTT_SUBSCRIBER" => "true" }, worker: false)).to be(true)
+      expect(described_class.start_here?({ "MQTT_SUBSCRIBER" => " TRUE " }, worker: false)).to be(true)
+      expect(described_class.start_here?({ "MQTT_SUBSCRIBER" => "false" }, worker: true)).to be(false)
+    end
+
+    it "asks Sidekiq whether this is the worker" do
+      allow(Sidekiq).to receive(:server?).and_return(true)
+      expect(described_class.start_here?({})).to be(true)
+    end
+  end
+
   describe ".listen" do
     it "says it is connected, notes each message, and says when it stops" do
       allow(client).to receive(:get).and_yield("fixflow/acme/telemetry", "{}").and_yield("fixflow/acme/telemetry", "{}")

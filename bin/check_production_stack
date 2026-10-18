@@ -1,0 +1,111 @@
+#!/bin/sh
+# Starts the production stack (docker-compose.prod.yml) for real, from a fresh checkout, and checks that it works:
+# every service healthy, the front door serving the web app and the API, a WebSocket upgrading, first-run setup and
+# sign-in, the System Health checks (database, Redis, the worker, the sensor broker, file storage), and a backup that
+# is restored again. It takes several minutes (the images are built). CI runs it; it removes everything it started.
+#
+# It writes a .env and deletes the stack's volumes, so it refuses to run where a .env already exists:
+# use a fresh clone, not your own working copy.
+set -eu
+cd "$(dirname "$0")/.."
+
+if [ -e .env ]; then
+  echo "bin/check_production_stack: there is a .env here. Run this in a fresh clone; it would replace your settings." >&2
+  exit 2
+fi
+
+PORT=8088
+BASE="http://localhost:$PORT"
+COMPOSE="docker compose -f docker-compose.prod.yml"
+
+cleanup() {
+  status=$?
+  if [ "$status" != 0 ]; then
+    echo "---- container status" >&2
+    $COMPOSE ps >&2 || true
+    echo "---- last log lines" >&2
+    $COMPOSE logs --tail 40 >&2 || true
+  fi
+  $COMPOSE down -v >/dev/null 2>&1 || true
+  rm -f .env
+  exit "$status"
+}
+trap cleanup EXIT
+
+fail() { echo "FAIL: $*" >&2; exit 1; }
+ok() { echo "ok:   $*"; }
+
+cp .env.example .env
+# Later lines win in an env file, so these replace the empty ones above without editing the file.
+{
+  echo
+  echo "APP_URL=$BASE"
+  echo "HTTP_PORT=$PORT"
+  echo "SECRET_KEY_BASE=$(openssl rand -hex 64)"
+  echo "DEVISE_JWT_SECRET_KEY=$(openssl rand -hex 48)"
+  echo "DB_PASSWORD=$(openssl rand -hex 24)"
+  echo "REDIS_PASSWORD=$(openssl rand -hex 24)"
+  echo "MINIO_ACCESS_KEY=$(openssl rand -hex 10)"
+  echo "MINIO_SECRET_KEY=$(openssl rand -hex 24)"
+  echo "MQTT_PASSWORD=$(openssl rand -hex 24)"
+} >> .env
+
+$COMPOSE up -d --build --wait --wait-timeout 900 || fail "the stack did not come up healthy"
+ok "all services healthy"
+
+[ "$(curl -s -o /dev/null -w '%{http_code}' $BASE/healthz)" = "200" ] || fail "/healthz"
+curl -s $BASE/api/v1/health | grep -q '"status":"ok"' || fail "/api/v1/health through the front door"
+curl -s $BASE/ | grep -q 'id="root"' || fail "the web app is not served at /"
+[ "$(curl -s -o /dev/null -w '%{http_code}' $BASE/settings/data-retention)" = "200" ] || fail "a deep link of the web app"
+curl -s $BASE/api/v1/setup/status | grep -q '"setup_required":true' || fail "setup status"
+ok "front door serves the web app and the API"
+
+UPGRADE=$(curl -s -i -m 3 -H 'Connection: Upgrade' -H 'Upgrade: websocket' -H 'Sec-WebSocket-Version: 13' \
+  -H 'Sec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw==' -H "Origin: $BASE" $BASE/cable 2>/dev/null | head -1 || true)
+echo "$UPGRADE" | grep -q ' 101 ' || fail "/cable did not upgrade to a WebSocket (got: $UPGRADE)"
+FOREIGN=$(curl -s -i -m 3 -H 'Connection: Upgrade' -H 'Upgrade: websocket' -H 'Sec-WebSocket-Version: 13' \
+  -H 'Sec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw==' -H 'Origin: http://evil.example' $BASE/cable 2>/dev/null | head -1 || true)
+echo "$FOREIGN" | grep -q ' 101 ' && fail "/cable accepted a WebSocket from another origin"
+ok "/cable upgrades for this address and refuses another"
+
+JSON='Content-Type: application/json'
+curl -s -X POST $BASE/api/v1/auth/sign_up -H "$JSON" \
+  -d '{"user":{"email":"admin@check.test","password":"password123","password_confirmation":"password123","first_name":"Check","last_name":"Admin","organization_name":"Check Co"}}' \
+  | grep -q 'Account created' || fail "first-run setup"
+[ "$(curl -s -o /dev/null -w '%{http_code}' -X POST $BASE/api/v1/auth/sign_up -H "$JSON" \
+  -d '{"user":{"email":"two@check.test","password":"password123","password_confirmation":"password123","first_name":"B","last_name":"B","organization_name":"Two"}}')" = "403" ] \
+  || fail "a second sign-up was not refused"
+TOKEN=$(curl -s -D - -o /dev/null -X POST $BASE/api/v1/auth/sign_in -H "$JSON" \
+  -d '{"user":{"email":"admin@check.test","password":"password123"}}' | grep -i '^authorization:' | sed 's/^[Aa]uthorization: //' | tr -d '\r')
+[ -n "$TOKEN" ] || fail "sign-in returned no token"
+ok "first-run setup, and sign-in"
+
+curl -s $BASE/api/v1/system_health -H "Authorization: $TOKEN" | python3 -c '
+import json, sys
+data = json.load(sys.stdin)
+checks = data.get("checks", data)
+bad = [name for name in ("database", "redis", "background_jobs", "mqtt", "storage") if checks[name]["status"] != "ok"]
+if bad:
+    sys.exit("System Health not ok: " + ", ".join("%s (%s)" % (n, checks[n].get("summary", "")) for n in bad))
+' || fail "System Health"
+ok "System Health: database, Redis, worker, sensor broker and file storage all ok"
+
+$COMPOSE exec -T api bin/rails runner 'DatabaseBackupJob.perform_now' >/dev/null 2>&1 || fail "the nightly backup job"
+$COMPOSE exec -T api bin/rails fixflow:backups 2>/dev/null | grep -q 'fixflow_.*\.sql\.gz' || fail "the backup is not listed"
+curl -s $BASE/api/v1/backups -H "Authorization: $TOKEN" | grep -q 'fixflow_.*sql.gz' || fail "the backup is not listed by the API"
+ok "a backup was made and listed"
+
+curl -s -X POST $BASE/api/v1/locations -H "Authorization: $TOKEN" -H "$JSON" \
+  -d '{"location":{"name":"Made after the backup","location_type":"building"}}' | grep -q 'Made after the backup' || fail "creating a place"
+make restore FROM=latest CONFIRM=yes >/dev/null 2>&1 || fail "make restore"
+for _ in $(seq 1 40); do
+  [ "$(curl -s -o /dev/null -w '%{http_code}' $BASE/api/v1/health)" = "200" ] && break
+  sleep 3
+done
+TOKEN=$(curl -s -D - -o /dev/null -X POST $BASE/api/v1/auth/sign_in -H "$JSON" \
+  -d '{"user":{"email":"admin@check.test","password":"password123"}}' | grep -i '^authorization:' | sed 's/^[Aa]uthorization: //' | tr -d '\r')
+[ -n "$TOKEN" ] || fail "cannot sign in after the restore"
+curl -s $BASE/api/v1/locations -H "Authorization: $TOKEN" | grep -q 'Made after the backup' && fail "the restore did not remove what was added after the backup"
+ok "restore put the database back as it was at the backup"
+
+echo "The production stack works."

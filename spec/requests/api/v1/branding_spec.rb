@@ -53,7 +53,8 @@ RSpec.describe "Api::V1::Branding", type: :request do
       get "/api/v1/branding"
       expect(json_body.dig("branding", "logo_url")).to eq(logo_url)
       get logo_url
-      expect(response).to have_http_status(:redirect)
+      expect(response).to have_http_status(:ok) # the file itself, not a redirect to the (internal) file storage
+      expect(response.body.b).to eq(file_fixture("pixel.png").binread)
     end
 
     it "removes a logo when asked, without touching the rest" do

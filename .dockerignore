@@ -43,3 +43,11 @@
 # Ignore Docker-related files
 /.dockerignore
 /Dockerfile*
+
+# The API image does not need the web app's sources (the web app has its own image), the tests or the notes.
+/apps/
+/spec/
+/docs/
+/coverage/
+/node_modules/
+/.claude/

@@ -26,8 +26,10 @@ RSpec.describe "Api::V1::Attachments", type: :request do
       get path, headers: auth_headers_for(technician)
       expect(json_body["attachments"].size).to eq(1)
 
+      # The file itself, from the app: a redirect would send the browser to the file storage, whose address is internal.
       get url
-      expect(response).to have_http_status(:redirect)
+      expect(response).to have_http_status(:ok)
+      expect(response.body.b).to eq(png.b)
     end
 
     it "also accepts the file as a plain field" do

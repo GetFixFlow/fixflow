@@ -1,9 +1,10 @@
 # ── Build stage ─────────────────────────────────────────────────────────────
-FROM ruby:3.3-alpine AS builder
+FROM ruby:3.3.12-alpine AS builder
 
 RUN apk add --no-cache \
       build-base \
       postgresql-dev \
+      yaml-dev \
       git \
       tzdata \
       nodejs \
@@ -12,7 +13,10 @@ RUN apk add --no-cache \
 WORKDIR /app
 
 COPY Gemfile Gemfile.lock ./
-RUN bundle config set --local without "development test" && \
+# A production image leaves out the development and test gems. docker-compose.yml (development) builds with this empty,
+# because Rails will not start in development without them.
+ARG BUNDLE_WITHOUT="development test"
+RUN bundle config set --local without "$BUNDLE_WITHOUT" && \
     bundle install --jobs 4 --retry 3
 
 COPY . .
@@ -21,7 +25,7 @@ COPY . .
 RUN bundle exec rails assets:precompile 2>/dev/null || true
 
 # ── Runtime stage ────────────────────────────────────────────────────────────
-FROM ruby:3.3-alpine AS runtime
+FROM ruby:3.3.12-alpine AS runtime
 
 RUN apk add --no-cache \
       postgresql-client \
