@@ -30,7 +30,15 @@ export interface DataUsage {
     removable_lines: number | null
   }
   cleanup_at: { sensor_data: string; audit_log: string }
-  backups: { runs: boolean; at: string; keep_days: number; bucket: string }
+  backups: {
+    runs: boolean
+    at: string
+    keep_days: number
+    bucket: string
+    /** A failed backup is tried this many times in all, `retry_minutes` apart; the administrators are told after the last. */
+    tries: number
+    retry_minutes: number
+  }
 }
 
 export const dataUsageApi = {

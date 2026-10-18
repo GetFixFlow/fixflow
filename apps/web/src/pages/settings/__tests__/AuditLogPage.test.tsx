@@ -69,6 +69,22 @@ describe('AuditLogPage', () => {
     expect(within(await rowOf('Bo Technician')).getByText('Role: technician → manager')).toBeInTheDocument()
   })
 
+  it('shows which backup was downloaded and why the nightly backup failed', async () => {
+    const base = log.activity_logs[0]
+    serve({
+      ...log,
+      activity_logs: [
+        { ...base, id: 901, action: 'backup.downloaded', resource_type: 'Organization', resource_name: 'Acme', metadata: { name: 'fixflow_20261018_030000.sql.gz' } },
+        { ...base, id: 902, action: 'backup.failed', user: null, resource_type: 'Organization', resource_name: 'Acme', metadata: { error: 'RuntimeError: pg_dump failed', attempts: 3 } },
+      ],
+    })
+    renderPage()
+    expect(await screen.findByText('Database backup downloaded')).toBeInTheDocument()
+    expect(screen.getByText('fixflow_20261018_030000.sql.gz')).toBeInTheDocument()
+    expect(screen.getByText('Nightly backup failed')).toBeInTheDocument()
+    expect(screen.getByText('RuntimeError: pg_dump failed')).toBeInTheDocument()
+  })
+
   it('shows sign-ins as sign-ins, with who signed in and from where', async () => {
     renderPage()
     const signIn = log.activity_logs.find((l) => l.action === 'user.signed_in')!

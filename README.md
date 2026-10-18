@@ -346,7 +346,34 @@ Each check says *Working*, *Needs attention* (works, but look at it) or *Down*, 
 
 Everything else (work orders, assets, IoT alerts, comments, uploaded files) is kept until someone deletes it. **Before saving a shorter limit the page asks the server what it would delete** and says so (for example "120 readings past this limit will be deleted for good in the next nightly cleanup"); nothing is deleted until you save, and then only at the next nightly run. Each cleanup that deletes something writes a line by the system to the audit log (what and how many). `bin/rails fixflow:cleanup_readings` runs both cleanups by hand.
 
-**Backups.** A production server copies the database every night at 03:00 UTC to the `MINIO_BACKUP_BUCKET` bucket and keeps 30 days. A failed backup is written to the server log only; nobody is emailed. Listing, downloading and restoring backups from the page is not available yet.
+**Backups** are described below.
+
+## Backups and restoring
+
+**What is backed up.** A production server copies the **database** every night at 03:00 UTC (`DatabaseBackupJob`, run by the background worker) into the `MINIO_BACKUP_BUCKET` bucket (`fixflow-backups` by default), as a gzipped SQL file named `fixflow_YYYYMMDD_HHMMSS.sql.gz`, and deletes backups of that name older than 30 days. **The photos and documents people uploaded are not in a backup**: they are in the `MINIO_BUCKET` file storage, which you have to protect yourself (for example by backing up the storage volume). A development server makes no backups.
+
+**When one fails.** The backup is tried again 15 minutes later, and once more after that (3 tries). Only if the last try fails, a `backup.failed` line is written to the audit log and **every active administrator is emailed** (it is not one of the choices on the notification screen, like an invitation; it needs email to be set up, and the background worker to be running to send it). One bad night is one email, not three. If nothing runs at all (the worker is stopped), nothing can tell you, which is why the page below warns when the newest backup is more than 26 hours old.
+
+**The Data Retention page** (Settings, Data Retention, administrators only) lists the backups in the storage with their size, lets you download one, and shows a warning when a backup is overdue or the storage does not answer. A backup holds everything in the database, **password hashes included**, so every download is written to the audit log. The page downloads through the browser's memory: for a very large database fetch the file from the storage bucket directly.
+
+**Restoring** is done on the server with a command, never from the web page, with the web and worker processes stopped:
+
+```bash
+rails fixflow:backups                              # list the backups in the storage, newest first
+rails "fixflow:restore[latest]"                    # restore the newest one
+rails "fixflow:restore[fixflow_20261018_030000.sql.gz]"   # or one from the list
+rails "fixflow:restore[/path/to/backup.sql.gz]"    # or a file you downloaded (a plain .sql from `make backup` also works)
+```
+
+- It restores into an **empty database** and refuses (changing nothing) if the database already has tables. Add `REPLACE=yes` to delete everything in the database first; the deletion and the restore are one transaction, so a restore that fails half way leaves the old data as it was.
+- The file is checked to be a complete dump before the database is touched, and the restore stops at the first error and rolls back.
+- It copes with a dump made under another database user, and with a dump made by a newer `pg_dump` than the database server (the app image's `pg_dump` is version 18 and the compose file's database is PostgreSQL 16).
+- Afterwards it says whether the backup is from an older FixFlow (run `rails db:migrate`) or a **newer** one (upgrade FixFlow first).
+- Only the database is touched; the files in the storage are not.
+
+`make backup` writes a gzipped dump of the production database to `backup_YYYYMMDD.sql.gz` in the current folder (it is ignored by git); restore it with the command above.
+
+**Not covered yet:** backing up the uploaded files, and a one-command restore inside Docker (see the note in the pull request).
 
 ## Reporting a problem without an account (QR labels)
 

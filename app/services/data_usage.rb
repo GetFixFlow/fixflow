@@ -72,6 +72,6 @@ class DataUsage
 
   def backups
     { runs: DatabaseBackupJob.runs_here?, at: DatabaseBackupJob::RUNS_AT, keep_days: DatabaseBackupJob::RETENTION_DAYS,
-      bucket: ENV.fetch("MINIO_BACKUP_BUCKET", "fixflow-backups") }
+      bucket: BackupStore.bucket, tries: DatabaseBackupJob::ATTEMPTS, retry_minutes: DatabaseBackupJob::RETRY_AFTER.in_minutes.to_i }
   end
 end

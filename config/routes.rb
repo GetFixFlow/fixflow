@@ -51,6 +51,9 @@ Rails.application.routes.draw do
       get "health",  to: "health#show"
       get "system_health", to: "system_health#show"
       get "data_usage", to: "data_usage#show"
+      get "backups", to: "backups#index"
+      # `format: false`: the name ends in .sql.gz, which Rails would otherwise take for a format.
+      get "backups/:name/download", to: "backups#download", format: false, constraints: { name: %r{[^/]+} }
       get "setup/status", to: "setup#status"
 
       resources :locations do

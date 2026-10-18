@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { changedFields, describeAction, removalSummary, roleChange } from '../auditText'
+import { backupSummary, changedFields, describeAction, removalSummary, roleChange } from '../auditText'
 import type { AuditLine } from '@/api/audit'
 
 const line = (metadata: AuditLine['metadata']): AuditLine => ({
@@ -54,5 +54,19 @@ describe('retention lines', () => {
   it('says nothing for other lines, or a cleanup that deleted nothing', () => {
     expect(removalSummary(line({ readings: 5 }))).toBeNull()
     expect(removalSummary({ ...line({ readings: 0, summaries: 0 }), action: 'retention.sensor_data_removed' })).toBeNull()
+  })
+})
+
+describe('backup lines', () => {
+  it('words a download and a failed nightly backup, and says which file or why', () => {
+    expect(describeAction('backup.downloaded')).toBe('Database backup downloaded')
+    expect(describeAction('backup.failed')).toBe('Nightly backup failed')
+    expect(backupSummary({ ...line({ name: 'fixflow_20261018_030000.sql.gz' }), action: 'backup.downloaded' })).toBe('fixflow_20261018_030000.sql.gz')
+    expect(backupSummary({ ...line({ error: 'RuntimeError: pg_dump failed', attempts: 3 }), action: 'backup.failed' })).toBe('RuntimeError: pg_dump failed')
+  })
+
+  it('says nothing for other lines', () => {
+    expect(backupSummary(line({ name: 'x' }))).toBeNull()
+    expect(backupSummary({ ...line({}), action: 'backup.downloaded' })).toBeNull()
   })
 })

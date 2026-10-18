@@ -39,6 +39,8 @@ const SPECIAL: Record<string, string> = {
   'part.stock_adjusted': 'Part stock adjusted',
   'retention.sensor_data_removed': 'Old sensor data deleted',
   'retention.audit_log_removed': 'Old audit log lines deleted',
+  'backup.downloaded': 'Database backup downloaded',
+  'backup.failed': 'Nightly backup failed',
 }
 
 const words = (text: string) => text.replace(/_/g, ' ')
@@ -78,4 +80,12 @@ export function removalSummary(line: AuditLine): string | null {
   ].filter(Boolean)
   if (parts.length === 0) return null
   return `Deleted ${parts.join(', ')}${typeof olderThan === 'number' ? `, older than ${olderThan} days` : ''}`
+}
+
+/** Which backup was downloaded, or why the nightly one failed; null for any other line. */
+export function backupSummary(line: AuditLine): string | null {
+  const { name, error } = line.metadata as Record<string, unknown>
+  if (line.action === 'backup.downloaded' && typeof name === 'string') return name
+  if (line.action === 'backup.failed' && typeof error === 'string') return error
+  return null
 }

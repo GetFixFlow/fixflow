@@ -41,6 +41,9 @@ gem "secure_headers", "~> 7.0"
 
 # Background jobs
 gem "sidekiq", "~> 7.3"
+# Sidekiq 7.3 calls TimedStack#pop(timeout), which connection_pool 3 no longer accepts: its scheduled-job poller dies
+# at start-up and no retry or delayed job ever runs. Remove this when Sidekiq is upgraded to 8.
+gem "connection_pool", "< 3"
 gem "sidekiq-scheduler", "~> 5.0"
 gem "redis", "~> 5.0"
 

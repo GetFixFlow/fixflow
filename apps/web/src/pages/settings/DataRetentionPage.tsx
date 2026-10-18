@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/Card'
 import { useAuthStore } from '@/stores/authStore'
 import { useOrgSettings, useUpdateOrgSettings } from '@/hooks/useSettings'
 import { dataUsageApi, type DataUsage } from '@/api/dataUsage'
+import { BackupsCard } from './BackupsCard'
 import { AUDIT_CHOICES, SENSOR_CHOICES, describeDays, formatBytes, withCurrent } from '@/lib/retentionText'
 import { formatDate, formatNumber } from '@/lib/localeFormat'
 
@@ -184,24 +185,7 @@ export function DataRetentionPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="space-y-2 p-5">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Database backups</h3>
-          {usage && (usage.backups.runs ? (
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              A copy of the database is made every night at {usage.backups.at} and kept for {usage.backups.keep_days} days in the
-              file storage (the <span className="font-mono">{usage.backups.bucket}</span> bucket). A failed backup is written to the server log only; nobody is told.
-            </p>
-          ) : (
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              This server does not make backups: only a production server does (nightly at {usage.backups.at}, kept {usage.backups.keep_days} days).
-            </p>
-          ))}
-          <p className="text-xs text-gray-500">
-            Listing, downloading and restoring backups from this page is not available yet. The files are in the storage bucket named above.
-          </p>
-        </CardContent>
-      </Card>
+      <BackupsCard backups={usage?.backups} />
     </div>
   )
 }

@@ -115,6 +115,7 @@ RSpec.describe "GET /api/v1/data_usage", type: :request do
   end
 
   it "tells the truth about backups: a nightly time, how long they are kept, and whether this server makes them" do
-    expect(usage["backups"]).to eq("runs" => false, "at" => "03:00 UTC", "keep_days" => 30, "bucket" => "fixflow-backups")
+    expect(usage["backups"]).to eq("runs" => false, "at" => "03:00 UTC", "keep_days" => 30, "bucket" => "fixflow-backups",
+                                   "tries" => 3, "retry_minutes" => 15)
   end
 end
