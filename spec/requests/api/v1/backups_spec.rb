@@ -20,7 +20,8 @@ RSpec.describe "Backups", type: :request do
 
   it "loads in a server that has not used the storage library yet (the Gemfile only requires it on use)" do
     script = "raise 'the storage library is already loaded' if defined?(Aws::S3); Api::V1::BackupsController; puts 'loaded'"
-    output, status = Open3.capture2e({ "RAILS_ENV" => "test" }, "bin/rails", "runner", script, chdir: Rails.root.to_s)
+    # Without CI: with it, the test environment loads every file up front, which loads the library too.
+    output, status = Open3.capture2e({ "RAILS_ENV" => "test", "CI" => nil }, "bin/rails", "runner", script, chdir: Rails.root.to_s)
 
     expect(status).to be_success, output
     expect(output).to include("loaded")
