@@ -45,6 +45,7 @@ module OrganizationSettings
       validate_integer_range(values, "iot_alert_cooldown", 0..525_600)
       validate_integer_range(values, "iot_stale_threshold", 1..86_400)
       validate_integer_range(values, "iot_data_retention_days", 1..3650)
+      validate_integer_range(values, "audit_log_retention_days", 0..3650)
     end
 
     def validate_schedule(values)

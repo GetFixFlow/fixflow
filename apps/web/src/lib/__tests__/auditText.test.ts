@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { changedFields, describeAction, roleChange } from '../auditText'
+import { changedFields, describeAction, removalSummary, roleChange } from '../auditText'
 import type { AuditLine } from '@/api/audit'
 
 const line = (metadata: AuditLine['metadata']): AuditLine => ({
@@ -38,5 +38,21 @@ describe('changedFields and roleChange', () => {
     expect(roleChange(line({ values: { role: ['technician', 'manager'] } }))).toBe('technician → manager')
     expect(roleChange(line({ values: { hourly_rate: [10, 20] } }))).toBeNull()
     expect(roleChange(line({}))).toBeNull()
+  })
+})
+
+describe('retention lines', () => {
+  it('words what the nightly cleanup deleted', () => {
+    expect(describeAction('retention.sensor_data_removed')).toBe('Old sensor data deleted')
+    expect(describeAction('retention.audit_log_removed')).toBe('Old audit log lines deleted')
+    expect(removalSummary({ ...line({ readings: 1200, summaries: 30, older_than_days: 365 }), action: 'retention.sensor_data_removed' }))
+      .toBe('Deleted 1,200 readings, 30 hourly summaries, older than 365 days')
+    expect(removalSummary({ ...line({ lines: 5, older_than_days: 730 }), action: 'retention.audit_log_removed' }))
+      .toBe('Deleted 5 lines, older than 730 days')
+  })
+
+  it('says nothing for other lines, or a cleanup that deleted nothing', () => {
+    expect(removalSummary(line({ readings: 5 }))).toBeNull()
+    expect(removalSummary({ ...line({ readings: 0, summaries: 0 }), action: 'retention.sensor_data_removed' })).toBeNull()
   })
 })

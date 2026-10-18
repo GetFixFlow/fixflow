@@ -335,7 +335,18 @@ Each check says *Working*, *Needs attention* (works, but look at it) or *Down*, 
 
 **What is not written down.** A change records *which fields* changed, never their values (a value can be a wage, a secret or a customer's text), with one exception: a change of someone's role shows the old and the new role. Passwords appear only as "password changed". Nothing is written for the things the system keeps up to date by itself (a schedule's next due date and counters, how often an IoT rule has fired, sign-in counters, a work order moving through its states beyond the one line each step already writes), for IoT readings and alerts (far too many), or for a failed sign-in. Reports and the dashboards' recent activity show the work, not who signed in. A line is written after the change is saved, so a change that is rolled back leaves none; if writing a line ever fails, the change itself is still saved.
 
-**How long it is kept.** For now, for ever (the retention setting for the audit log is the next change).
+**How long it is kept.** For ever by default; see *Data retention* below to set a limit.
+
+## Data retention
+
+**Settings, Data Retention** (administrators) shows what the data really takes up (the database and its biggest tables, and the uploaded files; FixFlow does not know how big your disk is) and sets how long two kinds of data are kept:
+
+- **Sensor readings and their hourly summaries**: 7 days to 10 years (a year by default). The nightly cleanup (`Iot::CleanupReadingsJob`, 02:00 UTC) deletes older ones, in small batches. A reading that raised an IoT alert is **always kept**, as the alert's evidence (and the database would refuse to delete it). This is the same setting as *Keep sensor readings for* on the Organization page. Before this change the limit came from `IOT_RETENTION_DAYS` (90 days) and the company's own setting was ignored; now the company's setting wins, `IOT_RETENTION_DAYS` is used only for a company that never chose one, and without either it is a year, so an install that relied on the old 90 days now keeps more.
+- **Audit log**: for ever by default, or 1 to 7 years (`AuditLogCleanupJob`, 02:30 UTC).
+
+Everything else (work orders, assets, IoT alerts, comments, uploaded files) is kept until someone deletes it. **Before saving a shorter limit the page asks the server what it would delete** and says so (for example "120 readings past this limit will be deleted for good in the next nightly cleanup"); nothing is deleted until you save, and then only at the next nightly run. Each cleanup that deletes something writes a line by the system to the audit log (what and how many). `bin/rails fixflow:cleanup_readings` runs both cleanups by hand.
+
+**Backups.** A production server copies the database every night at 03:00 UTC to the `MINIO_BACKUP_BUCKET` bucket and keeps 30 days. A failed backup is written to the server log only; nobody is emailed. Listing, downloading and restoring backups from the page is not available yet.
 
 ## Reporting a problem without an account (QR labels)
 

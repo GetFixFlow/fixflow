@@ -50,6 +50,7 @@ Rails.application.routes.draw do
       end
       get "health",  to: "health#show"
       get "system_health", to: "system_health#show"
+      get "data_usage", to: "data_usage#show"
       get "setup/status", to: "setup#status"
 
       resources :locations do

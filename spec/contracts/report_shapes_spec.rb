@@ -191,6 +191,18 @@ RSpec.describe "Report response shapes", type: :request do
     expect_fixture("activity_logs", fetch("activity_logs", as: admin))
   end
 
+  it "data_usage (what the data takes up, and what the retention settings would remove)" do
+    admin = create(:user, :admin, organization: org)
+    org.assign_company_settings("iot_data_retention_days" => 30, "audit_log_retention_days" => 365)
+    org.save!
+    Auditable.silenced do
+      create(:sensor_reading, organization: org, asset: pump, recorded_at: now - 90.days)
+      create(:sensor_aggregate, asset: pump, period_start: now - 90.days)
+      create(:activity_log, organization: org, created_at: now - 500.days)
+    end
+    expect_fixture("data_usage", fetch("data_usage", as: admin))
+  end
+
   it "costs_summary" do
     expect_fixture("costs_summary", fetch("reports/costs/summary", **period))
   end

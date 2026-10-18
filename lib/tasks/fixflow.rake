@@ -66,9 +66,10 @@ namespace :fixflow do
     puts "PM scheduler completed."
   end
 
-  desc "Cleanup old sensor readings"
+  desc "Remove sensor data and audit log lines older than the company's retention settings (the nightly jobs, by hand)"
   task cleanup_readings: :environment do
-    ActsAsTenant.without_tenant { Iot::CleanupReadingsJob.new.perform }
+    Iot::CleanupReadingsJob.new.perform
+    AuditLogCleanupJob.new.perform
     puts "Cleanup completed."
   end
 

@@ -1,0 +1,52 @@
+{
+  "database_bytes": 11712191,
+  "tables": {
+    "sensor_readings": {
+      "bytes": 114688,
+      "rows": 3
+    },
+    "sensor_aggregates": {
+      "bytes": 65536,
+      "rows": 1
+    },
+    "activity_logs": {
+      "bytes": 114688,
+      "rows": 4
+    },
+    "iot_alerts": {
+      "bytes": 180224,
+      "rows": 1
+    },
+    "work_orders": {
+      "bytes": 368640,
+      "rows": 7
+    }
+  },
+  "attachments": {
+    "count": 0,
+    "bytes": 0
+  },
+  "sensor_data": {
+    "retention_days": 30,
+    "checked_days": 30,
+    "oldest_at": "2026-07-18T12:00:00Z",
+    "removable_readings": 1,
+    "removable_summaries": 1
+  },
+  "audit_log": {
+    "retention_days": 365,
+    "checked_days": 365,
+    "oldest_at": "2025-06-03T12:00:00Z",
+    "removable_lines": 1
+  },
+  "cleanup_at": {
+    "sensor_data": "02:00 UTC",
+    "audit_log": "02:30 UTC"
+  },
+  "backups": {
+    "runs": false,
+    "at": "03:00 UTC",
+    "keep_days": 30,
+    "bucket": "fixflow-backups"
+  }
+}
