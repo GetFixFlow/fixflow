@@ -80,14 +80,23 @@ TOKEN=$(curl -s -D - -o /dev/null -X POST $BASE/api/v1/auth/sign_in -H "$JSON" \
 [ -n "$TOKEN" ] || fail "sign-in returned no token"
 ok "first-run setup, and sign-in"
 
-curl -s $BASE/api/v1/system_health -H "Authorization: $TOKEN" | python3 -c '
+# The worker and the broker connection report in a few seconds after the containers are healthy: wait for them.
+HEALTH_PROBLEM="never asked"
+for _ in $(seq 1 30); do
+  HEALTH_PROBLEM=$(curl -s $BASE/api/v1/system_health -H "Authorization: $TOKEN" | python3 -c '
 import json, sys
-data = json.load(sys.stdin)
+try:
+    data = json.load(sys.stdin)
+except ValueError:
+    sys.exit("not JSON")
 checks = data.get("checks", data)
-bad = [name for name in ("database", "redis", "background_jobs", "mqtt", "storage") if checks[name]["status"] != "ok"]
-if bad:
-    sys.exit("System Health not ok: " + ", ".join("%s (%s)" % (n, checks[n].get("summary", "")) for n in bad))
-' || fail "System Health"
+bad = [name for name in ("database", "redis", "background_jobs", "mqtt", "storage") if checks.get(name, {}).get("status") != "ok"]
+print(", ".join("%s: %s" % (n, checks.get(n, {}).get("summary", "missing")) for n in bad))
+' 2>&1) || true
+  [ -z "$HEALTH_PROBLEM" ] && break
+  sleep 3
+done
+[ -z "$HEALTH_PROBLEM" ] || fail "System Health is not ok after 90 seconds: $HEALTH_PROBLEM"
 ok "System Health: database, Redis, worker, sensor broker and file storage all ok"
 
 $COMPOSE exec -T api bin/rails runner 'DatabaseBackupJob.perform_now' >/dev/null 2>&1 || fail "the nightly backup job"
