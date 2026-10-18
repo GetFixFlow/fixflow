@@ -2,8 +2,9 @@ require "rails_helper"
 require "rake"
 
 RSpec.describe "fixflow rake tasks", type: :task do
+  # Loaded once for the whole run: loading twice makes every task do its work twice.
   before(:all) do
-    Rails.application.load_tasks
+    Rails.application.load_tasks unless Rake::Task.task_defined?("fixflow:create_admin")
   end
 
   describe "fixflow:create_admin" do

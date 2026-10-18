@@ -1,0 +1,17 @@
+{
+  "bucket": "fixflow-backups",
+  "backups": [
+    {
+      "name": "fixflow_20261016_030000.sql.gz",
+      "bytes": 1048576,
+      "created_at": "2026-10-15T12:00:00.000Z"
+    },
+    {
+      "name": "fixflow_20261015_030000.sql.gz",
+      "bytes": 1000000,
+      "created_at": "2026-10-14T12:00:00.000Z"
+    }
+  ],
+  "overdue": false,
+  "error": null
+}

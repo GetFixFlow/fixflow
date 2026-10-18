@@ -203,6 +203,17 @@ RSpec.describe "Report response shapes", type: :request do
     expect_fixture("data_usage", fetch("data_usage", as: admin))
   end
 
+  it "backups (the database backups in the file storage)" do
+    admin = create(:user, :admin, organization: org)
+    client = Aws::S3::Client.new(stub_responses: true)
+    client.stub_responses(:list_objects_v2, contents: [
+      { key: "backups/fixflow_20261016_030000.sql.gz", last_modified: now - 1.day, size: 1_048_576 },
+      { key: "backups/fixflow_20261015_030000.sql.gz", last_modified: now - 2.days, size: 1_000_000 }
+    ])
+    allow(BackupStore).to receive(:new).and_return(BackupStore.new(client: client))
+    expect_fixture("backups", fetch("backups", as: admin))
+  end
+
   it "costs_summary" do
     expect_fixture("costs_summary", fetch("reports/costs/summary", **period))
   end

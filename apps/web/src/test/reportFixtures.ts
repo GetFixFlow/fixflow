@@ -10,6 +10,7 @@ import type { TechnicianStats } from '@/components/reports/TechnicianScorecard'
 import type { SystemHealth } from '@/types/system'
 import type { AuditPage } from '@/api/audit'
 import type { DataUsage } from '@/api/dataUsage'
+import type { BackupList } from '@/api/backups'
 import type { DashboardStats, RequesterDashboardStats, TechnicianDashboardStats } from '@/types'
 import workOrdersSummary from './fixtures/reports/work_orders_summary.json'
 import workOrdersMttr from './fixtures/reports/work_orders_mttr.json'
@@ -26,6 +27,7 @@ import iotRuleEffectiveness from './fixtures/reports/iot_rule_effectiveness.json
 import systemHealth from './fixtures/reports/system_health.json'
 import activityLogs from './fixtures/reports/activity_logs.json'
 import dataUsage from './fixtures/reports/data_usage.json'
+import backups from './fixtures/reports/backups.json'
 import dashboardFull from './fixtures/reports/dashboard_full.json'
 import dashboardTechnician from './fixtures/reports/dashboard_technician.json'
 import dashboardRequester from './fixtures/reports/dashboard_requester.json'
@@ -52,6 +54,7 @@ export const fixtures: {
   systemHealth: SystemHealth
   auditLog: AuditPage
   dataUsage: DataUsage
+  backups: BackupList
   dashboardFull: DashboardStats
   dashboardTechnician: TechnicianDashboardStats
   dashboardRequester: RequesterDashboardStats
@@ -71,6 +74,7 @@ export const fixtures: {
   systemHealth: typed<SystemHealth>(systemHealth),
   auditLog: typed<AuditPage>(activityLogs),
   dataUsage,
+  backups: typed<BackupList>(backups),
   dashboardFull,
   dashboardTechnician,
   dashboardRequester,

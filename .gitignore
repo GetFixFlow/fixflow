@@ -47,3 +47,6 @@ apps/web/.env.production
 # Claude Code local state
 /.claude/
 
+# Database dumps made by `make backup`: they hold all of a company's data
+backup_*.sql
+backup_*.sql.gz

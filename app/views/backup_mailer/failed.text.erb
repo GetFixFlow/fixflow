@@ -1,0 +1,12 @@
+Hi <%= @admin.full_name %>,
+
+The nightly database backup failed on every one of its <%= DatabaseBackupJob::ATTEMPTS %> tries, so there may be no backup from last night.
+
+When:   <%= @failed_at.utc.strftime("%Y-%m-%d %H:%M UTC") %>
+Reason: <%= @reason %>
+
+What to do: check that the file storage (MinIO) is running and has room, and that the database answers. The next backup is tried at <%= DatabaseBackupJob::RUNS_AT %>.
+
+The backups that exist, and how old the newest one is: <%= @url %>
+
+— FixFlow
