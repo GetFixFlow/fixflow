@@ -1,4 +1,5 @@
 require "rails_helper"
+require "open3"
 
 # Production loads every file at boot (eager_load = true) and builds the storage
 # service named in config/environments/production.rb. Development and test load
@@ -36,6 +37,27 @@ RSpec.describe "Production boot requirements" do
       yield
     ensure
       saved.each { |k, v| v.nil? ? ENV.delete(k) : ENV[k] = v }
+    end
+  end
+
+  # production.rb is not loaded by the other specs, so start a real production process and ask it. With assume_ssl on,
+  # Action Cable takes every request to be https://, so an install served over http:// is refused unless it is listed.
+  describe "Action Cable origins" do
+    def origins_in_production(env)
+      base = { "PATH" => ENV.fetch("PATH"), "HOME" => Dir.home, "RAILS_ENV" => "production", "SECRET_KEY_BASE_DUMMY" => "1",
+               "SKIP_CONFIG_CHECK" => "true", "DEVISE_JWT_SECRET_KEY" => "x" * 40, "REDIS_URL" => "redis://localhost:6379/0" }
+      script = "puts ActionCable.server.config.allowed_request_origins.to_json"
+      out, status = Open3.capture2e(base.merge(env), "bin/rails", "runner", script, chdir: Rails.root.to_s, unsetenv_others: true)
+
+      raise "production did not start: #{out}" unless status.success?
+
+      JSON.parse(out.lines.last)
+    end
+
+    it "accepts the address people open FixFlow at, and the other addresses allowed to call it" do
+      origins = origins_in_production("APP_URL" => "http://fixflow.test:8088/", "ALLOWED_ORIGINS" => "https://other.test")
+
+      expect(origins).to eq(%w[http://fixflow.test:8088 https://other.test])
     end
   end
 end

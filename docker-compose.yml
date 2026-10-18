@@ -1,7 +1,11 @@
+# For DEVELOPMENT:  docker compose up --build   (a production install uses docker-compose.prod.yml, see the README)
 services:
   api:
-    build: .
-    image: fixflow-api
+    build:
+      context: .
+      args:
+        BUNDLE_WITHOUT: ""
+    image: fixflow-api-dev
     command: bundle exec puma -C config/puma.rb
     ports:
       - "3000:3000"
@@ -9,12 +13,10 @@ services:
       DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-password}@db:5432/fixflow_${RAILS_ENV:-development}
       REDIS_URL: redis://redis:6379/0
       RAILS_ENV: ${RAILS_ENV:-development}
-      RAILS_LOG_TO_STDOUT: "true"
-      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
-      DEVISE_JWT_SECRET_KEY: ${DEVISE_JWT_SECRET_KEY}
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3001}
-      IOT_API_KEY: ${IOT_API_KEY}
-      MINIO_ENDPOINT: http://minio:9000
+      # Development only: these defaults are public. A production install makes its own (docker-compose.prod.yml).
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:-development-only-secret-key-base-that-is-public-so-never-use-it-in-production-0123456789}
+      DEVISE_JWT_SECRET_KEY: ${DEVISE_JWT_SECRET_KEY:-development-only-jwt-key-that-is-public-so-never-use-it-in-production}
+      MINIO_ENDPOINT: http://s3:8333
       MINIO_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY_ID:-minioadmin}
       MINIO_SECRET_ACCESS_KEY: ${MINIO_SECRET_ACCESS_KEY:-minioadmin}
       MINIO_BUCKET: ${MINIO_BUCKET:-fixflow}
@@ -23,24 +25,27 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      minio:
+      s3:
         condition: service_healthy
     volumes:
       - ./storage:/rails/storage
     restart: unless-stopped
 
   sidekiq:
-    image: fixflow-api
-    build: .
+    image: fixflow-api-dev
+    build:
+      context: .
+      args:
+        BUNDLE_WITHOUT: ""
     command: bundle exec sidekiq -C config/sidekiq.yml
     environment:
       DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-password}@db:5432/fixflow_${RAILS_ENV:-development}
       REDIS_URL: redis://redis:6379/0
       RAILS_ENV: ${RAILS_ENV:-development}
-      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
-      DEVISE_JWT_SECRET_KEY: ${DEVISE_JWT_SECRET_KEY}
-      IOT_API_KEY: ${IOT_API_KEY}
-      MINIO_ENDPOINT: http://minio:9000
+      # Development only: these defaults are public. A production install makes its own (docker-compose.prod.yml).
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:-development-only-secret-key-base-that-is-public-so-never-use-it-in-production-0123456789}
+      DEVISE_JWT_SECRET_KEY: ${DEVISE_JWT_SECRET_KEY:-development-only-jwt-key-that-is-public-so-never-use-it-in-production}
+      MINIO_ENDPOINT: http://s3:8333
       MINIO_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY_ID:-minioadmin}
       MINIO_SECRET_ACCESS_KEY: ${MINIO_SECRET_ACCESS_KEY:-minioadmin}
     depends_on:
@@ -51,7 +56,7 @@ services:
     restart: unless-stopped
 
   db:
-    image: postgres:16-alpine
+    image: postgres:16.15-alpine
     environment:
       POSTGRES_DB: fixflow_development
       POSTGRES_USER: postgres
@@ -68,7 +73,7 @@ services:
     restart: unless-stopped
 
   redis:
-    image: redis:7-alpine
+    image: redis:7.4.11-alpine
     command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
@@ -81,25 +86,27 @@ services:
       retries: 5
     restart: unless-stopped
 
-  minio:
-    image: minio/minio:latest
-    command: server /data --console-address ":9001"
+  # Uploaded files and database backups, on SeaweedFS, which speaks the S3 protocol (the MinIO image used before cannot
+  # be pulled any more). The MINIO_* names are kept: they work for any S3-compatible server.
+  s3:
+    image: chrislusf/seaweedfs:4.48
+    command: server -s3 -dir=/data
     environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY_ID:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_ACCESS_KEY:-minioadmin}
+      AWS_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY_ID:-minioadmin}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_SECRET_ACCESS_KEY:-minioadmin}
     volumes:
-      - minio_data:/data
+      - s3_data:/data
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "8333:8333"
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8333/healthz"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 20s
     restart: unless-stopped
 
 volumes:
   postgres_data:
   redis_data:
-  minio_data:
+  s3_data:

@@ -5,6 +5,18 @@ module Iot
     TOPIC_PATTERN = /\Afixflow\/(?<org_token>[^\/]+)\/(?:assets\/(?<asset_id>[^\/]+)\/)?telemetry\z/
 
     class << self
+      # Whether this process should listen to the broker. Exactly one should: the broker gives every subscriber every
+      # message, so a second one (the web server as well as the worker, say) stores each reading twice. By default that
+      # is the background worker; MQTT_SUBSCRIBER=true or false overrides it (a server with no worker, or an external
+      # process that does the listening).
+      def start_here?(env = ENV, worker: Sidekiq.server?)
+        case env["MQTT_SUBSCRIBER"].to_s.strip.downcase
+        when "true" then true
+        when "false" then false
+        else worker
+        end
+      end
+
       def start
         @running = true
         connect_with_backoff

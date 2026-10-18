@@ -7,7 +7,8 @@ class AttachmentBlueprint < Blueprinter::Base
 
   field(:url) do |a|
     next nil unless a.file.attached?
-    Rails.application.routes.url_helpers.rails_blob_url(a.file, only_path: true)
+    # Through the app, not a redirect to the file storage: its address is internal (http://s3:8333) and no browser can open it.
+    Rails.application.routes.url_helpers.rails_storage_proxy_path(a.file, only_path: true)
   end
 
   field(:user) do |a|

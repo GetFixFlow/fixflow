@@ -47,6 +47,9 @@ Rails.application.configure do
 
   # Action Cable: Redis adapter
   config.action_cable.cable = { adapter: "redis", url: ENV.fetch("REDIS_URL", "redis://localhost:6379/0") }
+  # Who may open a WebSocket. Without this an install served over plain http:// is refused (see lib/fixflow_origins.rb).
+  require_relative "../../lib/fixflow_origins"
+  config.action_cable.allowed_request_origins = FixflowOrigins.from_env
 
   # Action Mailer
   config.action_mailer.raise_delivery_errors = false

@@ -16,26 +16,42 @@
 | **Frontend** | React 18 + TypeScript + Vite + Tailwind CSS |
 | **Database** | PostgreSQL 16 |
 | **Cache / Jobs** | Redis 7 + Sidekiq |
-| **File Storage** | MinIO (S3-compatible) |
+| **File Storage** | Any S3-compatible server (SeaweedFS in the Docker install) |
 | **Auth** | Devise + devise-jwt (Bearer JWT) |
 | **State** | TanStack Query v5 + Zustand v5 |
 | **IoT** | REST webhook + MQTT ingestion |
 
 ---
 
-## Quick Start (Docker — recommended)
+## Install on a server (Docker)
+
+You need a Linux (or macOS) machine with Docker and Docker Compose v2, about 2 GB of memory, and a few GB of disk. Nothing else is installed on it: the database, Redis, the file storage and the sensor broker all run in containers.
 
 ```bash
 git clone https://github.com/GetFixFlow/fixflow.git
 cd fixflow
 cp .env.example .env
-# Edit .env — set RAILS_MASTER_KEY and DEVISE_JWT_SECRET_KEY at minimum
-docker compose up -d
+# Fill in the "Required" block of .env. Every line has the command beside it that makes its value (openssl rand -hex 24 ...).
+docker compose -f docker-compose.prod.yml up -d --build      # or: make prod
+```
+
+The first start builds the two images on the server (about 5 to 10 minutes) and pulls the rest. Then open the address you put in `APP_URL`: a new install shows **Set up FixFlow** (see *First-run setup* below). `docker compose -f docker-compose.prod.yml ps` shows seven services, all `healthy`: `web`, `api`, `sidekiq`, `db`, `redis`, `mqtt` and `s3`.
+
+- **One front door.** `web` serves the web app and passes `/api` and `/cable` (live updates) on to the API. It listens on `HTTP_PORT` (80 unless you set another; put the port in `APP_URL` if it is not 80). The sensor broker is on port 1883. **Nothing else is published**: the database, Redis, the file storage and the API can only be reached from inside.
+- **No HTTPS yet.** The front door speaks plain HTTP, so sign-in tokens cross your network unencrypted: use it on a network you trust until you put a TLS proxy in front (your company's, or Caddy, Traefik and the like; it must send `X-Forwarded-Proto: https`, which the front door passes on). Built-in HTTPS is on the roadmap.
+- **File storage** is [SeaweedFS](https://github.com/seaweedfs/seaweedfs) speaking the S3 protocol (the `MINIO_*` settings keep their old names and work for any S3-compatible server; MinIO's own image can no longer be pulled).
+- **Settings.** Everything in `.env` reaches the API and the worker, so any setting in the table below can be added there. If a required one is missing, `docker compose` says which.
+- **Data lives in four volumes** (`postgres_data`, `redis_data`, `s3_data`, `mqtt_data`); `docker compose ... down` keeps them, `down -v` deletes them. Back up as described under *Backups and restoring*.
+- **Commands.** Commands in this README that start with `docker compose exec api rails ...` are written for the development stack; on a production install they are `docker compose -f docker-compose.prod.yml exec api bin/rails ...`. `make prod`, `make prod-status`, `make prod-logs`, `make prod-stop`, `make backup` and `make restore` wrap the common ones.
+
+### Development with Docker
+
+```bash
+docker compose up -d       # the API, a worker, PostgreSQL, Redis and an S3 server, with no configuration
 docker compose exec api bundle exec rails db:create db:migrate db:seed
 ```
 
-The API will be available at `http://localhost:3000`.
-MinIO console: `http://localhost:9001` (user: minioadmin / minioadmin)
+The API is on `http://localhost:3000` and the S3 server on `http://localhost:8333` (login `minioadmin` / `minioadmin`). The web app is run with npm; see *Local Development*. This is a different stack from the production one (`docker-compose.yml` and `docker-compose.prod.yml` are not combined) and uses public, development-only secrets.
 
 ### Sample data and the first steps
 
@@ -129,7 +145,7 @@ npm run dev     # Dev server on :3001
 
 ## Environment Variables
 
-`.env.example` lists every setting with a note on what it does. These are the ones that matter (the **Needed** column is for a production install):
+`.env.example` lists every setting with a note on what it does. These are the ones that matter (the **Needed** column is for a production install). **The Docker install builds `DATABASE_URL`, `REDIS_URL` and the `MINIO_ENDPOINT` itself** from `DB_PASSWORD`, `REDIS_PASSWORD` and its own services; you set the passwords.
 
 | Variable | Needed | What it is |
 |---|---|---|
@@ -142,7 +158,8 @@ npm run dev     # Dev server on :3001
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD` | No | A mail server, if you do not set one under Settings, Email |
 | `MINIO_ENDPOINT`, `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY`, `MINIO_BUCKET` | For file uploads | The S3-compatible file storage |
 | `MQTT_HOST`, `MQTT_PORT`, `MQTT_USERNAME`, `MQTT_PASSWORD` | For IoT over MQTT | The sensor broker |
-| `IOT_API_KEY` | For IoT over HTTP | The key sensors send to `POST /api/v1/iot/readings`; without one that route refuses everything |
+| `HTTP_PORT` | No | Docker install: the port the web front door listens on (80 if left out). Put it in `APP_URL` too when it is not 80 |
+| `MQTT_SUBSCRIBER` | No | `true` or `false` decides whether this process listens to the sensor broker; by default only the background worker does, so each reading is stored once |
 | `FIXFLOW_UPDATE_CHECK` | No | `false` stops the System Health page from asking GitHub for the latest release (anything else leaves it on) |
 | `SKIP_CONFIG_CHECK` | No | `true` skips the start-up check below (for an emergency) |
 
@@ -150,7 +167,6 @@ Generate secrets:
 ```bash
 bin/rails secret                  # SECRET_KEY_BASE
 openssl rand -base64 64           # DEVISE_JWT_SECRET_KEY
-openssl rand -hex 32              # IOT_API_KEY
 ```
 
 ### The server checks its settings when it starts
@@ -201,17 +217,26 @@ All endpoints are under `/api/v1/`. Authentication uses JWT Bearer tokens.
 ### IoT Ingestion (no JWT, uses API key)
 ```bash
 POST /api/v1/iot/ingest
-Headers: X-API-Key: <IOT_API_KEY>
-Body: {
-  "asset_id": 1,
-  "readings": { "temperature": 72.4, "vibration": 3.2 },
-  "timestamp": "2026-05-03T10:00:00Z"
-}
+Headers: X-API-Key: <an API key made under Settings, API Keys>
+Body: { "asset_id": 1, "metric": "temperature", "value": 72.4, "unit": "C" }
+# or several readings from one device:
+Body: { "asset_id": 1, "device_id": "pump-1", "timestamp": "2026-05-03T10:00:00Z",
+        "readings": [ { "metric": "temperature", "value": 72.4, "unit": "C" }, { "metric": "vibration", "value": 3.2, "unit": "mm/s" } ] }
 ```
+`asset_tag` can be used instead of `asset_id`. A body that is a list of readings, each naming its asset, is accepted too.
 
 ### MQTT
-Devices publish to: `fixflow/assets/{asset_id}/telemetry`
-Payload: `{ "temperature": 72.4, "vibration": 3.2, "timestamp": "..." }`
+Devices connect to the broker on port 1883 with `MQTT_USERNAME` and `MQTT_PASSWORD` (a connection without them is refused) and publish to:
+
+```
+fixflow/<company token>/assets/<asset id or asset tag>/telemetry
+Payload: { "metric": "temperature", "value": 72.4, "unit": "C" }
+     or: { "device_id": "pump-1", "readings": [ { "metric": "vibration", "value": 3.2, "unit": "mm/s" } ] }
+```
+
+The company token is the company name in lowercase with dashes (Acme Plant is `acme-plant`); `GET /api/v1/organization_settings` shows it as `slug`. The asset can also be named in the payload (`asset_id`) on `fixflow/<company token>/telemetry`. A message that names no known asset is logged and dropped.
+
+Exactly one process listens to the broker, the background worker: the broker hands every subscriber every message, so a second listener (the web server too) would store each reading twice. `MQTT_SUBSCRIBER=true` or `false` overrides which process it is, for a server with no worker.
 
 ---
 
@@ -356,7 +381,15 @@ Everything else (work orders, assets, IoT alerts, comments, uploaded files) is k
 
 **The Data Retention page** (Settings, Data Retention, administrators only) lists the backups in the storage with their size, lets you download one, and shows a warning when a backup is overdue or the storage does not answer. A backup holds everything in the database, **password hashes included**, so every download is written to the audit log. The page downloads through the browser's memory: for a very large database fetch the file from the storage bucket directly.
 
-**Restoring** is done on the server with a command, never from the web page, with the web and worker processes stopped:
+**Restoring** is done on the server with a command, never from the web page, with the web and worker processes stopped. On the Docker install, `make restore` does all of it (stops them, restores in a one-off container, starts them again):
+
+```bash
+make restore FROM=latest CONFIRM=yes                       # the newest nightly backup
+make restore FROM=fixflow_20261018_030000.sql.gz CONFIRM=yes   # a named one from the file storage
+make restore FROM=backup_20261018.sql.gz CONFIRM=yes       # a file in this folder (from `make backup`, or downloaded)
+```
+
+That replaces the whole database (it passes `REPLACE=yes`: the container's start-up has already created empty tables, so the database is never empty there). Without `make`, or outside Docker, run the command yourself:
 
 ```bash
 rails fixflow:backups                              # list the backups in the storage, newest first
@@ -371,9 +404,9 @@ rails "fixflow:restore[/path/to/backup.sql.gz]"    # or a file you downloaded (a
 - Afterwards it says whether the backup is from an older FixFlow (run `rails db:migrate`) or a **newer** one (upgrade FixFlow first).
 - Only the database is touched; the files in the storage are not.
 
-`make backup` writes a gzipped dump of the production database to `backup_YYYYMMDD.sql.gz` in the current folder (it is ignored by git); restore it with the command above.
+`make backup` writes a gzipped dump of the production database to `backup_YYYYMMDD.sql.gz` in the current folder (it is ignored by git); restore it with `make restore` above.
 
-**Not covered yet:** backing up the uploaded files, and a one-command restore inside Docker (see the note in the pull request).
+**Not covered yet:** backing up the uploaded files.
 
 ## Reporting a problem without an account (QR labels)
 
@@ -462,7 +495,7 @@ IoT Devices ──MQTT/REST──► FixFlow API (Rails 8)
                                   |
                     +─────────────+─────────────+
                     |             |             |
-              PostgreSQL       Redis          MinIO
+              PostgreSQL       Redis          S3 storage
              (core data)    (Sidekiq)    (file storage)
 ```
 
@@ -470,7 +503,7 @@ IoT Devices ──MQTT/REST──► FixFlow API (Rails 8)
 - **API**: Ruby on Rails 8, API mode
 - **Auth**: Devise + devise-jwt (Bearer JWT)
 - **Jobs**: Sidekiq + Redis
-- **Storage**: ActiveStorage → MinIO (S3-compatible)
+- **Storage**: ActiveStorage → an S3-compatible server (SeaweedFS in the Docker install)
 - **IoT**: REST webhook + MQTT-compatible ingestion
 - **Serialization**: Blueprinter
 - **Pagination**: Pagy

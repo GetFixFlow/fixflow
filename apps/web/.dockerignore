@@ -1,0 +1,7 @@
+# Installed again inside the image (npm ci) and built there: sending them only makes the build slow.
+node_modules
+dist
+.env*
+!.env.example
+coverage
+*.log
