@@ -19,21 +19,31 @@ class DatabaseBackupJob < ApplicationJob
   def perform
     return unless self.class.runs_here?
 
-    started_at  = Time.current
-    filename    = "fixflow_#{started_at.strftime('%Y%m%d_%H%M%S')}.sql.gz"
-    local_path  = Rails.root.join("tmp", filename)
-    store       = BackupStore.new
+    backup
+  rescue StandardError => e
+    Rails.logger.error("[Backup] Failed (try #{executions} of #{ATTEMPTS}): #{e.class} — #{e.message}")
+    raise
+  end
+
+  # Copies the uploaded files, then puts the database dump in the store: a backup that is listed has its files.
+  # (Done in this order because a file uploaded while this runs is copied tonight or tomorrow, and a dump never
+  # points at a file the copy cannot have.) Also what `rails fixflow:backup` runs by hand. => the backup's name
+  def backup
+    started_at = Time.current
+    filename   = "fixflow_#{started_at.strftime('%Y%m%d_%H%M%S')}.sql.gz"
+    local_path = Rails.root.join("tmp", filename)
+    store      = BackupStore.new
 
     run_dump(local_path)
+    files = UploadsBackup.new.backup
     store.put(filename, local_path)
     store.delete_older_than(RETENTION_DAYS.days.ago)
 
     duration = (Time.current - started_at).round(1)
-    size_mb   = (File.size(local_path).to_f / 1.megabyte).round(2)
-    Rails.logger.info("[Backup] Completed in #{duration}s — #{size_mb} MB — #{filename}")
-  rescue StandardError => e
-    Rails.logger.error("[Backup] Failed (try #{executions} of #{ATTEMPTS}): #{e.class} — #{e.message}")
-    raise
+    size_mb  = (File.size(local_path).to_f / 1.megabyte).round(2)
+    Rails.logger.info("[Backup] Completed in #{duration}s — #{size_mb} MB — #{filename} — uploaded files: " \
+                      "#{files.copied} copied (#{(files.bytes.to_f / 1.megabyte).round(2)} MB), #{files.present} already there")
+    filename
   ensure
     File.delete(local_path) if local_path && File.exist?(local_path)
   end

@@ -104,7 +104,8 @@ RSpec.describe "The production stack" do
   describe "images" do
     it "pins every image to a version (no latest, no moving tag)" do
       both = services.values + dev_compose["services"].values
-      images = both.filter_map { |service| service["image"] unless service["build"] }
+      built_here = both.filter_map { |service| service["image"] if service["build"] }
+      images = both.filter_map { |service| service["image"] unless service["build"] || built_here.include?(service["image"]) }
 
       expect(images).to all(match(/:\d+\.\d+/)), "unpinned: #{images.grep_v(/:\d+\.\d+/).join(', ')}"
       expect(images.grep(/latest/)).to eq([])

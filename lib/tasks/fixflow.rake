@@ -9,8 +9,9 @@ namespace :fixflow do
       region:            ENV.fetch("MINIO_REGION", "us-east-1"),
       force_path_style:  true
     )
+    # Backups kept on another storage (BACKUP_S3_*) have their bucket there, made by whoever runs that storage.
     [ENV.fetch("MINIO_BUCKET", "fixflow-uploads"),
-     ENV.fetch("MINIO_BACKUP_BUCKET", "fixflow-backups")].each do |bucket|
+     *(ENV.fetch("MINIO_BACKUP_BUCKET", "fixflow-backups") unless BackupStore.separate?)].each do |bucket|
       client.create_bucket(bucket: bucket)
       puts "Created bucket: #{bucket}"
     rescue Aws::S3::Errors::BucketAlreadyOwnedByYou

@@ -1,4 +1,5 @@
 require "uri"
+require_relative "fixflow_config_check/file_storage"
 
 # Looks at the server's settings (its environment variables) before it starts, so a mistake stops the start with a
 # plain message instead of a stack trace later, or a server that runs with an example password.
@@ -7,6 +8,8 @@ require "uri"
 # FixflowConfigCheck::Live for checking that what the settings point at answers). Plain Ruby, so it can run before
 # Rails has loaded.
 class FixflowConfigCheck
+  include FileStorage
+
   Problem = Struct.new(:level, :setting, :message) do
     def error? = level == :error
   end
@@ -152,18 +155,6 @@ class FixflowConfigCheck
 
     problem(:warning, "SMTP_PASSWORD", "is the example value, so email will not send until you put the real one here or " \
                                        "set up email under Settings, Email.")
-  end
-
-  def minio_settings
-    found = []
-    if present?("MINIO_ENDPOINT") && !uri_for("MINIO_ENDPOINT", %w[http https])
-      found << problem(:error, "MINIO_ENDPOINT", "is not a web address. It looks like http://minio:9000")
-    end
-    secret = present?("MINIO_SECRET_ACCESS_KEY") ? value("MINIO_SECRET_ACCESS_KEY") : value("MINIO_SECRET_KEY")
-    if self.class.placeholder?(secret) && !secret.empty?
-      found << problem(:warning, "MINIO_SECRET_KEY", "is the example value; anyone who can reach the file storage could read uploads.")
-    end
-    found
   end
 
   def mqtt_settings

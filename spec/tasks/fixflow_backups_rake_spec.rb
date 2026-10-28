@@ -3,12 +3,14 @@ require "rake"
 
 RSpec.describe "fixflow backup rake tasks", type: :task do
   let(:store)  { instance_double(BackupStore, list: []) }
+  let(:uploads) { instance_double(UploadsBackup, restore: UploadsBackup::Result.new(copied: 4, bytes: 2_500_000, present: 1)) }
   let(:newest) { BackupStore::Backup.new(name: "fixflow_20261018_030000.sql.gz", bytes: 2_500_000, created_at: Time.utc(2026, 10, 18, 3, 0, 4)) }
   let(:older)  { BackupStore::Backup.new(name: "fixflow_20261017_030000.sql.gz", bytes: 1_000, created_at: Time.utc(2026, 10, 17, 3, 0, 3)) }
 
   before do
     Rails.application.load_tasks unless Rake::Task.task_defined?("fixflow:backups")
     allow(BackupStore).to receive(:new).and_return(store)
+    allow(UploadsBackup).to receive(:new).and_return(uploads)
   end
 
   def run(task, source = nil) = Rake::Task["fixflow:#{task}"].execute(source: source)
@@ -42,6 +44,33 @@ RSpec.describe "fixflow backup rake tasks", type: :task do
     end
   end
 
+  describe "fixflow:backup" do
+    it "makes a backup now, as the nightly job does, and says its name" do
+      allow_any_instance_of(DatabaseBackupJob).to receive(:backup).and_return(newest.name) # rubocop:disable RSpec/AnyInstance
+
+      expect { run(:backup) }.to output(/Backed up as #{newest.name} in the #{BackupStore.bucket} bucket/).to_stdout
+    end
+
+    it "says why when it could not" do
+      allow_any_instance_of(DatabaseBackupJob).to receive(:backup).and_raise("pg_dump failed") # rubocop:disable RSpec/AnyInstance
+
+      expect { run(:backup) }.to raise_error(SystemExit).and output(/Not backed up: RuntimeError: pg_dump failed/).to_stderr
+    end
+  end
+
+  describe "fixflow:restore_files" do
+    it "copies back what the file storage lacks, and says how many" do
+      expect { run(:restore_files) }.to output(/Restored 4 uploaded files \(2\.38 MB\); 1 were already there/).to_stdout
+    end
+
+    it "says why, and what to run again, when the backup storage does not answer" do
+      allow(uploads).to receive(:restore).and_raise(Seahorse::Client::NetworkingError.new(Errno::ECONNREFUSED.new, "refused"))
+
+      expect { quietly { run(:restore_files) } }
+        .to raise_error(SystemExit).and output(/uploaded files were not restored.*run rails fixflow:restore_files again/mi).to_stderr
+    end
+  end
+
   describe "fixflow:restore" do
     let(:dump) do
       Tempfile.new(["dump", ".sql"]).tap do |file|
@@ -65,6 +94,15 @@ RSpec.describe "fixflow backup rake tasks", type: :task do
       expect(DatabaseRestore).to receive(:new).with(dump.path, replace: false)
 
       expect { run(:restore, dump.path) }.to output(/Restored 3 tables.*matches this version/m).to_stdout
+    end
+
+    it "then copies the uploaded files back, unless told FILES=no" do
+      expect(uploads).to receive(:restore).once
+      expect { run(:restore, dump.path) }.to output(/Restoring the uploaded files/).to_stdout
+
+      stub_const("ENV", ENV.to_h.merge("FILES" => "no"))
+      expect(uploads).not_to receive(:restore)
+      expect { run(:restore, dump.path) }.not_to output(/uploaded files/).to_stdout
     end
 
     it "deletes what is in the database first only when REPLACE=yes" do

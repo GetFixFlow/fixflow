@@ -2,7 +2,7 @@
 # Starts the production stack (docker-compose.prod.yml) for real, from a fresh checkout, and checks that it works:
 # every service healthy, the front door serving the web app and the API, a WebSocket upgrading, first-run setup and
 # sign-in, the System Health checks (database, Redis, the worker, the sensor broker, file storage), and a backup that
-# is restored again. It takes several minutes (the images are built). CI runs it; it removes everything it started.
+# is restored again, uploaded files included. It takes several minutes (the images are built). CI runs it; it removes everything it started.
 #
 # It writes a .env and deletes the stack's volumes, so it refuses to run where a .env already exists:
 # use a fresh clone, not your own working copy.
@@ -99,13 +99,24 @@ done
 [ -z "$HEALTH_PROBLEM" ] || fail "System Health is not ok after 90 seconds: $HEALTH_PROBLEM"
 ok "System Health: database, Redis, worker, sensor broker and file storage all ok"
 
+# A file as an upload would store it, which the backup has to copy too.
+FILE_KEY=$($COMPOSE exec -T api bin/rails runner \
+  'print ActiveStorage::Blob.create_and_upload!(io: StringIO.new("kept in the backup"), filename: "check.txt", content_type: "text/plain").key' \
+  2>/dev/null | tail -n 1)
+[ -n "$FILE_KEY" ] || fail "storing an uploaded file"
 $COMPOSE exec -T api bin/rails runner 'DatabaseBackupJob.perform_now' >/dev/null 2>&1 || fail "the nightly backup job"
+[ "$($COMPOSE exec -T api bin/rails runner \
+  "print BackupStore.build_client.head_object(bucket: BackupStore.bucket, key: 'files/$FILE_KEY').content_length" 2>/dev/null | tail -n 1)" = "18" ] \
+  || fail "the uploaded file was not copied by the backup"
 $COMPOSE exec -T api bin/rails fixflow:backups 2>/dev/null | grep -q 'fixflow_.*\.sql\.gz' || fail "the backup is not listed"
 curl -s $BASE/api/v1/backups -H "Authorization: $TOKEN" | grep -q 'fixflow_.*sql.gz' || fail "the backup is not listed by the API"
 ok "a backup was made and listed"
 
 curl -s -X POST $BASE/api/v1/locations -H "Authorization: $TOKEN" -H "$JSON" \
   -d '{"location":{"name":"Made after the backup","location_type":"building"}}' | grep -q 'Made after the backup' || fail "creating a place"
+# Lose the uploaded file, as a lost disk would.
+$COMPOSE exec -T api bin/rails runner "ActiveStorage::Blob.find_by!(key: '$FILE_KEY').service.delete('$FILE_KEY')" >/dev/null 2>&1 \
+  || fail "removing the uploaded file"
 make restore FROM=latest CONFIRM=yes >/dev/null 2>&1 || fail "make restore"
 for _ in $(seq 1 40); do
   [ "$(curl -s -o /dev/null -w '%{http_code}' $BASE/api/v1/health)" = "200" ] && break
@@ -116,5 +127,8 @@ TOKEN=$(curl -s -D - -o /dev/null -X POST $BASE/api/v1/auth/sign_in -H "$JSON" \
 [ -n "$TOKEN" ] || fail "cannot sign in after the restore"
 curl -s $BASE/api/v1/locations -H "Authorization: $TOKEN" | grep -q 'Made after the backup' && fail "the restore did not remove what was added after the backup"
 ok "restore put the database back as it was at the backup"
+[ "$($COMPOSE exec -T api bin/rails runner "print ActiveStorage::Blob.find_by!(key: '$FILE_KEY').download" 2>/dev/null | tail -n 1)" = "kept in the backup" ] \
+  || fail "the restore did not bring the uploaded file back"
+ok "the uploaded file was backed up and came back with the restore"
 
 echo "The production stack works."

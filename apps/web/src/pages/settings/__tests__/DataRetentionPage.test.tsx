@@ -194,11 +194,33 @@ describe('DataRetentionPage', () => {
   it('describes a production server that makes backups, with the bucket and how long they are kept', async () => {
     serve({ backups: { ...usage.backups, runs: true } })
     renderPage()
-    expect(await screen.findByText(/made every night at 03:00 UTC and kept for 30 days/)).toBeInTheDocument()
+    expect(await screen.findByText(/is made every night at 03:00 UTC/)).toBeInTheDocument()
+    expect(screen.getByText(/photos and documents people uploaded since the last one/)).toBeInTheDocument()
+    expect(screen.getByText(/The database copies are kept for 30 days/)).toBeInTheDocument()
     expect(screen.getByText('fixflow-backups')).toBeInTheDocument()
     expect(screen.getByText(/tried again every 15 minutes, 3 tries in all/)).toBeInTheDocument()
     expect(screen.getByText(/every administrator is emailed \(when email is set up\)/)).toBeInTheDocument()
     expect(screen.queryByText(/written to the server log only/)).toBeNull()
+  })
+
+  it('warns that backups on the same storage as the data do not survive losing the server', async () => {
+    serve({ backups: { ...usage.backups, runs: true, separate: false } })
+    renderPage()
+    expect(await screen.findByText(/same storage server and disk as the data they protect/)).toBeInTheDocument()
+    expect(screen.getByText('BACKUP_S3_ACCESS_KEY')).toBeInTheDocument()
+  })
+
+  it('does not warn when the backups are kept on another storage, and says so', async () => {
+    serve({ backups: { ...usage.backups, runs: true, separate: true } })
+    renderPage()
+    expect(await screen.findByText(/of the separate backup storage/)).toBeInTheDocument()
+    expect(screen.queryByText(/same storage server and disk/)).toBeNull()
+  })
+
+  it('does not warn on a server that makes no backups', async () => {
+    renderPage()
+    await screen.findByText(/This server does not make backups/)
+    expect(screen.queryByText(/same storage server and disk/)).toBeNull()
   })
 
   describe('the backups', () => {
@@ -287,7 +309,8 @@ describe('DataRetentionPage', () => {
       renderPage()
       expect(await screen.findByText(/password hashes included/)).toBeInTheDocument()
       expect(screen.getByText(/Every download is written to the audit log/)).toBeInTheDocument()
-      expect(screen.getByText(/photos and documents people uploaded are in the file storage and are not in them/)).toBeInTheDocument()
+      expect(screen.getByText(/never deleted from\s+the copy, because an older backup may still point at them/)).toBeInTheDocument()
+      expect(screen.getByText(/copies the uploaded files back/)).toBeInTheDocument()
       expect(screen.getByText('rails "fixflow:restore[latest]"')).toBeInTheDocument()
       expect(screen.getByText(/REPLACE=yes/)).toBeInTheDocument()
     })

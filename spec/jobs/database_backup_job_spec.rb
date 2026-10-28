@@ -43,9 +43,11 @@ RSpec.describe DatabaseBackupJob, type: :job do
 
   describe "#perform" do
     let(:store) { instance_double(BackupStore, put: nil, delete_older_than: []) }
+    let(:files) { instance_double(UploadsBackup, backup: UploadsBackup::Result.new(copied: 2, bytes: 3_000_000, present: 5)) }
 
     before do
       allow(BackupStore).to receive(:new).and_return(store)
+      allow(UploadsBackup).to receive(:new).and_return(files)
       allow(described_class).to receive(:runs_here?).and_return(true)
       allow_any_instance_of(described_class).to receive(:run_dump) { |_job, file| File.write(file, "dump") } # rubocop:disable RSpec/AnyInstance
     end
@@ -65,9 +67,28 @@ RSpec.describe DatabaseBackupJob, type: :job do
       expect(Rails.root.glob("tmp/fixflow_*.sql.gz")).to be_empty
     end
 
+    it "copies the uploaded files before the dump is stored, so a listed backup has its files" do
+      order = []
+      allow(files).to receive(:backup) { order << :files and UploadsBackup::Result.new(copied: 0, bytes: 0, present: 0) }
+      allow(store).to receive(:put) { order << :dump }
+
+      described_class.perform_now
+
+      expect(order).to eq(%i[files dump])
+    end
+
+    it "stores no dump, and fails (to be tried again), when the files cannot be copied" do
+      allow(files).to receive(:backup).and_raise(Seahorse::Client::NetworkingError.new(Errno::ECONNREFUSED.new, "refused"))
+      expect(store).not_to receive(:put)
+
+      expect { described_class.new.perform }.to raise_error(Seahorse::Client::NetworkingError)
+      expect(Rails.root.glob("tmp/fixflow_*.sql.gz")).to be_empty
+    end
+
     it "does nothing when this server does not make backups" do
       allow(described_class).to receive(:runs_here?).and_return(false)
       expect(store).not_to receive(:put)
+      expect(files).not_to receive(:backup)
 
       described_class.perform_now
     end

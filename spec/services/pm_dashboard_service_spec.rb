@@ -104,8 +104,8 @@ RSpec.describe PmDashboardService do
 
   describe "lists" do
     it "shows overdue schedules and what is due in the next week, active ones only" do
-      overdue = create(:preventive_maintenance, :overdue_pm, organization: org, asset: asset)
-      create(:preventive_maintenance, :paused_pm, organization: org, asset: asset, next_due_at: 3.days.ago)
+      overdue = create(:preventive_maintenance, :overdue_pm, organization: org, asset: asset, next_due_at: today.to_time - 2.days)
+      create(:preventive_maintenance, :paused_pm, organization: org, asset: asset, next_due_at: today.to_time - 3.days)
       soon = create(:preventive_maintenance, organization: org, asset: asset, next_due_at: today.to_time + 3.days)
 
       travel_to(today.to_time) do
