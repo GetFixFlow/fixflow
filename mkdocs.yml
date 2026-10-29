@@ -38,6 +38,10 @@ theme:
 
 plugins:
   - search
+  - mike:
+      # GitHub Pages does not follow symlinks, so "latest" is a small redirect page rather than a link to the version's folder.
+      alias_type: redirect
+      canonical_version: latest
 
 extra:
   version:
