@@ -29,7 +29,7 @@ cd apps/web && npx vitest run          # web app
 1. **One change per pull request.** A bug fix, a feature or a cleanup, not all three. Small pull requests are reviewed sooner.
 2. Branch from `main`, and keep your branch up to date with it.
 3. **Write a test that fails without your change.** A test that passes either way proves nothing. A bug fix needs a test that reproduces the bug; a rule needs a test that breaks when the rule does. If you can, break your change on purpose and check that the test fails.
-4. **Update the docs with the change.** A user-visible change gets a section or edit in the [README](README.md) and a bullet under `[Unreleased]` in the [CHANGELOG](CHANGELOG.md) (below the top bullet, so two open pull requests do not collide on the same line). Say what was wrong, what changed, and call out anything that changes an API answer or a setting.
+4. **Update the docs with the change.** A user-visible change gets a section or edit in the [README](README.md) and a bullet under `[Unreleased]` in the [CHANGELOG](CHANGELOG.md) (below the top bullet, so two open pull requests do not collide on the same line). Say what was wrong, what changed, and call out anything that changes an API answer or a setting. If the person running a server must do something when they upgrade (add a setting, run a command, sign in again), end the bullet with `**Upgrade:** what to do.`: the release notes list these at the top, under "Before you upgrade".
 5. **Run the checks CI runs**, in this order, one at a time:
 
    ```bash
@@ -69,3 +69,22 @@ FixFlow is released under the [AGPL-3.0](LICENSE). By submitting a pull request 
 ## Reviews
 
 A maintainer reviews every pull request. Expect questions, and expect to be asked to change things; that is how the code stays maintainable. If a review goes quiet for more than a week, a polite nudge on the pull request is welcome.
+
+## Making a release
+
+For maintainers. A release is a version number in the `VERSION` file, a section for it in the [CHANGELOG](CHANGELOG.md), and a tag; the GitHub release page is made from those.
+
+```bash
+git switch main && git pull
+bin/release 0.2.0 --dry-run     # shows the release notes it would publish; changes nothing
+bin/release 0.2.0               # a branch release-0.2.0: VERSION changed, [Unreleased] moved to "[0.2.0] - <date>"
+```
+
+Read the notes it prints (they are the changelog section) and fix the wording in `CHANGELOG.md` on that branch if needed. Push the branch, open a pull request, and merge it when the checks pass (they include `bin/check_upgrade`, which upgrades a running install from the previous version and rolls it back). Then tag the merge and push the tag:
+
+```bash
+git switch main && git pull
+git tag v0.2.0 && git push origin v0.2.0
+```
+
+The release workflow checks that the tag is on `main` and equals `VERSION`, writes the notes with `bin/release_notes 0.2.0`, and publishes the release. Servers upgrade with `make upgrade TO=v0.2.0` (README, "Upgrading and rolling back"). Use a version like `1.0.0-rc.1` for a candidate: it is published as a pre-release, which the update check on System Health does not offer to anyone.
