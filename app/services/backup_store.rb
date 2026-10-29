@@ -1,6 +1,9 @@
 require "aws-sdk-s3"
 
-# The storage bucket the nightly backups are kept in (the MinIO that ships with FixFlow, or any S3 storage).
+# The storage bucket the nightly backups are kept in. By default that is the file storage that ships with FixFlow
+# (the MINIO_* settings), which is the same server and disk as the data: it does not survive losing them. Set
+# BACKUP_S3_ACCESS_KEY and BACKUP_S3_SECRET_KEY (and BACKUP_S3_ENDPOINT, unless it is Amazon S3) to keep the backups
+# on another S3 storage instead; then nothing falls back to the MINIO_* settings.
 # A backup is a gzipped SQL dump named fixflow_YYYYMMDD_HHMMSS.sql.gz under backups/; anything else in the
 # bucket is not a backup and is neither listed nor deleted.
 class BackupStore
@@ -14,7 +17,36 @@ class BackupStore
   # (Here, not in a controller: this file loads the S3 library, which the Gemfile leaves to be required on use.)
   UNREACHABLE = [Aws::Errors::ServiceError, Seahorse::Client::NetworkingError, KeyError, SystemCallError, SocketError].freeze
 
-  def self.bucket = ENV.fetch("MINIO_BACKUP_BUCKET", "fixflow-backups")
+  def self.separate? = ENV["BACKUP_S3_ACCESS_KEY"].present? || ENV["BACKUP_S3_ENDPOINT"].present?
+
+  def self.bucket
+    separate? ? ENV.fetch("BACKUP_S3_BUCKET", "fixflow-backups") : ENV.fetch("MINIO_BACKUP_BUCKET", "fixflow-backups")
+  end
+
+  def self.build_client
+    # A storage that does not answer should fail the page in seconds, not after the library's default minute.
+    common = { http_open_timeout: 5, retry_limit: 1 }
+    if separate?
+      Aws::S3::Client.new(
+        endpoint:          ENV["BACKUP_S3_ENDPOINT"].presence,
+        access_key_id:     ENV.fetch("BACKUP_S3_ACCESS_KEY"),
+        secret_access_key: ENV.fetch("BACKUP_S3_SECRET_KEY"),
+        region:            ENV.fetch("BACKUP_S3_REGION", "us-east-1"),
+        force_path_style:  ENV.fetch("BACKUP_S3_PATH_STYLE", "true") != "false",
+        **common
+      )
+    else
+      Aws::S3::Client.new(
+        endpoint:          ENV.fetch("MINIO_ENDPOINT", "http://minio:9000"),
+        access_key_id:     ENV["MINIO_ACCESS_KEY"] || ENV.fetch("MINIO_ACCESS_KEY_ID"),
+        secret_access_key: ENV["MINIO_SECRET_KEY"] || ENV.fetch("MINIO_SECRET_ACCESS_KEY"),
+        region:            ENV.fetch("MINIO_REGION", "us-east-1"),
+        force_path_style:  true,
+        **common
+      )
+    end
+  end
+
   def self.valid_name?(name) = name.to_s.match?(NAME)
 
   def initialize(client: nil)
@@ -74,16 +106,5 @@ class BackupStore
 
   def key(name) = "#{PREFIX}#{name}"
 
-  def client
-    @client ||= Aws::S3::Client.new(
-      endpoint:          ENV.fetch("MINIO_ENDPOINT", "http://minio:9000"),
-      access_key_id:     ENV["MINIO_ACCESS_KEY"] || ENV.fetch("MINIO_ACCESS_KEY_ID"),
-      secret_access_key: ENV["MINIO_SECRET_KEY"] || ENV.fetch("MINIO_SECRET_ACCESS_KEY"),
-      region:            ENV.fetch("MINIO_REGION", "us-east-1"),
-      force_path_style:  true,
-      # A storage that does not answer should fail the page in seconds, not after the library's default minute.
-      http_open_timeout: 5,
-      retry_limit:       1
-    )
-  end
+  def client = @client ||= self.class.build_client
 end

@@ -7,6 +7,54 @@ RSpec.describe BackupStore do
 
   def object(key, at, size: 10) = { key: key, last_modified: at, size: size }
 
+  describe "where the backups are kept" do
+    let(:ours) { { "BACKUP_S3_ACCESS_KEY" => "k", "BACKUP_S3_SECRET_KEY" => "s", "BACKUP_S3_ENDPOINT" => "https://s3.example.com" } }
+
+    def with_env(values)
+      stub_const("ENV", ENV.to_h.except(*ours.keys, "BACKUP_S3_BUCKET", "BACKUP_S3_REGION").merge(values))
+    end
+
+    it "is the file storage's backup bucket unless another storage is set" do
+      with_env("MINIO_BACKUP_BUCKET" => "mine")
+
+      expect(described_class.separate?).to be(false)
+      expect(described_class.bucket).to eq("mine")
+    end
+
+    it "is another storage, and its own bucket, once BACKUP_S3_* is set" do
+      with_env(ours.merge("MINIO_BACKUP_BUCKET" => "mine", "BACKUP_S3_BUCKET" => "offsite"))
+
+      expect(described_class.separate?).to be(true)
+      expect(described_class.bucket).to eq("offsite")
+    end
+
+    it "talks to the other storage with its own login, never the file storage's" do
+      with_env(ours.merge("MINIO_ENDPOINT" => "http://s3:8333", "MINIO_ACCESS_KEY" => "minio", "MINIO_SECRET_KEY" => "minio-secret"))
+      client = described_class.build_client
+
+      expect(client.config.endpoint.to_s).to eq("https://s3.example.com")
+      expect(client.config.credentials.credentials).to have_attributes(access_key_id: "k", secret_access_key: "s")
+    end
+
+    it "does not fall back to the file storage's login when only half of the other one is set" do
+      with_env("BACKUP_S3_ACCESS_KEY" => "k", "MINIO_ACCESS_KEY" => "minio-key", "MINIO_SECRET_KEY" => "minio-secret")
+
+      expect { described_class.build_client }.to raise_error(KeyError)
+    end
+
+    it "does not borrow the file storage's access key either, whichever half is missing" do
+      with_env("BACKUP_S3_ENDPOINT" => "https://s3.example.com", "BACKUP_S3_SECRET_KEY" => "s", "MINIO_ACCESS_KEY" => "minio-key")
+
+      expect { described_class.build_client }.to raise_error(KeyError, /BACKUP_S3_ACCESS_KEY/)
+    end
+
+    it "uses the file storage when nothing else is set" do
+      with_env("MINIO_ENDPOINT" => "http://s3:8333", "MINIO_ACCESS_KEY" => "minio-key", "MINIO_SECRET_KEY" => "minio-secret")
+
+      expect(described_class.build_client.config.endpoint.to_s).to eq("http://s3:8333")
+    end
+  end
+
   describe ".valid_name?" do
     it "accepts what the nightly job names a backup and nothing else" do
       expect(described_class.valid_name?("fixflow_20261018_030000.sql.gz")).to be(true)

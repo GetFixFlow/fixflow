@@ -110,6 +110,12 @@ RSpec.describe FixflowConfigCheck do
       expect(about("MINIO_SECRET_KEY", "MINIO_SECRET_KEY" => "change_me_strong_password").first.level).to eq(:warning)
       expect(about("MINIO_SECRET_KEY", "MINIO_SECRET_ACCESS_KEY" => "a-real-secret", "MINIO_SECRET_KEY" => "change_me")).to be_empty
       expect(about("MINIO_ENDPOINT", "MINIO_ENDPOINT" => "minio:9000").map(&:level)).to eq([:error])
+      expect(about("BACKUP_S3_SECRET_KEY", "BACKUP_S3_ACCESS_KEY" => "key").first.level).to eq(:error)
+      only_endpoint = { "BACKUP_S3_ENDPOINT" => "https://s3.example.com", "BACKUP_S3_SECRET_KEY" => "s" }
+      expect(about("BACKUP_S3_ACCESS_KEY", only_endpoint).first.level).to eq(:error)
+      bad_endpoint = { "BACKUP_S3_ACCESS_KEY" => "k", "BACKUP_S3_SECRET_KEY" => "s", "BACKUP_S3_ENDPOINT" => "s3.example.com" }
+      expect(about("BACKUP_S3_ENDPOINT", bad_endpoint).map(&:level)).to eq([:error])
+      expect(about("BACKUP_S3_ACCESS_KEY", "BACKUP_S3_ACCESS_KEY" => "k", "BACKUP_S3_SECRET_KEY" => "s")).to be_empty
       expect(about("MQTT_PASSWORD", "MQTT_HOST" => "mqtt", "MQTT_PASSWORD" => "change_me_strong_password").first.level).to eq(:warning)
       expect(about("MQTT_PORT", "MQTT_HOST" => "mqtt", "MQTT_PORT" => "0").first.level).to eq(:error)
     end

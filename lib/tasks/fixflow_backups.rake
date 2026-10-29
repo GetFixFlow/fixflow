@@ -1,4 +1,12 @@
 namespace :fixflow do
+  desc "Back up now, as the nightly job does: the database dump and a copy of the uploaded files"
+  task backup: :environment do
+    name = DatabaseBackupJob.new.backup
+    puts "Backed up as #{name} in the #{BackupStore.bucket} bucket."
+  rescue StandardError => e
+    abort "Not backed up: #{e.class}: #{e.message}"
+  end
+
   desc "List the database backups in the file storage, newest first"
   task backups: :environment do
     backups = BackupStore.new.list
@@ -13,7 +21,8 @@ namespace :fixflow do
 
   desc "Restore a backup into an empty database. Usage: rails \"fixflow:restore[latest]\", " \
        "rails \"fixflow:restore[fixflow_20261018_030000.sql.gz]\" or rails \"fixflow:restore[/path/to/dump.sql.gz]\". " \
-       "REPLACE=yes first deletes everything in the database. Stop the web and worker processes first."
+       "REPLACE=yes first deletes everything in the database. FILES=no leaves the uploaded files alone. " \
+       "Stop the web and worker processes first."
   task :restore, [:source] => :environment do |_task, args|
     source = args[:source].to_s
     abort "Say which backup to restore: a file name from fixflow:backups, a path, or latest." if source.empty?
@@ -44,5 +53,21 @@ namespace :fixflow do
     ensure
       downloaded&.close!
     end
+
+    next if ENV["FILES"] == "no"
+
+    Rake::Task["fixflow:restore_files"].reenable
+    Rake::Task["fixflow:restore_files"].invoke
+  end
+
+  desc "Copy the uploaded photos and documents from the backup storage back to the file storage (what it lacks)"
+  task restore_files: :environment do
+    puts "Restoring the uploaded files from the #{BackupStore.bucket} bucket..."
+    files = UploadsBackup.new.restore
+    puts "Restored #{files.copied} uploaded files (#{ActiveSupport::NumberHelper.number_to_human_size(files.bytes)}); " \
+         "#{files.present} were already there."
+  rescue StandardError => e
+    abort "The uploaded files were not restored: #{e.class}: #{e.message.delete_suffix('.')}. " \
+          "Run rails fixflow:restore_files again when the #{BackupStore.bucket} bucket answers."
   end
 end

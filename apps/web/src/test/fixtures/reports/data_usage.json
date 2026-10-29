@@ -48,6 +48,7 @@
     "at": "03:00 UTC",
     "keep_days": 30,
     "bucket": "fixflow-backups",
+    "separate": false,
     "tries": 3,
     "retry_minutes": 15
   }

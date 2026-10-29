@@ -26,6 +26,13 @@ x-api-env: &api-env
   MINIO_SECRET_KEY:       ${MINIO_SECRET_KEY:?Set MINIO_SECRET_KEY in .env}
   MINIO_BUCKET:           ${MINIO_BUCKET:-fixflow-uploads}
   MINIO_BACKUP_BUCKET:    ${MINIO_BACKUP_BUCKET:-fixflow-backups}
+  # Backups on another S3 storage (optional; leave all empty to keep them in the file storage above).
+  BACKUP_S3_ENDPOINT:     ${BACKUP_S3_ENDPOINT:-}
+  BACKUP_S3_ACCESS_KEY:   ${BACKUP_S3_ACCESS_KEY:-}
+  BACKUP_S3_SECRET_KEY:   ${BACKUP_S3_SECRET_KEY:-}
+  BACKUP_S3_BUCKET:       ${BACKUP_S3_BUCKET:-fixflow-backups}
+  BACKUP_S3_REGION:       ${BACKUP_S3_REGION:-us-east-1}
+  BACKUP_S3_PATH_STYLE:   ${BACKUP_S3_PATH_STYLE:-true}
   MQTT_HOST:              mqtt
   MQTT_PORT:              "1883"
   MQTT_USERNAME:          ${MQTT_USERNAME:?Set MQTT_USERNAME in .env}
@@ -66,8 +73,10 @@ services:
 
   # Runs the background jobs: emails, preventive maintenance, IoT alerts, the nightly backup and cleanups.
   sidekiq:
-    build: .
+    # The image the api service builds. Not built a second time here: two builds that name the same image race
+    # each other ("image already exists") on Docker versions that keep images in containerd.
     image: fixflow-api
+    pull_policy: never
     restart: unless-stopped
     command: bundle exec sidekiq -C config/sidekiq.yml
     env_file: .env

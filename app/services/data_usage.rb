@@ -72,6 +72,7 @@ class DataUsage
 
   def backups
     { runs: DatabaseBackupJob.runs_here?, at: DatabaseBackupJob::RUNS_AT, keep_days: DatabaseBackupJob::RETENTION_DAYS,
-      bucket: BackupStore.bucket, tries: DatabaseBackupJob::ATTEMPTS, retry_minutes: DatabaseBackupJob::RETRY_AFTER.in_minutes.to_i }
+      bucket: BackupStore.bucket, separate: BackupStore.separate?, tries: DatabaseBackupJob::ATTEMPTS,
+      retry_minutes: DatabaseBackupJob::RETRY_AFTER.in_minutes.to_i }
   end
 end

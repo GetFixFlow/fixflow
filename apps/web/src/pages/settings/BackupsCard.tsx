@@ -36,8 +36,9 @@ export function BackupsCard({ backups }: { backups: DataUsage['backups'] | undef
         <h3 className="font-semibold text-gray-900 dark:text-gray-100">Database backups</h3>
         {backups && (backups.runs ? (
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            A copy of the database is made every night at {backups.at} and kept for {backups.keep_days} days in the file storage
-            (the <span className="font-mono">{backups.bucket}</span> bucket). A backup that fails is tried again every {backups.retry_minutes} minutes,
+            A copy of the database, and of any photos and documents people uploaded since the last one, is made every night at {backups.at}.
+            The database copies are kept for {backups.keep_days} days in the <span className="font-mono">{backups.bucket}</span> bucket
+            {backups.separate ? ' of the separate backup storage' : ' of the file storage'}. A backup that fails is tried again every {backups.retry_minutes} minutes,
             {' '}{backups.tries} tries in all; if the last one fails, every administrator is emailed (when email is set up) and a line is
             written to the audit log.
           </p>
@@ -97,13 +98,23 @@ export function BackupsCard({ backups }: { backups: DataUsage['backups'] | undef
 
         <p className="text-xs text-gray-500">
           A backup holds everything in the database, password hashes included: keep a downloaded copy somewhere safe. Every download is written to the
-          audit log. Backups hold the database only; the photos and documents people uploaded are in the file storage and are not in them.
+          audit log. Uploaded files are copied under <span className="font-mono">files/</span> in the same bucket and are never deleted from
+          the copy, because an older backup may still point at them.
         </p>
+        {backups?.runs && !backups.separate && (
+          <p role="note" className="rounded-md bg-amber-50 p-3 text-xs text-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
+            These backups are on the same storage server and disk as the data they protect, so they do not survive losing the server. Set{' '}
+            <span className="font-mono">BACKUP_S3_ACCESS_KEY</span>, <span className="font-mono">BACKUP_S3_SECRET_KEY</span> and{' '}
+            <span className="font-mono">BACKUP_S3_ENDPOINT</span> to keep them somewhere else (see &quot;Backups&quot; in the README), or copy the
+            <span className="font-mono"> s3_data</span> volume off the server yourself.
+          </p>
+        )}
         <details className="text-xs text-gray-600 dark:text-gray-400">
           <summary className="cursor-pointer font-medium">How to restore a backup</summary>
           <div className="mt-2 space-y-1">
             <p>Restoring is done on the server, with the web and worker processes stopped, into an empty database:</p>
             <p className="font-mono">rails "fixflow:restore[latest]"</p>
+            <p>This also copies the uploaded files back (add <span className="font-mono">FILES=no</span> to skip that).</p>
             <p>
               Use a name from the list instead of <span className="font-mono">latest</span>, or the path of a downloaded file. To replace a database that
               already has data, add <span className="font-mono">REPLACE=yes</span>: everything in it is deleted, but only if the restore succeeds. Afterwards run{' '}
