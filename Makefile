@@ -2,7 +2,7 @@
 # (README: "Install on a server"). The targets that start with prod, plus backup and restore, are the production one.
 PROD = docker compose -f docker-compose.prod.yml
 
-.PHONY: dev stop logs prod prod-stop prod-logs prod-status backup restore build-web test-web typecheck-web migrate seed demo-data console
+.PHONY: dev stop logs prod prod-stop prod-logs prod-status backup restore upgrade rollback build-web test-web typecheck-web migrate seed demo-data console
 
 dev:
 	docker compose up --build
@@ -66,3 +66,14 @@ restore:
 	  $(PROD) run --rm -T -e REPLACE=yes api bin/rails "fixflow:restore[$(FROM)]"; \
 	fi
 	$(PROD) up -d
+
+# Moves a production install to another version: backs up the database first, switches this folder to the version,
+# rebuilds and starts it (the migrations run at start). Details in the README, "Upgrading and rolling back".
+#   make upgrade TO=v1.2.3
+upgrade:
+	@./bin/upgrade "$(TO)"
+
+# Undoes the last upgrade: the previous version again, with the database as it was just before the upgrade.
+#   make rollback CONFIRM=yes
+rollback:
+	@./bin/rollback

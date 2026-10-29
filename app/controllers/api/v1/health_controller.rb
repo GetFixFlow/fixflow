@@ -1,4 +1,5 @@
 require "sidekiq/api"
+require "fixflow_release"
 
 module Api
   module V1
@@ -15,7 +16,7 @@ module Api
 
         render json: {
           status:          overall,
-          version:         ENV.fetch("APP_VERSION", "0.1.0"),
+          version:         FixflowRelease.current,
           checks:          checks,
           uptime_seconds:  (Time.current - BOOT_TIME).to_i,
           timestamp:       Time.current.iso8601

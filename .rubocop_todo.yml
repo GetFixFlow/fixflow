@@ -320,6 +320,7 @@ RSpec/DescribeClass:
   Exclude:
     - 'spec/config/production_boot_spec.rb'
     - 'spec/config/production_stack_spec.rb'
+    - 'spec/config/upgrade_spec.rb'
 
 # Offense count: 25
 # This cop supports unsafe autocorrection (--autocorrect-all).

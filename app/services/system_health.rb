@@ -1,5 +1,6 @@
 require "socket"
 require "timeout"
+require "fixflow_release"
 
 # What an administrator needs to know to tell whether this install is working: the database, Redis, the background
 # worker, email, the MQTT broker, file storage, and whether a newer release exists. Every check answers
@@ -37,7 +38,7 @@ class SystemHealth
     statuses.include?("warning") ? "warning" : "ok"
   end
 
-  def version = @env.fetch("APP_VERSION", "0.1.0")
+  def version = FixflowRelease.current(@env)
 
   def app_info
     { version: version, environment: Rails.env, ruby: RUBY_VERSION, rails: Rails.version,

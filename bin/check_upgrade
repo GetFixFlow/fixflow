@@ -1,0 +1,147 @@
+#!/bin/sh
+# Checks, for real, that an install upgrades with its data kept and can be rolled back: starts the production stack
+# (docker-compose.prod.yml) on an OLD version, puts data in it (first-run setup, a place, an uploaded file), runs
+# bin/upgrade to the version in this checkout, checks the data is all there and the migrations have run, then runs
+# bin/rollback and checks that the old version is back with the data as it was at the backup. It takes several
+# minutes (images are built three times). CI runs it on every pull request; it removes everything it started.
+#
+# Usage: bin/check_upgrade [old version]      the old version is a git ref and defaults to HEAD^1 (what the pull
+#                                              request is merged onto, or the commit before the one pushed)
+#
+# It writes a .env, switches this checkout between versions and deletes the stack's volumes, so it refuses to run
+# where a .env already exists: use a fresh clone, not your own working copy.
+#
+# One function, called on the last line: it checks out other versions of this very file while it runs.
+set -eu
+
+fail() { echo "FAIL: $*" >&2; exit 1; }
+ok() { echo "ok:   $*"; }
+
+main() {
+  cd "$(dirname "$0")/.."
+  if [ -e .env ]; then
+    echo "bin/check_upgrade: there is a .env here. Run this in a fresh clone; it would replace your settings." >&2
+    exit 2
+  fi
+
+  PORT=8089
+  BASE="http://localhost:$PORT"
+  COMPOSE="docker compose -f docker-compose.prod.yml"
+  JSON='Content-Type: application/json'
+  GIT="git -c user.name=check -c user.email=check@fixflow.test"
+
+  new=$(git rev-parse HEAD)
+  old=$(git rev-parse --verify "${1:-HEAD^1}^{commit}") || fail "there is no old version ${1:-HEAD^1} (a CI checkout needs fetch-depth: 2)"
+  [ "$old" != "$new" ] || fail "the old version is the same commit as this one"
+
+  trap cleanup EXIT
+  git checkout -q "$old"
+  # Until a released version has the upgrade scripts, put them on top of the old version, as a copy of it that has them.
+  if [ ! -x bin/upgrade ]; then
+    echo "note: $(git rev-parse --short "$old") has no bin/upgrade yet; testing it as a copy of that version that has the scripts"
+    for file in bin/upgrade bin/rollback; do
+      git show "$new:$file" > "$file"
+      chmod +x "$file"
+    done
+    printf '/.fixflow_upgrade\n' >> .gitignore
+    $GIT add bin/upgrade bin/rollback .gitignore
+    $GIT commit -q -m "The old version, with the upgrade scripts"
+    old=$(git rev-parse HEAD)
+  fi
+
+  cp .env.example .env
+  {
+    echo
+    echo "APP_URL=$BASE"
+    echo "HTTP_PORT=$PORT"
+    echo "SECRET_KEY_BASE=$(openssl rand -hex 64)"
+    echo "DEVISE_JWT_SECRET_KEY=$(openssl rand -hex 48)"
+    echo "DB_PASSWORD=$(openssl rand -hex 24)"
+    echo "REDIS_PASSWORD=$(openssl rand -hex 24)"
+    echo "MINIO_ACCESS_KEY=$(openssl rand -hex 10)"
+    echo "MINIO_SECRET_KEY=$(openssl rand -hex 24)"
+    echo "MQTT_PASSWORD=$(openssl rand -hex 24)"
+  } >> .env
+
+  echo "Starting the old version $(git describe --tags --always) ..."
+  $COMPOSE up -d --build --wait --wait-timeout 900 || fail "the old version did not come up healthy"
+  ok "the old version is running"
+
+  curl -s -X POST $BASE/api/v1/auth/sign_up -H "$JSON" \
+    -d '{"user":{"email":"admin@check.test","password":"password123","password_confirmation":"password123","first_name":"Check","last_name":"Admin","organization_name":"Check Co"}}' \
+    | grep -q 'Account created' || fail "first-run setup on the old version"
+  token=$(sign_in)
+  [ -n "$token" ] || fail "sign-in on the old version"
+  create_place "Made before the upgrade" "$token"
+  file_key=$($COMPOSE exec -T api bin/rails runner \
+    'print ActiveStorage::Blob.create_and_upload!(io: StringIO.new("kept through the upgrade"), filename: "check.txt", content_type: "text/plain").key' \
+    2>/dev/null | tail -n 1)
+  [ -n "$file_key" ] || fail "storing an uploaded file on the old version"
+  ok "data entered on the old version: a company, a user, a place and an uploaded file"
+
+  echo "Upgrading ..."
+  bin/upgrade "$new" || fail "bin/upgrade"
+  [ "$(git rev-parse HEAD)" = "$new" ] || fail "the folder is not on the new version after the upgrade"
+  ls backup_before_upgrade_*.sql.gz >/dev/null 2>&1 || fail "bin/upgrade left no backup file"
+  wait_for_health
+  token=$(sign_in)
+  [ -n "$token" ] || fail "cannot sign in after the upgrade"
+  curl -s $BASE/api/v1/locations -H "Authorization: $token" | grep -q 'Made before the upgrade' || fail "the place entered before the upgrade is gone"
+  [ "$($COMPOSE exec -T api bin/rails runner "print ActiveStorage::Blob.find_by!(key: '$file_key').download" 2>/dev/null | tail -n 1)" = "kept through the upgrade" ] \
+    || fail "the uploaded file is gone after the upgrade"
+  [ "$($COMPOSE exec -T api bin/rails runner 'print ActiveRecord::Base.connection_pool.migration_context.needs_migration?' 2>/dev/null | tail -n 1)" = "false" ] \
+    || fail "migrations are still waiting after the upgrade"
+  [ "$($COMPOSE exec -T api bin/rails runner 'print FixflowRelease.current' 2>/dev/null | tail -n 1)" = "$(cat VERSION)" ] \
+    || fail "the server does not report the version in the VERSION file"
+  ok "upgraded: the data is there, the migrations have run, the version is $(cat VERSION)"
+
+  create_place "Made after the upgrade" "$token"
+  CONFIRM=yes bin/rollback || fail "bin/rollback"
+  [ "$(git rev-parse HEAD)" = "$old" ] || fail "the folder is not back on the old version after the rollback"
+  [ ! -e .fixflow_upgrade ] || fail "the rollback left its record behind"
+  wait_for_health
+  token=$(sign_in)
+  [ -n "$token" ] || fail "cannot sign in after the rollback"
+  places=$(curl -s $BASE/api/v1/locations -H "Authorization: $token")
+  echo "$places" | grep -q 'Made before the upgrade' || fail "the place entered before the upgrade is gone after the rollback"
+  echo "$places" | grep -q 'Made after the upgrade' && fail "the rollback did not remove what was entered after the upgrade"
+  [ "$($COMPOSE exec -T api bin/rails runner "print ActiveStorage::Blob.find_by!(key: '$file_key').download" 2>/dev/null | tail -n 1)" = "kept through the upgrade" ] \
+    || fail "the uploaded file is gone after the rollback"
+  ok "rolled back: the old version is running with the data as it was at the backup"
+
+  echo "An install upgrades with its data kept, and rolls back."
+}
+
+sign_in() {
+  curl -s -D - -o /dev/null -X POST $BASE/api/v1/auth/sign_in -H "$JSON" \
+    -d '{"user":{"email":"admin@check.test","password":"password123"}}' | grep -i '^authorization:' | sed 's/^[Aa]uthorization: //' | tr -d '\r'
+}
+
+create_place() {
+  curl -s -X POST $BASE/api/v1/locations -H "Authorization: $2" -H "$JSON" \
+    -d "{\"location\":{\"name\":\"$1\",\"location_type\":\"building\"}}" | grep -q "$1" || fail "creating the place $1"
+}
+
+wait_for_health() {
+  for _ in $(seq 1 40); do
+    [ "$(curl -s -o /dev/null -w '%{http_code}' $BASE/api/v1/health)" = "200" ] && return 0
+    sleep 3
+  done
+  fail "the server does not answer after 2 minutes"
+}
+
+cleanup() {
+  status=$?
+  if [ "$status" != 0 ]; then
+    echo "---- container status" >&2
+    $COMPOSE ps >&2 || true
+    echo "---- last log lines" >&2
+    $COMPOSE logs --tail 40 >&2 || true
+  fi
+  $COMPOSE down -v >/dev/null 2>&1 || true
+  rm -f .env backup_before_upgrade_*.sql.gz .fixflow_upgrade
+  exit "$status"
+}
+
+main "$@"
+exit

@@ -1,0 +1,58 @@
+#!/usr/bin/env ruby
+# Prepares a release: a branch with the VERSION file changed and what is under [Unreleased] in CHANGELOG.md moved into
+# a section for the new version. Nothing is pushed or tagged; it prints what to do next.
+# Usage: bin/release 1.2.3         bin/release 1.2.3 --dry-run   (shows the release notes, changes nothing)
+require "open3"
+require_relative "../lib/fixflow_release"
+
+version = ARGV.find { |arg| arg.match?(/\A\d/) }.to_s
+dry_run = ARGV.include?("--dry-run")
+abort "Usage: bin/release 1.2.3 [--dry-run]" unless FixflowRelease.valid?(version)
+
+def git(*args)
+  out, status = Open3.capture2e("git", *args, chdir: FixflowRelease::ROOT)
+  abort "git #{args.join(' ')} failed:\n#{out}" unless status.success?
+  out.strip
+end
+
+current = FixflowRelease.current({})
+abort "#{version} is not newer than the current version, #{current}." unless FixflowRelease.newer?(version, current)
+
+unless dry_run
+  abort "Run this on the main branch (you are on #{git('branch', '--show-current')})." unless git("branch", "--show-current") == "main"
+  abort "There are uncommitted changes. Commit or stash them first." unless git("status", "--porcelain").empty?
+
+  git("fetch", "origin", "main", "--tags")
+  abort "main is not the same as origin/main. Run git pull first." unless git("rev-parse", "HEAD") == git("rev-parse", "origin/main")
+  abort "The tag v#{version} already exists." unless git("tag", "--list", "v#{version}").empty?
+end
+
+begin
+  changelog = FixflowRelease.cut(File.read(FixflowRelease::CHANGELOG_FILE), version)
+  notes = FixflowRelease.notes(changelog, version)
+rescue FixflowRelease::Error => e
+  abort e.message
+end
+
+if dry_run
+  puts notes
+  exit
+end
+
+git("switch", "-c", "release-#{version}")
+File.write(FixflowRelease::VERSION_FILE, "#{version}\n")
+File.write(FixflowRelease::CHANGELOG_FILE, changelog)
+git("add", "VERSION", "CHANGELOG.md")
+git("commit", "-m", "Release #{version}")
+
+puts <<~NEXT
+  Release #{version} is ready on the branch release-#{version}, with the release notes below.
+  Read them (they are the CHANGELOG section) and fix the wording in CHANGELOG.md if needed, then:
+
+    git push -u origin release-#{version}        and open a pull request; merge it when the checks pass
+    git switch main && git pull
+    git tag v#{version} && git push origin v#{version}       the release workflow checks the tag and publishes the release
+
+  ----
+  #{notes.gsub("\n", "\n  ")}
+NEXT

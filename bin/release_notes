@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+# Prints the release notes of a version, as they go on its GitHub release page: how to upgrade, what to do first, and
+# the CHANGELOG.md section. Usage: bin/release_notes 1.2.3
+require_relative "../lib/fixflow_release"
+
+version = ARGV.first.to_s.delete_prefix("v")
+abort "Usage: bin/release_notes 1.2.3" unless FixflowRelease.valid?(version)
+
+begin
+  puts FixflowRelease.notes(File.read(FixflowRelease::CHANGELOG_FILE), version)
+rescue FixflowRelease::Error => e
+  abort e.message
+end
