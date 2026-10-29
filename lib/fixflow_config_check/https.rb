@@ -1,5 +1,5 @@
 class FixflowConfigCheck
-  # The optional HTTPS front door (the `https` service of docker-compose.prod.yml, README "HTTPS"). Its settings are
+  # The optional HTTPS front door (the `https` service of docker-compose.prod.yml, docs/https.md). Its settings are
   # in .env, which the api container receives whole, so a mistake can be caught here before the proxy fails to start.
   module Https
     MODES = %w[automatic own-certificate internal].freeze

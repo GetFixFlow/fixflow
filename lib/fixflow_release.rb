@@ -73,8 +73,8 @@ module FixflowRelease
       lines << ""
     end
     lines << "Back up and upgrade with `make upgrade TO=v#{version}`; `make rollback CONFIRM=yes` puts the previous version and " \
-             "its database back. Migrations run when the server starts. The steps are in the README, under " \
-             "\"Upgrading and rolling back\"."
+             "its database back. Migrations run when the server starts. The steps are in the documentation, " \
+             "\"Upgrading and rolling back\" (docs/upgrading.md)."
     lines << "" << "## What changed" << "" << body
     lines.join("\n")
   end

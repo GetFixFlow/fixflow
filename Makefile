@@ -1,5 +1,5 @@
 # Two separate stacks: docker-compose.yml is for development, docker-compose.prod.yml is a production install
-# (README: "Install on a server"). The targets that start with prod, plus backup and restore, are the production one.
+# (docs/install.md). The targets that start with prod, plus backup and restore, are the production one.
 PROD = docker compose -f docker-compose.prod.yml
 
 .PHONY: dev stop logs prod prod-stop prod-logs prod-status backup restore upgrade rollback build-web test-web typecheck-web migrate seed demo-data console
@@ -68,7 +68,7 @@ restore:
 	$(PROD) up -d
 
 # Moves a production install to another version: backs up the database first, switches this folder to the version,
-# rebuilds and starts it (the migrations run at start). Details in the README, "Upgrading and rolling back".
+# rebuilds and starts it (the migrations run at start). Details in docs/upgrading.md.
 #   make upgrade TO=v1.2.3
 upgrade:
 	@./bin/upgrade "$(TO)"

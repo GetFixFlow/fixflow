@@ -105,7 +105,7 @@ export function BackupsCard({ backups }: { backups: DataUsage['backups'] | undef
           <p role="note" className="rounded-md bg-amber-50 p-3 text-xs text-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
             These backups are on the same storage server and disk as the data they protect, so they do not survive losing the server. Set{' '}
             <span className="font-mono">BACKUP_S3_ACCESS_KEY</span>, <span className="font-mono">BACKUP_S3_SECRET_KEY</span> and{' '}
-            <span className="font-mono">BACKUP_S3_ENDPOINT</span> to keep them somewhere else (see &quot;Backups&quot; in the README), or copy the
+            <span className="font-mono">BACKUP_S3_ENDPOINT</span> to keep them somewhere else (see &quot;Backups and restoring&quot; in the documentation), or copy the
             <span className="font-mono"> s3_data</span> volume off the server yourself.
           </p>
         )}
@@ -118,7 +118,7 @@ export function BackupsCard({ backups }: { backups: DataUsage['backups'] | undef
             <p>
               Use a name from the list instead of <span className="font-mono">latest</span>, or the path of a downloaded file. To replace a database that
               already has data, add <span className="font-mono">REPLACE=yes</span>: everything in it is deleted, but only if the restore succeeds. Afterwards run{' '}
-              <span className="font-mono">rails db:migrate</span> if it asks you to. See &quot;Backups&quot; in the README.
+              <span className="font-mono">rails db:migrate</span> if it asks you to. See &quot;Backups and restoring&quot; in the documentation.
             </p>
           </div>
         </details>
