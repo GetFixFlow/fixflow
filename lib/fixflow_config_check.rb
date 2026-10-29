@@ -1,5 +1,6 @@
 require "uri"
 require_relative "fixflow_config_check/file_storage"
+require_relative "fixflow_config_check/https"
 
 # Looks at the server's settings (its environment variables) before it starts, so a mistake stops the start with a
 # plain message instead of a stack trace later, or a server that runs with an example password.
@@ -9,6 +10,7 @@ require_relative "fixflow_config_check/file_storage"
 # Rails has loaded.
 class FixflowConfigCheck
   include FileStorage
+  include Https
 
   Problem = Struct.new(:level, :setting, :message) do
     def error? = level == :error
@@ -27,7 +29,8 @@ class FixflowConfigCheck
     @problems ||= [
       secret("SECRET_KEY_BASE", SECRET_KEY_BASE_MIN, "bin/rails secret"),
       secret("DEVISE_JWT_SECRET_KEY", JWT_SECRET_MIN, "openssl rand -base64 64"),
-      database_url, redis_url, app_url, allowed_origins, smtp_settings, minio_settings, mqtt_settings, feature_settings
+      database_url, redis_url, app_url, allowed_origins, smtp_settings, minio_settings, mqtt_settings, feature_settings,
+      https_settings
     ].flatten.compact
   end
 

@@ -29,13 +29,14 @@ RSpec.describe "The production stack" do
       end
     end
 
-    it "publishes the web front door and the sensor broker to the network, and nothing else" do
+    it "publishes the web front door, the HTTPS one and the sensor broker to the network, and nothing else" do
       published = services.transform_values { |service| Array(service["ports"]).map { |port| port.to_s.rpartition(":").first } }
       published.reject! { |_, ports| ports.empty? }
 
-      expect(published.keys).to contain_exactly("web", "mqtt")
-      expect(published["web"]).to eq(["${HTTP_PORT:-80}"])
+      expect(published.keys).to contain_exactly("web", "mqtt", "https")
+      expect(published["web"]).to eq(["${HTTP_BIND:-0.0.0.0}:${HTTP_PORT:-80}"])
       expect(published["mqtt"]).to eq(["1883"])
+      expect(published["https"]).to eq(["${HTTPS_HTTP_PORT:-80}", "${HTTPS_PORT:-443}"])
     end
 
     it "is complete by itself: it names the project, and no service extends another file" do
@@ -131,6 +132,51 @@ RSpec.describe "The production stack" do
 
       expect(dockerfile).to match(%r{ENV\s+VITE_API_URL=/api/v1})
       expect(dockerfile.index("VITE_API_URL")).to be < dockerfile.index("npm run build")
+    end
+  end
+
+  describe "HTTPS" do
+    let(:modes) { %w[automatic own-certificate internal] }
+
+    it "is a Caddy service that only starts when the https profile is on, and keeps its certificates in volumes" do
+      service = services.fetch("https")
+
+      expect(service["profiles"]).to eq(["https"])
+      expect(service["image"]).to start_with("caddy:")
+      expect(service["volumes"]).to include("caddy_data:/data")
+      expect(compose["volumes"]).to include("caddy_data", "caddy_config")
+      expect(services.except("https").values.pluck("profiles").compact).to eq([]), "only the https service is optional"
+    end
+
+    it "does not require a setting that a plain install has not got (compose reads the whole file, profile on or not)" do
+      expect(services.fetch("https").to_s).not_to include(":?")
+    end
+
+    it "has a Caddyfile for every mode that hands everything to the web front door and nothing else" do
+      expect(Rails.root.glob("deploy/caddy/*.Caddyfile").map { |file| file.basename(".Caddyfile").to_s }).to match_array(modes)
+      modes.each do |mode|
+        file = read("deploy/caddy/#{mode}.Caddyfile").lines.reject { |line| line.strip.start_with?("#") }.join
+        expect(file).to include("{$HTTPS_DOMAIN} {", "reverse_proxy web:80")
+        expect(file.scan("reverse_proxy").size).to eq(1)
+      end
+    end
+
+    it "reads the certificate and key a person was told to put in certs/, which git and the images never get" do
+      expect(read("deploy/caddy/own-certificate.Caddyfile")).to include("tls /certs/fixflow.crt /certs/fixflow.key")
+      expect(services.fetch("https")["volumes"]).to include("./certs:/certs:ro")
+      expect(read(".gitignore").lines.map(&:strip)).to include("/certs/")
+      expect(read(".dockerignore").lines.map(&:strip)).to include("/certs/")
+    end
+
+    it "is started and checked for real by bin/check_https, which CI runs" do
+      expect(Rails.root.join("bin/check_https")).to be_executable
+      workflow = YAML.safe_load(read(".github/workflows/ci.yml"), aliases: true)
+      expect(workflow.dig("jobs", "https", "steps").pluck("run").compact).to include("bin/check_https")
+    end
+
+    it "is documented in .env.example with the modes the config check accepts" do
+      expect(env_example).to include("COMPOSE_PROFILES=https", "HTTPS_DOMAIN=", "HTTPS_MODE=automatic", "HTTP_BIND=127.0.0.1")
+      expect(FixflowConfigCheck::Https::MODES).to match_array(modes)
     end
   end
 

@@ -51,3 +51,5 @@
 /coverage/
 /node_modules/
 /.claude/
+
+/certs/

@@ -38,11 +38,43 @@ docker compose -f docker-compose.prod.yml up -d --build      # or: make prod
 The first start builds the two images on the server (about 5 to 10 minutes) and pulls the rest. Then open the address you put in `APP_URL`: a new install shows **Set up FixFlow** (see *First-run setup* below). `docker compose -f docker-compose.prod.yml ps` shows seven services, all `healthy`: `web`, `api`, `sidekiq`, `db`, `redis`, `mqtt` and `s3`.
 
 - **One front door.** `web` serves the web app and passes `/api` and `/cable` (live updates) on to the API. It listens on `HTTP_PORT` (80 unless you set another; put the port in `APP_URL` if it is not 80). The sensor broker is on port 1883. **Nothing else is published**: the database, Redis, the file storage and the API can only be reached from inside.
-- **No HTTPS yet.** The front door speaks plain HTTP, so sign-in tokens cross your network unencrypted: use it on a network you trust until you put a TLS proxy in front (your company's, or Caddy, Traefik and the like; it must send `X-Forwarded-Proto: https`, which the front door passes on). Built-in HTTPS is on the roadmap.
+- **HTTPS is optional and built in.** The front door itself speaks plain HTTP, so sign-in tokens cross your network unencrypted until you turn on HTTPS (next section) or put your own TLS proxy in front.
 - **File storage** is [SeaweedFS](https://github.com/seaweedfs/seaweedfs) speaking the S3 protocol (the `MINIO_*` settings keep their old names and work for any S3-compatible server; MinIO's own image can no longer be pulled).
 - **Settings.** Everything in `.env` reaches the API and the worker, so any setting in the table below can be added there. If a required one is missing, `docker compose` says which.
 - **Data lives in four volumes** (`postgres_data`, `redis_data`, `s3_data`, `mqtt_data`); `docker compose ... down` keeps them, `down -v` deletes them. Back up as described under *Backups and restoring*.
 - **Commands.** Commands in this README that start with `docker compose exec api rails ...` are written for the development stack; on a production install they are `docker compose -f docker-compose.prod.yml exec api bin/rails ...`. `make prod`, `make prod-status`, `make prod-logs`, `make prod-stop`, `make backup` and `make restore` wrap the common ones.
+
+### HTTPS
+
+Without HTTPS, sign-in tokens and passwords cross your network readable, and browsers refuse the phone camera (QR scanning) and the offline cache on any address that is not HTTPS (`localhost` counts as secure). The Docker install can serve HTTPS itself: a small web server (Caddy) in front of the front door, started by one line in `.env`. Pick the case that is yours.
+
+| Your server is... | Use | You need |
+|---|---|---|
+| On the internet, with a name (`fixflow.example.com`) | `HTTPS_MODE=automatic` | The name pointing at the server, ports 80 and 443 open to the internet. The certificate is free (Let's Encrypt) and renews by itself. |
+| On a company network, and IT gave you a certificate | `HTTPS_MODE=own-certificate` | The certificate and its key as `certs/fixflow.crt` and `certs/fixflow.key` |
+| On a company network with no certificate to use | `HTTPS_MODE=internal` | To install FixFlow's own root certificate on every computer and phone (below) |
+| Behind your company's proxy or load balancer, which already does HTTPS | Leave this off | `APP_URL=https://...`, and the proxy must send `X-Forwarded-Proto: https` and pass WebSocket upgrades on `/cable` |
+
+In `.env` (the lines are in `.env.example`, commented out), for example:
+
+```
+APP_URL=https://fixflow.example.com
+COMPOSE_PROFILES=https
+HTTPS_DOMAIN=fixflow.example.com
+HTTPS_MODE=automatic
+HTTPS_EMAIL=it@example.com
+HTTP_PORT=8080
+HTTP_BIND=127.0.0.1
+```
+
+`HTTP_PORT` and `HTTP_BIND` move the plain-HTTP door out of the way (the HTTPS service takes ports 80 and 443) and close it to the network; the server refuses to start with the old values, and says so. Then `make prod` (or the `docker compose ... up -d --build` of the install) adds the `https` service, and `docker compose -f docker-compose.prod.yml logs https` shows it getting the certificate, which takes seconds. Plain HTTP on port 80 is sent on to HTTPS. Sign in again at the new address: browsers keep the sign-in per address.
+
+- **own-certificate**: put the certificate (followed by any intermediate certificates your IT gives) in `certs/fixflow.crt` and the key in `certs/fixflow.key`, next to `docker-compose.prod.yml`. Git and the images never get the `certs` folder. When the certificate is renewed, replace the files and run `docker compose -f docker-compose.prod.yml restart https`.
+- **internal**: Caddy makes its own certificate authority and signs the certificate. Every browser and phone shows a warning until it trusts that authority. Get the root certificate with `docker compose -f docker-compose.prod.yml cp https:/data/caddy/pki/authorities/local/root.crt fixflow-root.crt` and install it on each device as a trusted root (the steps differ for Windows, macOS, Android and iOS; your IT department has them). Without that, the camera and the offline cache will not work on phones either.
+- **automatic**: Let's Encrypt must be able to reach the server on port 80 under that name, from the internet. If the certificate does not come, `logs https` says why (the usual reasons: the name does not point at this server yet, or a firewall in front of port 80 or 443). Certificates are kept in the `caddy_data` volume; do not delete it often, because Let's Encrypt limits how many it issues for a name.
+- Certificates are not part of the backups: a new server gets a new one (automatic) or needs your files again (own-certificate).
+
+`bin/check_https` is the test of this: CI runs it on every change. It starts the stack with a certificate it makes, checks that exactly that certificate is served, that the web app, the API and a WebSocket work over HTTPS, that plain HTTP is redirected and the plain-HTTP door is closed to the network, then switches to `internal` and checks Caddy's authority signs. It cannot get a Let's Encrypt certificate (that needs a real name on the internet), so `automatic` for a real domain is the one mode CI has not seen.
 
 ### Development with Docker
 
@@ -158,6 +190,11 @@ npm run dev     # Dev server on :3001
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD` | No | A mail server, if you do not set one under Settings, Email |
 | `MINIO_ENDPOINT`, `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY`, `MINIO_BUCKET` | For file uploads | The S3-compatible file storage |
 | `MQTT_HOST`, `MQTT_PORT`, `MQTT_USERNAME`, `MQTT_PASSWORD` | For IoT over MQTT | The sensor broker |
+| `COMPOSE_PROFILES` | No | Docker install: `https` turns on the HTTPS front door (see *HTTPS*) |
+| `HTTPS_DOMAIN` | With `https` | The name people open FixFlow at, like `fixflow.example.com` (the name only). `APP_URL` must be `https://` and that name |
+| `HTTPS_MODE` | No | `automatic` (a free Let's Encrypt certificate; the default), `own-certificate` (`certs/fixflow.crt` and `certs/fixflow.key`) or `internal` (FixFlow makes its own) |
+| `HTTPS_EMAIL` | No | `automatic` mode: where Let's Encrypt writes before a certificate runs out |
+| `HTTP_BIND` | No | Docker install: the address the plain-HTTP door listens on; `127.0.0.1` closes it to the network (use it with HTTPS) |
 | `HTTP_PORT` | No | Docker install: the port the web front door listens on (80 if left out). Put it in `APP_URL` too when it is not 80 |
 | `MQTT_SUBSCRIBER` | No | `true` or `false` decides whether this process listens to the sensor broker; by default only the background worker does, so each reading is stored once |
 | `FIXFLOW_UPDATE_CHECK` | No | `false` stops the System Health page from asking GitHub for the latest release (anything else leaves it on) |
@@ -510,7 +547,7 @@ Photos are shrunk to at most 1600 pixels on a side before they are kept or sent,
 
 Things that need the server's decision (assigning, verifying, rejecting, cancelling, editing a work order) still need a connection.
 
-To reopen a page you already visited while offline, the app must be served over **HTTPS** (browsers only allow the offline cache on secure addresses; `localhost` counts). On a plain `http://` address the offline cache is not available: changes made while the page stays open are still saved and sent, but reloading the page offline will not work.
+To reopen a page you already visited while offline, the app must be served over **HTTPS** (see *HTTPS* under the install; browsers only allow the offline cache on secure addresses; `localhost` counts). On a plain `http://` address the offline cache is not available: changes made while the page stays open are still saved and sent, but reloading the page offline will not work.
 
 ## Email
 

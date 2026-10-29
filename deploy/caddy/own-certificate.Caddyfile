@@ -1,0 +1,8 @@
+# HTTPS_MODE=own-certificate: a certificate you were given (your company's, or one you bought), in the certs folder
+# next to docker-compose.prod.yml: certs/fixflow.crt (the certificate, followed by any intermediate certificates) and
+# certs/fixflow.key (its private key). Restart the https service to pick up a renewed one:
+#   docker compose -f docker-compose.prod.yml restart https
+{$HTTPS_DOMAIN} {
+	tls /certs/fixflow.crt /certs/fixflow.key
+	reverse_proxy web:80
+}
