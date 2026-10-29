@@ -1,0 +1,37 @@
+#!/bin/sh
+# Undoes the last bin/upgrade: switches back to the version that was running (noted in .fixflow_upgrade) and replaces
+# the database with the backup bin/upgrade took first. Everything entered since the upgrade is lost; uploaded files are
+# kept. Usage: make rollback CONFIRM=yes
+#
+# One function, called on the last line, because the checkout replaces this file while it runs (see bin/upgrade).
+set -eu
+
+die() { echo "bin/rollback: $*" >&2; exit 1; }
+
+main() {
+  cd "$(dirname "$0")/.."
+  PROD="docker compose -f docker-compose.prod.yml"
+  [ -f .fixflow_upgrade ] || die "There is no record of an upgrade here (.fixflow_upgrade), so there is nothing to go back to."
+  # shellcheck disable=SC1091
+  . ./.fixflow_upgrade
+  [ -f "$BACKUP" ] || die "The backup from before the upgrade, $BACKUP, is not here."
+  [ "${CONFIRM:-}" = "yes" ] || die "This goes back to $FROM_LABEL and REPLACES the database with $BACKUP: whatever was entered since is lost. Run it again with CONFIRM=yes to go ahead."
+  git diff --quiet HEAD -- || die "Files that git tracks have been changed here (git status shows which). Commit or stash them first."
+
+  echo "Switching back to $FROM_LABEL ..."
+  git checkout -q "$FROM"
+  $PROD build api web
+  $PROD stop web sidekiq api
+  echo "Putting the database back from $BACKUP ..."
+  # The uploaded files are not touched by an upgrade, so they are not copied back (FILES=no).
+  $PROD run --rm -T -e REPLACE=yes -e FILES=no -v "$PWD/$BACKUP:/tmp/restore.sql.gz:ro" api bin/rails "fixflow:restore[/tmp/restore.sql.gz]"
+  $PROD up -d --build --wait --wait-timeout 900
+  rm -f .fixflow_upgrade
+
+  echo ""
+  echo "Back on $FROM_LABEL with the database as it was in $BACKUP."
+  echo "git has this folder on a fixed version now; git switch main (or the branch you follow) returns to the newest."
+}
+
+main "$@"
+exit

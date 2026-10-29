@@ -182,3 +182,18 @@ jobs:
 
       - name: Start the production stack and check it
         run: bin/check_production_stack
+
+  # Starts the version this change is merged onto (the commit before it), puts data in it, upgrades it to this change with
+  # bin/upgrade, checks the data and the migrations, then rolls back with bin/rollback. fetch-depth 2 is what makes the
+  # commit before available.
+  upgrade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+
+      - name: Upgrade an install that has data, and roll it back
+        run: bin/check_upgrade

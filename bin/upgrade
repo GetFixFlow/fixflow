@@ -1,0 +1,59 @@
+#!/bin/sh
+# Upgrades a production install (docker-compose.prod.yml) to another version of FixFlow, and keeps the way back:
+#   1. dumps the database to backup_before_upgrade_<time>.sql.gz in this folder, and checks the file is whole,
+#   2. notes what is running now in .fixflow_upgrade, so `make rollback CONFIRM=yes` can put it back,
+#   3. checks out the new version, rebuilds, and starts it. The migrations run when the server starts.
+# Usage: make upgrade TO=v1.2.3        (or bin/upgrade v1.2.3; TO can be a tag, a branch or a commit)
+#
+# The whole script is one function, called on the last line: the checkout in step 3 replaces this file, and a shell
+# reads a script as it goes, so it must have read all of it before that happens.
+set -eu
+
+die() { echo "bin/upgrade: $*" >&2; exit 1; }
+
+main() {
+  cd "$(dirname "$0")/.."
+  PROD="docker compose -f docker-compose.prod.yml"
+  to=${1:-}
+  [ -n "$to" ] || die "Say which version: make upgrade TO=v1.2.3"
+  [ -f .env ] || die "There is no .env here. Run this in the folder the server runs from."
+  git rev-parse --git-dir >/dev/null 2>&1 || die "This folder is not a git checkout, so there is nothing to switch to the new version."
+  git diff --quiet HEAD -- || die "Files that git tracks have been changed here (git status shows which). Commit or stash them first: the upgrade switches them to the new version."
+  $PROD ps --status running --services 2>/dev/null | grep -qx db || die "The server is not running. Start it with make prod, then upgrade."
+
+  git fetch -q --tags origin || echo "Could not reach the git remote; using the versions that are already here." >&2
+  target=$(git rev-parse --verify -q "$to^{commit}" || git rev-parse --verify -q "origin/$to^{commit}") \
+    || die "There is no version called $to. Tags: $(git tag --sort=-v:refname | head -5 | tr '\n' ' ')"
+  from=$(git rev-parse HEAD)
+  [ "$from" != "$target" ] || die "This folder already has $to."
+  label=$(git describe --tags --always)
+
+  stamp=$(date +%Y%m%d_%H%M%S)
+  backup=backup_before_upgrade_$stamp.sql.gz
+  echo "Backing up the database to $backup ..."
+  $PROD exec -T db pg_dump -U fixflow --no-owner --no-acl fixflow_production > "$backup.part" \
+    || { rm -f "$backup.part"; die "The database backup failed, so nothing was changed."; }
+  gzip -c "$backup.part" > "$backup"
+  rm -f "$backup.part"
+  gzip -dc "$backup" | tail -n 5 | grep -q "PostgreSQL database dump complete" \
+    || { rm -f "$backup"; die "The database backup is incomplete, so nothing was changed."; }
+
+  printf 'FROM=%s\nFROM_LABEL=%s\nBACKUP=%s\nTO=%s\n' "$from" "$label" "$backup" "$target" > .fixflow_upgrade
+
+  echo "Switching from $label to $to ..."
+  git checkout -q "$target"
+  if ! $PROD up -d --build --wait --wait-timeout 900; then
+    echo "" >&2
+    echo "The new version did not come up healthy. Look at: docker compose -f docker-compose.prod.yml logs --tail 100" >&2
+    echo "To go back to $label and the database as it was (data entered since $stamp is lost): make rollback CONFIRM=yes" >&2
+    exit 1
+  fi
+
+  echo ""
+  echo "Upgraded from $label to $(git describe --tags --always). Open Settings, System Health to see that everything is working."
+  echo "The database as it was before is in $backup. If something is wrong, make rollback CONFIRM=yes goes back to $label"
+  echo "and that database (data entered since $stamp is lost). Keep the backup file for as long as you may need it."
+}
+
+main "$@"
+exit
