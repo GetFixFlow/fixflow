@@ -210,6 +210,17 @@ describe('DataRetentionPage', () => {
     expect(screen.getByText('BACKUP_S3_ACCESS_KEY')).toBeInTheDocument()
   })
 
+  it('describes backups kept in a folder on the disk (the lite install), and warns that the disk is shared with the data', async () => {
+    serve({ backups: { ...usage.backups, runs: true, disk: true, separate: false, bucket: '/app/backups' } })
+    renderPage()
+    expect(await screen.findByText('/app/backups')).toBeInTheDocument()
+    expect(screen.getByText(/folder on this server's disk/)).toBeInTheDocument()
+    expect(screen.getByText(/same server and disk as the data they protect/)).toBeInTheDocument()
+    expect(screen.queryByText(/storage server and disk/)).toBeNull()
+    expect(screen.queryByText(/of the file storage/)).toBeNull()
+    expect(screen.getByText('backups')).toBeInTheDocument()
+  })
+
   it('does not warn when the backups are kept on another storage, and says so', async () => {
     serve({ backups: { ...usage.backups, runs: true, separate: true } })
     renderPage()

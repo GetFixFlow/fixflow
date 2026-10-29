@@ -20,7 +20,7 @@ fi
 PORT=8089
 BASE="http://localhost:$PORT"
 COMPOSE="bin/compose"
-# What the five containers may hold, together, at rest (about 430 MiB when this was written): a 2 GB server needs room for
+# What the five containers may hold, together, at rest (400 to 430 MiB when this was written): a 2 GB server needs room for
 # the system and for the peaks of a busy day, so a rise past this is worth a look.
 MEMORY_LIMIT_MIB=800
 

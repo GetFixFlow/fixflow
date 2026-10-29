@@ -8,7 +8,7 @@ The lite install is FixFlow for a small team on **one small server** (2 GB of me
 | Uploaded photos and documents | in an S3-compatible server (SeaweedFS) | **a folder on the server's disk** (the `uploads` volume) |
 | Nightly backups | in a bucket of that server, or another S3 storage | **a folder on the server's disk** (the `backups` volume), or another S3 storage |
 | Sensors | HTTP, and MQTT through the broker | **HTTP only** (`POST /api/v1/iot/ingest` with an API key) |
-| Memory at rest | not measured | about 430 MiB for all five containers ([Sizing](#sizing)) |
+| Memory at rest | not measured | about 400 to 430 MiB for all five containers ([Sizing](#sizing)) |
 
 Everything else is the same: the same images, the same web app, the same settings, [HTTPS](https.md), [upgrading](upgrading.md) and [restoring](backups.md).
 
@@ -52,7 +52,7 @@ This is the plan, not a tested path: install the full one on a bigger server, se
 ## Sizing
 
 !!! note "Measured, at rest"
-    With the five containers started, a first company set up, a photo, a sensor reading, a backup and a restore done, the containers used about **430 MiB** together: the API 175, the worker 163, PostgreSQL 64, Redis 20 and the web front door 8 (Docker Desktop on a Mac, `docker stats`). That leaves most of 2 GB for the system and for busy days.
+    With the five containers started, a first company set up, a photo, a sensor reading, a backup and a restore done, the containers used about **400 to 430 MiB** together (two runs: 389 and 428): the API 175, the worker 162, PostgreSQL 35 to 64, Redis 10 to 20 and the web front door 8 (Docker Desktop on a Mac, `docker stats`). That leaves most of 2 GB for the system and for busy days.
 
     **Not measured:** a busy day (many people at once, a large import, a large report, thousands of sensor readings an hour), a server with the 5,000 assets and 50,000 work orders the roadmap aims at, and the disk: the database, the uploaded files and the backups all share it. If you run it on 2 GB and it struggles, open an issue with the output of `docker stats --no-stream`.
 
