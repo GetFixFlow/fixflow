@@ -26,6 +26,29 @@ RSpec.describe "fixflow rake tasks", type: :task do
     end
   end
 
+  describe "fixflow:reset_two_factor" do
+    it "switches off a person's two-factor sign-in and signs them out everywhere" do
+      user = create(:user, email: "lost.phone@example.test")
+      enable_two_factor_for(user)
+      old_jti = user.jti
+
+      expect { Rake::Task["fixflow:reset_two_factor"].execute(email: " Lost.Phone@Example.test ") }
+        .to output(/is off for lost.phone@example.test/).to_stdout
+
+      expect(user.reload).not_to be_two_factor_enabled
+      expect(user.jti).not_to eq(old_jti)
+    end
+
+    it "aborts for an unknown email and for a person who has it off" do
+      create(:user, email: "plain@example.test")
+
+      expect { Rake::Task["fixflow:reset_two_factor"].execute(email: "nobody@example.test") }
+        .to raise_error(SystemExit).and output(/no user with the email/).to_stderr
+      expect { Rake::Task["fixflow:reset_two_factor"].execute(email: "plain@example.test") }
+        .to raise_error(SystemExit).and output(/does not have two-factor/).to_stderr
+    end
+  end
+
   describe "fixflow:create_admin when a company already exists" do
     it "aborts without creating another company" do
       create(:organization)

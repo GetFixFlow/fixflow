@@ -127,6 +127,18 @@ The address shown is the one the server sees, so behind a proxy it is the proxy'
 
 **After upgrading, everyone signs in once more:** tokens made before this change have no session behind them and are no longer accepted (they would have expired within a day anyway).
 
+### Two-factor sign-in
+
+Anyone can make signing in safer with an authenticator app (Google Authenticator, Microsoft Authenticator, Authy, 1Password, ...). **Settings → Security → Set up**: scan the QR code with the app (or type the key it shows), enter the 6-digit code the app then shows, and save the ten **recovery codes** FixFlow shows once. From then on, signing in asks for the password and then for a code from the app. A recovery code works in place of a code, once each, for a lost phone; **New recovery codes** (which needs your password and a code) replaces the set.
+
+- **Turning it off**, and getting new recovery codes, ask for the password and a current code, so a borrowed, unlocked session cannot weaken the account.
+- **Wrong codes lock it.** Five wrong codes in a row stop all further tries for 15 minutes, even with the right code, and the audit log records it (`user.two_factor_locked`). A code works once: the same one cannot be used twice, and a code up to 30 seconds old or ahead is accepted, so phones with slightly wrong clocks still work.
+- **Administrators can require it for everyone** (Settings → Advanced Settings → Two-factor sign-in). A person who has not set it up is taken to do so on their next visit and can do nothing else until they have; they cannot turn it off afterwards.
+- **A lost phone, and no recovery codes:** an administrator opens Settings → Users, the person's menu, **Reset two-factor**. That switches it off, signs the person out everywhere, and they sign in with their password (and set it up again if the company requires it). If the person is the only administrator, run `rails fixflow:reset_two_factor[their@email]` on the server (`docker compose -f docker-compose.prod.yml exec api bin/rails "fixflow:reset_two_factor[their@email]"`).
+- **Where the secret is kept.** The key behind the codes is stored encrypted with a key made from `SECRET_KEY_BASE`, and the recovery codes only as digests, so a copy of the database does not hold a way past the second step. **If you ever change `SECRET_KEY_BASE`, everyone's two-factor stops working** (and sessions with it): reset it for them as above. The audit log records switching it on and off, new recovery codes, a recovery code being used, wrong codes and a lock (never the codes themselves).
+- **For programs**, `POST /api/v1/auth/sign_in` answers a person who has it on with `{"two_factor_required": true, "challenge": "..."}` and no token; send the challenge (good for 5 minutes) and the code to `POST /api/v1/auth/two_factor` to get the token, in the `Authorization` header, as before.
+- IoT devices use API keys and are not affected.
+
 ---
 
 ## Local Development (without Docker)

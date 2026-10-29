@@ -1,14 +1,28 @@
 import { apiClient } from './client'
 import type { InvitationDetails, LoginPayload, RegisterPayload, User } from '@/types'
 
+export type SignInResult =
+  | { twoFactor: true; challenge: string }
+  | { twoFactor: false; user: User; token: string }
+
+const bearer = (header: unknown) => String(header ?? '').replace(/^Bearer /, '')
+
 export const authApi = {
-  login: (payload: LoginPayload) =>
+  /** The password step. A person with two-factor sign-in on gets a challenge to send with the code, not a token. */
+  login: (payload: LoginPayload): Promise<SignInResult> =>
     apiClient
-      .post<{ message: string; user: User }>('/auth/sign_in', { user: payload })
-      .then((response) => ({
-        user: response.data.user,
-        token: response.headers['authorization']?.replace(/^Bearer /, '') ?? '',
-      })),
+      .post<{ message: string; user?: User; two_factor_required?: boolean; challenge?: string }>('/auth/sign_in', { user: payload })
+      .then((response) =>
+        response.data.two_factor_required && response.data.challenge
+          ? { twoFactor: true as const, challenge: response.data.challenge }
+          : { twoFactor: false as const, user: response.data.user as User, token: bearer(response.headers['authorization']) },
+      ),
+
+  /** The second step: the challenge from the password step, and a code from the app (or a recovery code). */
+  verifyTwoFactor: (challenge: string, code: string): Promise<Extract<SignInResult, { twoFactor: false }>> =>
+    apiClient
+      .post<{ message: string; user: User }>('/auth/two_factor', { challenge, code })
+      .then((response) => ({ twoFactor: false as const, user: response.data.user, token: bearer(response.headers['authorization']) })),
 
   setupStatus: () => apiClient.get<{ setup_required: boolean; email_configured?: boolean }>('/setup/status').then((r) => r.data),
 

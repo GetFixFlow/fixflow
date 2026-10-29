@@ -108,6 +108,8 @@ export interface OrgSettings {
   update_check: boolean
   /** Whether people with no account may send maintenance requests (the QR label's form). */
   public_requests_enabled: boolean
+  /** Everyone in the company must sign in with an authenticator app as well as the password. */
+  require_two_factor: boolean
   work_hours: { start: string; end: string }
   work_days: number[]
   holidays: Holiday[]

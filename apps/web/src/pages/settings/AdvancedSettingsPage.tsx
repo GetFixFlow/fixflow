@@ -109,6 +109,34 @@ export function AdvancedSettingsPage() {
       </Card>
 
       <Card>
+        <CardContent className="space-y-3 p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Two-factor sign-in</h3>
+              <p className="mt-0.5 text-xs text-gray-500">
+                When this is on, everyone in the company must sign in with an authenticator app as well as their password. A person
+                who has not set it up is taken to do so first, and can do nothing else until they have. Anyone can already set it up
+                for themselves under Settings, Security.
+              </p>
+            </div>
+            <Toggle
+              label="Require two-factor sign-in for everyone"
+              checked={settings?.require_two_factor ?? false}
+              disabled={isLoading || isError || save.isPending}
+              onChange={(required) => save.mutate({ require_two_factor: required })}
+            />
+          </div>
+          {!isError && (
+            <p className={cn('text-sm', settings?.require_two_factor ? 'text-green-700 dark:text-green-400' : 'text-gray-600 dark:text-gray-400')}>
+              {settings?.require_two_factor
+                ? 'On: everyone needs an authenticator app. If someone loses their phone, reset their two-factor under Settings, Users.'
+                : 'Off: each person chooses whether to use it.'}
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
         <CardContent className="flex items-center justify-between gap-4 p-5">
           <div>
             <h3 className="font-semibold text-gray-900 dark:text-gray-100">System health</h3>

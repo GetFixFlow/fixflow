@@ -110,3 +110,5 @@ group :test do
   gem "pundit-matchers",            "~> 3.1"
   gem "webmock",                    "~> 3.24"
 end
+
+gem "rotp", "~> 6.3"

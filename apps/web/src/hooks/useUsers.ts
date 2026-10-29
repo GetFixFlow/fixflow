@@ -91,6 +91,18 @@ export function useResetUserPassword() {
   })
 }
 
+export function useResetUserTwoFactor() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: usersApi.resetTwoFactor,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['users'] })
+      toast.success('Two-factor sign-in is off for that person, and they are signed out. They sign in with their password.')
+    },
+    onError: failureMessage('Could not reset two-factor sign-in.'),
+  })
+}
+
 export function useBulkChangeRole() {
   const qc = useQueryClient()
   return useMutation({

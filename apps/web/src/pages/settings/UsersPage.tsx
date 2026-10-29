@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import { toast } from 'sonner'
-import { Plus, MoreVertical, UserCheck, UserX, Pencil, Link2, KeyRound } from 'lucide-react'
+import { Plus, MoreVertical, UserCheck, UserX, Pencil, Link2, KeyRound, ShieldOff } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -18,6 +18,7 @@ import {
   useBulkChangeRole,
   useBulkDeactivate,
   useResetUserPassword,
+  useResetUserTwoFactor,
   useResendInvitation,
 } from '@/hooks/useUsers'
 import type { User, Role } from '@/types'
@@ -64,6 +65,7 @@ export function UsersPage() {
   const bulkChangeRole = useBulkChangeRole()
   const bulkDeactivate = useBulkDeactivate()
   const resetPassword = useResetUserPassword()
+  const resetTwoFactor = useResetUserTwoFactor()
   const [resetResult, setResetResult] = useState<{ user: User; resetUrl: string; emailSent: boolean } | null>(null)
   const [bulkRole, setBulkRole] = useState<Role | ''>('')
   const resendInvitation = useResendInvitation()
@@ -257,6 +259,9 @@ export function UsersPage() {
                               <NameAvatar name={u.full_name} />
                             )}
                             <span className="font-medium text-gray-900 dark:text-gray-100">{u.full_name}</span>
+                            {u.two_factor_enabled && (
+                              <span title="Signs in with an authenticator app" className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-medium text-green-700">2FA</span>
+                            )}
                           </div>
                         </td>
                         <td className="px-4 py-3 text-gray-500">{u.email}</td>
@@ -325,6 +330,19 @@ export function UsersPage() {
                                     className="flex items-center gap-2 w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700"
                                   >
                                     <KeyRound className="h-3.5 w-3.5" /> Reset Password
+                                  </button>
+                                )}
+                                {isAdmin && u.id !== currentUser?.id && u.two_factor_enabled && (
+                                  <button
+                                    onClick={() => {
+                                      setOpenMenuId(null)
+                                      if (window.confirm(`Switch off two-factor sign-in for ${u.full_name}? They are signed out everywhere, and sign in with their password alone (or set it up again if your company requires it).`)) {
+                                        resetTwoFactor.mutate(u.id)
+                                      }
+                                    }}
+                                    className="flex items-center gap-2 w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700"
+                                  >
+                                    <ShieldOff className="h-3.5 w-3.5" /> Reset two-factor
                                   </button>
                                 )}
                                 {isAdmin && u.id !== currentUser?.id && (

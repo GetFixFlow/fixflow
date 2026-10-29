@@ -29,7 +29,7 @@ module Api
             :default_priority, :default_due_days, :labor_rate, :require_completion_notes, :auto_close_days,
             :pm_compliance_target, :pm_reminder_days, :pm_pause_on_down, :iot_alert_cooldown,
             :iot_stale_threshold, :iot_data_retention_days, :audit_log_retention_days, :iot_auto_wo_threshold,
-            :update_check, :public_requests_enabled,
+            :update_check, :public_requests_enabled, :require_two_factor,
             { work_hours: %i[start end], work_days: [], holidays: [%i[date name repeating]] }
           ]
         )

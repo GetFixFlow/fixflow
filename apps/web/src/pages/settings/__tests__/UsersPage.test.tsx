@@ -21,6 +21,7 @@ const mockUsers = [
     email: 'bob@test.com',
     role: 'technician',
     active: true,
+    two_factor_enabled: true,
     created_at: '2026-01-15T00:00:00Z',
     organization_id: 1,
   },
@@ -41,6 +42,7 @@ const actions = vi.hoisted(() => ({
   bulkDeactivate: vi.fn(),
   bulkRole: vi.fn(),
   resetPassword: vi.fn(),
+  resetTwoFactor: vi.fn(),
 }))
 
 vi.mock('@/hooks/useUsers', () => ({
@@ -52,6 +54,7 @@ vi.mock('@/hooks/useUsers', () => ({
   useBulkDeactivate: () => ({ mutate: actions.bulkDeactivate, isPending: false }),
   useBulkChangeRole: () => ({ mutate: actions.bulkRole, isPending: false }),
   useResetUserPassword: () => ({ mutate: actions.resetPassword, isPending: false }),
+  useResetUserTwoFactor: () => ({ mutate: actions.resetTwoFactor, isPending: false }),
   useResendInvitation: () => ({ mutate: vi.fn(), isPending: false }),
 }))
 
@@ -145,6 +148,37 @@ describe('UsersPage', () => {
       expect(actions.resetPassword.mock.calls[0][0]).toBe(2)
       expect(await screen.findByLabelText('Reset link')).toHaveValue('https://app.test/reset-password?token=abc')
       expect(screen.getByText(/email is not set up on this server/i)).toBeInTheDocument()
+    })
+
+    it('marks who signs in with an authenticator app', () => {
+      render(<UsersPage />, { wrapper: Wrapper })
+      const bob = screen.getByText('Bob Jones').closest('tr') as HTMLElement
+      expect(within(bob).getByText('2FA')).toBeInTheDocument()
+      const dan = screen.getByText('Dan Former').closest('tr') as HTMLElement
+      expect(within(dan).queryByText('2FA')).not.toBeInTheDocument()
+    })
+
+    it('offers Reset two-factor for another person who has it on, after asking', async () => {
+      const confirm = vi.spyOn(window, 'confirm').mockReturnValueOnce(false).mockReturnValueOnce(true)
+      render(<UsersPage />, { wrapper: Wrapper })
+
+      await openMenu('Bob Jones')
+      await userEvent.click(screen.getByText('Reset two-factor'))
+      expect(confirm).toHaveBeenCalledWith(expect.stringContaining('Bob Jones'))
+      expect(actions.resetTwoFactor).not.toHaveBeenCalled()
+
+      await openMenu('Bob Jones')
+      await userEvent.click(screen.getByText('Reset two-factor'))
+      expect(actions.resetTwoFactor).toHaveBeenCalledWith(2)
+      confirm.mockRestore()
+    })
+
+    it('does not offer Reset two-factor for yourself or for someone who does not have it on', async () => {
+      render(<UsersPage />, { wrapper: Wrapper })
+      await openMenu('Alice Smith')
+      expect(screen.queryByText('Reset two-factor')).not.toBeInTheDocument()
+      await openMenu('Dan Former')
+      expect(screen.queryByText('Reset two-factor')).not.toBeInTheDocument()
     })
 
     it('does not offer Reset Password for yourself or for someone deactivated', async () => {

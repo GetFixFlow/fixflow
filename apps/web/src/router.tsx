@@ -7,6 +7,7 @@ import { PageLoader } from '@/components/shared/PageLoader'
 // Eagerly-loaded pages (above-the-fold / entry points)
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { SetupPage } from '@/pages/auth/SetupPage'
+import { TwoFactorSetupPage } from '@/pages/auth/TwoFactorSetupPage'
 import { AcceptInvitePage } from '@/pages/auth/AcceptInvitePage'
 import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage'
 import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage'
@@ -80,6 +81,8 @@ export const router = createBrowserRouter([
   {
     element: <ProtectedRoute />,
     children: [
+      // For a person whose company requires two-factor sign-in and who has not set it up: no layout, nothing else to load
+      { path: '/two-factor-setup', element: <TwoFactorSetupPage /> },
       {
         element: <AppLayout />,
         children: [

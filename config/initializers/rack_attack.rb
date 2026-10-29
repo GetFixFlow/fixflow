@@ -11,6 +11,12 @@ class Rack::Attack
     req.ip if req.path == "/api/v1/auth/sign_in" && req.post?
   end
 
+  # The second step of signing in: 10 tries / 1 min per IP (each person's wrong codes are also counted, and locked,
+  # in the database: see TwoFactorAuth).
+  throttle("api/auth/two_factor", limit: 10, period: 1.minute) do |req|
+    req.ip if req.path == "/api/v1/auth/two_factor" && req.post?
+  end
+
   # IoT ingestion: 1000 req / min per API key
   throttle("api/iot/ingest", limit: 1000, period: 1.minute) do |req|
     req.get_header("HTTP_X_API_KEY") if req.path == "/api/v1/iot/ingest"
