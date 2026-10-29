@@ -37,8 +37,11 @@ export function BackupsCard({ backups }: { backups: DataUsage['backups'] | undef
         {backups && (backups.runs ? (
           <p className="text-sm text-gray-600 dark:text-gray-400">
             A copy of the database, and of any photos and documents people uploaded since the last one, is made every night at {backups.at}.
-            The database copies are kept for {backups.keep_days} days in the <span className="font-mono">{backups.bucket}</span> bucket
-            {backups.separate ? ' of the separate backup storage' : ' of the file storage'}. A backup that fails is tried again every {backups.retry_minutes} minutes,
+            The database copies are kept for {backups.keep_days} days in
+            {backups.disk
+              ? <> the <span className="font-mono">{backups.bucket}</span> folder on this server&apos;s disk</>
+              : <> the <span className="font-mono">{backups.bucket}</span> bucket{backups.separate ? ' of the separate backup storage' : ' of the file storage'}</>}
+            . A backup that fails is tried again every {backups.retry_minutes} minutes,
             {' '}{backups.tries} tries in all; if the last one fails, every administrator is emailed (when email is set up) and a line is
             written to the audit log.
           </p>
@@ -98,15 +101,15 @@ export function BackupsCard({ backups }: { backups: DataUsage['backups'] | undef
 
         <p className="text-xs text-gray-500">
           A backup holds everything in the database, password hashes included: keep a downloaded copy somewhere safe. Every download is written to the
-          audit log. Uploaded files are copied under <span className="font-mono">files/</span> in the same bucket and are never deleted from
+          audit log. Uploaded files are copied under <span className="font-mono">files/</span> in the same {backups?.disk ? 'folder' : 'bucket'} and are never deleted from
           the copy, because an older backup may still point at them.
         </p>
         {backups?.runs && !backups.separate && (
           <p role="note" className="rounded-md bg-amber-50 p-3 text-xs text-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
-            These backups are on the same storage server and disk as the data they protect, so they do not survive losing the server. Set{' '}
+            These backups are on the same {backups.disk ? 'server and disk' : 'storage server and disk'} as the data they protect, so they do not survive losing the server. Set{' '}
             <span className="font-mono">BACKUP_S3_ACCESS_KEY</span>, <span className="font-mono">BACKUP_S3_SECRET_KEY</span> and{' '}
             <span className="font-mono">BACKUP_S3_ENDPOINT</span> to keep them somewhere else (see &quot;Backups and restoring&quot; in the documentation), or copy the
-            <span className="font-mono"> s3_data</span> volume off the server yourself.
+            <span className="font-mono"> {backups.disk ? 'backups' : 's3_data'}</span> volume off the server yourself.
           </p>
         )}
         <details className="text-xs text-gray-600 dark:text-gray-400">

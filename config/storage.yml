@@ -6,6 +6,11 @@ local:
   service: Disk
   root: <%= Rails.root.join("storage") %>
 
+# The lite install (FILE_STORAGE=disk, docker-compose.lite.yml): uploaded files go to a folder on the server's disk.
+disk:
+  service: Disk
+  root: <%= ENV.fetch("STORAGE_DIR", Rails.root.join("storage").to_s) %>
+
 minio:
   service: S3
   # MINIO_ACCESS_KEY / MINIO_SECRET_KEY are what .env.example and docker-compose.prod.yml set.

@@ -210,6 +210,19 @@ jobs:
       - name: Start the stack with HTTPS and check it
         run: bin/check_https
 
+  # Starts the lite install (docker-compose.lite.yml: no file-storage server, no sensor broker) and checks it: five services,
+  # a photo kept on the disk and served back, no broker needed, a backup and restore of the database and the files, and
+  # the memory the containers use.
+  lite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Start the lite install and check it
+        run: bin/check_lite
+
   # Builds the docs site (mkdocs.yml). A broken link or anchor between pages fails it, and so does a page missing from the
   # navigation. (That docs/api-endpoints.md matches the routes is checked by the `test` job.)
   docs:

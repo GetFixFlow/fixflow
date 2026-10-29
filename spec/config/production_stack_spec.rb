@@ -78,6 +78,79 @@ RSpec.describe "The production stack" do
     end
   end
 
+  describe "docker-compose.lite.yml (the lite install)" do
+    let(:lite)          { YAML.safe_load(read("docker-compose.lite.yml"), aliases: true) }
+    let(:lite_services) { lite.fetch("services") }
+
+    it "has no file-storage server and no sensor broker, and is complete by itself" do
+      expect(lite_services.keys).to contain_exactly("web", "https", "api", "sidekiq", "db", "redis")
+      expect(lite["name"]).to eq("fixflow")
+      expect(lite_services.values.flat_map(&:keys)).not_to include("extends")
+      expect(lite.fetch("volumes").keys).not_to include("s3_data", "mqtt_data")
+    end
+
+    it "keeps the services it shares with the full install exactly as they are, so the two cannot drift apart" do
+      %w[web https db redis].each do |name|
+        expect(lite_services[name]).to eq(services[name]), "#{name} differs between docker-compose.prod.yml and docker-compose.lite.yml"
+      end
+      expect(lite_services["web"]["depends_on"]).to eq("api" => { "condition" => "service_healthy" })
+      expect(lite_services["sidekiq"].except("volumes", "environment")).to eq(services["sidekiq"].except("volumes", "environment"))
+      expect(lite_services["api"].except("depends_on", "volumes", "environment")).to eq(services["api"].except("depends_on", "volumes", "environment"))
+    end
+
+    it "gives the api and the worker the same settings, and the same two volumes for the uploaded files and the backups" do
+      expect(lite_services["sidekiq"]["environment"]).to eq(lite_services["api"]["environment"])
+      expect(lite_services["api"]["volumes"]).to eq(%w[uploads:/app/storage backups:/app/backups])
+      expect(lite_services["sidekiq"]["volumes"]).to eq(lite_services["api"]["volumes"])
+      expect(lite["volumes"].keys).to include("uploads", "backups")
+      expect(lite_services["api"]["depends_on"].keys).to contain_exactly("db", "redis")
+    end
+
+    it "keeps the files and the backups in folders, and listens to no broker" do
+      environment = lite_services["api"]["environment"]
+
+      expect(environment).to include("FILE_STORAGE" => "disk", "STORAGE_DIR" => "/app/storage", "BACKUP_DIR" => "/app/backups",
+                                     "MQTT_SUBSCRIBER" => "false")
+      expect(environment.keys.grep(/\A(MINIO|MQTT_HOST|MQTT_USER|MQTT_PASS)/)).to eq([])
+      expect(environment.slice("DATABASE_URL", "REDIS_URL", "APP_URL", "ALLOWED_ORIGINS"))
+        .to eq(services["api"]["environment"].slice("DATABASE_URL", "REDIS_URL", "APP_URL", "ALLOWED_ORIGINS"))
+    end
+
+    it "publishes only the web front door and the HTTPS one" do
+      published = lite_services.select { |_, service| service["ports"] }.keys
+
+      expect(published).to contain_exactly("web", "https")
+    end
+
+    it "only reads settings that .env.example lists, and only sets ones the app reads" do
+      read_by_compose = read("docker-compose.lite.yml").scan(/\$\{([A-Z][A-Z0-9_]*)/).flatten.uniq
+      listed = env_example.scan(/^#?\s*([A-Z][A-Z0-9_]*)=/).flatten
+      source = %w[app config lib bin db].flat_map { |dir| Dir[Rails.root.join(dir, "**/*").to_s] }.select { |file| File.file?(file) }
+                                        .map { |file| File.read(file) }.join("\n")
+      unread = lite_services["api"]["environment"].keys.reject { |name| name == "RAILS_ENV" || source.include?(name) }
+
+      expect(read_by_compose - listed).to eq([])
+      expect(unread).to eq([])
+    end
+
+    it "is chosen by COMPOSE_FILE in .env, which bin/compose, make, bin/upgrade and bin/rollback all read" do
+      expect(env_example).to include("COMPOSE_FILE=docker-compose.lite.yml")
+      expect(read("Makefile")).to include("PROD = bin/compose")
+      expect(read("bin/compose")).to include("COMPOSE_FILE", "docker-compose.prod.yml")
+      %w[bin/upgrade bin/rollback].each { |script| expect(read(script)).to include("${COMPOSE_FILE:-docker-compose.prod.yml}") }
+    end
+
+    it "makes the folders the volumes are mounted on, owned by the user the server runs as" do
+      expect(read("Dockerfile")).to match(%r{mkdir -p /app/storage /app/backups.*chown -R fixflow}m)
+    end
+
+    it "is started and checked for real by bin/check_lite, which CI runs" do
+      expect(Rails.root.join("bin/check_lite")).to be_executable
+      workflow = YAML.safe_load(read(".github/workflows/ci.yml"), aliases: true)
+      expect(workflow.dig("jobs", "lite", "steps").pluck("run").compact).to include("bin/check_lite")
+    end
+  end
+
   describe "settings" do
     it "has every setting the compose files read in .env.example, and every setting compose requires filled in by hand" do
       text = read("docker-compose.prod.yml")

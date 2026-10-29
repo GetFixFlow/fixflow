@@ -13,7 +13,10 @@ die() { echo "bin/upgrade: $*" >&2; exit 1; }
 
 main() {
   cd "$(dirname "$0")/.."
-  PROD="docker compose -f docker-compose.prod.yml"
+  # The compose file of this install: COMPOSE_FILE (in the environment or in .env; the lite install sets it), else the full
+  # install's. Worked out here, not by bin/compose, because the checkout below can bring back a version without that script.
+  COMPOSE_FILE=${COMPOSE_FILE:-$(sed -n 's/^COMPOSE_FILE=//p' .env 2>/dev/null | tail -n 1 | tr -d "\"'\r")}
+  PROD="docker compose -f ${COMPOSE_FILE:-docker-compose.prod.yml}"
   to=${1:-}
   [ -n "$to" ] || die "Say which version: make upgrade TO=v1.2.3"
   [ -f .env ] || die "There is no .env here. Run this in the folder the server runs from."
@@ -44,7 +47,7 @@ main() {
   git checkout -q "$target"
   if ! $PROD up -d --build --wait --wait-timeout 900; then
     echo "" >&2
-    echo "The new version did not come up healthy. Look at: docker compose -f docker-compose.prod.yml logs --tail 100" >&2
+    echo "The new version did not come up healthy. Look at: make prod-logs  (or: bin/compose logs --tail 100)" >&2
     echo "To go back to $label and the database as it was (data entered since $stamp is lost): make rollback CONFIRM=yes" >&2
     exit 1
   fi

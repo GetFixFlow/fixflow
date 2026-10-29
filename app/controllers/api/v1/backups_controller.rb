@@ -14,11 +14,11 @@ module Api
       def index
         response.set_header("Cache-Control", "no-store")
         backups = BackupStore.new.list
-        render json: { bucket: BackupStore.bucket, backups: backups.map(&:to_h), overdue: overdue?(backups.first), error: nil }
+        render json: { bucket: BackupStore.location, backups: backups.map(&:to_h), overdue: overdue?(backups.first), error: nil }
       rescue *BackupStore::UNREACHABLE => e
-        Rails.logger.warn "[Backups] Could not list the #{BackupStore.bucket} bucket: #{e.class} — #{e.message}"
-        render json: { bucket: BackupStore.bucket, backups: [], overdue: false,
-                       error: "The file storage did not answer (#{e.class.name.demodulize}). Check that it is running." }
+        Rails.logger.warn "[Backups] Could not list #{BackupStore.place}: #{e.class} — #{e.message}"
+        render json: { bucket: BackupStore.location, backups: [], overdue: false,
+                       error: unreachable_message(e) }
       end
 
       # GET /api/v1/backups/:name/download — the file itself, passed on piece by piece.
@@ -38,10 +38,18 @@ module Api
         render_error("There is no backup with that name", :not_found, code: "RESOURCE_NOT_FOUND")
       rescue *BackupStore::UNREACHABLE => e
         Rails.logger.warn "[Backups] Could not read #{params[:name]}: #{e.class} — #{e.message}"
-        render_error("The file storage did not answer. Check that it is running.", :bad_gateway, code: "STORAGE_UNAVAILABLE")
+        render_error(unreachable_message(e), :bad_gateway, code: "STORAGE_UNAVAILABLE")
       end
 
       private
+
+      def unreachable_message(error)
+        if BackupStore.disk?
+          "The backups folder could not be read (#{error.class.name.demodulize}). Check the server's disk."
+        else
+          "The file storage did not answer (#{error.class.name.demodulize}). Check that it is running."
+        end
+      end
 
       # Only a server that makes backups can be late with one. With none yet, the company's age is the measure: the
       # first night's backup is not overdue on the first day.

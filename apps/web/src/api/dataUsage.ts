@@ -35,6 +35,7 @@ export interface DataUsage {
     at: string
     keep_days: number
     bucket: string
+    disk: boolean
     /** True when the backups are kept on another storage (BACKUP_S3_*), not on the one that holds the data. */
     separate: boolean
     /** A failed backup is tried this many times in all, `retry_minutes` apart; the administrators are told after the last. */

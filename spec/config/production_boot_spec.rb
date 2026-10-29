@@ -17,10 +17,11 @@ RSpec.describe "Production boot requirements" do
     %w[development test production].each do |env|
       it "defines the service that #{env} selects" do
         config = Rails.root.join("config/environments/#{env}.rb").read
-        selected = config[/active_storage\.service\s*=\s*:(\w+)/, 1]
+        # Every service the line can select (production picks :disk or :minio by FILE_STORAGE).
+        selected = config[/active_storage\.service\s*=.*/].to_s.scan(/:(\w+)/).flatten
 
         expect(selected).to be_present
-        expect(defined_services).to include(selected)
+        expect(defined_services).to include(*selected)
       end
     end
 

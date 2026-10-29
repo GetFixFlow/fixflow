@@ -1,0 +1,166 @@
+#!/bin/sh
+# Starts the LITE install (docker-compose.lite.yml: no file-storage server, no sensor broker) for real, from a fresh
+# checkout, and checks that it works: only the five services run, the web app and API answer, first-run setup and
+# sign-in, a photo uploaded over HTTP is kept on the disk and comes back byte for byte, System Health is fine with
+# no broker, sensor readings arrive over HTTP, and a backup (database and uploaded files, both as folders) is
+# restored again after the file and the data are lost. It prints what the containers use in memory and refuses a
+# total that would not fit a 2 GB server. It takes several minutes (the images are built). CI runs it; it removes
+# everything it started.
+#
+# It writes a .env and deletes the stack's volumes, so it refuses to run where a .env already exists:
+# use a fresh clone, not your own working copy.
+set -eu
+cd "$(dirname "$0")/.."
+
+if [ -e .env ]; then
+  echo "bin/check_lite: there is a .env here. Run this in a fresh clone; it would replace your settings." >&2
+  exit 2
+fi
+
+PORT=8089
+BASE="http://localhost:$PORT"
+COMPOSE="bin/compose"
+# What the five containers may hold, together, at rest: a 2 GB server needs room for the system and the web server's peaks.
+MEMORY_LIMIT_MIB=1100
+
+cleanup() {
+  status=$?
+  if [ "$status" != 0 ]; then
+    echo "---- container status" >&2
+    $COMPOSE ps >&2 || true
+    echo "---- last log lines" >&2
+    $COMPOSE logs --tail 40 >&2 || true
+  fi
+  $COMPOSE down -v >/dev/null 2>&1 || true
+  rm -f .env "$PWD/check_photo.png"
+  exit "$status"
+}
+trap cleanup EXIT
+
+fail() { echo "FAIL: $*" >&2; exit 1; }
+ok() { echo "ok:   $*"; }
+
+cp .env.example .env
+# Later lines win in an env file. The lite install needs no MINIO_* or MQTT_* settings, so none are given a value here.
+{
+  echo
+  echo "COMPOSE_FILE=docker-compose.lite.yml"
+  echo "APP_URL=$BASE"
+  echo "HTTP_PORT=$PORT"
+  echo "SECRET_KEY_BASE=$(openssl rand -hex 64)"
+  echo "DEVISE_JWT_SECRET_KEY=$(openssl rand -hex 48)"
+  echo "DB_PASSWORD=$(openssl rand -hex 24)"
+  echo "REDIS_PASSWORD=$(openssl rand -hex 24)"
+} >> .env
+# The lines the full install needs and this one does not (the example file fills them in with placeholders).
+grep -v '^MINIO_\|^MQTT_' .env > .env.lite && mv .env.lite .env
+
+$COMPOSE up -d --build --wait --wait-timeout 900 || fail "the stack did not come up healthy"
+SERVICES=$($COMPOSE ps --services | sort | tr '\n' ' ')
+[ "$SERVICES" = "api db redis sidekiq web " ] || fail "the lite install runs these services: $SERVICES"
+ok "five services healthy: $SERVICES"
+
+[ "$(curl -s -o /dev/null -w '%{http_code}' $BASE/healthz)" = "200" ] || fail "/healthz"
+curl -s $BASE/api/v1/health | grep -q '"status":"ok"' || fail "/api/v1/health through the front door"
+curl -s $BASE/ | grep -q 'id="root"' || fail "the web app is not served at /"
+curl -s $BASE/api/v1/setup/status | grep -q '"setup_required":true' || fail "setup status"
+ok "front door serves the web app and the API"
+
+JSON='Content-Type: application/json'
+curl -s -X POST $BASE/api/v1/auth/sign_up -H "$JSON" \
+  -d '{"user":{"email":"admin@check.test","password":"Blue-Ladder-4721-Kite","password_confirmation":"Blue-Ladder-4721-Kite","first_name":"Check","last_name":"Admin","organization_name":"Check Co"}}' \
+  | grep -q 'Account created' || fail "first-run setup"
+sign_in() {
+  curl -s -D - -o /dev/null -X POST $BASE/api/v1/auth/sign_in -H "$JSON" \
+    -d '{"user":{"email":"admin@check.test","password":"Blue-Ladder-4721-Kite"}}' | grep -i '^authorization:' | sed 's/^[Aa]uthorization: //' | tr -d '\r'
+}
+TOKEN=$(sign_in)
+[ -n "$TOKEN" ] || fail "sign-in returned no token"
+ok "first-run setup, and sign-in"
+
+# System Health: the worker needs a few seconds after the containers are healthy. No broker is "off", not a failure.
+HEALTH_PROBLEM="never asked"
+for _ in $(seq 1 30); do
+  HEALTH_PROBLEM=$(curl -s $BASE/api/v1/system_health -H "Authorization: $TOKEN" | python3 -c '
+import json, sys
+try:
+    data = json.load(sys.stdin)
+except ValueError:
+    sys.exit("not JSON")
+checks = data.get("checks", data)
+bad = [name for name in ("database", "redis", "background_jobs", "storage") if checks.get(name, {}).get("status") != "ok"]
+if checks.get("mqtt", {}).get("status") not in ("off", "disabled", "not_configured"):
+    bad.append("mqtt")
+print(", ".join("%s: %s" % (n, checks.get(n, {}).get("summary", "missing")) for n in bad))
+' 2>&1) || true
+  [ -z "$HEALTH_PROBLEM" ] && break
+  sleep 3
+done
+[ -z "$HEALTH_PROBLEM" ] || fail "System Health is not as it should be after 90 seconds: $HEALTH_PROBLEM"
+curl -s $BASE/api/v1/system_health -H "Authorization: $TOKEN" | grep -q 'File storage (Disk)' || fail "System Health does not say the file storage is the disk"
+ok "System Health: database, Redis, worker and file storage ok; the sensor broker is not set up, and that is fine"
+
+# A photo, uploaded the way the web app does it, comes back from the disk through the front door.
+python3 -c 'import base64,sys; sys.stdout.buffer.write(base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="))' > check_photo.png
+WORK_ORDER=$(curl -s -X POST $BASE/api/v1/work_orders -H "Authorization: $TOKEN" -H "$JSON" -d '{"work_order":{"title":"Pump 3 is leaking"}}' \
+  | python3 -c 'import json,sys; print(json.load(sys.stdin)["data"]["id"])')
+PHOTO_URL=$(curl -s -X POST "$BASE/api/v1/work_orders/$WORK_ORDER/attachments" -H "Authorization: $TOKEN" -F "file=@check_photo.png;type=image/png" \
+  | python3 -c 'import json,sys; print(json.load(sys.stdin)["data"]["url"])') || fail "uploading a photo"
+[ -n "$PHOTO_URL" ] || fail "the upload gave no address for the photo"
+curl -s "$BASE$PHOTO_URL" -o check_photo_back.png
+cmp -s check_photo.png check_photo_back.png || { rm -f check_photo_back.png; fail "the photo did not come back the same"; }
+rm -f check_photo_back.png
+[ "$($COMPOSE exec -T api sh -c 'find /app/storage -type f | wc -l' | tr -d ' \r')" -ge 1 ] || fail "the photo is not on the uploads volume"
+ok "a photo uploaded over HTTP is on the disk and comes back byte for byte"
+
+# Sensor readings over HTTP (there is no broker).
+KEY=$(curl -s -X POST $BASE/api/v1/api_keys -H "Authorization: $TOKEN" -H "$JSON" -d '{"api_key":{"name":"Check sensor"}}' | python3 -c 'import json,sys; print(json.load(sys.stdin)["data"]["key"])')
+curl -s -X POST $BASE/api/v1/assets -H "Authorization: $TOKEN" -H "$JSON" -d '{"asset":{"name":"Pump 3","asset_tag":"PUMP-3"}}' | grep -q 'PUMP-3' || fail "creating an asset"
+curl -s -X POST $BASE/api/v1/iot/ingest -H "X-API-Key: $KEY" -H "$JSON" -d '{"asset_id":"PUMP-3","metric":"temperature","value":72.4,"unit":"C"}' \
+  | grep -q '"processed":1' || fail "a sensor reading over HTTP"
+ok "a sensor reading over HTTP is stored"
+
+# Backup, then lose the file and the data, then restore.
+$COMPOSE exec -T api bin/rails runner 'DatabaseBackupJob.perform_now' >/dev/null 2>&1 || fail "the nightly backup job"
+$COMPOSE exec -T api bin/rails fixflow:backups 2>/dev/null | grep -q 'fixflow_.*\.sql\.gz' || fail "the backup is not listed"
+curl -s $BASE/api/v1/backups -H "Authorization: $TOKEN" | grep -q '"bucket":"/app/backups"' || fail "the backups API does not name the folder"
+[ "$($COMPOSE exec -T api sh -c 'find /app/backups/files -type f | wc -l' | tr -d ' \r')" -ge 1 ] || fail "the uploaded file was not copied into the backup folder"
+ok "a backup was made, listed, and holds the uploaded file"
+
+curl -s -X POST $BASE/api/v1/locations -H "Authorization: $TOKEN" -H "$JSON" \
+  -d '{"location":{"name":"Made after the backup","location_type":"building"}}' | grep -q 'Made after the backup' || fail "creating a place"
+$COMPOSE exec -T api sh -c 'find /app/storage -type f -delete' || fail "losing the uploaded file"
+curl -s -o /dev/null -w '%{http_code}' "$BASE$PHOTO_URL" | grep -q 200 && fail "the photo should be gone now"
+make restore FROM=latest CONFIRM=yes >/dev/null 2>&1 || fail "make restore"
+for _ in $(seq 1 40); do
+  [ "$(curl -s -o /dev/null -w '%{http_code}' $BASE/api/v1/health)" = "200" ] && break
+  sleep 3
+done
+TOKEN=$(sign_in)
+[ -n "$TOKEN" ] || fail "cannot sign in after the restore"
+curl -s $BASE/api/v1/locations -H "Authorization: $TOKEN" | grep -q 'Made after the backup' && fail "the restore did not remove what was added after the backup"
+curl -s "$BASE$PHOTO_URL" -o check_photo_back.png
+cmp -s check_photo.png check_photo_back.png || { rm -f check_photo_back.png; fail "the photo did not come back with the restore"; }
+rm -f check_photo_back.png
+ok "the restore put the database and the uploaded file back"
+
+# What it costs. At rest, a minute after the first requests.
+sleep 20
+echo "---- memory"
+docker stats --no-stream --format '{{.Name}} {{.MemUsage}}' | grep '^fixflow-' | tee /tmp/fixflow_lite_stats
+TOTAL=$(python3 - <<'PY'
+import re
+total = 0.0
+for line in open('/tmp/fixflow_lite_stats'):
+    used = line.split()[1]
+    value = float(re.match(r'[\d.]+', used).group())
+    total += value * {'KiB': 1/1024, 'MiB': 1, 'GiB': 1024}[re.search(r'[KMG]iB', used).group()]
+print(int(total))
+PY
+)
+rm -f /tmp/fixflow_lite_stats
+echo "total: ${TOTAL} MiB (limit ${MEMORY_LIMIT_MIB})"
+[ "$TOTAL" -le "$MEMORY_LIMIT_MIB" ] || fail "the five containers use ${TOTAL} MiB, more than ${MEMORY_LIMIT_MIB}: too much for a 2 GB server"
+ok "memory: ${TOTAL} MiB at rest for all five containers"
+
+echo "The lite install works."

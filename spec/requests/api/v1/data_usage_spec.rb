@@ -114,8 +114,14 @@ RSpec.describe "GET /api/v1/data_usage", type: :request do
     expect(usage["cleanup_at"]).to eq("sensor_data" => "02:00 UTC", "audit_log" => "02:30 UTC")
   end
 
+  it "says when the backups are a folder on the server's disk (the lite install), not a bucket" do
+    stub_const("ENV", ENV.to_h.merge("FILE_STORAGE" => "disk", "BACKUP_DIR" => "/app/backups"))
+
+    expect(usage["backups"]).to include("disk" => true, "bucket" => "/app/backups", "separate" => false)
+  end
+
   it "tells the truth about backups: a nightly time, how long they are kept, and whether this server makes them" do
     expect(usage["backups"]).to eq("runs" => false, "at" => "03:00 UTC", "keep_days" => 30, "bucket" => "fixflow-backups",
-                                   "separate" => false,                                    "tries" => 3, "retry_minutes" => 15)
+                                   "disk" => false, "separate" => false, "tries" => 3, "retry_minutes" => 15)
   end
 end
