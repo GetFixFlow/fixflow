@@ -7,7 +7,7 @@ Everyone taking part is expected to follow the [Code of Conduct](CODE_OF_CONDUCT
 ## Ways to help
 
 - **Report a bug** or **suggest a feature**: open an issue and pick a template. The more of "what I did, what I expected, what happened" you give, the quicker it is fixed.
-- **Try an install and write down every stumble.** The README is the install guide; anything that was missing, wrong or confusing is a valuable issue.
+- **Try an install and write down every stumble.** The [install page](docs/install.md) is the install guide; anything that was missing, wrong or confusing is a valuable issue.
 - **Pick up an issue** labelled [`good first issue`](https://github.com/GetFixFlow/fixflow/labels/good%20first%20issue) or [`help wanted`](https://github.com/GetFixFlow/fixflow/labels/help%20wanted). Say in the issue that you are working on it, so two people do not do the same job.
 - **Improve the docs.** Wrong or missing documentation is a bug.
 
@@ -15,7 +15,7 @@ For anything bigger than a small fix, open an issue first and say what you plan 
 
 ## Setting up
 
-The README has the steps: [Local Development](README.md#local-development-without-docker) (Ruby 3.3, Node 20, PostgreSQL 16, Redis 7). Copy `.env.example` to `.env` and fill in your local database and Redis.
+The docs have the steps: [Development](docs/development.md#local-development-without-docker) (Ruby 3.3, Node 20, PostgreSQL 16, Redis 7). Copy `.env.example` to `.env` and fill in your local database and Redis.
 
 Run the tests before you change anything, so you know the baseline:
 
@@ -29,7 +29,7 @@ cd apps/web && npx vitest run          # web app
 1. **One change per pull request.** A bug fix, a feature or a cleanup, not all three. Small pull requests are reviewed sooner.
 2. Branch from `main`, and keep your branch up to date with it.
 3. **Write a test that fails without your change.** A test that passes either way proves nothing. A bug fix needs a test that reproduces the bug; a rule needs a test that breaks when the rule does. If you can, break your change on purpose and check that the test fails.
-4. **Update the docs with the change.** A user-visible change gets a section or edit in the [README](README.md) and a bullet under `[Unreleased]` in the [CHANGELOG](CHANGELOG.md) (below the top bullet, so two open pull requests do not collide on the same line). Say what was wrong, what changed, and call out anything that changes an API answer or a setting. If the person running a server must do something when they upgrade (add a setting, run a command, sign in again), end the bullet with `**Upgrade:** what to do.`: the release notes list these at the top, under "Before you upgrade".
+4. **Update the docs with the change.** A user-visible change gets a section or edit in the [docs](docs/index.md) (the Markdown pages in `docs/`; after `pip install -r deploy/docs/requirements.txt`, `mkdocs serve` shows the site and `mkdocs build --strict` checks the links; a new or changed route needs `bin/rails docs:api`, which rewrites the endpoint list) and a bullet under `[Unreleased]` in the [CHANGELOG](CHANGELOG.md) (below the top bullet, so two open pull requests do not collide on the same line). Say what was wrong, what changed, and call out anything that changes an API answer or a setting. If the person running a server must do something when they upgrade (add a setting, run a command, sign in again), end the bullet with `**Upgrade:** what to do.`: the release notes list these at the top, under "Before you upgrade".
 5. **Run the checks CI runs**, in this order, one at a time:
 
    ```bash
@@ -87,4 +87,6 @@ git switch main && git pull
 git tag v0.2.0 && git push origin v0.2.0
 ```
 
-The release workflow checks that the tag is on `main` and equals `VERSION`, writes the notes with `bin/release_notes 0.2.0`, and publishes the release. Servers upgrade with `make upgrade TO=v0.2.0` (README, "Upgrading and rolling back"). Use a version like `1.0.0-rc.1` for a candidate: it is published as a pre-release, which the update check on System Health does not offer to anyone.
+The release workflow checks that the tag is on `main` and equals `VERSION`, writes the notes with `bin/release_notes 0.2.0`, and publishes the release. Servers upgrade with `make upgrade TO=v0.2.0` ([docs/upgrading.md](docs/upgrading.md)). Use a version like `1.0.0-rc.1` for a candidate: it is published as a pre-release, which the update check on System Health does not offer to anyone.
+
+The same tag also builds the docs: the workflow attaches them to the release as `fixflow-docs-0.2.0.zip` and publishes this version of the site on the `gh-pages` branch (the newest stable one as `latest`) with [mike](https://github.com/jimporter/mike). For the site to be on the web, switch on GitHub Pages for the `gh-pages` branch once (repository Settings, Pages).

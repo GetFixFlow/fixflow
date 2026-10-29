@@ -56,3 +56,5 @@ backup_*.sql.gz
 
 # The private key of an HTTPS certificate (README, "HTTPS").
 /certs/
+/site/
+__pycache__/

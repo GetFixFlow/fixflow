@@ -318,6 +318,7 @@ RSpec/ContextWording:
 # Configuration parameters: IgnoredMetadata.
 RSpec/DescribeClass:
   Exclude:
+    - 'spec/config/docs_spec.rb'
     - 'spec/config/production_boot_spec.rb'
     - 'spec/config/production_stack_spec.rb'
     - 'spec/config/upgrade_spec.rb'
@@ -521,6 +522,7 @@ Rails/I18nLocaleTexts:
 # This cop supports unsafe autocorrection (--autocorrect-all).
 Rails/IndexWith:
   Exclude:
+    - 'spec/config/docs_spec.rb'
     - 'spec/config/production_boot_spec.rb'
 
 # Offense count: 4
@@ -688,6 +690,7 @@ Style/FetchEnvVar:
     - 'app/services/ai/client.rb'
     - 'app/services/iot/mqtt_subscriber_service.rb'
     - 'config/environments/production.rb'
+    - 'spec/config/docs_spec.rb'
     - 'spec/config/production_boot_spec.rb'
     - 'spec/requests/api/v1/ai/assist_spec.rb'
     - 'spec/services/ai/client_spec.rb'

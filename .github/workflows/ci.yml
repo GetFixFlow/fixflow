@@ -209,3 +209,24 @@ jobs:
 
       - name: Start the stack with HTTPS and check it
         run: bin/check_https
+
+  # Builds the docs site (mkdocs.yml). A broken link or anchor between pages fails it, and so does a page missing from the
+  # navigation. (That docs/api-endpoints.md matches the routes is checked by the `test` job.)
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: deploy/docs/requirements.txt
+
+      - name: Install MkDocs
+        run: pip install -r deploy/docs/requirements.txt
+
+      - name: Build the site
+        run: mkdocs build --strict

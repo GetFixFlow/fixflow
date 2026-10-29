@@ -1,0 +1,4 @@
+# The docs site (mkdocs.yml). Pinned, like everything else: `pip install -r deploy/docs/requirements.txt`.
+mkdocs==1.6.1
+mkdocs-material==9.6.14
+mike==2.1.3

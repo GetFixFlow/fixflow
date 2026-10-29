@@ -1,0 +1,85 @@
+# The docs site: `pip install -r deploy/docs/requirements.txt`, then `mkdocs serve` to read it or `mkdocs build --strict` to
+# check it. The pages are the Markdown files in docs/. Each release publishes a copy of its own version (see
+# .github/workflows/release.yml and CONTRIBUTING.md, "Making a release").
+site_name: FixFlow documentation
+site_description: Install, configure, upgrade, back up and use FixFlow, the self-hosted maintenance management system.
+site_url: https://getfixflow.github.io/fixflow/
+repo_url: https://github.com/GetFixFlow/fixflow
+repo_name: GetFixFlow/fixflow
+edit_uri: edit/main/docs/
+docs_dir: docs
+strict: true
+
+exclude_docs: |
+  FixFlow_CMMS_Project_Proposal.md
+
+hooks:
+  - deploy/docs/hooks.py
+
+theme:
+  name: material
+  logo: logo.png
+  favicon: logo.png
+  features:
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - content.action.edit
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      toggle: { icon: material/weather-night, name: Switch to dark mode }
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      toggle: { icon: material/weather-sunny, name: Switch to light mode }
+
+plugins:
+  - search
+  - mike:
+      # GitHub Pages does not follow symlinks, so "latest" is a small redirect page rather than a link to the version's folder.
+      alias_type: redirect
+      canonical_version: latest
+
+extra:
+  version:
+    provider: mike
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.superfences
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
+
+nav:
+  - Home: index.md
+  - Set up:
+      - Install on a server: install.md
+      - HTTPS: https.md
+      - Configuration: configuration.md
+      - People and roles: users.md
+      - Sign-in and security: security.md
+      - Importing data and sample data: import.md
+  - Keep it running:
+      - Upgrading and rolling back: upgrading.md
+      - Backups and restoring: backups.md
+      - Watching the install: monitoring.md
+      - Troubleshooting: troubleshooting.md
+  - Use FixFlow:
+      - Work orders and maintenance: work-orders.md
+      - Sensors and IoT: iot.md
+      - Reports and the dashboard: reports.md
+  - Reference:
+      - API: api.md
+      - API endpoints: api-endpoints.md
+      - Changelog: changelog.md
+  - Development: development.md

@@ -40,3 +40,48 @@ jobs:
         run: |
           case "$TAG" in *-*) prerelease="--prerelease" ;; *) prerelease="" ;; esac
           gh release create "$TAG" --verify-tag --title "FixFlow ${TAG#v}" --notes-file notes.md $prerelease
+
+  # The docs of this version: built (a broken link fails it), attached to the release as a zip anyone can unpack and open,
+  # and published to the gh-pages branch under the version's number with mike. The newest stable version is also "latest",
+  # which is what the site opens on. For the site to be on the web, GitHub Pages must be switched on for the gh-pages branch
+  # (repository Settings, Pages).
+  docs:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: deploy/docs/requirements.txt
+
+      - name: Install MkDocs
+        run: pip install -r deploy/docs/requirements.txt
+
+      - name: Build the site and attach it to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          mkdocs build --strict
+          (cd site && zip -qr "../fixflow-docs-${TAG#v}.zip" .)
+          gh release upload "$TAG" "fixflow-docs-${TAG#v}.zip"
+
+      - name: Publish this version of the site
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          version="${TAG#v}"
+          case "$version" in
+            *-*) mike deploy --push "$version" ;;                                    # a candidate: its own version, not "latest"
+            *)   mike deploy --push --update-aliases "${version%.*}" latest
+                 mike set-default --push latest ;;                                   # 0.2.1 replaces 0.2; "latest" follows it
+          esac
