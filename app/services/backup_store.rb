@@ -120,7 +120,9 @@ class BackupStore
   # Deletes the backups made before the time; returns their names.
   def delete_older_than(time)
     old = list.select { |backup| backup.created_at < time }
-    old.each { |backup| self.class.disk? ? File.delete(disk_path(backup.name)) : client.delete_object(bucket: bucket, key: key(backup.name)) }
+    old.each do |backup|
+      self.class.disk? ? File.delete(disk_path(backup.name)) : client.delete_object(bucket: bucket, key: key(backup.name))
+    end
     old.map(&:name)
   end
 

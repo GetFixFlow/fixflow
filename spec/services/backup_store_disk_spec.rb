@@ -2,13 +2,14 @@ require "rails_helper"
 require "tmpdir"
 
 # The lite install has no storage server: with FILE_STORAGE=disk the backups are files in BACKUP_DIR.
-RSpec.describe BackupStore, "kept in a folder" do
+RSpec.describe BackupStore do
   let(:folder) { Dir.mktmpdir("fixflow_backups") }
   let(:store)  { described_class.new }
   let(:name)   { "fixflow_20261018_030000.sql.gz" }
 
   def with_env(values)
-    stub_const("ENV", ENV.to_h.except("BACKUP_S3_ACCESS_KEY", "BACKUP_S3_SECRET_KEY", "BACKUP_S3_ENDPOINT", "FILE_STORAGE").merge(values))
+    unset = %w[BACKUP_S3_ACCESS_KEY BACKUP_S3_SECRET_KEY BACKUP_S3_ENDPOINT FILE_STORAGE]
+    stub_const("ENV", ENV.to_h.except(*unset).merge(values))
   end
 
   def dump(content = "a dump") = Tempfile.new(["dump", ".sql.gz"]).tap { |file| file.write(content) && file.flush }

@@ -15,6 +15,9 @@ Every setting, what the server checks when it starts, and how to set up email, l
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD` | No | A mail server, if you do not set one under Settings, Email |
 | `MINIO_ENDPOINT`, `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY`, `MINIO_BUCKET` | For file uploads | The S3-compatible file storage |
 | `MQTT_HOST`, `MQTT_PORT`, `MQTT_USERNAME`, `MQTT_PASSWORD` | For IoT over MQTT | The sensor broker |
+| `COMPOSE_FILE` | No | Docker install: `docker-compose.lite.yml` chooses the [lite install](lite.md); left out, the full install (`docker-compose.prod.yml`) |
+| `FILE_STORAGE` | No | `disk` keeps uploaded files in a folder on the server instead of an S3-compatible storage (the lite install sets it); left out, the `MINIO_*` storage is used |
+| `STORAGE_DIR`, `BACKUP_DIR` | With `FILE_STORAGE=disk` | The folders for uploaded files and for backups (the lite install uses `/app/storage` and `/app/backups`, both volumes) |
 | `COMPOSE_PROFILES` | No | Docker install: `https` turns on the HTTPS front door (see [HTTPS](https.md)) |
 | `HTTPS_DOMAIN` | With `https` | The name people open FixFlow at, like `fixflow.example.com` (the name only). `APP_URL` must be `https://` and that name |
 | `HTTPS_MODE` | No | `automatic` (a free Let's Encrypt certificate; the default), `own-certificate` (`certs/fixflow.crt` and `certs/fixflow.key`) or `internal` (FixFlow makes its own) |

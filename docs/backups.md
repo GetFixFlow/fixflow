@@ -2,6 +2,8 @@
 
 What is backed up, where it goes, how to restore, and how long data is kept.
 
+On the [lite install](lite.md) the backups are files in a folder (the `backups` volume) instead of a bucket, with the same names and rules; everything below says "bucket" for the full install.
+
 **What is backed up.** A production server copies the **database** every night at 03:00 UTC (`DatabaseBackupJob`, run by the background worker) into the backup bucket (`MINIO_BACKUP_BUCKET`, `fixflow-backups` by default), as a gzipped SQL file named `fixflow_YYYYMMDD_HHMMSS.sql.gz`, and deletes backups of that name older than 30 days. In the same run it copies the **photos and documents people uploaded** (the `MINIO_BUCKET` file storage) to `files/` in the backup bucket. Only files the backup does not have yet are copied, so a quiet night copies nothing. The database dump is stored last, so a backup that is listed has its files. Files that are deleted from FixFlow stay in the copy (an older database backup may still point at them); delete them from the backup bucket by hand if the space matters. A development server makes no backups. `rails fixflow:backup` makes one now (before an upgrade, say).
 
 **Where the backups are kept.** By default in the same file storage as the data: the same server and the same disk, so they do **not** survive losing that server or disk. For a backup that does, point them at another S3-compatible storage (Amazon S3, Backblaze B2, Wasabi, a MinIO or SeaweedFS on another machine) in `.env`:

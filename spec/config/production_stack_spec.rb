@@ -95,7 +95,8 @@ RSpec.describe "The production stack" do
       end
       expect(lite_services["web"]["depends_on"]).to eq("api" => { "condition" => "service_healthy" })
       expect(lite_services["sidekiq"].except("volumes", "environment")).to eq(services["sidekiq"].except("volumes", "environment"))
-      expect(lite_services["api"].except("depends_on", "volumes", "environment")).to eq(services["api"].except("depends_on", "volumes", "environment"))
+      own = %w[depends_on volumes environment]
+      expect(lite_services["api"].except(*own)).to eq(services["api"].except(*own))
     end
 
     it "gives the api and the worker the same settings, and the same two volumes for the uploaded files and the backups" do
@@ -138,6 +139,14 @@ RSpec.describe "The production stack" do
       expect(read("Makefile")).to include("PROD = bin/compose")
       expect(read("bin/compose")).to include("COMPOSE_FILE", "docker-compose.prod.yml")
       %w[bin/upgrade bin/rollback].each { |script| expect(read(script)).to include("${COMPOSE_FILE:-docker-compose.prod.yml}") }
+    end
+
+    it "makes production keep the uploaded files in the disk service when FILE_STORAGE=disk, in a folder STORAGE_DIR names" do
+      expect(read("config/environments/production.rb")).to match(/active_storage\.service = ENV\["FILE_STORAGE"\] == "disk" \? :disk : :minio/)
+      storage = YAML.safe_load(ERB.new(read("config/storage.yml")).result, aliases: true)
+
+      expect(storage["disk"]).to include("service" => "Disk")
+      expect(read("config/storage.yml")).to include('ENV.fetch("STORAGE_DIR"')
     end
 
     it "makes the folders the volumes are mounted on, owned by the user the server runs as" do

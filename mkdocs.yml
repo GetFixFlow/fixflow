@@ -64,6 +64,7 @@ nav:
   - Home: index.md
   - Set up:
       - Install on a server: install.md
+      - Lite install for small servers: lite.md
       - HTTPS: https.md
       - Configuration: configuration.md
       - People and roles: users.md

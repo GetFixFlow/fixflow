@@ -30,6 +30,7 @@
 | | |
 |---|---|
 | [Install on a server](docs/install.md) | Docker on a Linux server, then [HTTPS](docs/https.md) |
+| [Lite install](docs/lite.md) | One small server, no storage server and no sensor broker |
 | [Configuration](docs/configuration.md) | Every setting, the start-up check, email, branding |
 | [Upgrading and rolling back](docs/upgrading.md) | `make upgrade TO=v0.2.0`, and the way back |
 | [Backups and restoring](docs/backups.md) | What is backed up, where it goes, how to restore |

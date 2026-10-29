@@ -10,7 +10,9 @@ require "tempfile"
 # the backup bucket by hand if the space matters.
 #
 # With FILE_STORAGE=disk (the lite install) the uploads are a folder, and the copy is a folder (files/ in BACKUP_DIR) or,
-# when BACKUP_S3_* is set, objects in that other storage: the same rules, on files instead of objects.
+# when BACKUP_S3_* is set, objects in that other storage: the same rules, on files instead of objects. Whatever the place,
+# a copy holds files/<key> (the key Active Storage gives the file), and the uploads folder keeps each file where Active
+# Storage's disk service does (<key[0,2]>/<key[2,2]>/<key>), so a backup of one kind of install restores on the other.
 class UploadsBackup
   PREFIX = "files/".freeze
 
@@ -71,8 +73,8 @@ class UploadsBackup
   def copy_files(from:, to:)
     result = Result.new(copied: 0, bytes: 0, present: 0)
     FileUtils.mkdir_p(to) if to.is_a?(Pathname)
-    have = to == :backups ? backup_sizes : tree_sizes(to)
-    source = from == :backups ? backup_sizes : tree_sizes(from)
+    have = to == :backups ? backup_sizes : upload_sizes(to)
+    source = from == :backups ? backup_sizes : upload_sizes(from)
     source.each do |name, size|
       if have[name] == size
         result.present += 1
@@ -86,15 +88,20 @@ class UploadsBackup
     result
   end
 
-  # { relative path => size } of every file under the folder.
-  def tree_sizes(root)
-    root = Pathname.new(root)
-    Dir.glob(root.join("**", "*"), File::FNM_DOTMATCH).select { |path| File.file?(path) }
-       .to_h { |path| [Pathname.new(path).relative_path_from(root).to_s, File.size(path)] }
+  # { key => size } of every file under the folder, at whatever depth (the uploads folder has two levels of folders).
+  def upload_sizes(root)
+    files_sizes(Dir.glob(Pathname.new(root).join("**", "*")))
   end
 
+  def files_sizes(paths)
+    paths.select { |path| File.file?(path) && !path.end_with?(".part") }.to_h { |path| [File.basename(path), File.size(path)] }
+  end
+
+  # Where Active Storage's disk service keeps the file with this key.
+  def upload_path(root, key) = root.join(key[0, 2], key[2, 2], key)
+
   def backup_sizes
-    return tree_sizes(BackupStore.files_directory) if BackupStore.disk?
+    return files_sizes(Dir.glob(BackupStore.files_directory.join("*"))) if BackupStore.disk?
 
     sizes(backups, BackupStore.bucket, PREFIX)
   end
@@ -107,7 +114,7 @@ class UploadsBackup
         file.rewind
         backups.put_object(bucket: BackupStore.bucket, key: PREFIX + name, body: file)
       else
-        target = (place == :backups ? BackupStore.files_directory : place).join(name)
+        target = place == :backups ? BackupStore.files_directory.join(name) : upload_path(place, name)
         FileUtils.mkdir_p(target.dirname)
         FileUtils.cp(file.path, "#{target}.part")
         File.rename("#{target}.part", target)
@@ -119,7 +126,7 @@ class UploadsBackup
     if place == :backups && !BackupStore.disk?
       backups.get_object(bucket: BackupStore.bucket, key: PREFIX + name, response_target: path)
     else
-      FileUtils.cp((place == :backups ? BackupStore.files_directory : place).join(name), path)
+      FileUtils.cp(place == :backups ? BackupStore.files_directory.join(name) : upload_path(place, name), path)
     end
   end
 

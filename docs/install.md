@@ -1,5 +1,8 @@
 # Install on a server
 
+!!! tip "A small server?"
+    For a team that fits on one server with **2 GB of memory**, with no file-storage server and no sensor broker, use the [lite install](lite.md) instead. Everything below applies to it, apart from the services and the two `.env` lines that page lists.
+
 Install FixFlow with Docker on a Linux server, then set it up.
 
 You need a Linux (or macOS) machine with Docker and Docker Compose v2, about 2 GB of memory, and a few GB of disk. Nothing else is installed on it: the database, Redis, the file storage and the sensor broker all run in containers.

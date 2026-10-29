@@ -9,7 +9,8 @@ RSpec.describe "Backups in a folder", type: :request do
   let(:name)   { "fixflow_20261018_030000.sql.gz" }
 
   before do
-    stub_const("ENV", ENV.to_h.except("BACKUP_S3_ACCESS_KEY", "BACKUP_S3_ENDPOINT").merge("FILE_STORAGE" => "disk", "BACKUP_DIR" => folder))
+    here = { "FILE_STORAGE" => "disk", "BACKUP_DIR" => folder }
+    stub_const("ENV", ENV.to_h.except("BACKUP_S3_ACCESS_KEY", "BACKUP_S3_ENDPOINT").merge(here))
     FileUtils.mkdir_p(File.join(folder, "backups"))
     File.write(File.join(folder, "backups", name), "gzipped dump")
   end

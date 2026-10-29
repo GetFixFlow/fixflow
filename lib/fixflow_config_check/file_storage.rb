@@ -21,14 +21,15 @@ class FixflowConfigCheck
 
     def disk_storage_settings
       unless value("FILE_STORAGE") == "disk"
-        return problem(:error, "FILE_STORAGE", "is \"#{value('FILE_STORAGE')}\": use disk (files in folders on this server, the lite install) " \
-                                               "or leave it out (files in an S3-compatible storage).")
+        return problem(:error, "FILE_STORAGE",
+                       "is \"#{value('FILE_STORAGE')}\": use disk (files in folders on this server, the lite install) " \
+                       "or leave it out (files in an S3-compatible storage).")
       end
 
       found = backup_storage_settings
       if present?("MINIO_ENDPOINT") || present?("MINIO_ACCESS_KEY") || present?("MINIO_SECRET_KEY")
-        found << problem(:warning, "FILE_STORAGE", "is disk, so the MINIO_* settings are not used: uploaded files go to " \
-                                                    "#{value('STORAGE_DIR').empty? ? 'the storage folder' : value('STORAGE_DIR')}.")
+        folder = value("STORAGE_DIR").empty? ? "the storage folder" : value("STORAGE_DIR")
+        found << problem(:warning, "FILE_STORAGE", "is disk, so the MINIO_* settings are not used: uploaded files go to #{folder}.")
       end
       found
     end

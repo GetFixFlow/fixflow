@@ -3,7 +3,7 @@ require "tmpdir"
 
 # The lite install: the uploaded files are a folder (FILE_STORAGE=disk) and the copy of them is a folder, or, when another
 # S3 storage is set for the backups, objects there.
-RSpec.describe UploadsBackup, "with the files in a folder" do
+RSpec.describe UploadsBackup do
   let(:root)     { Dir.mktmpdir("fixflow_uploads_backup") }
   let(:uploads)  { Pathname.new(root).join("uploads") }
   let(:backups)  { Pathname.new(root).join("backups") }
@@ -28,15 +28,15 @@ RSpec.describe UploadsBackup, "with the files in a folder" do
   after { FileUtils.remove_entry(root) }
 
   context "when the copy is a folder too" do
-    it "copies each file the copy lacks, keeping the folders Active Storage puts them in" do
+    it "copies each file the copy lacks, as files/<key>: the folders Active Storage puts them in are not part of the copy" do
       write(uploads, "ab/cd/abcdef", "one")
       write(uploads, "12/34/123456", "twenty")
 
       result = service.backup
 
       expect(result).to have_attributes(copied: 2, bytes: 9, present: 0)
-      expect(backups.join("files/ab/cd/abcdef").read).to eq("one")
-      expect(backups.join("files/12/34/123456").read).to eq("twenty")
+      expect(backups.join("files/abcdef").read).to eq("one")
+      expect(backups.join("files/123456").read).to eq("twenty")
     end
 
     it "copies nothing on a night when nothing is new, and a file whose size differs again" do
@@ -48,7 +48,7 @@ RSpec.describe UploadsBackup, "with the files in a folder" do
       result = described_class.new.backup
 
       expect(result).to have_attributes(copied: 1, present: 1)
-      expect(backups.join("files/12/34/123456").read).to eq("twenty-one")
+      expect(backups.join("files/123456").read).to eq("twenty-one")
     end
 
     it "never deletes from the copy a file that was deleted from the uploads" do
@@ -59,12 +59,12 @@ RSpec.describe UploadsBackup, "with the files in a folder" do
 
       described_class.new.backup
 
-      expect(backups.join("files/ab/cd/abcdef")).to exist
+      expect(backups.join("files/abcdef")).to exist
     end
 
     it "restores what the uploads folder lacks, and leaves the files it has" do
-      write(backups, "files/ab/cd/abcdef", "one")
-      write(backups, "files/12/34/123456", "twenty")
+      write(backups, "files/abcdef", "one")
+      write(backups, "files/123456", "twenty")
       write(uploads, "12/34/123456", "twenty")
 
       result = service.restore
@@ -74,11 +74,19 @@ RSpec.describe UploadsBackup, "with the files in a folder" do
     end
 
     it "restores into an uploads folder that does not exist yet (a new server)" do
-      write(backups, "files/ab/cd/abcdef", "one")
+      write(backups, "files/abcdef", "one")
       FileUtils.rm_rf(uploads)
 
       expect(service.restore.copied).to eq(1)
       expect(uploads.join("ab/cd/abcdef").read).to eq("one")
+    end
+
+    it "restores a file to where Active Storage's disk service looks for it, from a copy that holds only the key" do
+      write(backups, "files/k3yabcdefghijklmnop", "one")
+
+      service.restore
+
+      expect(uploads.join("k3/ya/k3yabcdefghijklmnop").read).to eq("one")
     end
 
     it "does not need the S3 settings, which the lite install does not have" do
@@ -98,21 +106,21 @@ RSpec.describe UploadsBackup, "with the files in a folder" do
                "BACKUP_S3_ENDPOINT" => "https://s3.example.com", "BACKUP_S3_BUCKET" => "offsite")
     end
 
-    it "sends each file the other storage lacks, as files/<its folder path>" do
+    it "sends each file the other storage lacks, as files/<key>" do
       write(uploads, "ab/cd/abcdef", "one")
       write(uploads, "12/34/123456", "twenty")
-      client.stub_responses(:list_objects_v2, contents: [{ key: "files/12/34/123456", size: 6, last_modified: Time.now }])
+      client.stub_responses(:list_objects_v2, contents: [{ key: "files/123456", size: 6, last_modified: Time.current }])
       sent = []
       allow(client).to receive(:put_object) { |args| sent << [args[:bucket], args[:key], args[:body].read] }
 
       result = service.backup
 
-      expect(sent).to eq([["offsite", "files/ab/cd/abcdef", "one"]])
+      expect(sent).to eq([["offsite", "files/abcdef", "one"]])
       expect(result).to have_attributes(copied: 1, present: 1)
     end
 
     it "brings back the files the uploads folder lacks" do
-      client.stub_responses(:list_objects_v2, contents: [{ key: "files/ab/cd/abcdef", size: 3, last_modified: Time.now }])
+      client.stub_responses(:list_objects_v2, contents: [{ key: "files/abcdef", size: 3, last_modified: Time.current }])
       allow(client).to receive(:get_object) { |args| File.write(args[:response_target], "one") }
 
       expect(service.restore.copied).to eq(1)
