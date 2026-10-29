@@ -142,7 +142,8 @@ RSpec.describe "The production stack" do
     end
 
     it "makes production keep the uploaded files in the disk service when FILE_STORAGE=disk, in a folder STORAGE_DIR names" do
-      expect(read("config/environments/production.rb")).to match(/active_storage\.service = ENV\["FILE_STORAGE"\] == "disk" \? :disk : :minio/)
+      selects = /active_storage\.service = ENV\["FILE_STORAGE"\] == "disk" \? :disk : :minio/
+      expect(read("config/environments/production.rb")).to match(selects)
       storage = YAML.safe_load(ERB.new(read("config/storage.yml")).result, aliases: true)
 
       expect(storage["disk"]).to include("service" => "Disk")
