@@ -152,6 +152,9 @@ RSpec.describe FixflowRelease do
     before do
       git(dir, "init", "-q", "--bare", "-b", "main", origin)
       git(dir, "clone", "-q", origin, work)
+      # bin/release commits, and a CI runner has no git identity of its own.
+      git(work, "config", "user.name", "t")
+      git(work, "config", "user.email", "t@example.test")
       FileUtils.mkdir_p([File.join(work, "bin"), File.join(work, "lib")])
       %w[bin/release lib/fixflow_release.rb].each { |file| FileUtils.cp(Rails.root.join(file), File.join(work, file)) }
       File.write(File.join(work, "VERSION"), "1.2.0\n")
