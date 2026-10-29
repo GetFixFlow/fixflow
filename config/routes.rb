@@ -169,6 +169,7 @@ Rails.application.routes.draw do
           post  :resend_invitation
           post  :reset_password
           post  :reset_two_factor
+          post  :unlock
           patch :deactivate
           patch :reactivate
           patch :role

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import { toast } from 'sonner'
-import { Plus, MoreVertical, UserCheck, UserX, Pencil, Link2, KeyRound, ShieldOff } from 'lucide-react'
+import { Plus, MoreVertical, UserCheck, UserX, Pencil, Link2, KeyRound, ShieldOff, LockOpen } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -19,6 +19,7 @@ import {
   useBulkDeactivate,
   useResetUserPassword,
   useResetUserTwoFactor,
+  useUnlockUser,
   useResendInvitation,
 } from '@/hooks/useUsers'
 import type { User, Role } from '@/types'
@@ -66,6 +67,7 @@ export function UsersPage() {
   const bulkDeactivate = useBulkDeactivate()
   const resetPassword = useResetUserPassword()
   const resetTwoFactor = useResetUserTwoFactor()
+  const unlock = useUnlockUser()
   const [resetResult, setResetResult] = useState<{ user: User; resetUrl: string; emailSent: boolean } | null>(null)
   const [bulkRole, setBulkRole] = useState<Role | ''>('')
   const resendInvitation = useResendInvitation()
@@ -259,6 +261,9 @@ export function UsersPage() {
                               <NameAvatar name={u.full_name} />
                             )}
                             <span className="font-medium text-gray-900 dark:text-gray-100">{u.full_name}</span>
+                            {u.locked && (
+                              <span title="Too many wrong passwords. It opens by itself after 30 minutes, or unlock it from the menu." className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-700">Locked</span>
+                            )}
                             {u.two_factor_enabled && (
                               <span title="Signs in with an authenticator app" className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-medium text-green-700">2FA</span>
                             )}
@@ -330,6 +335,14 @@ export function UsersPage() {
                                     className="flex items-center gap-2 w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700"
                                   >
                                     <KeyRound className="h-3.5 w-3.5" /> Reset Password
+                                  </button>
+                                )}
+                                {isAdmin && u.id !== currentUser?.id && u.locked && (
+                                  <button
+                                    onClick={() => { unlock.mutate(u.id); setOpenMenuId(null) }}
+                                    className="flex items-center gap-2 w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700"
+                                  >
+                                    <LockOpen className="h-3.5 w-3.5" /> Unlock account
                                   </button>
                                 )}
                                 {isAdmin && u.id !== currentUser?.id && u.two_factor_enabled && (

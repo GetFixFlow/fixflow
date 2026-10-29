@@ -11,8 +11,8 @@ RSpec.describe "Auth", type: :request do
       {
         user: {
           email: "founder@startup.io",
-          password: "Password1!",
-          password_confirmation: "Password1!",
+          password: "Blue-Ladder-4721-Kite",
+          password_confirmation: "Blue-Ladder-4721-Kite",
           first_name: "Alice",
           last_name: "Founder",
           organization_name: "Startup Inc"

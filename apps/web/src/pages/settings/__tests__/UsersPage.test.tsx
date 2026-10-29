@@ -31,6 +31,7 @@ const mockUsers = [
     email: 'dan@test.com',
     role: 'technician',
     active: false,
+    locked: true,
     created_at: '2026-02-01T00:00:00Z',
     organization_id: 1,
   },
@@ -43,6 +44,7 @@ const actions = vi.hoisted(() => ({
   bulkRole: vi.fn(),
   resetPassword: vi.fn(),
   resetTwoFactor: vi.fn(),
+  unlock: vi.fn(),
 }))
 
 vi.mock('@/hooks/useUsers', () => ({
@@ -55,6 +57,7 @@ vi.mock('@/hooks/useUsers', () => ({
   useBulkChangeRole: () => ({ mutate: actions.bulkRole, isPending: false }),
   useResetUserPassword: () => ({ mutate: actions.resetPassword, isPending: false }),
   useResetUserTwoFactor: () => ({ mutate: actions.resetTwoFactor, isPending: false }),
+  useUnlockUser: () => ({ mutate: actions.unlock, isPending: false }),
   useResendInvitation: () => ({ mutate: vi.fn(), isPending: false }),
 }))
 
@@ -156,6 +159,24 @@ describe('UsersPage', () => {
       expect(within(bob).getByText('2FA')).toBeInTheDocument()
       const dan = screen.getByText('Dan Former').closest('tr') as HTMLElement
       expect(within(dan).queryByText('2FA')).not.toBeInTheDocument()
+    })
+
+    it('marks a locked account and lets an administrator unlock it', async () => {
+      render(<UsersPage />, { wrapper: Wrapper })
+      const dan = screen.getByText('Dan Former').closest('tr') as HTMLElement
+      expect(within(dan).getByText('Locked')).toBeInTheDocument()
+
+      await openMenu('Dan Former')
+      await userEvent.click(screen.getByText('Unlock account'))
+      expect(actions.unlock).toHaveBeenCalledWith(3)
+    })
+
+    it('does not offer Unlock for an account that is not locked', async () => {
+      render(<UsersPage />, { wrapper: Wrapper })
+      await openMenu('Bob Jones')
+      expect(screen.queryByText('Unlock account')).not.toBeInTheDocument()
+      const bob = screen.getByText('Bob Jones').closest('tr') as HTMLElement
+      expect(within(bob).queryByText('Locked')).not.toBeInTheDocument()
     })
 
     it('offers Reset two-factor for another person who has it on, after asking', async () => {

@@ -5,6 +5,8 @@ class UserBlueprint < Blueprinter::Base
   field(:active) { |user| user.active? }
   field(:invitation_pending) { |user| user.invitation_pending? }
   field(:two_factor_enabled) { |user| user.two_factor_enabled? }
+  # Too many wrong passwords; an administrator can unlock it (it also opens by itself after 30 minutes).
+  field(:locked) { |user| user.access_locked? }
   # The company requires it and this person has not set it up: the web app sends them to do so before anything else.
   field(:two_factor_setup_required) { |user| !user.two_factor_enabled? && user.organization.require_two_factor? }
   # Users who signed up themselves have no invitation, so they count as accepted.

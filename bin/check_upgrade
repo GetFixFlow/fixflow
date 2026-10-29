@@ -68,7 +68,7 @@ main() {
   ok "the old version is running"
 
   curl -s -X POST $BASE/api/v1/auth/sign_up -H "$JSON" \
-    -d '{"user":{"email":"admin@check.test","password":"password123","password_confirmation":"password123","first_name":"Check","last_name":"Admin","organization_name":"Check Co"}}' \
+    -d '{"user":{"email":"admin@check.test","password":"Blue-Ladder-4721-Kite","password_confirmation":"Blue-Ladder-4721-Kite","first_name":"Check","last_name":"Admin","organization_name":"Check Co"}}' \
     | grep -q 'Account created' || fail "first-run setup on the old version"
   token=$(sign_in)
   [ -n "$token" ] || fail "sign-in on the old version"
@@ -114,7 +114,7 @@ main() {
 
 sign_in() {
   curl -s -D - -o /dev/null -X POST $BASE/api/v1/auth/sign_in -H "$JSON" \
-    -d '{"user":{"email":"admin@check.test","password":"password123"}}' | grep -i '^authorization:' | sed 's/^[Aa]uthorization: //' | tr -d '\r'
+    -d '{"user":{"email":"admin@check.test","password":"Blue-Ladder-4721-Kite"}}' | grep -i '^authorization:' | sed 's/^[Aa]uthorization: //' | tr -d '\r'
 }
 
 create_place() {

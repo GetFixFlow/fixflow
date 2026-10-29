@@ -36,6 +36,14 @@ class UserAdministration
       ActivityLogService.log(action: "user.two_factor_reset", resource: user, user: by)
     end
 
+    # Opens an account locked for too many wrong passwords, before its 30 minutes are over.
+    def unlock!(user, by:)
+      raise Refused, "#{user.full_name} is not locked." unless user.access_locked?
+
+      user.unlock_access!
+      ActivityLogService.log(action: "user.unlocked", resource: user, user: by)
+    end
+
     def delete!(user, by:)
       guard_self!(user, by, "delete your own account")
       guarded(user) { user.destroy! }

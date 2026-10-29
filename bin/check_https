@@ -113,10 +113,10 @@ ok "/cable upgrades over HTTPS for this address and refuses another"
 
 JSON='Content-Type: application/json'
 curl -sk -X POST $BASE/api/v1/auth/sign_up -H "$JSON" \
-  -d '{"user":{"email":"admin@check.test","password":"password123","password_confirmation":"password123","first_name":"Check","last_name":"Admin","organization_name":"Check Co"}}' \
+  -d '{"user":{"email":"admin@check.test","password":"Blue-Ladder-4721-Kite","password_confirmation":"Blue-Ladder-4721-Kite","first_name":"Check","last_name":"Admin","organization_name":"Check Co"}}' \
   | grep -q 'Account created' || fail "first-run setup over HTTPS"
 TOKEN=$(curl -sk -D - -o /dev/null -X POST $BASE/api/v1/auth/sign_in -H "$JSON" \
-  -d '{"user":{"email":"admin@check.test","password":"password123"}}' | grep -i '^authorization:' | sed 's/^[Aa]uthorization: //' | tr -d '\r')
+  -d '{"user":{"email":"admin@check.test","password":"Blue-Ladder-4721-Kite"}}' | grep -i '^authorization:' | sed 's/^[Aa]uthorization: //' | tr -d '\r')
 [ -n "$TOKEN" ] || fail "sign-in over HTTPS returned no token"
 curl -sk $BASE/api/v1/locations -H "Authorization: $TOKEN" | grep -q '"data"\|\[' || fail "an authenticated request over HTTPS"
 ok "first-run setup and sign-in work over HTTPS"

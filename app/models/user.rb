@@ -4,13 +4,14 @@ class User < ApplicationRecord
   ROLES = %w[admin manager technician requester].freeze
 
   devise :database_authenticatable, :registerable, :recoverable,
-    :rememberable, :trackable, :validatable,
+    :rememberable, :trackable, :validatable, :lockable,
     :jwt_authenticatable, jwt_revocation_strategy: self
 
   INVITATION_TTL = 7.days
 
   include PasswordReset
   include TwoFactorAuth
+  include PasswordPolicy
   include Auditable
 
   # A whitelist: sign-in counters, tokens and preferences change all the time and are not edits. The password is
@@ -92,6 +93,12 @@ class User < ApplicationRecord
 
   def active_for_authentication?
     super && active?
+  end
+
+  # Called by Devise when the wrong passwords reach the limit.
+  def lock_access!(opts = {})
+    super
+    ActivityLogService.log(action: "user.locked", resource: self, user: self)
   end
 
   def inactive_message

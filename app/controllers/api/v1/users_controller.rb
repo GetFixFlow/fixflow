@@ -3,9 +3,9 @@ module Api
     class UsersController < Api::V1::BaseController
       before_action :require_manager!, only: %i[index update]
       before_action :require_admin!,   only: %i[invite resend_invitation destroy deactivate reactivate role
-                                                bulk_role bulk_deactivate reset_password reset_two_factor]
+                                                bulk_role bulk_deactivate reset_password reset_two_factor unlock]
       before_action :set_user, only: %i[show update destroy resend_invitation deactivate reactivate role reset_password
-                                        reset_two_factor]
+                                        reset_two_factor unlock]
 
       rescue_from UserAdministration::Refused do |error|
         render_error(error.message, :unprocessable_entity, code: "USER_ACTION_REFUSED")
@@ -50,6 +50,12 @@ module Api
       def reactivate
         UserAdministration.reactivate!(@user)
         render json: { user: UserBlueprint.render_as_hash(@user) }
+      end
+
+      # POST /api/v1/users/:id/unlock
+      def unlock
+        UserAdministration.unlock!(@user, by: current_user)
+        render json: { user: UserBlueprint.render_as_hash(@user.reload) }
       end
 
       # POST /api/v1/users/:id/reset_two_factor
@@ -98,7 +104,7 @@ module Api
         ActiveRecord::Base.transaction do
           password = SecureRandom.hex(32) # unusable until the invitee sets their own
           user = current_organization.users.create!(
-            invite_params.merge(password: password, password_confirmation: password)
+            invite_params.merge(password: password, password_confirmation: password, skip_password_policy: true)
           )
           raw_token = user.invite!(invited_by: current_user)
         end

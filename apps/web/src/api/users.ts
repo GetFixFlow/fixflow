@@ -12,6 +12,9 @@ export const usersApi = {
   resetPassword: (id: number) =>
     apiClient.post<{ reset_url: string; email_sent: boolean }>(`/users/${id}/reset_password`),
 
+  /** Opens an account locked for too many wrong passwords, before its 30 minutes are over. */
+  unlock: (id: number) => apiClient.post<{ user: User }>(`/users/${id}/unlock`),
+
   /** For a lost phone: switches the person's two-factor sign-in off and signs them out everywhere. */
   resetTwoFactor: (id: number) => apiClient.post<{ user: User }>(`/users/${id}/reset_two_factor`),
 
