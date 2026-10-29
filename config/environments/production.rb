@@ -6,8 +6,8 @@ Rails.application.configure do
   config.consider_all_requests_local = false
   config.public_file_server.headers = { "cache-control" => "public, max-age=#{1.year.to_i}" }
 
-  # Active Storage: MinIO (S3-compatible)
-  config.active_storage.service = :minio
+  # Active Storage: an S3-compatible server (MINIO_*), or, with FILE_STORAGE=disk (the lite install), a folder on the disk
+  config.active_storage.service = ENV["FILE_STORAGE"] == "disk" ? :disk : :minio
 
   # SSL
   config.assume_ssl  = true

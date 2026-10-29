@@ -1,6 +1,7 @@
 # Two separate stacks: docker-compose.yml is for development, docker-compose.prod.yml is a production install
 # (docs/install.md). The targets that start with prod, plus backup and restore, are the production one.
-PROD = docker compose -f docker-compose.prod.yml
+# bin/compose is docker compose with this install's file: docker-compose.prod.yml, or the one COMPOSE_FILE names in .env (the lite install).
+PROD = bin/compose
 
 .PHONY: dev stop logs prod prod-stop prod-logs prod-status backup restore upgrade rollback build-web test-web typecheck-web migrate seed demo-data console
 

@@ -76,6 +76,12 @@ docker compose -f docker-compose.prod.yml exec api bin/rails "fixflow:reset_two_
 
 **An upgrade stopped.** `make upgrade` stops at the first problem, before changing anything: the server must be running and the files git tracks must be unedited. If the new version starts and then says a setting is missing, add it to `.env` and run `make prod`. To go back, `make rollback CONFIRM=yes` restores the database from the backup the upgrade took, which loses what was entered since. See [Upgrading and rolling back](upgrading.md).
 
+## The lite install
+
+**Photos cannot be saved, the backup fails, or the database stops.** On the [lite install](lite.md) the database, Redis, the uploaded files and the backups all share the server's disk, and a full disk stops all of them. `df -h` shows how full it is and `docker system df` how much Docker holds. Database backups older than 30 days are deleted by the nightly job; the copy of the uploaded files in the `backups` volume is never deleted (an older backup may still need a file), so it only grows.
+
+**System Health says the sensor broker is not set up.** That is right: the lite install has none. Sensors send readings over HTTP (see [Sensors and IoT](iot.md)).
+
 ## Still stuck
 
 Collect the output of `ps`, the last 100 lines of the failing service's log and your FixFlow version (System Health, or the `VERSION` file), remove anything secret, and [open an issue](https://github.com/GetFixFlow/fixflow/issues). Do not post `.env`.

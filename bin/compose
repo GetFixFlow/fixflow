@@ -1,0 +1,7 @@
+#!/bin/sh
+# `docker compose` for this install: the file named by COMPOSE_FILE (in the environment or in .env; the lite install sets
+# it to docker-compose.lite.yml), else docker-compose.prod.yml. Make, bin/upgrade and bin/rollback use it, so they work for
+# either install. Anything you type after it goes to docker compose:  bin/compose ps
+cd "$(dirname "$0")/.."
+file=${COMPOSE_FILE:-$(sed -n 's/^COMPOSE_FILE=//p' .env 2>/dev/null | tail -n 1 | tr -d "\"'\r")}
+exec docker compose -f "${file:-docker-compose.prod.yml}" "$@"

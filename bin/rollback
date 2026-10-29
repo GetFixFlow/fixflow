@@ -10,7 +10,10 @@ die() { echo "bin/rollback: $*" >&2; exit 1; }
 
 main() {
   cd "$(dirname "$0")/.."
-  PROD="docker compose -f docker-compose.prod.yml"
+  # The compose file of this install: COMPOSE_FILE (in the environment or in .env; the lite install sets it), else the full
+  # install's. Worked out here, not by bin/compose, because the checkout below can bring back a version without that script.
+  COMPOSE_FILE=${COMPOSE_FILE:-$(sed -n 's/^COMPOSE_FILE=//p' .env 2>/dev/null | tail -n 1 | tr -d "\"'\r")}
+  PROD="docker compose -f ${COMPOSE_FILE:-docker-compose.prod.yml}"
   [ -f .fixflow_upgrade ] || die "There is no record of an upgrade here (.fixflow_upgrade), so there is nothing to go back to."
   # shellcheck disable=SC1091
   . ./.fixflow_upgrade

@@ -120,6 +120,19 @@ RSpec.describe FixflowConfigCheck do
       expect(about("MQTT_PORT", "MQTT_HOST" => "mqtt", "MQTT_PORT" => "0").first.level).to eq(:error)
     end
 
+    it "accepts FILE_STORAGE=disk (the lite install) with no storage server settings, and refuses any other word" do
+      expect(problems("FILE_STORAGE" => "disk")).to eq([])
+      expect(about("FILE_STORAGE", "FILE_STORAGE" => "disk", "MINIO_ENDPOINT" => "http://s3:8333").first)
+        .to have_attributes(level: :warning, message: include("MINIO_* settings are not used"))
+      expect(about("FILE_STORAGE", "FILE_STORAGE" => "folder").map(&:level)).to eq([:error])
+      expect(about("FILE_STORAGE", "FILE_STORAGE" => "s3", "MINIO_ENDPOINT" => "minio:9000")).to be_empty
+      expect(about("MINIO_ENDPOINT", "FILE_STORAGE" => "s3", "MINIO_ENDPOINT" => "minio:9000").map(&:level)).to eq([:error])
+    end
+
+    it "still checks the other S3 storage for backups when the files are on disk" do
+      expect(about("BACKUP_S3_SECRET_KEY", "FILE_STORAGE" => "disk", "BACKUP_S3_ACCESS_KEY" => "key").first.level).to eq(:error)
+    end
+
     it "warns when the update check is switched with a word that does not switch it off" do
       warned = about("FIXFLOW_UPDATE_CHECK", "FIXFLOW_UPDATE_CHECK" => "off").first
       expect(warned).to have_attributes(level: :warning, message: include("only `false` turns the update check off"))

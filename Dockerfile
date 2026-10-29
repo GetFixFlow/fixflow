@@ -38,7 +38,10 @@ WORKDIR /app
 COPY --from=builder /usr/local/bundle /usr/local/bundle
 COPY --from=builder /app .
 
+# storage and backups are where the lite install (docker-compose.lite.yml) mounts its volumes: made here, owned by the
+# user the server runs as, so that a new volume starts with that owner.
 RUN adduser -D -u 1000 fixflow && \
+    mkdir -p /app/storage /app/backups && \
     chown -R fixflow:fixflow /app
 
 USER fixflow
