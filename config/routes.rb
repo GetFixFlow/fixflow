@@ -13,6 +13,11 @@ Rails.application.routes.draw do
       registrations: "api/v1/auth/registrations"
     }
 
+  # The second step of signing in for a person with two-factor sign-in on (the first, sign_in, answers with a challenge)
+  devise_scope :user do
+    post "api/v1/auth/two_factor", to: "api/v1/auth/two_factor_sessions#create"
+  end
+
   namespace :api do
     namespace :v1 do
       get "auth/me", to: "auth/profile#show"
@@ -47,6 +52,11 @@ Rails.application.routes.draw do
       # The signed-in user's own details and password
       resource :profile, only: %i[show update], controller: "profile" do
         patch :password
+      end
+      # Two-factor sign-in with an authenticator app: set it up, switch it off, get new recovery codes
+      resource :two_factor, path: "profile/two_factor", only: %i[show create destroy], controller: "two_factor" do
+        post :confirm
+        post :recovery_codes
       end
       get "health",  to: "health#show"
       get "system_health", to: "system_health#show"
@@ -158,6 +168,7 @@ Rails.application.routes.draw do
         member do
           post  :resend_invitation
           post  :reset_password
+          post  :reset_two_factor
           patch :deactivate
           patch :reactivate
           patch :role

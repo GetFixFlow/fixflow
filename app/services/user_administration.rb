@@ -23,6 +23,19 @@ class UserAdministration
       guarded(user) { user.update!(role: role.to_s) }
     end
 
+    # For a lost phone: switches the person's two-factor sign-in off and signs them out everywhere (they sign in with
+    # their password and, if the company requires it, set it up again).
+    def reset_two_factor!(user, by:)
+      guard_self!(user, by, "reset your own two-factor sign-in here (use Settings, Security)")
+      unless user.two_factor_enabled? || user.two_factor_pending?
+        raise Refused, "#{user.full_name} does not have two-factor sign-in on."
+      end
+
+      user.disable_two_factor!
+      user.update!(jti: SecureRandom.uuid)
+      ActivityLogService.log(action: "user.two_factor_reset", resource: user, user: by)
+    end
+
     def delete!(user, by:)
       guard_self!(user, by, "delete your own account")
       guarded(user) { user.destroy! }

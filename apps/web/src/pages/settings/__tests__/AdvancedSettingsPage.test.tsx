@@ -104,6 +104,52 @@ describe('AdvancedSettingsPage', () => {
     expect(await screen.findByRole('link', { name: /Open System Health/ })).toHaveAttribute('href', '/settings/system-health')
   })
 
+  describe('requiring two-factor sign-in', () => {
+    const REQUIRE = { name: /require two-factor sign-in for everyone/i }
+
+    /** A server that remembers what was saved. */
+    function serveTwoFactor(required: boolean) {
+      let current = required
+      server.use(
+        http.get('/api/v1/organization_settings', () =>
+          HttpResponse.json({ organization: { public_requests_enabled: true, require_two_factor: current } })),
+        http.patch('/api/v1/organization_settings', async ({ request }) => {
+          const body = (await request.json()) as { organization: { require_two_factor: boolean } }
+          patches.push(body)
+          current = body.organization.require_two_factor
+          return HttpResponse.json({ organization: {} })
+        }),
+      )
+    }
+
+    it('shows it as off by default, and turns it on by saving the company setting', async () => {
+      serveTwoFactor(false)
+      renderPage()
+      const toggle = await screen.findByRole('switch', REQUIRE)
+      await waitFor(() => expect(toggle).toBeEnabled())
+      expect(toggle).not.toBeChecked()
+      expect(screen.getByText('Off: each person chooses whether to use it.')).toBeInTheDocument()
+
+      await userEvent.click(toggle)
+
+      await waitFor(() => expect(toggle).toBeChecked())
+      expect(patches).toEqual([{ organization: { require_two_factor: true } }])
+      expect(screen.getByText(/On: everyone needs an authenticator app/)).toBeInTheDocument()
+    })
+
+    it('shows it as on, and turns it off', async () => {
+      serveTwoFactor(true)
+      renderPage()
+      const toggle = await screen.findByRole('switch', REQUIRE)
+      await waitFor(() => expect(toggle).toBeChecked())
+
+      await userEvent.click(toggle)
+
+      await waitFor(() => expect(toggle).not.toBeChecked())
+      expect(patches).toEqual([{ organization: { require_two_factor: false } }])
+    })
+  })
+
   it('is for administrators only', () => {
     serve(true)
     renderPage('manager')

@@ -3,8 +3,9 @@ module Api
     class UsersController < Api::V1::BaseController
       before_action :require_manager!, only: %i[index update]
       before_action :require_admin!,   only: %i[invite resend_invitation destroy deactivate reactivate role
-                                                bulk_role bulk_deactivate reset_password]
-      before_action :set_user, only: %i[show update destroy resend_invitation deactivate reactivate role reset_password]
+                                                bulk_role bulk_deactivate reset_password reset_two_factor]
+      before_action :set_user, only: %i[show update destroy resend_invitation deactivate reactivate role reset_password
+                                        reset_two_factor]
 
       rescue_from UserAdministration::Refused do |error|
         render_error(error.message, :unprocessable_entity, code: "USER_ACTION_REFUSED")
@@ -49,6 +50,12 @@ module Api
       def reactivate
         UserAdministration.reactivate!(@user)
         render json: { user: UserBlueprint.render_as_hash(@user) }
+      end
+
+      # POST /api/v1/users/:id/reset_two_factor
+      def reset_two_factor
+        UserAdministration.reset_two_factor!(@user, by: current_user)
+        render json: { user: UserBlueprint.render_as_hash(@user.reload) }
       end
 
       # POST /api/v1/users/:id/reset_password

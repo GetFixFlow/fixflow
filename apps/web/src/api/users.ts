@@ -12,6 +12,9 @@ export const usersApi = {
   resetPassword: (id: number) =>
     apiClient.post<{ reset_url: string; email_sent: boolean }>(`/users/${id}/reset_password`),
 
+  /** For a lost phone: switches the person's two-factor sign-in off and signs them out everywhere. */
+  resetTwoFactor: (id: number) => apiClient.post<{ user: User }>(`/users/${id}/reset_two_factor`),
+
   resendInvitation: (id: number, sendEmail = false) =>
     apiClient.post<InviteResult>(`/users/${id}/resend_invitation`, { user: { send_welcome: sendEmail } }),
 

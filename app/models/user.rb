@@ -10,6 +10,7 @@ class User < ApplicationRecord
   INVITATION_TTL = 7.days
 
   include PasswordReset
+  include TwoFactorAuth
   include Auditable
 
   # A whitelist: sign-in counters, tokens and preferences change all the time and are not edits. The password is

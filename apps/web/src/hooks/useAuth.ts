@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { authApi } from '@/api'
 import { useAuthStore } from '@/stores/authStore'
 import { queryClient } from '@/lib/queryClient'
-import type { LoginPayload, RegisterPayload } from '@/types'
+import type { LoginPayload, RegisterPayload, User } from '@/types'
 
 export function useCurrentUser() {
   const { isAuthenticated } = useAuthStore()
@@ -71,19 +71,38 @@ export function useResetPassword() {
   })
 }
 
-export function useLogin() {
+/** Signed in: keep the token, greet, and go on (to the set-up screen first when the company requires two-factor). */
+function useFinishSignIn() {
   const { setAuth } = useAuthStore()
   const navigate = useNavigate()
 
+  return ({ token, user }: { token: string; user: User }) => {
+    setAuth(user, token)
+    toast.success(`Welcome back, ${user.full_name}!`)
+    navigate(user.two_factor_setup_required ? '/two-factor-setup' : '/dashboard')
+  }
+}
+
+/** `onChallenge` is called when the password was right but a code from the authenticator app is needed too. */
+export function useLogin({ onChallenge }: { onChallenge?: (challenge: string) => void } = {}) {
+  const finish = useFinishSignIn()
+
   return useMutation({
     mutationFn: (payload: LoginPayload) => authApi.login(payload),
-    onSuccess: ({ token, user }) => {
-      setAuth(user, token)
-      toast.success(`Welcome back, ${user.full_name}!`)
-      navigate('/dashboard')
-    },
+    onSuccess: (result) => (result.twoFactor ? onChallenge?.(result.challenge) : finish(result)),
     onError: (error: AxiosError<{ error?: string }>) =>
       toast.error(error.response?.data?.error ?? 'Invalid email or password.'),
+  })
+}
+
+export function useVerifyTwoFactor() {
+  const finish = useFinishSignIn()
+
+  return useMutation({
+    mutationFn: ({ challenge, code }: { challenge: string; code: string }) => authApi.verifyTwoFactor(challenge, code),
+    onSuccess: finish,
+    // The message comes from the server: a wrong code, too many wrong codes, or a challenge that has run out.
+    onError: (error: AxiosError<{ error?: string }>) => toast.error(error.response?.data?.error ?? 'Could not check the code. Try again.'),
   })
 }
 

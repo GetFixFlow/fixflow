@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -5,7 +6,7 @@ import { Link, Navigate } from 'react-router-dom'
 import { Zap } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { useLogin, useSetupStatus } from '@/hooks/useAuth'
+import { useLogin, useSetupStatus, useVerifyTwoFactor } from '@/hooks/useAuth'
 import { useBranding } from '@/hooks/useSettings'
 
 const schema = z.object({
@@ -22,7 +23,11 @@ export function LoginPage() {
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
-  const { mutate: login, isPending } = useLogin()
+  // Set once the password was right for a person who signs in with an authenticator app too.
+  const [challenge, setChallenge] = useState<string | null>(null)
+  const [code, setCode] = useState('')
+  const { mutate: login, isPending } = useLogin({ onChallenge: setChallenge })
+  const { mutate: verify, isPending: verifying, error: codeError } = useVerifyTwoFactor()
   const { data: setup } = useSetupStatus()
   const { data: branding } = useBranding()
 
@@ -49,6 +54,36 @@ export function LoginPage() {
         </div>
 
         <div className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          {challenge ? (
+            <form
+              onSubmit={(event) => { event.preventDefault(); verify({ challenge, code }) }}
+              className="space-y-4"
+            >
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Enter the 6-digit code from your authenticator app. If you have lost your phone, enter one of your recovery codes instead.
+              </p>
+              <Input
+                id="code"
+                label="Code"
+                autoComplete="one-time-code"
+                autoFocus
+                placeholder="123456"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+              />
+              <Button type="submit" className="w-full" loading={verifying} disabled={code.trim().length < 6}>
+                Verify
+              </Button>
+              <button
+                type="button"
+                className="block w-full text-center text-sm text-brand-600 hover:underline"
+                onClick={() => { setChallenge(null); setCode('') }}
+              >
+                {codeError ? 'Start again' : 'Back to sign in'}
+              </button>
+            </form>
+          ) : (
+          <>
           <form onSubmit={handleSubmit((v) => login(v))} className="space-y-4">
             <Input
               id="email"
@@ -78,6 +113,8 @@ export function LoginPage() {
               Forgot your password?
             </Link>
           </p>
+          </>
+          )}
           <p className="mt-2 text-center text-sm text-gray-500 dark:text-gray-400">
             Need an account? Ask your administrator to invite you.
           </p>

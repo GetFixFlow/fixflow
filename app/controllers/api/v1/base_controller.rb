@@ -6,6 +6,7 @@ module Api
 
       before_action :authenticate_user!
       before_action :set_current_context
+      before_action :require_two_factor_when_company_does
       around_action :use_organization_time_zone
 
       # ── Error handling ────────────────────────────────────────────────────
@@ -57,6 +58,15 @@ module Api
       end
 
       private
+
+      # A company can require two-factor sign-in (Settings, Advanced). Until a person has set it up they can reach only
+      # the set-up screens; the controllers for those skip this.
+      def require_two_factor_when_company_does
+        return unless current_user && current_organization&.require_two_factor? && !current_user.two_factor_enabled?
+
+        render_error("Your company requires two-factor sign-in. Set it up under Settings, Security.", :forbidden,
+                     code: "TWO_FACTOR_SETUP_REQUIRED")
+      end
 
       def set_current_context
         Current.user       = current_user

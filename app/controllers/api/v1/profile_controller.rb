@@ -3,6 +3,8 @@ module Api
     # The signed-in user's own profile. Email stays read-only here: changing it would
     # need a confirmation step this app does not have yet.
     class ProfileController < Api::V1::BaseController
+      skip_before_action :require_two_factor_when_company_does, only: :show
+
       # GET /api/v1/profile
       def show
         render json: { user: serialized_user }
