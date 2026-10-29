@@ -70,13 +70,13 @@ ok "/cable upgrades for this address and refuses another"
 
 JSON='Content-Type: application/json'
 curl -s -X POST $BASE/api/v1/auth/sign_up -H "$JSON" \
-  -d '{"user":{"email":"admin@check.test","password":"password123","password_confirmation":"password123","first_name":"Check","last_name":"Admin","organization_name":"Check Co"}}' \
+  -d '{"user":{"email":"admin@check.test","password":"Blue-Ladder-4721-Kite","password_confirmation":"Blue-Ladder-4721-Kite","first_name":"Check","last_name":"Admin","organization_name":"Check Co"}}' \
   | grep -q 'Account created' || fail "first-run setup"
 [ "$(curl -s -o /dev/null -w '%{http_code}' -X POST $BASE/api/v1/auth/sign_up -H "$JSON" \
-  -d '{"user":{"email":"two@check.test","password":"password123","password_confirmation":"password123","first_name":"B","last_name":"B","organization_name":"Two"}}')" = "403" ] \
+  -d '{"user":{"email":"two@check.test","password":"Blue-Ladder-4721-Kite","password_confirmation":"Blue-Ladder-4721-Kite","first_name":"B","last_name":"B","organization_name":"Two"}}')" = "403" ] \
   || fail "a second sign-up was not refused"
 TOKEN=$(curl -s -D - -o /dev/null -X POST $BASE/api/v1/auth/sign_in -H "$JSON" \
-  -d '{"user":{"email":"admin@check.test","password":"password123"}}' | grep -i '^authorization:' | sed 's/^[Aa]uthorization: //' | tr -d '\r')
+  -d '{"user":{"email":"admin@check.test","password":"Blue-Ladder-4721-Kite"}}' | grep -i '^authorization:' | sed 's/^[Aa]uthorization: //' | tr -d '\r')
 [ -n "$TOKEN" ] || fail "sign-in returned no token"
 ok "first-run setup, and sign-in"
 
@@ -123,7 +123,7 @@ for _ in $(seq 1 40); do
   sleep 3
 done
 TOKEN=$(curl -s -D - -o /dev/null -X POST $BASE/api/v1/auth/sign_in -H "$JSON" \
-  -d '{"user":{"email":"admin@check.test","password":"password123"}}' | grep -i '^authorization:' | sed 's/^[Aa]uthorization: //' | tr -d '\r')
+  -d '{"user":{"email":"admin@check.test","password":"Blue-Ladder-4721-Kite"}}' | grep -i '^authorization:' | sed 's/^[Aa]uthorization: //' | tr -d '\r')
 [ -n "$TOKEN" ] || fail "cannot sign in after the restore"
 curl -s $BASE/api/v1/locations -H "Authorization: $TOKEN" | grep -q 'Made after the backup' && fail "the restore did not remove what was added after the backup"
 ok "restore put the database back as it was at the backup"

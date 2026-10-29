@@ -11,7 +11,14 @@ Devise.setup do |config|
   config.stretches = Rails.env.test? ? 1 : 12
   config.reconfirmable = false
   config.expire_all_remember_me_on_sign_out = true
-  config.password_length = 8..128
+  config.password_length = 10..128
+  # Ten wrong passwords for one account lock it for 30 minutes (it opens by itself, or an administrator unlocks it).
+  # This is on top of the throttle per address (Rack::Attack), which a guesser using many addresses gets past.
+  config.lock_strategy = :failed_attempts
+  config.unlock_strategy = :time
+  config.maximum_attempts = 10
+  config.unlock_in = 30.minutes
+  config.last_attempt_warning = false
   config.email_regexp = /\A[^@\s]+@[^@\s]+\z/
   config.reset_password_within = 6.hours
   config.sign_out_via = :delete

@@ -9,6 +9,8 @@ class DemoDataService
 
   DEMO_SUBDOMAIN = "demo".freeze
   DEMO_PASSWORD  = "password123".freeze
+  # A well-known password on purpose, so the password rules (PasswordPolicy) are switched off for these accounts.
+  DEMO_ACCOUNT   = { password: DEMO_PASSWORD, password_confirmation: DEMO_PASSWORD, skip_password_policy: true }.freeze
   DEMO_LOGINS    = %w[admin@demo.com manager@demo.com tech1@demo.com tech2@demo.com].freeze
 
   def self.load!(confirmed: false)
@@ -21,25 +23,25 @@ class DemoDataService
       end
 
       admin = User.find_or_create_by!(email: "admin@demo.com") do |u|
-        u.password = u.password_confirmation = "password123"
+        u.assign_attributes(DEMO_ACCOUNT)
         u.first_name = "Alice"; u.last_name = "Admin"
         u.role = :admin; u.organization = org
       end
 
       manager = User.find_or_create_by!(email: "manager@demo.com") do |u|
-        u.password = u.password_confirmation = "password123"
+        u.assign_attributes(DEMO_ACCOUNT)
         u.first_name = "Bob"; u.last_name = "Manager"
         u.role = :manager; u.organization = org
       end
 
       tech1 = User.find_or_create_by!(email: "tech1@demo.com") do |u|
-        u.password = u.password_confirmation = "password123"
+        u.assign_attributes(DEMO_ACCOUNT)
         u.first_name = "Carlos"; u.last_name = "Tech"
         u.role = :technician; u.organization = org
       end
 
       tech2 = User.find_or_create_by!(email: "tech2@demo.com") do |u|
-        u.password = u.password_confirmation = "password123"
+        u.assign_attributes(DEMO_ACCOUNT)
         u.first_name = "Diana"; u.last_name = "Tech"
         u.role = :technician; u.organization = org
       end

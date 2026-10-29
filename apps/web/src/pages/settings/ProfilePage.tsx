@@ -47,7 +47,7 @@ const profileSchema = z.object({
 const passwordSchema = z
   .object({
     current_password: z.string().min(1, 'Required'),
-    password: z.string().min(8, 'At least 8 characters'),
+    password: z.string().min(10, 'At least 10 characters'),
     password_confirmation: z.string(),
   })
   .refine((d) => d.password === d.password_confirmation, {
@@ -99,10 +99,10 @@ export function ProfilePage() {
   const { score: pwScore, label: pwLabel, color: pwColor } = passwordStrength(newPw)
 
   const pwReqs = [
-    { label: 'At least 8 characters', met: newPw.length >= 8 },
-    { label: 'Contains uppercase letter', met: /[A-Z]/.test(newPw) },
-    { label: 'Contains number', met: /[0-9]/.test(newPw) },
-    { label: 'Contains special character', met: /[^A-Za-z0-9]/.test(newPw) },
+    { label: 'At least 10 characters (required)', met: newPw.length >= 10 },
+    { label: 'An uppercase letter (stronger, not required)', met: /[A-Z]/.test(newPw) },
+    { label: 'A number (stronger, not required)', met: /[0-9]/.test(newPw) },
+    { label: 'A symbol (stronger, not required)', met: /[^A-Za-z0-9]/.test(newPw) },
   ]
 
   const onSaveProfile = form.handleSubmit((data) => {
@@ -284,6 +284,9 @@ export function ProfilePage() {
                     </div>
                   ))}
                 </div>
+                <p className="text-xs text-gray-500">
+                  Common passwords, and ones made from your name or email address, are refused when you save.
+                </p>
               </div>
             )}
 

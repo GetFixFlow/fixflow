@@ -10,7 +10,7 @@ import { useAcceptInvitation, useInvitation } from '@/hooks/useAuth'
 
 const schema = z
   .object({
-    password: z.string().min(8, 'Password must be at least 8 characters'),
+    password: z.string().min(10, 'Password must be at least 10 characters'),
     password_confirmation: z.string(),
   })
   .refine((v) => v.password === v.password_confirmation, {
@@ -87,6 +87,7 @@ export function AcceptInvitePage() {
             error={errors.password?.message}
             {...register('password')}
           />
+            <p className="-mt-2 text-xs text-gray-500">10 or more characters. A few words in a row work well. Common passwords, and ones made from your name or email address, are refused.</p>
           <Input
             id="password_confirmation"
             type="password"

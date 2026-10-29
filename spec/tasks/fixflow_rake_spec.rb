@@ -13,7 +13,7 @@ RSpec.describe "fixflow rake tasks", type: :task do
         expect {
           Rake::Task["fixflow:create_admin"].execute(
             email: "tasktest@example.com",
-            password: "password123",
+            password: "Blue-Ladder-4721-Kite",
             org_name: "Task Test Org"
           )
         }.to change(Organization, :count).by(1).and change(User, :count).by(1)
@@ -46,6 +46,21 @@ RSpec.describe "fixflow rake tasks", type: :task do
         .to raise_error(SystemExit).and output(/no user with the email/).to_stderr
       expect { Rake::Task["fixflow:reset_two_factor"].execute(email: "plain@example.test") }
         .to raise_error(SystemExit).and output(/does not have two-factor/).to_stderr
+    end
+  end
+
+  describe "fixflow:create_admin without a good password" do
+    it "asks for one instead of creating an account with a default" do
+      expect { Rake::Task["fixflow:create_admin"].execute(email: "a@example.test", org_name: "X") }
+        .to raise_error(SystemExit).and output(/Give the password/).to_stderr
+      expect(User.count).to eq(0)
+    end
+
+    it "refuses a weak one with the reason" do
+      ActsAsTenant.without_tenant do
+        expect { Rake::Task["fixflow:create_admin"].execute(email: "a@example.test", password: "password123", org_name: "X") }
+          .to raise_error(ActiveRecord::RecordInvalid, /too common/)
+      end
     end
   end
 

@@ -26,7 +26,11 @@ module Api
           return unless credentials.respond_to?(:[]) && credentials[:email].is_a?(String) && credentials[:password].is_a?(String)
 
           user = User.find_for_authentication(email: credentials[:email])
-          return unless user&.two_factor_enabled? && user.valid_password?(credentials[:password]) && user.active_for_authentication?
+          return unless user&.two_factor_enabled? && user.valid_password?(credentials[:password])
+
+          # A right password counts for the lock as it does for anyone (it resets the count of wrong ones). A locked or
+          # deactivated account carries on to Devise, which refuses it with the reason. A wrong password is counted there.
+          return unless user.valid_for_authentication? { true } && user.active_for_authentication?
 
           render json: { two_factor_required: true, challenge: TwoFactorChallenge.issue(user),
                          message: "Enter the code from your authenticator app." }

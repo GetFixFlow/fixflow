@@ -62,6 +62,19 @@ describe('SetupPage', () => {
     expect(await screen.findByText('login screen')).toBeInTheDocument()
   })
 
+  it('asks for ten characters, and says what else is refused', async () => {
+    renderPage()
+    await screen.findByRole('heading', { name: /set up fixflow/i })
+    expect(screen.getByText(/10 or more characters/)).toBeInTheDocument()
+    expect(screen.getByText(/Common passwords, and ones made from your name or email address, are refused/)).toBeInTheDocument()
+
+    await fillForm({ Password: 'ninechars', 'Confirm password': 'ninechars' })
+    await userEvent.click(screen.getByRole('button', { name: /finish setup/i }))
+
+    expect(await screen.findByText('Password must be at least 10 characters')).toBeInTheDocument()
+    expect(authApi.register).not.toHaveBeenCalled()
+  })
+
   it('rejects mismatched passwords without calling the API', async () => {
     renderPage()
     await screen.findByLabelText('Company name')

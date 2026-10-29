@@ -53,6 +53,8 @@ export interface User {
   invitation_accepted_at?: string | null
   /** Signs in with an authenticator app as well as the password. */
   two_factor_enabled?: boolean
+  /** Too many wrong passwords: locked for 30 minutes, or until an administrator unlocks it. */
+  locked?: boolean
   /** The company requires two-factor sign-in and this person has not set it up yet. */
   two_factor_setup_required?: boolean
 }

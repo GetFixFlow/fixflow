@@ -91,6 +91,18 @@ export function useResetUserPassword() {
   })
 }
 
+export function useUnlockUser() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: usersApi.unlock,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['users'] })
+      toast.success('Account unlocked. They can sign in now.')
+    },
+    onError: failureMessage('Could not unlock the account.'),
+  })
+}
+
 export function useResetUserTwoFactor() {
   const qc = useQueryClient()
   return useMutation({

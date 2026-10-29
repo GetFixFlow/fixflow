@@ -2,3 +2,4 @@ en:
   devise:
     failure:
       deactivated: "Your account has been deactivated. Contact your administrator."
+      locked: "Too many wrong passwords. Try again in 30 minutes, or ask an administrator to unlock your account."
