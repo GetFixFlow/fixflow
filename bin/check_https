@@ -1,0 +1,136 @@
+#!/bin/sh
+# Starts the production stack with the HTTPS front door (the `https` service of docker-compose.prod.yml, Caddy) and
+# checks it for real: a certificate it was given is the one served (HTTPS_MODE=own-certificate), the web app, the API
+# and a WebSocket work over it, plain HTTP is sent to HTTPS, the plain-HTTP door is closed to the network, and
+# HTTPS_MODE=internal serves a certificate of Caddy's own authority. What it cannot check is a Let's Encrypt
+# certificate (HTTPS_MODE=automatic for a real domain): that needs a name on the internet. It takes several minutes
+# (the images are built). CI runs it; it removes everything it started.
+#
+# It writes a .env and a certs folder and deletes the stack's volumes, so it refuses to run where a .env already
+# exists: use a fresh clone, not your own working copy.
+set -eu
+cd "$(dirname "$0")/.."
+
+if [ -e .env ] || [ -e certs ]; then
+  echo "bin/check_https: there is a .env or a certs folder here. Run this in a fresh clone; it would replace them." >&2
+  exit 2
+fi
+
+SECURE_PORT=8443
+REDIRECT_PORT=8081
+PLAIN_PORT=8088
+BASE="https://localhost:$SECURE_PORT"
+COMPOSE="docker compose -f docker-compose.prod.yml"
+
+cleanup() {
+  status=$?
+  if [ "$status" != 0 ]; then
+    echo "---- container status" >&2
+    $COMPOSE ps >&2 || true
+    echo "---- last log lines" >&2
+    $COMPOSE logs --tail 40 https api >&2 || true
+  fi
+  $COMPOSE down -v >/dev/null 2>&1 || true
+  rm -rf .env certs
+  exit "$status"
+}
+trap cleanup EXIT
+
+fail() { echo "FAIL: $*" >&2; exit 1; }
+ok() { echo "ok:   $*"; }
+
+# The certificate that stands in for one a company gives out.
+mkdir certs
+cat > certs/openssl.cnf <<'CNF'
+[req]
+distinguished_name = dn
+x509_extensions = ext
+prompt = no
+[dn]
+CN = localhost
+[ext]
+subjectAltName = DNS:localhost
+CNF
+openssl req -x509 -newkey rsa:2048 -nodes -days 2 -config certs/openssl.cnf -keyout certs/fixflow.key -out certs/fixflow.crt 2>/dev/null \
+  || fail "making a test certificate"
+rm certs/openssl.cnf
+
+cp .env.example .env
+# Later lines win in an env file, so these replace the empty ones above without editing the file.
+{
+  echo
+  echo "APP_URL=$BASE"
+  echo "ALLOWED_ORIGINS=$BASE"
+  echo "COMPOSE_PROFILES=https"
+  echo "HTTPS_DOMAIN=localhost"
+  echo "HTTPS_MODE=own-certificate"
+  echo "HTTPS_PORT=$SECURE_PORT"
+  echo "HTTPS_HTTP_PORT=$REDIRECT_PORT"
+  echo "HTTP_PORT=$PLAIN_PORT"
+  echo "HTTP_BIND=127.0.0.1"
+  echo "SECRET_KEY_BASE=$(openssl rand -hex 64)"
+  echo "DEVISE_JWT_SECRET_KEY=$(openssl rand -hex 48)"
+  echo "DB_PASSWORD=$(openssl rand -hex 24)"
+  echo "REDIS_PASSWORD=$(openssl rand -hex 24)"
+  echo "MINIO_ACCESS_KEY=$(openssl rand -hex 10)"
+  echo "MINIO_SECRET_KEY=$(openssl rand -hex 24)"
+  echo "MQTT_PASSWORD=$(openssl rand -hex 24)"
+} >> .env
+
+$COMPOSE up -d --build --wait --wait-timeout 900 || fail "the stack with HTTPS did not come up healthy"
+ok "all services healthy, the https service too"
+
+fingerprint_served() {
+  openssl s_client -connect "localhost:$SECURE_PORT" -servername localhost </dev/null 2>/dev/null | openssl x509 -noout -fingerprint -sha256
+}
+[ "$(fingerprint_served)" = "$(openssl x509 -in certs/fixflow.crt -noout -fingerprint -sha256)" ] \
+  || fail "the certificate served is not the one in certs/"
+ok "HTTPS_MODE=own-certificate serves the certificate from certs/"
+
+[ "$(curl -sk -o /dev/null -w '%{http_code}' $BASE/healthz)" = "200" ] || fail "/healthz over HTTPS"
+curl -sk $BASE/api/v1/health | grep -q '"status":"ok"' || fail "/api/v1/health over HTTPS"
+curl -sk $BASE/ | grep -q 'id="root"' || fail "the web app is not served over HTTPS"
+curl -sk -D - -o /dev/null $BASE/ | grep -qi '^strict-transport-security:' || fail "no Strict-Transport-Security header over HTTPS"
+curl -sk $BASE/api/v1/setup/status | grep -q '"setup_required":true' || fail "setup status over HTTPS"
+ok "the web app and the API are served over HTTPS, with HSTS"
+
+# Plain HTTP on the HTTPS service's own port is sent to HTTPS.
+REDIRECT=$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' "http://localhost:$REDIRECT_PORT/")
+case "$REDIRECT" in 30[1278]\ https://localhost*) ;; *) fail "plain HTTP was not sent to HTTPS (got: $REDIRECT)" ;; esac
+ok "plain HTTP is redirected to HTTPS"
+
+# The plain-HTTP door answers on this machine only.
+$COMPOSE port web 80 | grep -q '^127\.0\.0\.1:' || fail "the plain-HTTP door is not bound to 127.0.0.1 (got: $($COMPOSE port web 80))"
+ok "the plain-HTTP door is closed to the network"
+
+UPGRADE=$(curl -sk --http1.1 -i -m 3 -H 'Connection: Upgrade' -H 'Upgrade: websocket' -H 'Sec-WebSocket-Version: 13' \
+  -H 'Sec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw==' -H "Origin: $BASE" $BASE/cable 2>/dev/null | head -1 || true)
+echo "$UPGRADE" | grep -q ' 101 ' || fail "/cable did not upgrade to a WebSocket over HTTPS (got: $UPGRADE)"
+FOREIGN=$(curl -sk --http1.1 -i -m 3 -H 'Connection: Upgrade' -H 'Upgrade: websocket' -H 'Sec-WebSocket-Version: 13' \
+  -H 'Sec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw==' -H 'Origin: http://evil.example' $BASE/cable 2>/dev/null | head -1 || true)
+echo "$FOREIGN" | grep -q ' 101 ' && fail "/cable accepted a WebSocket from another origin"
+ok "/cable upgrades over HTTPS for this address and refuses another"
+
+JSON='Content-Type: application/json'
+curl -sk -X POST $BASE/api/v1/auth/sign_up -H "$JSON" \
+  -d '{"user":{"email":"admin@check.test","password":"password123","password_confirmation":"password123","first_name":"Check","last_name":"Admin","organization_name":"Check Co"}}' \
+  | grep -q 'Account created' || fail "first-run setup over HTTPS"
+TOKEN=$(curl -sk -D - -o /dev/null -X POST $BASE/api/v1/auth/sign_in -H "$JSON" \
+  -d '{"user":{"email":"admin@check.test","password":"password123"}}' | grep -i '^authorization:' | sed 's/^[Aa]uthorization: //' | tr -d '\r')
+[ -n "$TOKEN" ] || fail "sign-in over HTTPS returned no token"
+curl -sk $BASE/api/v1/locations -H "Authorization: $TOKEN" | grep -q '"data"\|\[' || fail "an authenticated request over HTTPS"
+ok "first-run setup and sign-in work over HTTPS"
+
+# A different mode, same stack: Caddy's own authority signs the certificate.
+sed -i.bak 's/^HTTPS_MODE=own-certificate$/HTTPS_MODE=internal/' .env && rm -f .env.bak
+$COMPOSE up -d --wait --wait-timeout 300 || fail "the https service did not come up in internal mode"
+for _ in $(seq 1 20); do
+  ISSUER=$(openssl s_client -connect "localhost:$SECURE_PORT" -servername localhost </dev/null 2>/dev/null | openssl x509 -noout -issuer 2>/dev/null || true)
+  echo "$ISSUER" | grep -q 'Caddy Local Authority' && break
+  sleep 2
+done
+echo "$ISSUER" | grep -q 'Caddy Local Authority' || fail "HTTPS_MODE=internal did not serve a certificate from Caddy's authority (issuer: $ISSUER)"
+[ "$(curl -sk -o /dev/null -w '%{http_code}' $BASE/healthz)" = "200" ] || fail "/healthz in internal mode"
+ok "HTTPS_MODE=internal serves a certificate from Caddy's own authority"
+
+echo "HTTPS works."

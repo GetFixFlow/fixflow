@@ -1,0 +1,7 @@
+# HTTPS_MODE=internal: for a network with no certificate to use. Caddy makes its own certificate authority and signs a
+# certificate for HTTPS_DOMAIN with it. Browsers and phones refuse it until the authority's root certificate is
+# installed on each of them (README, "HTTPS"), so use it only when you can do that.
+{$HTTPS_DOMAIN} {
+	tls internal
+	reverse_proxy web:80
+}

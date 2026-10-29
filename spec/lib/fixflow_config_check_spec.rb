@@ -180,6 +180,59 @@ RSpec.describe FixflowConfigCheck do
     end
   end
 
+  describe "the HTTPS front door" do
+    let(:https) do
+      { "COMPOSE_PROFILES" => "https", "HTTPS_DOMAIN" => "cmms.acme.test", "HTTPS_MODE" => "automatic",
+        "APP_URL" => "https://cmms.acme.test", "HTTP_PORT" => "8080", "HTTP_BIND" => "127.0.0.1" }
+    end
+
+    def with_https(setting, value) = about(setting, https.merge(setting => value))
+
+    it "is silent when it is not used, even with a company proxy and an https address" do
+      expect(problems("APP_URL" => "https://cmms.acme.test", "HTTP_PORT" => "80")).to eq([])
+    end
+
+    it "finds nothing wrong with a complete setup, in each mode, and a port in APP_URL" do
+      expect(problems(https)).to eq([])
+      %w[automatic own-certificate internal].each { |mode| expect(problems(https.merge("HTTPS_MODE" => mode))).to eq([]) }
+      local = https.merge("HTTPS_DOMAIN" => "localhost", "APP_URL" => "https://localhost:8443", "ALLOWED_ORIGINS" => "https://localhost:8443")
+      expect(problems(local)).to eq([])
+    end
+
+    it "needs the domain when the profile is on, and refuses anything but a bare name" do
+      expect(with_https("HTTPS_DOMAIN", "").map(&:level)).to eq([:error])
+      ["https://cmms.acme.test", "cmms.acme.test:443", "cmms.acme.test/", "cmms acme", "-x.test"].each do |bad|
+        expect(with_https("HTTPS_DOMAIN", bad).map(&:level)).to include(:error), bad
+      end
+    end
+
+    it "warns when the domain is set but the profile is not on, so nothing would start" do
+      found = about("HTTPS_DOMAIN", https.except("COMPOSE_PROFILES"))
+      expect(found.map(&:level)).to eq([:warning])
+      expect(found.first.message).to include("COMPOSE_PROFILES=https")
+    end
+
+    it "refuses an unknown mode, and an empty one means the default" do
+      expect(with_https("HTTPS_MODE", "letsencrypt").first.message).to include("automatic, own-certificate, internal")
+      expect(with_https("HTTPS_MODE", "")).to eq([])
+    end
+
+    it "refuses an APP_URL that is not the https address of the domain" do
+      expect(with_https("APP_URL", "http://cmms.acme.test").first.message).to include("must be https://cmms.acme.test")
+      expect(with_https("APP_URL", "https://other.acme.test").map(&:level)).to eq([:error])
+      expect(with_https("APP_URL", "https://CMMS.acme.test")).to eq([])
+    end
+
+    it "refuses ports 80 and 443 for the plain-HTTP door, which the HTTPS one takes" do
+      ["", "80", "443"].each { |port| expect(with_https("HTTP_PORT", port).map(&:level)).to eq([:error]), port.inspect }
+    end
+
+    it "warns when the plain-HTTP door is not closed to the network" do
+      ["", "0.0.0.0", "192.168.1.5"].each { |bind| expect(with_https("HTTP_BIND", bind).map(&:level)).to eq([:warning]), bind.inspect }
+      expect(with_https("HTTP_BIND", "localhost")).to eq([])
+    end
+  end
+
   describe "starting a production server" do
     # `rails server` in production with no secrets must stop at once with the plain message (not the bare
     # "key not found" a later initializer would raise). Only the failing case is started: with good settings

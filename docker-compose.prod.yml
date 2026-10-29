@@ -7,7 +7,8 @@
 # Only the web front door (HTTP_PORT) and the sensor broker (1883) are published. The database, Redis, the file storage
 # and the API are reachable from the other containers only.
 #
-# HTTPS is not done here: put a TLS proxy in front of HTTP_PORT (it must send X-Forwarded-Proto: https).
+# HTTPS: either the optional "https" service below (Caddy; README, "HTTPS"), or a TLS proxy of your own in front of
+# HTTP_PORT (it must send X-Forwarded-Proto: https).
 name: fixflow
 
 # Everything in .env reaches the api and sidekiq containers (env_file below), so a setting from the README table needs no
@@ -46,10 +47,37 @@ services:
     image: fixflow-web
     restart: unless-stopped
     ports:
-      - "${HTTP_PORT:-80}:80"
+      # HTTP_BIND=127.0.0.1 keeps this plain-HTTP door off the network when the https service is the way in.
+      - "${HTTP_BIND:-0.0.0.0}:${HTTP_PORT:-80}:80"
     depends_on:
       api:
         condition: service_healthy
+
+  # HTTPS in front of the web service. Off unless .env has COMPOSE_PROFILES=https (and HTTPS_DOMAIN, HTTPS_MODE, and
+  # HTTP_PORT=8080 with HTTP_BIND=127.0.0.1, so that this service can have ports 80 and 443). README, "HTTPS".
+  https:
+    profiles: ["https"]
+    image: caddy:2.11.7-alpine
+    restart: unless-stopped
+    ports:
+      - "${HTTPS_HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    environment:
+      HTTPS_DOMAIN: ${HTTPS_DOMAIN:-}
+      HTTPS_EMAIL:  ${HTTPS_EMAIL:-}
+    volumes:
+      - ./deploy/caddy/${HTTPS_MODE:-automatic}.Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./certs:/certs:ro
+      # The certificates Caddy obtained: keep them across restarts, or Let's Encrypt's limits are soon reached.
+      - caddy_data:/data
+      - caddy_config:/config
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:2019/config/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      - web
 
   api:
     build: .
@@ -174,3 +202,5 @@ volumes:
   redis_data:
   s3_data:
   mqtt_data:
+  caddy_data:
+  caddy_config:

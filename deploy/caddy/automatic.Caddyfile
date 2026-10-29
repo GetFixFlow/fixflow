@@ -1,0 +1,8 @@
+# HTTPS_MODE=automatic: Caddy gets a free certificate for HTTPS_DOMAIN from Let's Encrypt and renews it by itself.
+# The server must be reachable from the internet on ports 80 and 443 under that name (README, "HTTPS").
+# HTTPS_EMAIL is optional: Let's Encrypt writes to it before a certificate runs out. Caddy answers plain HTTP with a
+# redirect to HTTPS. For a name like "localhost" it makes its own certificate instead, which is how CI tries this out.
+{$HTTPS_DOMAIN} {
+	tls {$HTTPS_EMAIL:}
+	reverse_proxy web:80
+}

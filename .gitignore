@@ -53,3 +53,6 @@ backup_*.sql.gz
 
 # Written by bin/upgrade, read by bin/rollback.
 /.fixflow_upgrade
+
+# The private key of an HTTPS certificate (README, "HTTPS").
+/certs/
