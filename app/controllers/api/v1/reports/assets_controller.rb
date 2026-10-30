@@ -45,7 +45,7 @@ module Api
               total_work_orders:     asset.work_orders.count,
               total_downtime_hours:  repaired.sum(repair_hours).to_f.round(1),
               avg_resolution_hours:  repaired.average(repair_hours).to_f.round(1),
-              total_maintenance_cost: asset.work_orders.sum("labor_cost + parts_cost").to_f.round(2),
+              total_maintenance_cost: asset.work_orders.sum("labor_cost + parts_cost + vendor_cost").to_f.round(2),
               pm_compliance_rate:    pm_compliance_for_asset(asset),
               iot_alerts_total:      asset.iot_alerts.count
             },
@@ -73,7 +73,8 @@ module Api
                COUNT(work_orders.id)                        as work_orders_count,
                COALESCE(SUM(work_orders.labor_cost), 0)     as labor_cost,
                COALESCE(SUM(work_orders.parts_cost), 0)     as parts_cost,
-               COALESCE(SUM(work_orders.labor_cost + work_orders.parts_cost), 0) as total_cost"
+               COALESCE(SUM(work_orders.vendor_cost), 0)    as vendor_cost,
+               COALESCE(SUM(work_orders.labor_cost + work_orders.parts_cost + work_orders.vendor_cost), 0) as total_cost"
             )
 
           sort_col = { "labor" => "labor_cost", "parts" => "parts_cost" }
@@ -87,16 +88,18 @@ module Api
               work_orders: r.work_orders_count.to_i,
               labor_cost:  r.labor_cost.to_f.round(2),
               parts_cost:  r.parts_cost.to_f.round(2),
+              vendor_cost: r.vendor_cost.to_f.round(2),
               total_cost:  r.total_cost.to_f.round(2),
               cost_per_wo: r.work_orders_count.to_i.positive? ?
                 (r.total_cost.to_f / r.work_orders_count).round(2) : 0
             }
           end
 
-          totals = rows.each_with_object({ total_cost: 0, total_labor_cost: 0, total_parts_cost: 0 }) do |r, h|
+          totals = rows.each_with_object({ total_cost: 0, total_labor_cost: 0, total_parts_cost: 0, total_vendor_cost: 0 }) do |r, h|
             h[:total_cost]       += r[:total_cost]
             h[:total_labor_cost] += r[:labor_cost]
             h[:total_parts_cost] += r[:parts_cost]
+            h[:total_vendor_cost] += r[:vendor_cost]
           end
 
           render json: totals.merge(by_asset: rows)

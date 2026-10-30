@@ -25,6 +25,7 @@ const QRScannerPage = lazy(() => import('@/pages/assets/QRScannerPage').then(m =
 const WorkRequestPortalPage = lazy(() => import('@/pages/work-orders/WorkRequestPortalPage').then(m => ({ default: m.WorkRequestPortalPage })))
 const WorkRequestStatusPage = lazy(() => import('@/pages/work-orders/WorkRequestStatusPage').then(m => ({ default: m.WorkRequestStatusPage })))
 const PartsPage = lazy(() => import('@/pages/parts/PartsPage').then(m => ({ default: m.PartsPage })))
+const VendorsPage = lazy(() => import('@/pages/vendors/VendorsPage').then(m => ({ default: m.VendorsPage })))
 const LocationsPage = lazy(() => import('@/pages/assets/LocationsPage').then(m => ({ default: m.LocationsPage })))
 const WorkOrdersListPage = lazy(() => import('@/pages/work-orders/WorkOrdersListPage').then(m => ({ default: m.WorkOrdersListPage })))
 const WorkOrderCreatePage = lazy(() => import('@/pages/work-orders/WorkOrderCreatePage').then(m => ({ default: m.WorkOrderCreatePage })))
@@ -110,6 +111,7 @@ export const router = createBrowserRouter([
             element: <ProtectedRoute allowedRoles={['admin', 'manager', 'technician']} />,
             children: [
               { path: '/parts', element: <Lazy><PartsPage /></Lazy> },
+              { path: '/vendors', element: <Lazy><VendorsPage /></Lazy> },
               { path: '/iot', element: <Lazy><IotPage /></Lazy> },
             ],
           },

@@ -11,6 +11,7 @@ export const RECORD_TYPES: Record<string, string> = {
   User: 'Person',
   Part: 'Part',
   Meter: 'Meter',
+  Vendor: 'Vendor',
   Organization: 'Company',
 }
 

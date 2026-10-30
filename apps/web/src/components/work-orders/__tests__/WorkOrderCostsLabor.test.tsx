@@ -55,3 +55,27 @@ describe('WorkOrderCosts labor', () => {
     expect(screen.getByText('€1.000,00')).toBeInTheDocument()
   })
 })
+
+describe('WorkOrderCosts vendor charge', () => {
+  it('adds what a vendor charged to the total, as its own line', async () => {
+    wrap(<WorkOrderCosts workOrderId={1} actualHours="2" laborCost="90.00" laborRate="45.00" vendorCost="300.00" />)
+
+    expect(await screen.findByText('$415.00')).toBeInTheDocument() // 25 parts + 90 labor + 300 vendor
+    expect(screen.getByText('Vendor charge')).toBeInTheDocument()
+    expect(screen.getByText('$300.00')).toBeInTheDocument()
+  })
+
+  it('has no vendor line when nothing was charged', async () => {
+    wrap(<WorkOrderCosts workOrderId={1} actualHours="2" laborCost="90.00" laborRate="45.00" vendorCost="0.0" />)
+
+    expect(await screen.findByText('$115.00')).toBeInTheDocument()
+    expect(screen.queryByText('Vendor charge')).not.toBeInTheDocument()
+  })
+
+  it('does not show the vendor charge to people who may not see costs of labor and vendors', async () => {
+    wrap(<WorkOrderCosts workOrderId={1} laborCost={null} laborRate={null} vendorCost={null} />)
+
+    expect(await screen.findByText('$25.00')).toBeInTheDocument()
+    expect(screen.queryByText('Vendor charge')).not.toBeInTheDocument()
+  })
+})

@@ -1,6 +1,6 @@
 import { apiClient } from './client'
 import type {
-  AssetHealth, AssetHistory, BacklogReport, CostByAsset, CostSummary, IotAlertsReport, IotRuleEffectiveness, MttrReport,
+  AssetHealth, AssetHistory, BacklogReport, CostByAsset, CostByVendor, CostSummary, IotAlertsReport, IotRuleEffectiveness, MttrReport,
   PmCompliance, PmForecast, WorkOrderSummary,
 } from '@/types/reports'
 import type { TechnicianStats } from '@/components/reports/TechnicianScorecard'
@@ -47,6 +47,8 @@ export const reportsApi = {
       apiClient.get<CostByAsset>('/reports/costs/by_asset', { params }),
     byLocation: (params?: Record<string, unknown>) =>
       apiClient.get('/reports/costs/by_location', { params }),
+    byVendor: (params?: Record<string, unknown>) =>
+      apiClient.get<CostByVendor>('/reports/costs/by_vendor', { params }),
   },
 
   /**

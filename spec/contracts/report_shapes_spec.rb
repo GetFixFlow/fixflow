@@ -89,9 +89,11 @@ RSpec.describe "Report response shapes", type: :request do
   # so the activity feed holds only the line made on purpose below.
   def build_company
     manager
+    acme = create(:vendor, organization: org, name: "Acme Electric")
     schedule = create(:preventive_maintenance, organization: org, asset: pump)
     make(pump, priority: "high", status: "completed", assignee: alice, created_at: now - 6.days, started_at: now - 5.days - 4.hours,
-               completed_at: now - 5.days, due_date: now - 5.days - 2.hours, labor_cost: 100, parts_cost: 20.5)
+               completed_at: now - 5.days, due_date: now - 5.days - 2.hours, labor_cost: 100, parts_cost: 20.5,
+               vendor: acme, vendor_cost: 300)
     make(pump, priority: "critical", status: "verified", assignee: bob, created_at: now - 5.days, started_at: now - 5.days + 1.hour,
                completed_at: now - 5.days + 3.hours, due_date: now + 1.day, labor_cost: 50, parts_cost: 10,
                preventive_maintenance: schedule)
@@ -220,5 +222,9 @@ RSpec.describe "Report response shapes", type: :request do
 
   it "costs_by_asset" do
     expect_fixture("costs_by_asset", fetch("reports/costs/by_asset", **period))
+  end
+
+  it "costs_by_vendor" do
+    expect_fixture("costs_by_vendor", fetch("reports/costs/by_vendor", **period))
   end
 end

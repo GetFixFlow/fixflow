@@ -3,7 +3,7 @@
 import { http, HttpResponse } from 'msw'
 import { server } from './server'
 import type {
-  AssetHealth, AssetHistory, BacklogReport, CostByAsset, CostSummary, IotAlertsReport, IotRuleEffectiveness, MttrReport,
+  AssetHealth, AssetHistory, BacklogReport, CostByAsset, CostByVendor, CostSummary, IotAlertsReport, IotRuleEffectiveness, MttrReport,
   PmCompliance, PmForecast, WorkOrderSummary,
 } from '@/types/reports'
 import type { TechnicianStats } from '@/components/reports/TechnicianScorecard'
@@ -20,6 +20,7 @@ import assetsHealth from './fixtures/reports/assets_health.json'
 import assetsHistory from './fixtures/reports/assets_history.json'
 import costsSummary from './fixtures/reports/costs_summary.json'
 import costsByAsset from './fixtures/reports/costs_by_asset.json'
+import costsByVendor from './fixtures/reports/costs_by_vendor.json'
 import pmCompliance from './fixtures/reports/pm_compliance.json'
 import pmForecast from './fixtures/reports/pm_forecast.json'
 import iotAlerts from './fixtures/reports/iot_alerts.json'
@@ -47,6 +48,7 @@ export const fixtures: {
   assetHistory: AssetHistory
   costSummary: CostSummary
   costByAsset: CostByAsset
+  costByVendor: CostByVendor
   pmCompliance: PmCompliance
   pmForecast: PmForecast
   iotAlerts: IotAlertsReport
@@ -67,6 +69,7 @@ export const fixtures: {
   assetHistory: assetsHistory,
   costSummary: costsSummary,
   costByAsset: costsByAsset,
+  costByVendor: costsByVendor,
   pmCompliance,
   pmForecast,
   iotAlerts,
@@ -88,6 +91,7 @@ const routes: [string, unknown][] = [
   ['/api/v1/reports/assets/health', fixtures.assetHealth],
   ['/api/v1/reports/costs/summary', fixtures.costSummary],
   ['/api/v1/reports/costs/by_asset', fixtures.costByAsset],
+  ['/api/v1/reports/costs/by_vendor', fixtures.costByVendor],
   ['/api/v1/reports/assets/:id/history', fixtures.assetHistory],
   ['/api/v1/system_health', fixtures.systemHealth],
   ['/api/v1/reports/pm/compliance', fixtures.pmCompliance],

@@ -6,7 +6,7 @@ the like stand for a value, and `:format` is left out. Live updates are a WebSoc
 holds the standard routes of the sign-in library that nothing uses (`sign_up/edit` and the like): the ones to use are
 `sign_in`, `sign_out`, `two_factor`, `password` and `me`; `sign_up` works only until the first company exists.
 
-There are 198 endpoints in 38 groups: [activity_logs](#activity-logs), [ai](#ai), [api_keys](#api-keys), [assets](#assets), [auth](#auth), [backups](#backups), [branding](#branding), [chat_settings](#chat-settings), [dashboard](#dashboard), [data_usage](#data-usage), [email_settings](#email-settings), [getting_started](#getting-started), [health](#health), [imports](#imports), [invitations](#invitations), [iot](#iot), [iot_alerts](#iot-alerts), [iot_rules](#iot-rules), [localization_settings](#localization-settings), [locations](#locations), [meters](#meters), [notification_preferences](#notification-preferences), [organization_settings](#organization-settings), [parts](#parts), [preventive_maintenances](#preventive-maintenances), [profile](#profile), [public_assets](#public-assets), [public_request_form](#public-request-form), [push_subscriptions](#push-subscriptions), [reports](#reports), [sample_data](#sample-data), [sessions](#sessions), [setup](#setup), [storage](#storage), [system_health](#system-health), [users](#users), [work_orders](#work-orders), [work_requests](#work-requests).
+There are 207 endpoints in 39 groups: [activity_logs](#activity-logs), [ai](#ai), [api_keys](#api-keys), [assets](#assets), [auth](#auth), [backups](#backups), [branding](#branding), [chat_settings](#chat-settings), [dashboard](#dashboard), [data_usage](#data-usage), [email_settings](#email-settings), [getting_started](#getting-started), [health](#health), [imports](#imports), [invitations](#invitations), [iot](#iot), [iot_alerts](#iot-alerts), [iot_rules](#iot-rules), [localization_settings](#localization-settings), [locations](#locations), [meters](#meters), [notification_preferences](#notification-preferences), [organization_settings](#organization-settings), [parts](#parts), [preventive_maintenances](#preventive-maintenances), [profile](#profile), [public_assets](#public-assets), [public_request_form](#public-request-form), [push_subscriptions](#push-subscriptions), [reports](#reports), [sample_data](#sample-data), [sessions](#sessions), [setup](#setup), [storage](#storage), [system_health](#system-health), [users](#users), [vendors](#vendors), [work_orders](#work-orders), [work_requests](#work-requests).
 
 ## activity-logs
 
@@ -285,6 +285,7 @@ There are 198 endpoints in 38 groups: [activity_logs](#activity-logs), [ai](#ai)
 | GET | `/api/v1/reports/assets/health` | `api/v1/reports/assets#health` |
 | GET | `/api/v1/reports/costs/by_asset` | `api/v1/reports/costs#by_asset` |
 | GET | `/api/v1/reports/costs/by_location` | `api/v1/reports/costs#by_location` |
+| GET | `/api/v1/reports/costs/by_vendor` | `api/v1/reports/costs#by_vendor` |
 | GET | `/api/v1/reports/costs/summary` | `api/v1/reports/costs#summary` |
 | GET | `/api/v1/reports/iot/alert_summary` | `api/v1/reports/iot#alert_summary` |
 | GET | `/api/v1/reports/iot/alerts` | `api/v1/reports/iot#alerts` |
@@ -359,6 +360,19 @@ There are 198 endpoints in 38 groups: [activity_logs](#activity-logs), [ai](#ai)
 | PATCH | `/api/v1/users/bulk_role` | `api/v1/users#bulk_role` |
 | POST | `/api/v1/users/invite` | `api/v1/users#invite` |
 | GET | `/api/v1/users/me` | `api/v1/users#me` |
+
+## vendors
+
+| Method | Path | Handled by |
+| --- | --- | --- |
+| GET | `/api/v1/vendors` | `api/v1/vendors#index` |
+| POST | `/api/v1/vendors` | `api/v1/vendors#create` |
+| DELETE | `/api/v1/vendors/:id` | `api/v1/vendors#destroy` |
+| GET | `/api/v1/vendors/:id` | `api/v1/vendors#show` |
+| PATCH, PUT | `/api/v1/vendors/:id` | `api/v1/vendors#update` |
+| POST | `/api/v1/vendors/:vendor_id/contacts` | `api/v1/vendor_contacts#create` |
+| DELETE | `/api/v1/vendors/:vendor_id/contacts/:id` | `api/v1/vendor_contacts#destroy` |
+| PATCH, PUT | `/api/v1/vendors/:vendor_id/contacts/:id` | `api/v1/vendor_contacts#update` |
 
 ## work-orders
 

@@ -1,10 +1,11 @@
-# What finished work cost, from the labor and parts costs recorded on each work order.
+# What finished work cost, from the labor, parts and vendor costs recorded on each work order.
 #
 # A cost counts in the period the work was finished (completed or verified, by the completion date), not
 # when the work order was opened, so a job opened last month and finished today is today's cost.
 class CostReport
   OTHER = "Other".freeze
-  SUMS = "COALESCE(SUM(work_orders.labor_cost), 0), COALESCE(SUM(work_orders.parts_cost), 0), COUNT(*)".freeze
+  SUMS = "COALESCE(SUM(work_orders.labor_cost), 0), COALESCE(SUM(work_orders.parts_cost), 0), " \
+         "COALESCE(SUM(work_orders.vendor_cost), 0), COUNT(*)".freeze
   TREEMAP_ITEMS = 12
   TOP_ASSETS = 20
   # What costs can be grouped by: the SQL for each is fixed here, never built from anything passed in.
@@ -19,10 +20,11 @@ class CostReport
 
   def summary(group_by)
     # A filter that matches nothing gives an empty relation, which has no row to pick: that is zeros.
-    labor, parts, count = @scope.pick(Arel.sql("COALESCE(SUM(labor_cost), 0), COALESCE(SUM(parts_cost), 0), COUNT(*)")) || [0, 0, 0]
+    labor, parts, vendor, count = @scope.pick(Arel.sql(SUMS)) || [0, 0, 0, 0]
+    total = labor + parts + vendor
     {
-      total_cost: money(labor + parts), labor_cost: money(labor), parts_cost: money(parts), work_orders_count: count,
-      avg_cost_per_wo: count.zero? ? 0.0 : money((labor + parts) / count),
+      total_cost: money(total), labor_cost: money(labor), parts_cost: money(parts), vendor_cost: money(vendor),
+      work_orders_count: count, avg_cost_per_wo: count.zero? ? 0.0 : money(total / count),
       group_by: group_by, trend: trend(group_by)
     }
   end
@@ -44,6 +46,18 @@ class CostReport
     { locations: location_rows }
   end
 
+  # What each vendor charged for the work finished in the period, dearest first.
+  def by_vendor
+    { vendors: vendor_rows }
+  end
+
+  def vendor_rows
+    rows = @scope.where.not(vendor_id: nil).group(:vendor_id).pluck(:vendor_id, Arel.sql("COALESCE(SUM(vendor_cost), 0), COUNT(*)"))
+    names = Vendor.unscoped.where(id: rows.map(&:first)).pluck(:id, :name).to_h
+    list = rows.map { |id, cost, count| { vendor_id: id, vendor_name: names[id], vendor_cost: money(cost), wo_count: count } }
+    list.sort_by { |row| [-row[:vendor_cost], row[:vendor_name].to_s] }
+  end
+
   def location_rows
     rows = grouped_costs(:location)
     names = Location.unscoped.where(id: rows.keys.compact).to_h { |location| [location.id, location.full_path] }
@@ -53,13 +67,14 @@ class CostReport
 
   private
 
-  # { key => { labor_cost:, parts_cost:, total_cost:, wo_count: } }
+  # { key => { labor_cost:, parts_cost:, vendor_cost:, total_cost:, wo_count: } }
   def grouped_costs(by)
     column = GROUPINGS.fetch(by)
     scope = by == :location ? @scope.left_joins(:asset) : @scope
     rows = scope.group(column).pluck(Arel.sql(column), Arel.sql(SUMS))
-    rows.to_h do |key, labor, parts, count|
-      [key, { labor_cost: money(labor), parts_cost: money(parts), total_cost: money(labor + parts), wo_count: count }]
+    rows.to_h do |key, labor, parts, vendor, count|
+      [key, { labor_cost: money(labor), parts_cost: money(parts), vendor_cost: money(vendor),
+              total_cost: money(labor + parts + vendor), wo_count: count }]
     end
   end
 
@@ -76,8 +91,9 @@ class CostReport
     bucket = "DATE_TRUNC('#{unit}', work_orders.completed_at)::date"
     found = @scope.group(Arel.sql(bucket)).pluck(Arel.sql("#{bucket}, #{SUMS}")).index_by(&:first)
     bucket_starts(unit).map do |date|
-      _, labor, parts, count = found[date] || [date, 0, 0, 0]
-      { period: date.iso8601, labor: money(labor), parts: money(parts), total: money(labor + parts), wo_count: count }
+      _, labor, parts, vendor, count = found[date] || [date, 0, 0, 0, 0]
+      { period: date.iso8601, labor: money(labor), parts: money(parts), vendor: money(vendor),
+        total: money(labor + parts + vendor), wo_count: count }
     end
   end
 

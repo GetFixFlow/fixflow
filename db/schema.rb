@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_120500) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_120600) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -422,6 +422,33 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_120500) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  create_table "vendor_contacts", force: :cascade do |t|
+    t.bigint "vendor_id", null: false
+    t.string "name", null: false
+    t.string "role"
+    t.string "phone"
+    t.string "email"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["vendor_id"], name: "index_vendor_contacts_on_vendor_id"
+  end
+
+  create_table "vendors", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.string "name", null: false
+    t.string "category"
+    t.string "phone"
+    t.string "email"
+    t.string "website"
+    t.text "address"
+    t.text "notes"
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index "organization_id, lower((name)::text)", name: "index_vendors_on_organization_id_and_lower_name", unique: true
+    t.index ["organization_id"], name: "index_vendors_on_organization_id"
+  end
+
   create_table "versions", force: :cascade do |t|
     t.datetime "created_at"
     t.string "event", null: false
@@ -477,6 +504,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_120500) do
     t.bigint "verified_by_id"
     t.string "work_order_number"
     t.decimal "labor_rate", precision: 8, scale: 2
+    t.bigint "vendor_id"
+    t.decimal "vendor_cost", precision: 10, scale: 2, default: "0.0", null: false
+    t.string "vendor_reference"
     t.index ["asset_id", "created_at"], name: "index_work_orders_on_asset_id_and_created_at"
     t.index ["asset_id"], name: "index_work_orders_on_asset_id"
     t.index ["assignee_id", "status"], name: "index_work_orders_on_assignee_id_and_status"
@@ -493,6 +523,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_120500) do
     t.index ["preventive_maintenance_id"], name: "index_work_orders_on_preventive_maintenance_id"
     t.index ["public_token"], name: "index_work_orders_on_public_token", unique: true
     t.index ["requester_id"], name: "index_work_orders_on_requester_id"
+    t.index ["vendor_id"], name: "index_work_orders_on_vendor_id"
     t.index ["verified_by_id"], name: "index_work_orders_on_verified_by_id"
     t.index ["work_order_number"], name: "index_work_orders_on_work_order_number", unique: true
   end
@@ -537,6 +568,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_120500) do
   add_foreign_key "user_sessions", "users"
   add_foreign_key "users", "organizations"
   add_foreign_key "users", "users", column: "invited_by_id"
+  add_foreign_key "vendor_contacts", "vendors"
+  add_foreign_key "vendors", "organizations"
   add_foreign_key "work_order_parts", "parts"
   add_foreign_key "work_order_parts", "work_orders"
   add_foreign_key "work_orders", "assets"
@@ -547,4 +580,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_120500) do
   add_foreign_key "work_orders", "users", column: "assignee_id"
   add_foreign_key "work_orders", "users", column: "requester_id"
   add_foreign_key "work_orders", "users", column: "verified_by_id"
+  add_foreign_key "work_orders", "vendors"
 end

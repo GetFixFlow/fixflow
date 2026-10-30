@@ -255,6 +255,11 @@ export interface WorkOrder {
   /** Only managers and administrators are sent the labor figures (they reveal what people are paid). */
   labor_cost?: number | string | null
   labor_rate?: number | string | null
+  vendor_id?: number | null
+  vendor?: { id: number; name: string } | null
+  /** What an outside company charged and their invoice number: only managers and administrators are sent these. */
+  vendor_cost?: number | string | null
+  vendor_reference?: string | null
   completion_notes?: string | null
   rejection_reason?: string | null
   cancellation_reason?: string | null
@@ -571,6 +576,32 @@ export interface ApiKeyFull extends ApiKey {
 }
 
 // ── Parts / Inventory ─────────────────────────────────────────────────────────
+
+export interface VendorContact {
+  id: number
+  name: string
+  role?: string | null
+  phone?: string | null
+  email?: string | null
+}
+
+/** An outside company that does maintenance work (a contractor, a repair shop, a hire firm). */
+export interface Vendor {
+  id: number
+  name: string
+  category?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  address?: string | null
+  notes?: string | null
+  active: boolean
+  work_orders_count: number
+  /** Only on a single vendor (the detail), not in the list. */
+  contacts?: VendorContact[]
+  created_at: string
+  updated_at: string
+}
 
 export interface Part {
   id: number

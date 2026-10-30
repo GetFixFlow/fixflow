@@ -34,6 +34,11 @@ export function CostAnalysisPage() {
     queryFn: () => reportsApi.costs.byAsset(params).then((r) => r.data),
   })
 
+  const { data: v, isError: vendorError } = useQuery({
+    queryKey: ['reports', 'costs_by_vendor', params],
+    queryFn: () => reportsApi.costs.byVendor(params).then((r) => r.data),
+  })
+
   return (
     <div className="space-y-5">
       <PrintHeader reportTitle="Cost Analysis Report" dateRange={dateRange} />
@@ -45,7 +50,7 @@ export function CostAnalysisPage() {
         </div>
       </div>
 
-      {(isError || assetError) && (
+      {(isError || assetError || vendorError) && (
         <p role="alert" className="rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">
           The cost figures could not be loaded, so none are shown. Try again in a moment.
         </p>
@@ -57,11 +62,12 @@ export function CostAnalysisPage() {
         </p>
       )}
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {([
           ['Total Cost', s ? formatCurrency(s.total_cost) : '—'],
           ['Labor Costs', s ? formatCurrency(s.labor_cost) : '—'],
           ['Parts Costs', s ? formatCurrency(s.parts_cost) : '—'],
+          ['Vendor Costs', s ? formatCurrency(s.vendor_cost) : '—'],
           ['Cost per WO', s ? formatCurrency(s.avg_cost_per_wo) : '—'],
         ] as [string, string | number][]).map(([title, value]) => (
           <KPICard key={title} title={title} value={value} loading={isLoading} />
@@ -82,11 +88,25 @@ export function CostAnalysisPage() {
               { key: 'asset_name', header: 'Asset', sortable: true },
               { key: 'labor_cost', header: 'Labor', align: 'right', render: (r) => formatCurrency(r.labor_cost) },
               { key: 'parts_cost', header: 'Parts', align: 'right', render: (r) => formatCurrency(r.parts_cost) },
+              { key: 'vendor_cost', header: 'Vendors', align: 'right', render: (r) => formatCurrency(r.vendor_cost) },
               { key: 'total_cost', header: 'Total', align: 'right', sortable: true, render: (r) => <strong>{formatCurrency(r.total_cost)}</strong> },
               { key: 'wo_count', header: 'WOs', align: 'right', sortable: true },
             ]} />
         </ChartContainer>
       </div>
+
+      <ChartContainer title="Costs by Vendor">
+        {v?.vendors?.length === 0 ? (
+          <p className="py-6 text-center text-sm text-gray-500">No work given to a vendor was finished in this period.</p>
+        ) : (
+          <DataTable data={v?.vendors ?? []} compact
+            columns={[
+              { key: 'vendor_name', header: 'Vendor', sortable: true },
+              { key: 'vendor_cost', header: 'Charged', align: 'right', sortable: true, render: (r) => <strong>{formatCurrency(r.vendor_cost)}</strong> },
+              { key: 'wo_count', header: 'WOs', align: 'right', sortable: true },
+            ]} />
+        )}
+      </ChartContainer>
 
       <ReportFiltersSidebar open={filtersOpen} onClose={() => setFiltersOpen(false)} />
     </div>
