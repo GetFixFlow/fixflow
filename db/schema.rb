@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_120200) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_120300) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -265,6 +265,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_120200) do
     t.index ["status"], name: "index_preventive_maintenances_on_status"
   end
 
+  create_table "push_subscriptions", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.text "endpoint", null: false
+    t.string "p256dh", null: false
+    t.string "auth", null: false
+    t.string "user_agent"
+    t.datetime "last_sent_at"
+    t.integer "failures", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["endpoint"], name: "index_push_subscriptions_on_endpoint", unique: true
+    t.index ["user_id"], name: "index_push_subscriptions_on_user_id"
+  end
+
   create_table "sample_records", force: :cascade do |t|
     t.bigint "organization_id", null: false
     t.string "record_type", null: false
@@ -475,6 +489,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_120200) do
   add_foreign_key "preventive_maintenances", "assets"
   add_foreign_key "preventive_maintenances", "organizations"
   add_foreign_key "preventive_maintenances", "users", column: "assigned_to_id"
+  add_foreign_key "push_subscriptions", "users"
   add_foreign_key "sample_records", "organizations"
   add_foreign_key "sensor_aggregates", "assets"
   add_foreign_key "sensor_readings", "assets"

@@ -36,6 +36,13 @@ Rails.application.routes.draw do
       resource :notification_preferences, only: %i[show update], controller: "notification_preferences"
       resource :localization_settings, only: %i[show update], controller: "localization_settings"
 
+      # Push notifications to this person's browsers (Web Push): the server's public key and the browsers subscribed, a
+      # browser subscribing or stopping, and a test message
+      get    "push_subscriptions",      to: "push_subscriptions#index"
+      post   "push_subscriptions",      to: "push_subscriptions#create"
+      delete "push_subscriptions",      to: "push_subscriptions#destroy"
+      post   "push_subscriptions/test", to: "push_subscriptions#test"
+
       # Example data to look around in, and the first things to do
       resource :sample_data, only: %i[show create destroy], controller: "sample_data"
       get  "getting_started",         to: "getting_started#show"

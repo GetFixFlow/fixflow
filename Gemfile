@@ -112,3 +112,5 @@ group :test do
 end
 
 gem "rotp", "~> 6.3"
+
+gem "web-push", "~> 3.1"

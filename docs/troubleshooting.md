@@ -46,6 +46,10 @@ docker compose -f docker-compose.prod.yml exec api bin/rails "fixflow:reset_two_
 
 **Invitations cannot be emailed.** They are not lost: the invite dialog gives a link to copy and send yourself.
 
+## Push notifications
+
+**There is no switch on Settings, Notifications, or a test does not arrive.** Push needs HTTPS, a browser that supports it, the background worker running, and a server that can reach the browser makers' push services. The table on [Notifications](notifications.md#if-it-does-not-work) says which symptom means which.
+
 ## Live updates and background work
 
 **New IoT alerts do not appear on their own, or the monitor never says *Live*.** The reverse proxy in front of FixFlow must pass WebSocket upgrades on `/cable`. The Docker install's own front door does; a proxy you added does not unless you configure it. See [Sensors and IoT](iot.md).

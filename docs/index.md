@@ -29,6 +29,7 @@ These pages are for the person who **installs and looks after** a FixFlow server
 | Run work orders, checklists and QR-label requests | [Work orders and maintenance](work-orders.md) |
 | Connect sensors and set alert rules | [Sensors and IoT](iot.md) |
 | Understand the reports and the dashboard | [Reports and the dashboard](reports.md) |
+| Get messages on a phone when work is assigned | [Notifications](notifications.md) |
 | Connect another program | [API](api.md) and [API endpoints](api-endpoints.md) |
 
 ## Helping with FixFlow

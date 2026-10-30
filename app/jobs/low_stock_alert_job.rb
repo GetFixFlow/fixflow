@@ -6,8 +6,15 @@ class LowStockAlertJob < ApplicationJob
     part = ActsAsTenant.without_tenant { Part.find_by(id: part_id) }
     return unless part
 
-    part.organization.users.managers.wanting_email("part_low_stock").each do |manager|
+    managers = part.organization.users.managers
+    managers.wanting_email("part_low_stock").each do |manager|
       PartMailer.low_stock(manager, part, kind).deliver_later
+    end
+    managers.each do |manager|
+      title = kind.to_s == "out" ? "Out of stock: #{part.name}" : "Running low: #{part.name}"
+      left = part.quantity_on_hand.to_f.round(2)
+      reorder = part.reorder_point.to_f.round(2)
+      manager.push!("part_low_stock", title: title, body: "#{left} left (reorder at #{reorder})", path: "/parts")
     end
   end
 end

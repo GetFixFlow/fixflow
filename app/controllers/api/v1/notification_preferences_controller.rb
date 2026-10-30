@@ -8,7 +8,8 @@ module Api
         render json: { preferences: current_user.email_preferences }
       end
 
-      # PATCH /api/v1/notification_preferences  { preferences: { email_enabled, rules: { wo_assigned: { email } } } }
+      # PATCH /api/v1/notification_preferences
+      #   { preferences: { email_enabled, push_enabled, rules: { wo_assigned: { email, push } } } }
       def update
         current_user.update_email_preferences!(preferences_params)
         render json: { preferences: current_user.email_preferences }
@@ -17,7 +18,7 @@ module Api
       private
 
       def preferences_params
-        params.expect(preferences: [:email_enabled, { rules: {} }])
+        params.expect(preferences: [:email_enabled, :push_enabled, { rules: {} }])
       end
     end
   end
