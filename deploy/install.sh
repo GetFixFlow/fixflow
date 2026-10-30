@@ -173,7 +173,10 @@ download() {
     fi
   fi
   git clone -q "$REPO" "$DIR"
-  git -C "$DIR" -c advice.detachedHead=false checkout -q "$ref" || die "There is no version $ref. The releases are at ${REPO%.git}/releases."
+  if ! git -C "$DIR" -c advice.detachedHead=false checkout -q "$ref" 2>/dev/null; then
+    rm -rf "$DIR" # made a moment ago, by this script; leaving it would make the next try say "already installed"
+    die "There is no version $ref. The releases are at ${REPO%.git}/releases."
+  fi
   say "Version: $ref"
 }
 
