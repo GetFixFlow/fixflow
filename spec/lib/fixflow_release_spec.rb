@@ -90,6 +90,19 @@ RSpec.describe FixflowRelease do
     end
   end
 
+  describe ".pin_images" do
+    it "moves the default image version in a compose file, wherever it is named" do
+      compose = "image: ${REPO:-x}/fixflow-api:${FIXFLOW_VERSION:-0.1.0}\nimage: ${REPO:-x}/fixflow-web:${FIXFLOW_VERSION:-0.1.0}\n"
+
+      expect(described_class.pin_images(compose, "1.3.0")).to eq(compose.gsub("0.1.0", "1.3.0"))
+    end
+
+    it "leaves everything else alone, and refuses what is not a version" do
+      expect(described_class.pin_images("image: caddy:2.11\n", "1.3.0")).to eq("image: caddy:2.11\n")
+      expect { described_class.pin_images("x", "latest") }.to raise_error(FixflowRelease::Error)
+    end
+  end
+
   describe ".cut" do
     it "moves what is under [Unreleased] into a dated section and leaves [Unreleased] empty" do
       cut = described_class.cut(changelog, "1.3.0", date: Date.new(2026, 2, 3))
@@ -159,6 +172,7 @@ RSpec.describe FixflowRelease do
       %w[bin/release lib/fixflow_release.rb].each { |file| FileUtils.cp(Rails.root.join(file), File.join(work, file)) }
       File.write(File.join(work, "VERSION"), "1.2.0\n")
       File.write(File.join(work, "CHANGELOG.md"), changelog)
+      FixflowRelease::COMPOSE_FILES.each { |file| File.write(File.join(work, File.basename(file)), "image: r/fixflow-api:${FIXFLOW_VERSION:-1.2.0}\n") }
       git(work, "add", ".")
       git(work, "commit", "-q", "-m", "start")
       git(work, "push", "-q", "-u", "origin", "main")
@@ -173,6 +187,7 @@ RSpec.describe FixflowRelease do
       expect(git(work, "branch", "--show-current")).to eq("release-1.3.0")
       expect(File.read(File.join(work, "VERSION"))).to eq("1.3.0\n")
       expect(File.read(File.join(work, "CHANGELOG.md"))).to include("## [1.3.0] - ")
+      expect(File.read(File.join(work, "docker-compose.prod.yml"))).to eq("image: r/fixflow-api:${FIXFLOW_VERSION:-1.3.0}\n")
       expect(git(work, "log", "-1", "--format=%s")).to eq("Release 1.3.0")
       expect(out).to include("git tag v1.3.0", "Reports changed shape. Run `rails db:migrate`")
       expect(git(work, "status", "--porcelain")).to be_empty

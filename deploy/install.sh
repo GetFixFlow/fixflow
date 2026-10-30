@@ -11,7 +11,8 @@
 #   2. installs git, make, openssl and Docker with Compose, from Docker's own apt repository, unless they are there
 #   3. downloads FixFlow into --dir (the newest release, or --version) with git
 #   4. writes .env: every secret made here with openssl, nothing else asked; the file is readable by root only
-#   5. builds and starts it (5 to 10 minutes the first time) and waits until every service is healthy
+#   5. starts it and waits until every service is healthy (it pulls the release's published images; if they cannot be
+#      had it builds them here, which takes 5 to 10 minutes)
 #   6. prints the address to open, and what to do next
 #
 # It never overwrites an existing install or .env. To change an install afterwards, edit .env and run `make prod`.
@@ -261,8 +262,8 @@ dns_note() {
 
 start_stack() {
   cd "$DIR"
-  step "Building and starting FixFlow (the first time takes 5 to 10 minutes)"
-  if ! bin/compose up -d --build --wait --wait-timeout 900; then
+  step "Starting FixFlow (the first time takes a few minutes; 5 to 10 if the images have to be built here)"
+  if ! bin/up; then
     bin/compose ps >&2 || true
     die "FixFlow did not come up healthy. Look at the log: cd $DIR && bin/compose logs --tail 100   (docs/troubleshooting.md)"
   fi

@@ -324,6 +324,7 @@ RSpec/DescribeClass:
     - 'spec/jobs/push_in_jobs_spec.rb'
     - 'spec/config/production_boot_spec.rb'
     - 'spec/config/production_stack_spec.rb'
+    - 'spec/config/published_images_spec.rb'
     - 'spec/config/upgrade_spec.rb'
 
 # Offense count: 25

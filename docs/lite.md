@@ -26,7 +26,7 @@ cp .env.example .env
 2. Add the line `COMPOSE_FILE=docker-compose.lite.yml` (it is in `.env.example`, commented out). Docker Compose, `make` and the upgrade scripts all read it, so from here on every command is the one in these pages.
 
 ```bash
-make prod            # or: docker compose up -d --build
+make prod            # the published images of the release this folder is on, or a build here (see install.md)
 make prod-status     # five services, all healthy: web, api, sidekiq, db and redis
 ```
 

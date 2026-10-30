@@ -14,7 +14,9 @@ docker compose -f docker-compose.prod.yml exec api bin/rails fixflow:check_confi
 
 **`docker compose` stops and names a variable that is "required".** A setting in the *Required* block of `.env` is empty. Fill it in; each line has the command beside it that makes its value. See [Install on a server](install.md).
 
-**The first start takes ten minutes.** It builds the two images on the server (5 to 10 minutes) and pulls the rest. `ps` shows the services becoming `healthy` one by one.
+**The first start takes ten minutes.** The folder is not on a release, or the release's images could not be pulled, so it builds the two images on the server (5 to 10 minutes). On a release (`git checkout v0.2.0`) it pulls them instead ([Published images](install.md#published-images)); `make prod` says which it is doing.
+
+**`make prod` says it could not get the published images.** The server cannot reach `ghcr.io`, or that release has no images (the images are published by the release workflow; if it failed, the release page says so). It builds them here instead, which works; nothing else is wrong. If the images are there but the pull is refused ("denied"), the package is still private: a maintainer has to make it public once (see CONTRIBUTING, "Making a release"). `ps` shows the services becoming `healthy` one by one.
 
 **A service never becomes healthy, or keeps restarting.** Read its log (`logs --tail 100 <service>`). The `api` and `sidekiq` services check the settings before starting and print the reason in plain words, for example a secret that is missing, too short or still the example value, an address that is malformed, or a database or Redis that does not answer: see [the start-up check](configuration.md#the-server-checks-its-settings-when-it-starts). Run `fixflow:check_config` as above to see the same list. `SKIP_CONFIG_CHECK=true` skips the check in an emergency; it does not fix the cause.
 

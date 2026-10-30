@@ -2,7 +2,7 @@
 #
 #   cp .env.example .env, fill it in, and add the line COMPOSE_FILE=docker-compose.lite.yml to it, then
 #
-#   make prod        (or: docker compose up -d --build)
+#   make prod        (it is bin/up: the published images of this release, or a build from the source here; docs/lite.md)
 #
 # Uploaded photos and documents are folders on the server's disk (the "uploads" volume) and the nightly backups are another
 # one (the "backups" volume), where the full install (docker-compose.prod.yml) has the "s3" service. There is no "mqtt"
@@ -48,7 +48,7 @@ services:
   web:
     build:
       context: apps/web
-    image: fixflow-web
+    image: ${FIXFLOW_IMAGE_REPO:-ghcr.io/getfixflow}/fixflow-web:${FIXFLOW_VERSION:-0.1.0}
     restart: unless-stopped
     ports:
       # HTTP_BIND=127.0.0.1 keeps this plain-HTTP door off the network when the https service is the way in.
@@ -85,7 +85,7 @@ services:
 
   api:
     build: .
-    image: fixflow-api
+    image: ${FIXFLOW_IMAGE_REPO:-ghcr.io/getfixflow}/fixflow-api:${FIXFLOW_VERSION:-0.1.0}
     restart: unless-stopped
     env_file: .env
     environment: *api-env
@@ -106,7 +106,7 @@ services:
   sidekiq:
     # The image the api service builds. Not built a second time here: two builds that name the same image race
     # each other ("image already exists") on Docker versions that keep images in containerd.
-    image: fixflow-api
+    image: ${FIXFLOW_IMAGE_REPO:-ghcr.io/getfixflow}/fixflow-api:${FIXFLOW_VERSION:-0.1.0}
     pull_policy: never
     restart: unless-stopped
     command: bundle exec sidekiq -C config/sidekiq.yml

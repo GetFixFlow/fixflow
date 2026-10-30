@@ -1,0 +1,46 @@
+#!/bin/sh
+# Starts (or updates) this install: `make prod` is this script. On a folder that is exactly a release (the git tag vX.Y.Z,
+# with X.Y.Z in the VERSION file) it pulls that release's published images, so nothing is built on this server. On
+# anything else (a branch, a commit, a version older than the published images, no network, an image that is not there) it
+# builds the images from the source in this folder, as before.
+#   FIXFLOW_BUILD=yes bin/up     always build here
+#   FIXFLOW_PULL=yes bin/up      always pull, and stop if the images cannot be had (no building)
+set -eu
+cd "$(dirname "$0")/.."
+
+# The compose file of this install, as bin/compose works it out.
+file=${COMPOSE_FILE:-$(sed -n 's/^COMPOSE_FILE=//p' .env 2>/dev/null | tr -d "\"'\r" | tail -n 1)}
+file=${file:-docker-compose.prod.yml}
+COMPOSE="docker compose -f $file"
+
+mode=build
+if [ "${FIXFLOW_BUILD:-}" = yes ]; then
+  mode=build
+elif [ "${FIXFLOW_PULL:-}" = yes ]; then
+  mode=pull
+elif tag=$(git describe --exact-match --tags 2>/dev/null) && [ "$tag" = "v$(cat VERSION)" ]; then
+  mode=try
+fi
+
+# Only a compose file that names registry images has anything to pull.
+if [ "$mode" != build ] && ! grep -q 'image: .*/fixflow-api:' "$file"; then
+  [ "$mode" = pull ] && { echo "bin/up: this compose file does not name published images." >&2; exit 1; }
+  mode=build
+fi
+
+if [ "$mode" = try ]; then
+  echo "Getting the published images for $tag ..."
+  if $COMPOSE pull api web; then
+    mode=pull
+  else
+    echo "Could not get them (no network, or this release has no published images). Building them here instead." >&2
+    mode=build
+  fi
+elif [ "$mode" = pull ]; then
+  $COMPOSE pull api web
+fi
+
+if [ "$mode" = pull ]; then
+  exec $COMPOSE up -d --wait --wait-timeout 900
+fi
+exec $COMPOSE up -d --build --wait --wait-timeout 900

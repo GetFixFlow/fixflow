@@ -15,7 +15,7 @@ It does four things, and stops at the first that fails, before anything is chang
 1. Checks that the server is running and that you have not edited files git tracks (`git status` shows which; your `.env` is not one of them).
 2. Dumps the database to `backup_before_upgrade_<time>.sql.gz` in that folder and checks the file is whole.
 3. Notes what is running now in `.fixflow_upgrade`, so the way back is known.
-4. Switches the folder to the new version, rebuilds and starts it. **The database migrations run when the server starts**, so there is no separate step. It takes a few minutes, and the web app is unavailable while it restarts.
+4. Switches the folder to the new version and starts it: with the release's **published images** when the version is a release (nothing is built on the server), else built from the source ([Published images](install.md#published-images)). **The database migrations run when the server starts**, so there is no separate step. It takes a few minutes, and the web app is unavailable while it restarts.
 
 Then open Settings, System Health: everything should be working, and the version is the new one. If the new version needs a setting that your `.env` lacks, it stops at start with a message naming it (the same check as at install); add it to `.env` and run `make prod`.
 

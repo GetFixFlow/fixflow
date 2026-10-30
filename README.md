@@ -52,12 +52,13 @@ By hand, with four commands: you need a Linux (or macOS) machine with Docker and
 ```bash
 git clone https://github.com/GetFixFlow/fixflow.git
 cd fixflow
+git checkout v0.2.0     # the newest release (see the releases page)
 cp .env.example .env
 # Fill in the "Required" block of .env. Every line has the command beside it that makes its value (openssl rand -hex 24 ...).
-docker compose -f docker-compose.prod.yml up -d --build      # or: make prod
+make prod
 ```
 
-The first start builds the images (5 to 10 minutes). Then open the address you put in `APP_URL`: a new install shows **Set up FixFlow**. The page [Install on a server](docs/install.md) has the rest, including what is running and where the data lives. The front door speaks plain HTTP until you turn on [HTTPS](docs/https.md).
+On a release the first start pulls the published images (a few minutes); on anything else it builds them (5 to 10 minutes). Then open the address you put in `APP_URL`: a new install shows **Set up FixFlow**. The page [Install on a server](docs/install.md) has the rest, including what is running and where the data lives. The front door speaks plain HTTP until you turn on [HTTPS](docs/https.md).
 
 ---
 

@@ -37,12 +37,13 @@ You need a Linux (or macOS) machine with Docker and Docker Compose v2, about 2 G
 ```bash
 git clone https://github.com/GetFixFlow/fixflow.git
 cd fixflow
+git checkout v0.2.0     # the newest release (the releases page lists them); see "Published images" below
 cp .env.example .env
 # Fill in the "Required" block of .env. Every line has the command beside it that makes its value (openssl rand -hex 24 ...).
-docker compose -f docker-compose.prod.yml up -d --build      # or: make prod
+make prod               # starts it with bin/up and waits until every service is healthy
 ```
 
-The first start builds the two images on the server (about 5 to 10 minutes) and pulls the rest. Then open the address you put in `APP_URL`: a new install shows **Set up FixFlow** (see [First-run setup](#first-run-setup) below). `docker compose -f docker-compose.prod.yml ps` shows seven services, all `healthy`: `web`, `api`, `sidekiq`, `db`, `redis`, `mqtt` and `s3`.
+On a release the first start pulls FixFlow's two images and the rest (a few minutes); on anything else it builds the two images on the server first (about 5 to 10 minutes). See [Published images](#published-images). Then open the address you put in `APP_URL`: a new install shows **Set up FixFlow** (see [First-run setup](#first-run-setup) below). `bin/compose ps` shows seven services, all `healthy`: `web`, `api`, `sidekiq`, `db`, `redis`, `mqtt` and `s3`.
 
 - **One front door.** `web` serves the web app and passes `/api` and `/cable` (live updates) on to the API. It listens on `HTTP_PORT` (80 unless you set another; put the port in `APP_URL` if it is not 80). The sensor broker is on port 1883. **Nothing else is published**: the database, Redis, the file storage and the API can only be reached from inside.
 - **HTTPS is optional and built in.** The front door itself speaks plain HTTP, so sign-in tokens cross your network unencrypted until you turn on [HTTPS](https.md) or put your own TLS proxy in front.
@@ -50,6 +51,18 @@ The first start builds the two images on the server (about 5 to 10 minutes) and 
 - **Settings.** Everything in `.env` reaches the API and the worker, so any setting in the [settings table](configuration.md) can be added there. If a required one is missing, `docker compose` says which.
 - **Data lives in four volumes** (`postgres_data`, `redis_data`, `s3_data`, `mqtt_data`); `docker compose ... down` keeps them, `down -v` deletes them. Back up as described in [Backups and restoring](backups.md).
 - **Commands.** Commands in these pages that start with `docker compose exec api rails ...` are written for the development stack; on a production install they are `docker compose -f docker-compose.prod.yml exec api bin/rails ...`. `make prod`, `make prod-status`, `make prod-logs`, `make prod-stop`, `make backup` and `make restore` wrap the common ones.
+
+## Published images
+
+Every release publishes its two images, `fixflow-api` and `fixflow-web`, to GitHub's container registry (`ghcr.io/getfixflow`), for Intel/AMD and ARM servers. Each is tagged with the exact version (`0.2.0`); there is **no `latest` tag**, so an install never changes version by itself. `make prod` (that is `bin/up`) decides what to do:
+
+| The folder is on | `make prod` |
+| --- | --- |
+| A release (`git checkout v0.2.0`), and its images can be pulled | pulls them: **nothing is built on the server** |
+| A release, but they cannot be pulled (no network to the registry, or that release has no images) | says so, and builds them from the source in the folder |
+| Anything else (a branch, a commit) | builds them from the source in the folder |
+
+`FIXFLOW_BUILD=yes make prod` always builds here, for example to try a change of your own. `FIXFLOW_PULL=yes make prod` always pulls and stops if it cannot. To use a mirror of the registry (for a server that cannot reach `ghcr.io`), copy the two images there and set `FIXFLOW_IMAGE_REPO=registry.example.com/fixflow` in `.env`; the images must be named `fixflow-api:0.2.0` and `fixflow-web:0.2.0` in it. `make upgrade` does the same as `make prod` after it switches versions ([Upgrading](upgrading.md)).
 
 ## First-run setup
 
