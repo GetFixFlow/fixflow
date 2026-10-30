@@ -9,6 +9,7 @@ import { useLogout } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/Button'
 import { SyncStatus } from './SyncStatus'
 import { cn } from '@/lib/utils'
+import { env } from '@/lib/env'
 
 export function Header() {
   const navigate = useNavigate()
@@ -86,6 +87,12 @@ export function Header() {
                 onSelect={() => navigate('/settings/profile')}
               >
                 Profile
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                asChild
+                className="flex cursor-pointer rounded-sm px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 focus:outline-none"
+              >
+                <a href={env.docsUrl} target="_blank" rel="noopener noreferrer">Help and guides</a>
               </DropdownMenu.Item>
               <DropdownMenu.Item
                 className="flex cursor-pointer rounded-sm px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none"

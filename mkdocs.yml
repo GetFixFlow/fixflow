@@ -79,6 +79,8 @@ nav:
       - Watching the install: monitoring.md
       - Troubleshooting: troubleshooting.md
   - Use FixFlow:
+      - Quick start for technicians: technician.md
+      - Administrator guide, first week: administrator.md
       - Work orders and maintenance: work-orders.md
       - Sensors and IoT: iot.md
       - Reports and the dashboard: reports.md
