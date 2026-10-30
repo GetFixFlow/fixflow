@@ -27,7 +27,7 @@ Set where backups go **before** you rely on the install, and do one test restore
 
 ## Day 4: scheduled maintenance
 
-Under **Preventive Maintenance**, create a schedule for each recurring job: a name, the asset, the priority, how often and when to start, plus a **checklist** so the steps are always the same. It creates the work orders by itself. [Work orders and maintenance](work-orders.md) explains checklists.
+Under **Preventive Maintenance**, create a schedule for each recurring job: a name, the asset, the priority, how often and when to start, plus a **checklist** so the steps are always the same. It creates the work orders by itself. [Work orders and maintenance](work-orders.md) explains checklists. A job that is done by running hours or kilometres instead of by date follows a **meter** on the asset (**Asset, Meters, Add meter**, then choose *Meter-Based* in the schedule): see [Meters](meters.md).
 
 ## Day 5: hear about it
 

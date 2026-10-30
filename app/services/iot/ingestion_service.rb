@@ -27,6 +27,7 @@ module Iot
         results[:processed] += 1
 
         broadcast_reading(sensor_reading)
+        feed_meters(sensor_reading)
 
         Array(Iot::RuleEvaluatorService.evaluate(asset, sensor_reading)).each do |alert|
           results[:alerts_triggered] += 1
@@ -91,6 +92,16 @@ module Iot
 
       organization.assets.find_by(id: identifier) ||
         organization.assets.find_by(asset_tag: identifier)
+    end
+
+    # A sensor can feed a meter ("running_hours" on this asset): its reading moves up with the sensor's. A bad reading must not
+    # stop the sensor data from being stored, so nothing here raises.
+    private_class_method def self.feed_meters(sensor_reading)
+      Meter.for_sensor(sensor_reading.asset_id, sensor_reading.metric_name).find_each do |meter|
+        MeterReadingRecorder.call(meter, value: sensor_reading.value, at: sensor_reading.recorded_at, source: :sensor)
+      end
+    rescue StandardError => e
+      Rails.logger.warn "[Iot::IngestionService] Could not update a meter from #{sensor_reading.metric_name}: #{e.message}"
     end
 
     private_class_method def self.broadcast_reading(sensor_reading)

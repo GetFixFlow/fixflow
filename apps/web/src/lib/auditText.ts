@@ -10,6 +10,7 @@ export const RECORD_TYPES: Record<string, string> = {
   ApiKey: 'API key',
   User: 'Person',
   Part: 'Part',
+  Meter: 'Meter',
   Organization: 'Company',
 }
 

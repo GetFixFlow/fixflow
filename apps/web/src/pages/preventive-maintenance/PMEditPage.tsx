@@ -9,8 +9,10 @@ import { Skeleton } from '@/components/ui/Skeleton'
 import { AssetSelect } from '@/components/assets/AssetSelect'
 import { ChecklistTemplateBuilder } from '@/components/pm/ChecklistTemplateBuilder'
 import { RequiredPartsEditor } from '@/components/pm/RequiredPartsEditor'
+import { MeterScheduleFields } from '@/components/pm/MeterScheduleFields'
 import { usePM, useUpdatePM } from '@/hooks/usePreventiveMaintenance'
 import { useAuthStore } from '@/stores/authStore'
+import { buildTemplate } from '@/lib/pmTemplate'
 import { cn } from '@/lib/utils'
 import type { PMChecklistStep, PMRequiredPart, PmFrequencyType, PmFrequencyUnit, Priority } from '@/types'
 
@@ -40,10 +42,13 @@ export function PMEditPage() {
   const [freqType, setFreqType] = useState<PmFrequencyType>('time_based')
   const [freqValue, setFreqValue] = useState(30)
   const [freqUnit, setFreqUnit] = useState<PmFrequencyUnit>('days')
+  const [meterId, setMeterId] = useState<number | undefined>()
+  const [lastService, setLastService] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [estimatedHours, setEstimatedHours] = useState('')
   const [titleTemplate, setTitleTemplate] = useState('')
+  const [descTemplate, setDescTemplate] = useState('') // kept as it is: this form does not edit it
   const [checklistSteps, setChecklistSteps] = useState<PMChecklistStep[]>([])
   const [requiredParts, setRequiredParts] = useState<PMRequiredPart[]>([])
   const [isDirty, setIsDirty] = useState(false)
@@ -57,12 +62,14 @@ export function PMEditPage() {
       setFreqType(pm.frequency_type ?? 'time_based')
       setFreqValue(pm.frequency_value ?? 30)
       setFreqUnit(pm.frequency_unit ?? 'days')
+      setMeterId(pm.meter?.id)
       setStartDate(pm.start_date ? format(new Date(pm.start_date), 'yyyy-MM-dd') : '')
       setEndDate(pm.end_date ? format(new Date(pm.end_date), 'yyyy-MM-dd') : '')
       setEstimatedHours(pm.estimated_hours?.toString() ?? '')
-      setTitleTemplate(pm.title_template ?? '')
-      setChecklistSteps(pm.checklist_template ?? [])
-      setRequiredParts(pm.required_parts ?? [])
+      setTitleTemplate(pm.template?.title ?? '')
+      setDescTemplate(pm.template?.description ?? '')
+      setChecklistSteps(pm.template?.checklist ?? [])
+      setRequiredParts(pm.template?.required_parts ?? [])
     }
   }, [pm])
 
@@ -88,13 +95,11 @@ export function PMEditPage() {
       priority,
       frequency_type: freqType,
       frequency_value: freqValue,
-      frequency_unit: freqUnit,
+      ...(freqType === 'meter_based' ? { meter_id: meterId, last_service_reading: lastService.trim() || undefined } : { frequency_unit: freqUnit }),
       start_date: startDate,
       end_date: endDate || undefined,
       estimated_hours: estimatedHours ? parseFloat(estimatedHours) : undefined,
-      title_template: titleTemplate,
-      checklist_template: checklistSteps.length > 0 ? checklistSteps : undefined,
-      required_parts: requiredParts.length > 0 ? requiredParts.map((p) => ({ part_id: p.part_id, quantity: p.quantity })) : undefined,
+      template: buildTemplate({ title: titleTemplate, fallbackTitle: name, description: descTemplate, checklist: checklistSteps, parts: requiredParts }),
     }, { onSuccess: () => navigate(`/preventive-maintenance/${pm.id}`) })
   }
 
@@ -107,7 +112,11 @@ export function PMEditPage() {
 
       <div className="rounded-lg border border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20 p-3 flex gap-2 text-sm">
         <AlertTriangle className="h-4 w-4 text-yellow-600 shrink-0 mt-0.5" />
-        <p className="text-yellow-700 dark:text-yellow-300">Changing the frequency will recalculate the next due date from today.</p>
+        <p className="text-yellow-700 dark:text-yellow-300">
+          {freqType === 'meter_based'
+            ? 'Changing the interval moves the reading the schedule falls due at; it keeps counting from the last service.'
+            : 'Changing the frequency will recalculate the next due date from today.'}
+        </p>
       </div>
 
       <Card>
@@ -136,6 +145,10 @@ export function PMEditPage() {
             <textarea value={description} onChange={(e) => { setDescription(e.target.value); setIsDirty(true) }} rows={3}
               className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none" />
           </div>
+          {freqType === 'meter_based' ? (
+            <MeterScheduleFields assetId={assetId} meterId={meterId} onMeter={(v) => { setMeterId(v); setIsDirty(true) }} value={freqValue}
+              onValue={(v) => { setFreqValue(v); setIsDirty(true) }} lastService={lastService} onLastService={(v) => { setLastService(v); setIsDirty(true) }} />
+          ) : (
           <div className="flex gap-3">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Frequency: Every</label>
@@ -149,6 +162,7 @@ export function PMEditPage() {
               </select>
             </div>
           </div>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title Template</label>
             <Input value={titleTemplate} onChange={(e) => { setTitleTemplate(e.target.value); setIsDirty(true) }} placeholder={name} />

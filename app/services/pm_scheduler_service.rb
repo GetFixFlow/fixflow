@@ -32,7 +32,7 @@ class PmSchedulerService
         priority:               overrides[:priority] || pm.priority,
         checklist:              checklist,
         estimated_hours:        pm.template["estimated_hours"] || pm.estimated_hours,
-        due_date:               overrides[:due_date] || pm.next_due_at
+        due_date:               overrides[:due_date] || pm.next_due_at || pm.organization.default_due_days.days.from_now
       )
 
       execution = pm.pm_executions.create!(
@@ -44,9 +44,10 @@ class PmSchedulerService
 
       next_due = calculate_next_due(pm)
       pm.update_columns(
-        last_run_at:     Time.current,
-        next_due_at:     next_due,
-        times_generated: pm.times_generated + 1
+        last_run_at:      Time.current,
+        next_due_at:      next_due,
+        next_due_reading: pm.freq_meter_based? ? PmMeterService.next_due_reading_after_generating(pm) : pm.next_due_reading,
+        times_generated:  pm.times_generated + 1
       )
 
       PmMailer.work_order_generated(pm, work_order).deliver_later if pm.assigned_to&.wants_email?("pm_generated")
@@ -59,10 +60,13 @@ class PmSchedulerService
 
   def self.should_generate?(pm)
     return false unless pm.status_active?
-    return false if pm.next_due_at.nil?
-    return false if pm.next_due_at > Time.current + 24.hours
     return false if pm.end_date && pm.end_date < Date.today
     return false if open_work_order_exists?(pm)
+
+    # A schedule that follows a meter falls due when the meter reaches its due reading, not on a date.
+    return PmMeterService.due?(pm) if pm.freq_meter_based?
+    return false if pm.next_due_at.nil?
+    return false if pm.next_due_at > Time.current + 24.hours
 
     true
   end

@@ -24,6 +24,7 @@ import { AssetQRCode } from '@/components/assets/AssetQRCode'
 import { AssetTimeline, type TimelineEvent } from '@/components/assets/AssetTimeline'
 import { SensorReadingCard } from '@/components/assets/SensorReadingCard'
 import { SensorChart } from '@/components/assets/SensorChart'
+import { AssetMeters } from '@/components/assets/AssetMeters'
 import { LocationBreadcrumb } from '@/components/shared/LocationBreadcrumb'
 import { useAsset, useDeleteAsset } from '@/hooks/useAssets'
 import { useLocations } from '@/hooks/useLocations'
@@ -228,7 +229,7 @@ export function AssetDetailPage() {
       {/* Tabs */}
       <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
         <Tabs.List className="flex border-b border-gray-200 dark:border-gray-700">
-          {['overview', 'work-orders', 'history', 'iot-data', 'details'].map((tab) => (
+          {['overview', 'work-orders', 'meters', 'history', 'iot-data', 'details'].map((tab) => (
             <Tabs.Trigger
               key={tab}
               value={tab}
@@ -368,6 +369,11 @@ export function AssetDetailPage() {
         {/* Maintenance History */}
         <Tabs.Content value="history" className="pt-4">
           <AssetTimeline events={timelineEvents} />
+        </Tabs.Content>
+
+        {/* Meters */}
+        <Tabs.Content value="meters" className="pt-4">
+          <AssetMeters assetId={asset.id} canManage={canManage} />
         </Tabs.Content>
 
         {/* IoT Data */}

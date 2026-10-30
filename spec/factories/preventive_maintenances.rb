@@ -50,10 +50,13 @@ FactoryBot.define do
       status { :archived }
     end
 
+    # Falls due 500 hours after the meter's reading when it is made (the meter starts at 0 unless a spec says otherwise).
     trait :meter_based_pm do
       frequency_type  { :meter_based }
       frequency_value { 500 }
       frequency_unit  { "hours" }
+      meter { association :meter, organization: organization, asset: asset, unit: "hours" }
+      next_due_at     { nil }
     end
 
     trait :calendar_based do
