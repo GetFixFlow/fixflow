@@ -28,6 +28,15 @@ HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
 
 HTMLCanvasElement.prototype.toDataURL = vi.fn(() => 'data:image/png;base64,mock')
 
-beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }))
-afterEach(() => server.resetHandlers())
+// A request nobody mocked would go to the real network and, in CI, crash the run at teardown. Fail the test that sent it.
+const unmocked: string[] = []
+beforeAll(() => server.listen({
+  onUnhandledRequest(request) { unmocked.push(`${request.method} ${new URL(request.url).pathname}`) },
+}))
+afterEach(() => {
+  server.resetHandlers()
+  if (unmocked.length > 0) {
+    throw new Error(`No mock handler for: ${unmocked.splice(0).join(', ')}. Add one with server.use(...) in the test.`)
+  }
+})
 afterAll(() => server.close())

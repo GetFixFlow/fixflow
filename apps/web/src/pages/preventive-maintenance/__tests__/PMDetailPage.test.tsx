@@ -46,8 +46,8 @@ describe('PMDetailPage', () => {
       http.get('/api/v1/preventive_maintenances/1/executions', () =>
         HttpResponse.json({ executions: [], meta: { request_id: 'test', timestamp: '' } }),
       ),
-      http.get('/api/v1/preventive_maintenances/1/preview_schedule', () =>
-        HttpResponse.json({ items: [], meta: { request_id: 'test', timestamp: '' } }),
+      http.get('/api/v1/preventive_maintenances/1/preview', () =>
+        HttpResponse.json({ scheduled_dates: [] }),
       ),
       http.get('/api/v1/work_orders', () =>
         HttpResponse.json({ work_orders: [], meta: { request_id: 'test', timestamp: '' } }),

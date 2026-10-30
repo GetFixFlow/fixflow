@@ -8,6 +8,10 @@ import { useAuthStore } from '@/stores/authStore'
 import React from 'react'
 import type { SensorReading } from '@/types'
 
+vi.mock('@/lib/cable', () => ({
+  cable: { subscriptions: { create: vi.fn(() => ({ unsubscribe: vi.fn() })) } },
+}))
+
 const mockReadings: SensorReading[] = [
   { id: 1, asset_id: 1, sensor_type: 'vibration', value: 3.2, unit: 'mm/s', recorded_at: new Date().toISOString() },
   { id: 2, asset_id: 1, sensor_type: 'temperature', value: 72.4, unit: '°C', recorded_at: new Date().toISOString() },

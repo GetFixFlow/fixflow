@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { beforeEach, describe, it, expect } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
@@ -17,6 +17,14 @@ function wrapper({ children }: { children: React.ReactNode }) {
 }
 
 describe('AssetCreatePage', () => {
+  beforeEach(() => {
+    server.use(
+      http.get('/api/v1/locations', () =>
+        HttpResponse.json({ locations: [], meta: { request_id: 'test', timestamp: '' } }),
+      ),
+    )
+  })
+
   it('shows step 1 by default', () => {
     render(<AssetCreatePage />, { wrapper })
     expect(screen.getByLabelText(/asset name/i)).toBeInTheDocument()

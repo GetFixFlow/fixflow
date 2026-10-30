@@ -4,6 +4,9 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AppLayout } from '../AppLayout'
 import { useAuthStore } from '@/stores/authStore'
+import { http, HttpResponse } from 'msw'
+import { server } from '@/test/server'
+import { DEFAULT_LOCALE } from '@/lib/localeFormat'
 
 const created = vi.hoisted(() => ({ channels: [] as unknown[], unsubscribed: 0 }))
 vi.mock('@/lib/cable', () => ({
@@ -36,6 +39,7 @@ describe('live IoT alerts in the app layout', () => {
   beforeEach(() => {
     created.channels.length = 0
     created.unsubscribed = 0
+    server.use(http.get('/api/v1/localization_settings', () => HttpResponse.json({ localization: DEFAULT_LOCALE })))
     useAuthStore.setState({ user: { id: 1, email: '', full_name: 'Admin User', role: 'admin', organization_id: 1, created_at: '' }, token: 't', isAuthenticated: true })
   })
 
