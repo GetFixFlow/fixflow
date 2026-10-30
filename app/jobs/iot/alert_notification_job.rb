@@ -8,9 +8,18 @@ module Iot
 
       broadcast_alert(alert)
       broadcast_to_company(alert)
+      post_to_chat(alert)
     end
 
     private
+
+    # The serious ones, as the live toasts show them: a channel is for what someone should look at now.
+    def post_to_chat(alert)
+      return unless %w[critical high].include?(alert.severity)
+
+      ChatNotifier.post(alert.asset.organization, "iot_alert", title: "#{alert.severity.capitalize} sensor alert: #{alert.asset.name}",
+                                                              body: alert.message, path: "/iot")
+    end
 
     # The IoT screens' live feed: the alert as the alert list shows it.
     def broadcast_to_company(alert)

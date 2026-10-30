@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/authStore'
 import {
   User, Bell, Lock, Building2, Palette, Mail, Globe, Users, Shield,
-  Radio, Database, FileArchive, Search, Settings, ChevronRight, Sparkles, Activity,
+  Radio, Database, FileArchive, Search, Settings, ChevronRight, Sparkles, Activity, MessageSquare,
 } from 'lucide-react'
 
 interface NavItem {
@@ -53,6 +53,7 @@ const NAV_SECTIONS: NavSection[] = [
     roles: ['admin'],
     items: [
       { href: '/settings/iot', label: 'IoT & API Keys', icon: Radio },
+      { href: '/settings/chat', label: 'Team Chat', icon: MessageSquare },
       { href: '/settings/ai', label: 'AI Features', icon: Sparkles },
     ],
   },

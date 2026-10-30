@@ -52,6 +52,7 @@ const NotificationsPage = lazy(() => import('@/pages/settings/NotificationsPage'
 const SecurityPage = lazy(() => import('@/pages/settings/SecurityPage').then(m => ({ default: m.SecurityPage })))
 const OrganizationPage = lazy(() => import('@/pages/settings/OrganizationPage').then(m => ({ default: m.OrganizationPage })))
 const BrandingPage = lazy(() => import('@/pages/settings/BrandingPage').then(m => ({ default: m.BrandingPage })))
+const ChatSettingsPage = lazy(() => import('@/pages/settings/ChatSettingsPage').then(m => ({ default: m.ChatSettingsPage })))
 const EmailSettingsPage = lazy(() => import('@/pages/settings/EmailSettingsPage').then(m => ({ default: m.EmailSettingsPage })))
 const LocalizationPage = lazy(() => import('@/pages/settings/LocalizationPage').then(m => ({ default: m.LocalizationPage })))
 const UsersPage = lazy(() => import('@/pages/settings/UsersPage').then(m => ({ default: m.UsersPage })))
@@ -160,6 +161,7 @@ export const router = createBrowserRouter([
                       { path: 'system-health', element: <Lazy><SystemHealthPage /></Lazy> },
                       { path: 'advanced', element: <Lazy><AdvancedSettingsPage /></Lazy> },
                       { path: 'ai', element: <Lazy><AISettingsPage /></Lazy> },
+                      { path: 'chat', element: <Lazy><ChatSettingsPage /></Lazy> },
                     ],
                   },
                 ],

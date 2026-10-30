@@ -9,5 +9,8 @@ class NotifyAssigneeJob < ApplicationJob
     WorkOrderMailer.assigned(work_order).deliver_later if assignee.wants_email?("wo_assigned")
     assignee.push!("wo_assigned", title: "Assigned to you: #{work_order.work_order_number}", body: work_order.title.to_s,
                                   path: "/work-orders/#{work_order.id}")
+    ChatNotifier.post(work_order.organization, "wo_assigned",
+                      title: "#{work_order.work_order_number} assigned to #{assignee.full_name}", body: work_order.title.to_s,
+                      path: "/work-orders/#{work_order.id}")
   end
 end
