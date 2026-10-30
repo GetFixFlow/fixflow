@@ -8,6 +8,19 @@ set -eu
 
 die() { echo "bin/rollback: $*" >&2; exit 1; }
 
+# True when this folder is exactly a release (the tag vX.Y.Z, X.Y.Z being in VERSION), its compose file names published
+# images, and they can be pulled; then nothing needs building here. Otherwise it says so and returns false: build. Like bin/up,
+# but a copy of it, because the checkout replaces bin/ with another version's files.
+pulled_images() {
+  [ "${FIXFLOW_BUILD:-}" != yes ] || return 1
+  tag=$(git describe --exact-match --tags 2>/dev/null) && [ "$tag" = "v$(cat VERSION)" ] || return 1
+  grep -q 'image: .*/fixflow-api:' "${COMPOSE_FILE:-docker-compose.prod.yml}" || return 1
+  echo "Getting the published images for $tag ..."
+  $PROD pull api web && return 0
+  echo "Could not get them (no network, or this release has no published images). Building them here instead." >&2
+  return 1
+}
+
 main() {
   cd "$(dirname "$0")/.."
   # The compose file of this install: COMPOSE_FILE (in the environment or in .env; the lite install sets it), else the full
@@ -23,12 +36,13 @@ main() {
 
   echo "Switching back to $FROM_LABEL ..."
   git checkout -q "$FROM"
-  $PROD build api web
+  if pulled_images; then build=""; else build="--build"; $PROD build api web; fi
   $PROD stop web sidekiq api
   echo "Putting the database back from $BACKUP ..."
   # The uploaded files are not touched by an upgrade, so they are not copied back (FILES=no).
   $PROD run --rm -T -e REPLACE=yes -e FILES=no -v "$PWD/$BACKUP:/tmp/restore.sql.gz:ro" api bin/rails "fixflow:restore[/tmp/restore.sql.gz]"
-  $PROD up -d --build --wait --wait-timeout 900
+  # shellcheck disable=SC2086
+  $PROD up -d $build --wait --wait-timeout 900
   rm -f .fixflow_upgrade
 
   echo ""

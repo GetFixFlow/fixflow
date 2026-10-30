@@ -183,6 +183,19 @@ jobs:
       - name: Start the production stack and check it
         run: bin/check_production_stack
 
+  # Builds the api and web images, pushes them to a registry started here (what the release workflow does with ghcr.io),
+  # deletes them, and starts the production stack with bin/up allowed only to pull: the images that run must be the pulled
+  # ones. Then checks that a release whose images cannot be pulled still comes up, by building them.
+  images:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Run the stack from published images
+        run: bin/check_images
+
   # Starts the version this change is merged onto (the commit before it), puts data in it, upgrades it to this change with
   # bin/upgrade, checks the data and the migrations, then rolls back with bin/rollback. fetch-depth 2 is what makes the
   # commit before available.

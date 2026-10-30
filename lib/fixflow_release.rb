@@ -9,6 +9,8 @@ module FixflowRelease
   ROOT = File.expand_path("..", __dir__)
   VERSION_FILE = File.join(ROOT, "VERSION")
   CHANGELOG_FILE = File.join(ROOT, "CHANGELOG.md")
+  # These name the release's images (ghcr.io/getfixflow/fixflow-api:<version>), so a release moves the default version in them.
+  COMPOSE_FILES = %w[docker-compose.prod.yml docker-compose.lite.yml].map { |name| File.join(ROOT, name) }.freeze
 
   SEMVER = /\A\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?\z/
   UNRELEASED = "## [Unreleased]".freeze
@@ -51,6 +53,13 @@ module FixflowRelease
     raise Error, "Nothing is waiting under #{UNRELEASED} in CHANGELOG.md." if body.strip.empty?
 
     changelog.sub(UNRELEASED, "#{UNRELEASED}\n\n## [#{version}] - #{date.iso8601}")
+  end
+
+  # A compose file with the default image version (the 0.1.0 in ${FIXFLOW_VERSION:-0.1.0}) set to this release's.
+  def self.pin_images(compose, version)
+    raise Error, "#{version} is not a version number like 1.2.3." unless valid?(version)
+
+    compose.gsub(/(\$\{FIXFLOW_VERSION:-)[^}]*(\})/) { "#{Regexp.last_match(1)}#{version}#{Regexp.last_match(2)}" }
   end
 
   # The "Upgrade:" notes of a release, each with the start of the bullet it came from.

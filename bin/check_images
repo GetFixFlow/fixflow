@@ -1,0 +1,102 @@
+#!/bin/sh
+# Checks, for real, that an install can run from published images and that nothing has to be built on the server:
+#   1. builds the api and web images, pushes them to a registry started here (the same steps the release workflow does,
+#      with this registry in place of ghcr.io), and deletes them from this machine;
+#   2. starts the production stack with FIXFLOW_PULL=yes bin/up, which may only pull: the images that come up must be the
+#      ones pulled (they carry the registry's digest; an image built here would not), and the stack must be healthy;
+#   3. checks that a folder on a release whose images cannot be pulled still comes up, by building them (the fallback).
+# It takes several minutes (the images are built once, and once more, from cache, for the fallback). CI runs it; it removes
+# everything it started. It writes a .env, makes a git tag and deletes the stack's volumes, so it refuses to run where a .env
+# already exists: use a fresh clone, not your own working copy.
+set -eu
+cd "$(dirname "$0")/.."
+
+if [ -e .env ]; then
+  echo "bin/check_images: there is a .env here. Run this in a fresh clone; it would replace your settings." >&2
+  exit 2
+fi
+
+PORT=8090
+BASE="http://localhost:$PORT"
+REGISTRY_PORT=5001
+REGISTRY_NAME=fixflow-check-registry
+VERSION=$(cat VERSION)
+export FIXFLOW_IMAGE_REPO="localhost:$REGISTRY_PORT"
+COMPOSE="docker compose -f docker-compose.prod.yml"
+API="$FIXFLOW_IMAGE_REPO/fixflow-api:$VERSION"
+WEB="$FIXFLOW_IMAGE_REPO/fixflow-web:$VERSION"
+
+cleanup() {
+  status=$?
+  if [ "$status" != 0 ]; then
+    echo "---- container status" >&2
+    $COMPOSE ps >&2 || true
+    echo "---- last log lines" >&2
+    $COMPOSE logs --tail 40 >&2 || true
+  fi
+  $COMPOSE down -v >/dev/null 2>&1 || true
+  docker rm -f "$REGISTRY_NAME" >/dev/null 2>&1 || true
+  docker image rm "$API" "$WEB" "localhost:1/fixflow-api:$VERSION" "localhost:1/fixflow-web:$VERSION" >/dev/null 2>&1 || true
+  git tag -d "v$VERSION" >/dev/null 2>&1 || true
+  rm -f .env
+  exit "$status"
+}
+trap cleanup EXIT
+
+fail() { echo "FAIL: $*" >&2; exit 1; }
+ok() { echo "ok:   $*"; }
+
+docker rm -f "$REGISTRY_NAME" >/dev/null 2>&1 || true
+docker run -d --name "$REGISTRY_NAME" -p "$REGISTRY_PORT:5000" registry:2.8.3 >/dev/null || fail "starting a registry"
+for _ in $(seq 1 20); do
+  curl -fs "http://localhost:$REGISTRY_PORT/v2/" >/dev/null 2>&1 && break
+  sleep 1
+done
+curl -fs "http://localhost:$REGISTRY_PORT/v2/" >/dev/null || fail "the registry did not start"
+
+cp .env.example .env
+{
+  echo
+  echo "APP_URL=$BASE"
+  echo "HTTP_PORT=$PORT"
+  echo "SECRET_KEY_BASE=$(openssl rand -hex 64)"
+  echo "DEVISE_JWT_SECRET_KEY=$(openssl rand -hex 48)"
+  echo "DB_PASSWORD=$(openssl rand -hex 24)"
+  echo "REDIS_PASSWORD=$(openssl rand -hex 24)"
+  echo "MINIO_ACCESS_KEY=$(openssl rand -hex 10)"
+  echo "MINIO_SECRET_KEY=$(openssl rand -hex 24)"
+  echo "MQTT_PASSWORD=$(openssl rand -hex 24)"
+} >> .env
+
+# 1. What the release workflow does: build, push, and make sure nothing is left on this machine.
+$COMPOSE build api web || fail "building the images"
+$COMPOSE push api web || fail "pushing the images to the registry"
+docker image rm "$API" "$WEB" >/dev/null || fail "removing the built images from this machine"
+curl -s "http://localhost:$REGISTRY_PORT/v2/_catalog" | grep -q 'fixflow-api' || fail "the registry does not list fixflow-api"
+curl -s "http://localhost:$REGISTRY_PORT/v2/fixflow-api/tags/list" | grep -q "\"$VERSION\"" || fail "the registry has no fixflow-api:$VERSION"
+ok "the images were built, pushed to a registry, and removed from this machine"
+
+# 2. Start from the registry only.
+FIXFLOW_PULL=yes bin/up || fail "bin/up from the registry"
+for image in "$API" "$WEB"; do
+  digests=$(docker image inspect --format '{{join .RepoDigests " "}}' "$image") || fail "$image is not on this machine"
+  case "$digests" in
+    "$FIXFLOW_IMAGE_REPO"/*) ;;
+    *) fail "$image was not pulled from the registry (it has no registry digest: $digests)" ;;
+  esac
+done
+ok "the stack is healthy, running the images pulled from the registry"
+[ "$(curl -s -o /dev/null -w '%{http_code}' $BASE/healthz)" = "200" ] || fail "/healthz"
+curl -s $BASE/api/v1/health | grep -q '"status":"ok"' || fail "/api/v1/health through the front door"
+curl -s $BASE/ | grep -q 'id="root"' || fail "the web app is not served at /"
+ok "the front door serves the web app and the API"
+
+# 3. A release whose images cannot be pulled still starts, by building them here.
+$COMPOSE down -v >/dev/null 2>&1 || fail "stopping the stack"
+docker image rm "$API" "$WEB" >/dev/null || fail "removing the pulled images"
+git -c user.name=check -c user.email=check@fixflow.test tag "v$VERSION" 2>/dev/null || true
+OUTPUT=$(FIXFLOW_IMAGE_REPO="localhost:1" bin/up 2>&1) || { echo "$OUTPUT" >&2; fail "bin/up did not fall back to building"; }
+echo "$OUTPUT" | grep -q 'Building them here instead' || { echo "$OUTPUT" >&2; fail "bin/up did not say it fell back to building"; }
+ok "when the published images cannot be pulled, bin/up builds them and the stack is healthy"
+
+echo "Running from published images works."

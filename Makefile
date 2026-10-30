@@ -15,7 +15,7 @@ logs:
 	docker compose logs -f
 
 prod:
-	$(PROD) up --build -d
+	@./bin/up
 
 prod-stop:
 	$(PROD) stop

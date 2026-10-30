@@ -2,7 +2,8 @@
 # Upgrades a production install (docker-compose.prod.yml) to another version of FixFlow, and keeps the way back:
 #   1. dumps the database to backup_before_upgrade_<time>.sql.gz in this folder, and checks the file is whole,
 #   2. notes what is running now in .fixflow_upgrade, so `make rollback CONFIRM=yes` can put it back,
-#   3. checks out the new version, rebuilds, and starts it. The migrations run when the server starts.
+#   3. checks out the new version and starts it: with the published images when the version is a release, else built here.
+#      The migrations run when the server starts.
 # Usage: make upgrade TO=v1.2.3        (or bin/upgrade v1.2.3; TO can be a tag, a branch or a commit)
 #
 # The whole script is one function, called on the last line: the checkout in step 3 replaces this file, and a shell
@@ -10,6 +11,19 @@
 set -eu
 
 die() { echo "bin/upgrade: $*" >&2; exit 1; }
+
+# True when this folder is exactly a release (the tag vX.Y.Z, X.Y.Z being in VERSION), its compose file names published
+# images, and they can be pulled; then nothing needs building here. Otherwise it says so and returns false: build. Like bin/up,
+# but a copy of it, because the checkout replaces bin/ with another version's files.
+pulled_images() {
+  [ "${FIXFLOW_BUILD:-}" != yes ] || return 1
+  tag=$(git describe --exact-match --tags 2>/dev/null) && [ "$tag" = "v$(cat VERSION)" ] || return 1
+  grep -q 'image: .*/fixflow-api:' "${COMPOSE_FILE:-docker-compose.prod.yml}" || return 1
+  echo "Getting the published images for $tag ..."
+  $PROD pull api web && return 0
+  echo "Could not get them (no network, or this release has no published images). Building them here instead." >&2
+  return 1
+}
 
 main() {
   cd "$(dirname "$0")/.."
@@ -45,7 +59,9 @@ main() {
 
   echo "Switching from $label to $to ..."
   git checkout -q "$target"
-  if ! $PROD up -d --build --wait --wait-timeout 900; then
+  if pulled_images; then build=""; else build="--build"; fi
+  # shellcheck disable=SC2086
+  if ! $PROD up -d $build --wait --wait-timeout 900; then
     echo "" >&2
     echo "The new version did not come up healthy. Look at: make prod-logs  (or: bin/compose logs --tail 100)" >&2
     echo "To go back to $label and the database as it was (data entered since $stamp is lost): make rollback CONFIRM=yes" >&2
