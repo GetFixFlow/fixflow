@@ -5,11 +5,13 @@ How work orders move, checklists, labor cost, reporting a problem from a QR labe
 ## Work Order Status Flow
 
 ```
-open → in_progress → pending_parts → in_progress
-                  |
-                  v
-              completed → verified
+open → assigned → in_progress → completed → verified
+                   |    ^            |
+                   v    |            v  (rejected: back to in_progress)
+          on_hold / pending_parts
 ```
+
+A work order can be **cancelled** from any state before it is verified. Only someone other than the technician who did the work can verify it.
 
 ## Checklists
 
@@ -19,11 +21,11 @@ A preventive maintenance schedule can carry a **checklist** (set when you create
 
 A work order's **labor cost** is the hours recorded when it is completed times an **hourly rate**: the technician's own rate if they have one, otherwise the company's default. The rate used is saved with the work order, so raising someone's rate later does not change work already done; correcting the hours works the cost out again at the current rate. Parts and labor add up to the work order's total, and the cost reports now include the labor.
 
-Set the **default rate** in **Settings → Company** (Hourly labor rate) and, for a particular person, **Settings → Users → Edit → Hourly rate** (administrators only; leave it empty to use the default). Until a rate is set anywhere, labor counts as nothing, and the work order says so rather than guessing. Because wages are sensitive, only **managers and administrators** see labor costs and rates; technicians and requesters see the parts cost only.
+Set the **default rate** in **Settings → Organization** (Hourly labor rate) and, for a particular person, **Settings → Users → Edit → Hourly rate** (administrators only; leave it empty to use the default). Until a rate is set anywhere, labor counts as nothing, and the work order says so rather than guessing. Because wages are sensitive, only **managers and administrators** see labor costs and rates; technicians and requesters see the parts cost only.
 
 ## Reporting a problem without an account (QR labels)
 
-Every asset's QR label links to a public form, `/request?asset=<code>`, where anyone (a visitor, a nurse, a tenant) can report a problem **without an account**. The form says which equipment the label is on, asks for a name (an email is optional), and what is wrong. It becomes an ordinary work order (priority and due date from **Settings → Company**), the managers are emailed, and the person gets a link, `/request/<token>`, to follow it: received, assigned, in progress, completed (or closed without work). If the link is lost the request cannot be looked up again, so the form says to keep it, and remembers the last five on that device.
+Every asset's QR label links to a public form, `/request?asset=<code>`, where anyone (a visitor, a nurse, a tenant) can report a problem **without an account**. The form says which equipment the label is on, asks for a name (an email is optional), and what is wrong. It becomes an ordinary work order (priority and due date from **Settings → Organization**), the managers are emailed, and the person gets a link, `/request/<token>`, to follow it: received, assigned, in progress, completed (or closed without work). If the link is lost the request cannot be looked up again, so the form says to keep it, and remembers the last five on that device.
 
 Print labels from **Assets → Print labels** (or an asset's page). **Labels printed by older versions pointed at the asset page and still need a sign-in**: reprint them. A label that is not recognised (an asset since removed) still lets the person report the problem by typing the place and equipment.
 

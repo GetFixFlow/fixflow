@@ -26,6 +26,8 @@ These pages are for the person who **installs and looks after** a FixFlow server
 
 | I want to... | Read |
 | --- | --- |
+| Start as a technician, on a phone | [Quick start for technicians](technician.md) |
+| Set up the company in the first week | [Administrator guide](administrator.md) |
 | Run work orders, checklists and QR-label requests | [Work orders and maintenance](work-orders.md) |
 | Connect sensors and set alert rules | [Sensors and IoT](iot.md) |
 | Understand the reports and the dashboard | [Reports and the dashboard](reports.md) |
@@ -37,4 +39,4 @@ These pages are for the person who **installs and looks after** a FixFlow server
 [Development](development.md) is how to run it from source and run the tests. The repository's [CONTRIBUTING.md](https://github.com/GetFixFlow/fixflow/blob/main/CONTRIBUTING.md) says what a pull request needs. Security problems are reported privately: see [SECURITY.md](https://github.com/GetFixFlow/fixflow/blob/main/SECURITY.md).
 
 !!! info "What these pages do not cover yet"
-    A guide for technicians with screenshots, step-by-step server guides for particular providers, and a guide to getting the best out of every screen are still to be written. The install has been checked on Docker Desktop and in CI, not yet on a fresh server by someone outside the project: if anything in these pages was missing, wrong or confusing, please [open an issue](https://github.com/GetFixFlow/fixflow/issues).
+    The guides for technicians and administrators have no screenshots yet, and there is no page that goes through every screen. The install has been checked on Docker Desktop and in CI, not yet on a fresh server by someone outside the project: if anything in these pages was missing, wrong or confusing, please [open an issue](https://github.com/GetFixFlow/fixflow/issues).
