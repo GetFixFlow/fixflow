@@ -6,7 +6,7 @@ These pages are for the person who **installs and looks after** a FixFlow server
 
 ## Start here
 
-1. **[Install on a server](install.md)**: Docker on a Linux server, about two gigabytes of memory (or the [lite install](lite.md), with no storage server or sensor broker). Then [HTTPS](https.md) so passwords and phones' cameras work.
+1. **[Install on a server](install.md)**: Docker on a Linux server, about two gigabytes of memory (or the [lite install](lite.md), with no storage server or sensor broker). One script does it on a fresh Ubuntu server, and there are step-by-step guides for [DigitalOcean](server-digitalocean.md), [AWS](server-aws.md) and [a server inside the company network](server-company-network.md). Then [HTTPS](https.md) so passwords and phones' cameras work.
 2. **[Configuration](configuration.md)**: the settings in `.env`, what the server checks when it starts, and email.
 3. **[People and roles](users.md)** and **[Sign-in and security](security.md)**: invite your team, and switch on two-factor sign-in.
 4. **[Importing data](import.md)**: bring places, assets and parts in from a spreadsheet, or add sample data to look around.

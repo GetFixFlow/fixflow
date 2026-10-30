@@ -1,6 +1,7 @@
 require "rails_helper"
 require "fixflow_api_docs"
 require "rake"
+require "open3"
 
 # The docs (docs/*.md, built by mkdocs.yml) are only worth reading while they match the program. `mkdocs build --strict`
 # (the `docs` CI job) checks the links between pages; these check what it cannot: that the list of endpoints is the routes,
@@ -55,6 +56,20 @@ RSpec.describe "The docs" do
 
       expect(named).to include("bin/check_upgrade")
       expect(named.reject { |script| Rails.root.join(script).exist? }).to eq([])
+    end
+  end
+
+  describe "the install script the pages tell people to download" do
+    let(:script) { Rails.root.join("deploy/install.sh") }
+
+    it "is the file the pages download, and has every option they name" do
+      help = Open3.capture2("sh", script.to_s, "--help").first
+      lines = text.lines.select { |line| line.include?("install.sh") || line.start_with?("| `--") }
+      used = lines.flat_map { |line| line.scan(/--[a-z][a-z-]+/) }.uniq
+
+      expect(text).to include("raw.githubusercontent.com/GetFixFlow/fixflow/main/deploy/install.sh")
+      expect(used).to include("--domain", "--lite", "--https-mode", "--url")
+      expect(used.reject { |option| help.include?(option) }).to eq([])
     end
   end
 

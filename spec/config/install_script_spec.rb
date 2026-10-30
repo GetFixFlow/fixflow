@@ -101,9 +101,21 @@ RSpec.describe "deploy/install.sh" do
       install("--domain", "fixflow.example.com", "--email", "it@example.com")
 
       env = written_env
-      expect(env).to include("APP_URL" => "https://fixflow.example.com", "COMPOSE_PROFILES" => "https", "HTTPS_DOMAIN" => "fixflow.example.com",
-                             "HTTPS_MODE" => "automatic", "HTTPS_EMAIL" => "it@example.com", "HTTP_PORT" => "8080", "HTTP_BIND" => "127.0.0.1")
+      expect(env).to include("APP_URL" => "https://fixflow.example.com", "COMPOSE_PROFILES" => "https",
+                             "HTTPS_DOMAIN" => "fixflow.example.com", "HTTPS_MODE" => "automatic", "HTTPS_EMAIL" => "it@example.com",
+                             "HTTP_PORT" => "8080", "HTTP_BIND" => "127.0.0.1")
       expect(problems_of(env)).to eq([]) # the HTTPS checks too: APP_URL, the port, the bind
+    end
+
+    it "can use your own certificate or FixFlow's own authority instead, and the server accepts that too" do
+      %w[own-certificate internal].each do |mode|
+        FileUtils.rm_f(File.join(dir, ".env"))
+        install("--domain", "fixflow.company.local", "--https-mode", mode)
+
+        expect(written_env).to include("HTTPS_MODE" => mode, "APP_URL" => "https://fixflow.company.local", "HTTP_PORT" => "8080")
+        expect(written_env.keys).not_to include("HTTPS_EMAIL")
+        expect(problems_of(written_env)).to eq([])
+      end
     end
 
     it "does not write an email it was not given" do
@@ -161,6 +173,9 @@ RSpec.describe "deploy/install.sh" do
       %w[--url fixflow.company.local] => "--url looks like",
       %w[--url http://host/] => "--url looks like",
       %w[--version 0.2.0] => "--version looks like",
+      %w[--https-mode internal] => "goes with --domain",
+      %w[--domain a.example.com --https-mode magic] => "automatic, own-certificate or internal",
+      %w[--domain a.example.com --https-mode internal --email it@example.com] => "email is for the automatic mode",
       %w[--frobnicate] => "I do not know --frobnicate"
     }.each do |args, message|
       it "refuses #{args.join(' ')} with a plain message, before writing anything" do

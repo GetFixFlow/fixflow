@@ -20,6 +20,9 @@
 #   --domain NAME     the name people open FixFlow at (fixflow.example.com). Turns on HTTPS with a free certificate from
 #                     Let's Encrypt: the name must already point at this server and ports 80 and 443 must reach it.
 #   --email ADDRESS   with --domain: where Let's Encrypt writes before a certificate runs out
+#   --https-mode MODE with --domain: automatic (the default: a free Let's Encrypt certificate), own-certificate (your
+#                     company's: put certs/fixflow.crt and certs/fixflow.key in --dir; nothing is started until they are
+#                     there) or internal (FixFlow makes its own; every device must trust it: docs/https.md)
 #   --url ADDRESS     no domain: the address people open FixFlow at, such as http://fixflow.company.local or
 #                     http://10.0.0.5:8080 (plain HTTP; see docs/https.md for your own certificate). Without --domain and
 #                     --url it is http://<this server's first address>.
@@ -36,6 +39,7 @@ REPO="https://github.com/GetFixFlow/fixflow.git"
 DIR="/opt/fixflow"
 DOMAIN=""
 EMAIL=""
+MODE="automatic"
 URL=""
 LITE=no
 WANTED=""
@@ -54,6 +58,7 @@ parse_args() {
     case "$1" in
       --domain) [ $# -ge 2 ] || die "--domain needs a name"; DOMAIN=$2; shift 2 ;;
       --email) [ $# -ge 2 ] || die "--email needs an address"; EMAIL=$2; shift 2 ;;
+      --https-mode) [ $# -ge 2 ] || die "--https-mode needs automatic, own-certificate or internal"; MODE=$2; shift 2 ;;
       --url) [ $# -ge 2 ] || die "--url needs an address"; URL=$2; shift 2 ;;
       --lite) LITE=yes; shift ;;
       --version) [ $# -ge 2 ] || die "--version needs a release such as v0.2.0"; WANTED=$2; shift 2 ;;
@@ -66,6 +71,9 @@ parse_args() {
   done
   [ -z "$DOMAIN" ] || [ -z "$URL" ] || die "Use --domain (HTTPS, a free certificate) or --url (an address of your own), not both."
   [ -z "$EMAIL" ] || [ -n "$DOMAIN" ] || die "--email is for --domain: it is where Let's Encrypt writes."
+  case "$MODE" in automatic|own-certificate|internal) ;; *) die "--https-mode is automatic, own-certificate or internal." ;; esac
+  [ "$MODE" = automatic ] || [ -n "$DOMAIN" ] || die "--https-mode goes with --domain."
+  [ -z "$EMAIL" ] || [ "$MODE" = automatic ] || die "--email is for the automatic mode: it is where Let's Encrypt writes."
   if [ -n "$DOMAIN" ]; then
     printf '%s' "$DOMAIN" | grep -Eq '^[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?$' ||
       die "--domain is a name only, like fixflow.example.com: no https:// in front, no port or path after."
@@ -215,7 +223,7 @@ write_env() {
       # The HTTPS front door takes ports 80 and 443; the plain-HTTP door moves to 8080 and is closed to the network.
       echo "COMPOSE_PROFILES=https"
       echo "HTTPS_DOMAIN=$DOMAIN"
-      echo "HTTPS_MODE=automatic"
+      echo "HTTPS_MODE=$MODE"
       [ -z "$EMAIL" ] || echo "HTTPS_EMAIL=$EMAIL"
       echo "HTTP_PORT=8080"
       echo "HTTP_BIND=127.0.0.1"
@@ -235,8 +243,13 @@ firewall_note() {
   warn "The firewall (ufw) is on. Let people in with: ufw allow 80/tcp && ufw allow 443/tcp"
 }
 
+# The own-certificate mode cannot start without the files; say so rather than fail in the middle of the build.
+needs_certificate() {
+  [ "$MODE" = own-certificate ] && { [ ! -s "$DIR/certs/fixflow.crt" ] || [ ! -s "$DIR/certs/fixflow.key" ]; }
+}
+
 dns_note() {
-  [ -n "$DOMAIN" ] || return 0
+  [ -n "$DOMAIN" ] && [ "$MODE" = automatic ] || return 0
   resolved=$(getent hosts "$DOMAIN" 2>/dev/null | awk '{print $1}' | head -n 1)
   if [ -z "$resolved" ]; then
     warn "$DOMAIN does not resolve to any address yet. Make its DNS record point at this server first, or the certificate cannot be issued."
@@ -284,7 +297,11 @@ main() {
   write_env
   firewall_note
   dns_note
-  if [ "$START" = yes ]; then
+  if [ "$START" = yes ] && needs_certificate; then
+    say ""
+    say "Your certificate is needed before it can start: put the certificate (and any intermediate ones) in $DIR/certs/fixflow.crt"
+    say "and its key in $DIR/certs/fixflow.key, then: cd $DIR && make prod   (docs/https.md)"
+  elif [ "$START" = yes ]; then
     start_stack
     finish
   else

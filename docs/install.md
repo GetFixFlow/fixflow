@@ -5,6 +5,33 @@
 
 Install FixFlow with Docker on a Linux server, then set it up.
 
+## One-command install
+
+On a fresh **Ubuntu 22.04+ or Debian 12+** server, one script does everything below: it installs Docker, downloads FixFlow, writes `.env` with random secrets and starts it.
+
+```bash
+curl -fsSLO https://raw.githubusercontent.com/GetFixFlow/fixflow/main/deploy/install.sh
+less install.sh                                   # read it first: it runs as root
+sudo sh install.sh --domain fixflow.example.com --email you@example.com
+```
+
+| Option | What it does |
+| --- | --- |
+| `--domain NAME` | The name people open FixFlow at. Turns on [HTTPS](https.md) with a free Let's Encrypt certificate: the name must already point at this server, and ports 80 and 443 must reach it. |
+| `--email ADDRESS` | With `--domain`: where Let's Encrypt writes before a certificate runs out. |
+| `--https-mode MODE` | With `--domain`: `automatic` (the default), `own-certificate` (your company's, put in `certs/` before it starts) or `internal` (FixFlow's own). |
+| `--url ADDRESS` | Instead of `--domain`: an address of your own, such as `http://fixflow.company.local` or `http://10.0.0.5:8080`. Plain HTTP (or HTTPS done by a proxy of yours). With neither, it uses `http://<this server's address>`. |
+| `--lite` | The [lite install](lite.md): five services, for a small server. |
+| `--version TAG` | A release such as `v0.2.0`. Default: the newest release, or the development version (`main`) while there is none. |
+| `--dir PATH` | Where to put it. Default `/opt/fixflow`. |
+| `--no-start` | Do everything but build and start it. |
+
+It checks the system and that ports 80 and 443 are free before changing anything, never overwrites an existing install or `.env`, and prints what it does. When it finishes it prints the address to open: the first page creates your company and the first administrator. **Then set up [backups](backups.md)** (they are on the same disk until you do) and keep a copy of `/opt/fixflow/.env` somewhere safe.
+
+Step-by-step guides with the surrounding setup (firewall, DNS name, backups): [DigitalOcean](server-digitalocean.md), [AWS](server-aws.md) and [a server inside the company network](server-company-network.md).
+
+## Install by hand
+
 You need a Linux (or macOS) machine with Docker and Docker Compose v2, about 2 GB of memory, and a few GB of disk. Nothing else is installed on it: the database, Redis, the file storage and the sensor broker all run in containers.
 
 ```bash

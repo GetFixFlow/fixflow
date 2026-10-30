@@ -38,9 +38,16 @@
 | [API](docs/api.md) | Signing in, answers, limits, and [every endpoint](docs/api-endpoints.md) |
 | [Development](docs/development.md) | Run it from source, the tests, the architecture |
 
-## Install in four commands
+## Install
 
-You need a Linux (or macOS) machine with Docker and Docker Compose v2, about 2 GB of memory and a few GB of disk. Nothing else is installed on it.
+On a fresh Ubuntu or Debian server, one script installs Docker and FixFlow and starts it ([Install on a server](docs/install.md#one-command-install)):
+
+```bash
+curl -fsSLO https://raw.githubusercontent.com/GetFixFlow/fixflow/main/deploy/install.sh
+sudo sh install.sh --domain fixflow.example.com --email you@example.com
+```
+
+By hand, with four commands: you need a Linux (or macOS) machine with Docker and Docker Compose v2, about 2 GB of memory and a few GB of disk. Nothing else is installed on it.
 
 ```bash
 git clone https://github.com/GetFixFlow/fixflow.git
