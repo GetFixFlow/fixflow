@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Package, Plus, LayoutGrid, List, MoreVertical, Eye, Pencil, QrCode, Trash2, Upload } from 'lucide-react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -32,6 +32,8 @@ function useDebounce<T>(value: T, delay: number): T {
 
 export function AssetsListPage() {
   const navigate = useNavigate()
+  // The QR scanner sends a label's code here as ?search=, so the list shows that asset.
+  const [searchParams] = useSearchParams()
   const { user } = useAuthStore()
   const canManage = user?.role === 'admin' || user?.role === 'manager'
 
@@ -39,7 +41,7 @@ export function AssetsListPage() {
     () => (localStorage.getItem(STORAGE_KEY) as ViewMode) ?? 'table',
   )
   const [filters, setFilters] = useState<AssetFilterState>({
-    search: '',
+    search: searchParams.get('search') ?? '',
     status: '',
     location_id: null,
   })

@@ -51,6 +51,8 @@ Keep working. Start, hold, resume, complete, comments, ticks and photos are all 
 
 Anyone can scan the QR label on a machine with the phone's camera: it opens a short form that creates a work order, no account needed. If you are signed in, you can also press **New Work Order** under **Work Orders**.
 
+To look a machine up instead, press the **scan** button at the top of the screen (next to the moon) and point the phone at its label: you land on the list of assets showing just that machine; open it for its history and work orders. The phone asks to use the camera the first time, and needs HTTPS to do so.
+
 ## Stuck?
 
 Press your picture at the top right, then **Help and guides**, or ask your administrator. Problems with the sign-in itself (forgotten password, lost phone) are covered in [People and roles](users.md#forgotten-passwords).

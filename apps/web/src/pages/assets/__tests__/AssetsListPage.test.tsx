@@ -88,4 +88,25 @@ describe('AssetsListPage', () => {
       expect(screen.queryByRole('columnheader', { name: /asset tag/i })).not.toBeInTheDocument(),
     )
   })
+
+  it('starts with the search the QR scanner passed in the address', async () => {
+    const asked: (string | null)[] = []
+    server.use(
+      http.get('/api/v1/assets', ({ request }) => {
+        asked.push(new URL(request.url).searchParams.get('search'))
+        return HttpResponse.json({ assets: [mockAssets[0]], meta: { request_id: 'test', timestamp: '' } })
+      }),
+      http.get('/api/v1/locations', () => HttpResponse.json({ locations: [], meta: { request_id: 'test', timestamp: '' } })),
+    )
+    useAuthStore.setState({ user: { id: 1, email: 'test@test.com', full_name: 'Test', role: 'admin', organization_id: 1 }, token: 'token', isAuthenticated: true })
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={qc}>
+        <MemoryRouter initialEntries={['/assets?search=abc123LabelCode']}><AssetsListPage /></MemoryRouter>
+      </QueryClientProvider>,
+    )
+
+    await waitFor(() => expect(asked).toContain('abc123LabelCode'))
+    expect(await screen.findByText('Pump-01')).toBeInTheDocument()
+  })
 })

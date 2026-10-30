@@ -1,4 +1,4 @@
-import { Bell, Moon, Sun, Search } from 'lucide-react'
+import { Bell, Moon, Sun, Search, ScanLine } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import * as Avatar from '@radix-ui/react-avatar'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
@@ -43,6 +43,11 @@ export function Header() {
 
       <div className="flex items-center gap-2">
         <SyncStatus />
+        {user && user.role !== 'requester' && (
+          <Button variant="ghost" size="icon" aria-label="Scan QR code" onClick={() => navigate('/assets/scan')}>
+            <ScanLine className="h-4 w-4" />
+          </Button>
+        )}
         <Button variant="ghost" size="icon" onClick={toggleDarkMode} aria-label="Toggle theme">
           {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>
