@@ -29,6 +29,9 @@ class Organization < ApplicationRecord
   # The mail server saved in the app, or an empty one.
   def smtp_config = SmtpConfig.load(self)
 
+  # Where chat messages go (Slack, Teams...), or an empty one.
+  def chat_config = ChatConfig.load(self)
+
   # Each install serves one company. Setup is complete once that company
   # exists, after which public sign-up is closed.
   def self.setup_complete?

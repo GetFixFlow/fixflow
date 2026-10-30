@@ -56,6 +56,11 @@ Rails.application.routes.draw do
         post :test
       end
 
+      # Where chat messages (Slack, Teams...) go
+      resource :chat_settings, only: %i[show update destroy], controller: "chat_settings" do
+        post :test
+      end
+
       # The signed-in user's own details and password
       resource :profile, only: %i[show update], controller: "profile" do
         patch :password

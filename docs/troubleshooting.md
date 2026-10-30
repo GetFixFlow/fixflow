@@ -50,6 +50,10 @@ docker compose -f docker-compose.prod.yml exec api bin/rails "fixflow:reset_two_
 
 **There is no switch on Settings, Notifications, or a test does not arrive.** Push needs HTTPS, a browser that supports it, the background worker running, and a server that can reach the browser makers' push services. The table on [Notifications](notifications.md#if-it-does-not-work) says which symptom means which.
 
+## Team chat (Slack, Teams)
+
+**Nothing appears in the channel.** Open **Settings, Team Chat**: the banner says whether messages are on and where they go, and a red line gives the reason the last one failed. A **revoked or mistyped webhook** (the chat service answers 403 or 404): make a new one and paste it. **The service could not be reached:** the server needs outbound access to it. Also check that the event is ticked and that the background worker is running (System Health). See [Notifications](notifications.md#team-chat).
+
 ## Live updates and background work
 
 **New IoT alerts do not appear on their own, or the monitor never says *Live*.** The reverse proxy in front of FixFlow must pass WebSocket upgrades on `/cable`. The Docker install's own front door does; a proxy you added does not unless you configure it. See [Sensors and IoT](iot.md).

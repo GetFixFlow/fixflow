@@ -1,6 +1,6 @@
 # Notifications
 
-FixFlow tells people about work in two ways: **email** and **push notifications** on their phones and computers. Each person chooses under **Settings, Notifications**; nothing here is set by an administrator for someone else.
+FixFlow tells people about work in three ways: **email**, **push notifications** on their phones and computers, and **messages in a team chat channel** (Slack, Microsoft Teams). Email and push are each person's own choice under **Settings, Notifications**; nothing there is set by an administrator for someone else. The chat channel is the company's, set by an administrator ([below](#team-chat)).
 
 ## Email
 
@@ -54,3 +54,39 @@ FixFlow needs **no account with anyone** to send push: there is nothing to sign 
 | Everything worked until `SECRET_KEY_BASE` changed | Every device turns push on again. |
 
 An address the browser gives that points *inside* the network (rather than at a push service) is refused, so that signing in cannot be used to make the server call something it should not.
+
+## Team chat
+
+An administrator can have FixFlow post to a **Slack** or **Microsoft Teams** channel, so a whole team sees what happens without everyone having FixFlow open: **Settings, Team Chat**. Anything that takes a Slack-style incoming webhook works as "Slack", including **Mattermost** and **Rocket.Chat** on your own network.
+
+**What is posted**, each event ticked or not as you choose:
+
+| Event | The message |
+| --- | --- |
+| Someone reports a problem from a QR label | "New problem reported: WO-000012" and the title |
+| A work order is assigned | "WO-000012 assigned to Ana Perera" and the title |
+| Work is finished and needs verifying | "WO-000012 is finished and needs verifying" |
+| A critical or high sensor alert is raised | "Critical sensor alert: Pump 3" and what the rule says (medium and low are not posted: they would bury the serious ones) |
+| A part is running low or out | "Running low: Belt" and how many are left |
+
+Each message has a link back to the page in FixFlow. It carries a work order's number and title, a sensor's name and reading, a part's name and count, and for an assignment the name of the person it went to; **no requesters' names or email addresses, no costs, no comments**.
+
+### Setting it up
+
+1. **Make a webhook** in the chat service:
+    - **Slack:** create an app with *Incoming Webhooks*, add it to the channel, and copy the *Webhook URL*.
+    - **Mattermost / Rocket.Chat:** *Integrations, Incoming Webhooks*, choose the channel, copy the URL.
+    - **Microsoft Teams:** in the channel choose *Workflows* and *Post to a channel when a webhook request is received*, and copy the address it gives you.
+2. In FixFlow, **Settings, Team Chat**: choose where, paste the address, tick the events, and press **Send a test message**. A message should appear in the channel at once; if it does not, the page shows the reason the chat service gave.
+3. Tick **Post these messages** and **Save**.
+
+**The address is a secret**: anyone who has it can post to your channel. FixFlow keeps it encrypted, never shows it again (only the name of its host, to recognise it), and never writes it to the audit log. Leave the field blank later to keep the saved one. As with other saved secrets, **changing `SECRET_KEY_BASE` means entering it again**.
+
+### Limits and safety
+
+- **Messages are sent by the background worker**, within seconds, and tried again (three tries) if the chat service is down. If one cannot be delivered, or the webhook is refused (revoked, mistyped), the reason is shown at the top of the Team Chat page.
+- **No more than 20 messages a minute** go out; the rest are dropped (and logged), so a noisy sensor cannot bury the channel or get the webhook rate-limited.
+- **What people typed is made harmless**: a work order's title can be typed by anyone through the public request form, so in Slack its `<!channel>` or hidden links are shown as plain text, and for Teams the characters that make links and styles are dropped.
+- **The server must be able to reach the chat service** over the network: `hooks.slack.com` for Slack, the address of your own server for Mattermost. Addresses on your own network are fine; the server refuses its own address and link-local addresses (where cloud metadata services live). Redirects are not followed.
+- **Microsoft Teams has not yet been tried against a real Teams.** The message is the documented form for a Teams workflow webhook (an Adaptive Card in a message), and the page says so; if Teams refuses it, the reason shown is Teams' own.
+
