@@ -10,9 +10,11 @@ on:
 permissions:
   contents: write
 
+# The jobs run on Ubuntu 24.04, not "ubuntu-latest": when GitHub moved "latest" to 26.04, ruby/setup-ruby could no longer get
+# Ruby 3.3.6 (only the newest patch of each series is built there) and every Ruby job failed. Move them on purpose.
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -48,7 +50,7 @@ jobs:
   # (repository Settings, Pages).
   docs:
     needs: release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -94,7 +96,7 @@ jobs:
   # (the organisation's Packages page, the package, Package settings, Change visibility), or servers cannot pull them.
   images:
     needs: release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 120
     permissions:
       contents: read

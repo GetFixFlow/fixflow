@@ -5,9 +5,11 @@ on:
   push:
     branches: [ main ]
 
+# The jobs run on Ubuntu 24.04, not "ubuntu-latest": when GitHub moved "latest" to 26.04, ruby/setup-ruby could no longer get
+# Ruby 3.3.6 (only the newest patch of each series is built there) and every Ruby job failed. Move them on purpose.
 jobs:
   scan_ruby:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout code
@@ -25,7 +27,7 @@ jobs:
         run: bin/bundler-audit
       
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       RUBOCOP_CACHE_ROOT: tmp/rubocop
     steps:
@@ -55,7 +57,7 @@ jobs:
   # running and failed here without it, which is how that was found.
   # Node is here because spec/lib also checks the web app's requests against the routes (skipped without it).
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:16-alpine
@@ -115,7 +117,7 @@ jobs:
   # Every request the web app makes must have a route in Rails (and no route may lead to a missing action).
   # Needs Ruby (to list the routes) and Node (to read the web app's requests); no database.
   web_routes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       DEVISE_JWT_SECRET_KEY: ci-only-secret-not-used-for-anything-real
     steps:
@@ -142,7 +144,7 @@ jobs:
         run: bin/rails web:check_routes
 
   web:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: apps/web
@@ -174,7 +176,7 @@ jobs:
   # healthy, the front door serves the web app and the API, first-run setup, System Health, a backup and a restore.
   # Nothing else starts these files, and they stayed broken for that reason. It builds the images, so it takes a while.
   production_stack:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - name: Checkout code
@@ -187,7 +189,7 @@ jobs:
   # deletes them, and starts the production stack with bin/up allowed only to pull: the images that run must be the pulled
   # ones. Then checks that a release whose images cannot be pulled still comes up, by building them.
   images:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
       - name: Checkout code
@@ -200,7 +202,7 @@ jobs:
   # bin/upgrade, checks the data and the migrations, then rolls back with bin/rollback. fetch-depth 2 is what makes the
   # commit before available.
   upgrade:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
       - name: Checkout code
@@ -214,7 +216,7 @@ jobs:
   # Starts the production stack with the HTTPS front door (Caddy) and checks it: a certificate it is given is the one
   # served, the web app, API and WebSocket work over it, plain HTTP is sent to HTTPS, and Caddy's own authority works.
   https:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - name: Checkout code
@@ -227,7 +229,7 @@ jobs:
   # a photo kept on the disk and served back, no broker needed, a backup and restore of the database and the files, and
   # the memory the containers use.
   lite:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - name: Checkout code
@@ -239,7 +241,7 @@ jobs:
   # Builds the docs site (mkdocs.yml). A broken link or anchor between pages fails it, and so does a page missing from the
   # navigation. (That docs/api-endpoints.md matches the routes is checked by the `test` job.)
   docs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
