@@ -9,7 +9,7 @@ type Handler = (event: unknown) => void
 function loadWorker(origin = 'https://fixflow.example.com') {
   const handlers: Record<string, Handler> = {}
   const shown: { title: string; options: Record<string, unknown> }[] = []
-  const clients = { matchAll: vi.fn(async () => [] as unknown[]), openWindow: vi.fn(async () => ({})) }
+  const clients = { matchAll: vi.fn(async () => [] as unknown[]), openWindow: vi.fn<(url: string) => Promise<object>>(async () => ({})) }
   const self = {
     addEventListener: (type: string, handler: Handler) => {
       handlers[type] = handler
