@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { usePushNotifications } from '@/hooks/usePushNotifications'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -41,7 +42,8 @@ interface EmailEvent {
 }
 
 // Exactly the emails the server sends (EmailPreferences::EMAIL_EVENTS). An email that is not
-// sent yet is not listed: a switch for it would do nothing.
+// sent yet is not listed: a switch for it would do nothing. Those that are also pushed
+// (EmailPreferences::PUSH_EVENTS) have a second switch.
 const EMAIL_EVENTS: EmailEvent[] = [
   { key: 'wo_assigned', label: 'A work order is assigned to me', hint: 'Sent to the technician it is assigned to.', group: 'Work orders' },
   { key: 'wo_verified', label: 'A work order I requested is finished', hint: 'Sent to the person who asked for the work, once it is verified.', group: 'Work orders' },
@@ -52,6 +54,16 @@ const EMAIL_EVENTS: EmailEvent[] = [
   { key: 'pm_overdue', label: 'Maintenance is overdue', hint: 'A summary of overdue schedules.', group: 'Preventive maintenance', minRole: 'manager' },
   { key: 'part_low_stock', label: 'A part is running low or out', hint: 'Sent once each time stock reaches its reorder point, and again if it runs out.', group: 'Inventory', minRole: 'manager' },
 ]
+
+// What a screen reader says for each Push box (the row's own label belongs to the email box).
+const PUSH_EVENTS: Record<string, string> = {
+  wo_assigned: 'an assignment',
+  wo_verified: 'a finished request',
+  pm_generated: 'a scheduled work order',
+  wo_needs_verification: 'work to verify',
+  wo_new_request: 'a reported problem',
+  part_low_stock: 'a part running low',
+}
 
 const SOUND_KEY = 'fixflow-alert-sound'
 
@@ -81,7 +93,11 @@ function playSampleSound() {
 }
 
 function sameChoices(a: NotificationPreferences, b: NotificationPreferences) {
-  return a.email_enabled === b.email_enabled && EMAIL_EVENTS.every((e) => a.rules[e.key]?.email === b.rules[e.key]?.email)
+  return (
+    a.email_enabled === b.email_enabled &&
+    a.push_enabled === b.push_enabled &&
+    EMAIL_EVENTS.every((e) => a.rules[e.key]?.email === b.rules[e.key]?.email && a.rules[e.key]?.push === b.rules[e.key]?.push)
+  )
 }
 
 function PreferencesForm({ saved }: { saved: NotificationPreferences }) {
@@ -95,8 +111,8 @@ function PreferencesForm({ saved }: { saved: NotificationPreferences }) {
   const groups = Array.from(new Set(events.map((e) => e.group)))
   const changed = !sameChoices(prefs, saved)
 
-  const setRule = (key: string, email: boolean) =>
-    setPrefs((p) => ({ ...p, rules: { ...p.rules, [key]: { email } } }))
+  const setRule = (key: string, change: { email?: boolean; push?: boolean }) =>
+    setPrefs((p) => ({ ...p, rules: { ...p.rules, [key]: { ...p.rules[key], ...change } } }))
 
   const setSoundEnabled = (on: boolean) => {
     setSound(on)
@@ -109,7 +125,9 @@ function PreferencesForm({ saved }: { saved: NotificationPreferences }) {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <PageHeader title="Notifications" description="Choose which emails you get" />
+      <PageHeader title="Notifications" description="Choose which emails and push notifications you get" />
+
+      <PushDeviceCard />
 
       <Card>
         <CardContent className="space-y-4 p-5">
@@ -128,12 +146,30 @@ function PreferencesForm({ saved }: { saved: NotificationPreferences }) {
             />
           </div>
 
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Push</h3>
+              <p className="mt-0.5 text-xs text-gray-400">
+                Turn this off to get no push notifications on any of your devices. Each device is turned on separately, above.
+              </p>
+            </div>
+            <Toggle
+              id="push-enabled"
+              label="Push notifications"
+              checked={prefs.push_enabled}
+              onChange={(v) => setPrefs((p) => ({ ...p, push_enabled: v }))}
+            />
+          </div>
+
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="sr-only">
-                <tr>
-                  <th>Email</th>
-                  <th>Send me this</th>
+              <thead>
+                <tr className="text-xs text-gray-400">
+                  <th className="text-left font-normal">
+                    <span className="sr-only">Tell me when</span>
+                  </th>
+                  <th className="w-16 text-center font-normal">Email</th>
+                  <th className="w-16 text-center font-normal">Push</th>
                 </tr>
               </thead>
               <tbody>
@@ -152,7 +188,8 @@ function PreferencesForm({ saved }: { saved: NotificationPreferences }) {
 
           <p className="text-xs text-gray-400">
             Invitations and password reset links are always sent, because you could not use the app without them.
-            Emails about overdue work orders and sensor alerts, push notifications and digests are not available yet.
+            The summaries of maintenance due and overdue are email only. Emails about overdue work orders and sensor alerts, and digests,
+            are not available yet.
           </p>
 
           <Button
@@ -186,6 +223,76 @@ function PreferencesForm({ saved }: { saved: NotificationPreferences }) {
   )
 }
 
+/** Push notifications on THIS device: whether it can, whether it is on, and a test. Each device is turned on by itself. */
+function PushDeviceCard() {
+  const push = usePushNotifications()
+  const [note, setNote] = useState('')
+
+  return (
+    <Card>
+      <CardContent className="space-y-3 p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100">Push notifications on this device</h3>
+            <p className="mt-0.5 text-xs text-gray-400">
+              A message on this phone or computer when work is assigned to you, even while FixFlow is closed. Turn it on in each browser or phone you want it on.
+            </p>
+          </div>
+          {push.supported === 'supported' && !push.loading && (
+            <Toggle
+              id="push-device"
+              label="Push notifications on this device"
+              checked={push.enabled}
+              onChange={(on) => {
+                setNote('')
+                void (on ? push.enable() : push.disable())
+              }}
+            />
+          )}
+        </div>
+
+        {push.supported === 'unsupported' && (
+          <p role="status" className="text-sm text-gray-600 dark:text-gray-400">
+            This browser cannot receive push notifications. On an iPhone or iPad, add FixFlow to the Home Screen first and open it from there.
+          </p>
+        )}
+        {push.supported === 'insecure' && (
+          <p role="status" className="text-sm text-amber-700 dark:text-amber-300">
+            Push notifications need a secure address (https://). Ask whoever looks after this FixFlow server to turn on HTTPS.
+          </p>
+        )}
+        {push.supported === 'supported' && push.permission === 'denied' && !push.enabled && (
+          <p role="status" className="text-sm text-amber-700 dark:text-amber-300">
+            Notifications are blocked for this site in the browser. Allow them in the browser&apos;s settings for this address, then turn this on.
+          </p>
+        )}
+        {push.error && (
+          <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+            {push.error}
+          </p>
+        )}
+        {push.enabled && (
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={push.busy}
+              onClick={async () => setNote(await push.sendTest())}
+            >
+              Send a test
+            </Button>
+            {note && (
+              <span role="status" className="text-xs text-gray-500">
+                {note}
+              </span>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
 function GroupRows({
   group,
   events,
@@ -195,12 +302,12 @@ function GroupRows({
   group: string
   events: EmailEvent[]
   prefs: NotificationPreferences
-  onChange: (key: string, email: boolean) => void
+  onChange: (key: string, change: { email?: boolean; push?: boolean }) => void
 }) {
   return (
     <>
       <tr>
-        <td colSpan={2} className="pb-1 pt-4">
+        <td colSpan={3} className="pb-1 pt-4">
           <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">{group}</span>
         </td>
       </tr>
@@ -217,10 +324,25 @@ function GroupRows({
               id={`rule-${event.key}`}
               type="checkbox"
               checked={prefs.rules[event.key]?.email ?? true}
-              onChange={(e) => onChange(event.key, e.target.checked)}
+              onChange={(e) => onChange(event.key, { email: e.target.checked })}
               disabled={!prefs.email_enabled}
               className="rounded"
             />
+          </td>
+          <td className="w-16 py-2 text-center">
+            {event.key in PUSH_EVENTS ? (
+              <input
+                id={`push-${event.key}`}
+                type="checkbox"
+                aria-label={`Push for ${PUSH_EVENTS[event.key]}`}
+                checked={prefs.rules[event.key]?.push ?? true}
+                onChange={(e) => onChange(event.key, { push: e.target.checked })}
+                disabled={!prefs.push_enabled}
+                className="rounded"
+              />
+            ) : (
+              <span aria-hidden="true" className="text-gray-300">–</span>
+            )}
           </td>
         </tr>
       ))}
@@ -237,7 +359,7 @@ export function NotificationsPage() {
   if (!data) {
     return (
       <div className="max-w-2xl space-y-3">
-        <PageHeader title="Notifications" description="Choose which emails you get" />
+        <PageHeader title="Notifications" description="Choose which emails and push notifications you get" />
         <p role="alert" className="text-sm text-red-600 dark:text-red-400">
           Your preferences could not be loaded, so nothing is shown that could be saved over them.
         </p>

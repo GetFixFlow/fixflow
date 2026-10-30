@@ -320,6 +320,7 @@ RSpec/DescribeClass:
   Exclude:
     - 'spec/config/docs_spec.rb'
     - 'spec/config/install_script_spec.rb'
+    - 'spec/jobs/push_in_jobs_spec.rb'
     - 'spec/config/production_boot_spec.rb'
     - 'spec/config/production_stack_spec.rb'
     - 'spec/config/upgrade_spec.rb'

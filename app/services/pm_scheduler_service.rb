@@ -50,6 +50,8 @@ class PmSchedulerService
       )
 
       PmMailer.work_order_generated(pm, work_order).deliver_later if pm.assigned_to&.wants_email?("pm_generated")
+      pm.assigned_to&.push!("pm_generated", title: "Maintenance due: #{work_order.work_order_number}", body: work_order.title.to_s,
+                                            path: "/work-orders/#{work_order.id}")
 
       work_order
     end

@@ -27,6 +27,7 @@ class User < ApplicationRecord
   has_many :verified_work_orders,  class_name: "WorkOrder", foreign_key: :verified_by_id, dependent: :nullify
   has_many :comments, dependent: :destroy
   has_many :user_sessions, dependent: :delete_all
+  has_many :push_subscriptions, dependent: :delete_all
 
   # ── Sessions ────────────────────────────────────────────────────────────
   #

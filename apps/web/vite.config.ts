@@ -28,6 +28,8 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // Shows pushes from the server and opens the page they are about (public/push-sw.js).
+        importScripts: ['push-sw.js'],
         runtimeCaching: [
           {
             // Any API read, whichever address the app is served from. Network first, so what is shown

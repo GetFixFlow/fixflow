@@ -55,8 +55,43 @@ RSpec.describe EmailPreferences do
     damaged = { "email_enabled" => "banana", "rules" => { "wo_assigned" => "oops", "pm_overdue" => nil } }
     user.update_columns(notification_preferences: damaged) # rubocop:disable Rails/SkipsModelValidations
 
-    expect(user.email_preferences["rules"]["wo_assigned"]).to eq("email" => true)
+    expect(user.email_preferences["rules"]["wo_assigned"]).to eq("email" => true, "push" => true)
+    expect(user.email_preferences["push_enabled"]).to be(true)
     expect(user.wants_email?("pm_overdue")).to be(true)
+  end
+
+  describe "#wants_push?" do
+    let(:browser) { fake_browser }
+
+    before do
+      stub_push_dns
+      PushSubscription.create!(user: user, endpoint: browser.endpoint, p256dh: browser.p256dh, auth: browser.auth)
+    end
+
+    it "is yes for a person with a browser subscribed and nothing switched off" do
+      expect(user).to be_wants_push("wo_assigned")
+    end
+
+    it "is no without a browser, with the master switch off, with that event off, or for a deactivated person" do
+      expect(create(:user)).not_to be_wants_push("wo_assigned")
+      user.update_email_preferences!("push_enabled" => false)
+      expect(user).not_to be_wants_push("wo_assigned")
+      user.update_email_preferences!("push_enabled" => true, "rules" => { "wo_assigned" => { "push" => false } })
+      expect(user).not_to be_wants_push("wo_assigned")
+      expect(user).to be_wants_push("wo_verified")
+      user.update!(deactivated_at: Time.current)
+      expect(user).not_to be_wants_push("wo_verified")
+    end
+
+    it "does not depend on the email choice: email off, push on is a thing people want" do
+      user.update_email_preferences!("email_enabled" => false)
+
+      expect(user).to be_wants_push("wo_assigned")
+    end
+
+    it "refuses an event that cannot be pushed, so a typo cannot silently mean 'no'" do
+      expect { user.wants_push?("pm_overdue") }.to raise_error(ArgumentError, /unknown push event/)
+    end
   end
 
   it "refuses to be asked about an email that does not exist, so a typo in the app cannot silently mean 'no'" do

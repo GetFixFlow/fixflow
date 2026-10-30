@@ -78,7 +78,10 @@ export interface UserSession {
 /** Which emails the signed-in person wants. Invitations and password reset links are not up to them. */
 export interface NotificationPreferences {
   email_enabled: boolean
-  rules: Record<string, { email: boolean }>
+  /** Whether the browsers this person has turned push on in are pushed to at all. */
+  push_enabled: boolean
+  /** `push` is there only for the events that can be pushed (the time-sensitive ones). */
+  rules: Record<string, { email: boolean; push?: boolean }>
 }
 
 export interface OrgSettings {

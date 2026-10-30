@@ -82,6 +82,7 @@ nav:
       - Work orders and maintenance: work-orders.md
       - Sensors and IoT: iot.md
       - Reports and the dashboard: reports.md
+      - Notifications: notifications.md
   - Reference:
       - API: api.md
       - API endpoints: api-endpoints.md

@@ -76,7 +76,7 @@ Everyone chooses their own emails in **Settings → Notifications**: one switch 
 
 Deactivated people are never emailed.
 
-Not offered yet, because nothing sends them: push notifications, in-app notifications, daily and weekly digests, and emails about overdue work orders and sensor alerts. The **alert sound** switch applies to the browser it is set in (it is kept in that browser, not on the server).
+Not offered yet, because nothing sends them: in-app notifications, daily and weekly digests, and emails about overdue work orders and sensor alerts. Push notifications to phones and computers are on [their own page](notifications.md). The **alert sound** switch applies to the browser it is set in (it is kept in that browser, not on the server).
 
 ## Localization
 

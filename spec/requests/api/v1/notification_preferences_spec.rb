@@ -17,7 +17,10 @@ RSpec.describe "Notification preferences", type: :request do
       prefs = json_body["preferences"]
       expect(prefs["email_enabled"]).to be(true)
       expect(prefs["rules"].keys).to match_array(EmailPreferences::EMAIL_EVENTS)
-      expect(prefs["rules"].values).to all(eq("email" => true))
+      expect(prefs["push_enabled"]).to be(true)
+      expect(prefs["rules"].slice(*EmailPreferences::PUSH_EVENTS).values).to all(eq("email" => true, "push" => true))
+      # Only the time-sensitive ones can be pushed; the daily summaries are email only.
+      expect(prefs["rules"].except(*EmailPreferences::PUSH_EVENTS).values).to all(eq("email" => true))
     end
 
     it "needs a sign-in" do
@@ -32,10 +35,30 @@ RSpec.describe "Notification preferences", type: :request do
       change({ rules: { wo_assigned: { email: false } } })
 
       expect(response).to have_http_status(:ok)
-      expect(json_body.dig("preferences", "rules", "wo_assigned")).to eq("email" => false)
+      expect(json_body.dig("preferences", "rules", "wo_assigned")).to eq("email" => false, "push" => true)
       get "/api/v1/notification_preferences", headers: auth_headers_for(user)
-      expect(json_body.dig("preferences", "rules", "wo_assigned")).to eq("email" => false)
+      expect(json_body.dig("preferences", "rules", "wo_assigned")).to eq("email" => false, "push" => true)
       expect(json_body.dig("preferences", "rules", "pm_overdue")).to eq("email" => true)
+    end
+
+    it "saves push choices apart from email ones: the master switch, and one for each event that can be pushed" do
+      change({ push_enabled: false, rules: { wo_assigned: { push: false }, wo_verified: { email: false, push: true } } })
+
+      prefs = json_body["preferences"]
+      expect(prefs["push_enabled"]).to be(false)
+      expect(prefs["email_enabled"]).to be(true)
+      expect(prefs["rules"]["wo_assigned"]).to eq("email" => true, "push" => false)
+      expect(prefs["rules"]["wo_verified"]).to eq("email" => false, "push" => true)
+    end
+
+    it "ignores a push choice for an event that cannot be pushed, and still refuses what is not on or off" do
+      change({ rules: { pm_overdue: { push: false } } })
+
+      expect(response).to have_http_status(:ok)
+      expect(json_body.dig("preferences", "rules", "pm_overdue")).to eq("email" => true)
+
+      change({ push_enabled: "maybe" })
+      expect(response).to have_http_status(:unprocessable_content)
     end
 
     it "saves the master switch" do
@@ -76,7 +99,7 @@ RSpec.describe "Notification preferences", type: :request do
       change({ email_enabled: false, role: "admin", deactivated_at: nil, notification_preferences: { x: 1 } })
 
       expect(user.reload.role).not_to eq("admin")
-      expect(user.notification_preferences.keys).to match_array(%w[email_enabled rules])
+      expect(user.notification_preferences.keys).to match_array(%w[email_enabled push_enabled rules])
     end
   end
 end
