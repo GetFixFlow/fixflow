@@ -325,6 +325,8 @@ RSpec/DescribeClass:
     - 'spec/config/production_boot_spec.rb'
     - 'spec/config/production_stack_spec.rb'
     - 'spec/config/published_images_spec.rb'
+    - 'spec/services/iot/meter_feed_spec.rb'
+    - 'spec/services/pm_meter_service_spec.rb'
     - 'spec/config/upgrade_spec.rb'
 
 # Offense count: 25

@@ -9,9 +9,12 @@ import { AssetSelect } from '@/components/assets/AssetSelect'
 import { AssetMiniCard } from '@/components/assets/AssetMiniCard'
 import { ChecklistTemplateBuilder } from '@/components/pm/ChecklistTemplateBuilder'
 import { RequiredPartsEditor } from '@/components/pm/RequiredPartsEditor'
+import { MeterScheduleFields } from '@/components/pm/MeterScheduleFields'
 import { PMFrequencyBadge } from '@/components/pm/PMFrequencyBadge'
 import { useCreatePM } from '@/hooks/usePreventiveMaintenance'
 import { useAsset } from '@/hooks/useAssets'
+import { useAssetMeters } from '@/hooks/useMeters'
+import { buildTemplate } from '@/lib/pmTemplate'
 import { cn } from '@/lib/utils'
 import type { PMChecklistStep, PMRequiredPart, PmFrequencyType, PmFrequencyUnit, Priority } from '@/types'
 import { formatDate } from '@/lib/localeFormat'
@@ -67,6 +70,8 @@ export function PMCreatePage() {
   const [freqType, setFreqType] = useState<PmFrequencyType>('time_based')
   const [freqValue, setFreqValue] = useState(30)
   const [freqUnit, setFreqUnit] = useState<PmFrequencyUnit>('days')
+  const [meterId, setMeterId] = useState<number | undefined>()
+  const [lastService, setLastService] = useState('')
   const [startDate, setStartDate] = useState(format(new Date(), 'yyyy-MM-dd'))
   const [endDate, setEndDate] = useState('')
   const [noEndDate, setNoEndDate] = useState(true)
@@ -79,6 +84,9 @@ export function PMCreatePage() {
   const [requiredParts, setRequiredParts] = useState<PMRequiredPart[]>([])
 
   const { data: asset } = useAsset(assetId ?? 0)
+  const { data: meters } = useAssetMeters(assetId)
+  const meter = meters?.find((m) => m.id === meterId)
+  const byMeter = freqType === 'meter_based'
 
   const previewDates = useMemo(
     () => computePreviewDates(freqType, freqValue, freqUnit, startDate),
@@ -86,7 +94,7 @@ export function PMCreatePage() {
   )
 
   const step1Valid = name.trim().length >= 3 && !!assetId
-  const step2Valid = freqValue > 0 && !!startDate
+  const step2Valid = freqValue > 0 && !!startDate && (!byMeter || !!meterId)
 
   const handleSubmit = () => {
     const payload: Record<string, unknown> = {
@@ -97,14 +105,13 @@ export function PMCreatePage() {
       priority,
       frequency_type: freqType,
       frequency_value: freqValue,
-      frequency_unit: freqUnit,
+      // A schedule by meter counts in the meter's own unit, which the server takes from the meter.
+      ...(byMeter ? { meter_id: meterId, last_service_reading: lastService.trim() || undefined } : { frequency_unit: freqUnit }),
       start_date: startDate,
       end_date: noEndDate ? undefined : endDate || undefined,
       estimated_hours: estimatedHours ? parseFloat(estimatedHours) : undefined,
-      title_template: titleTemplate || name,
-      description_template: descTemplate,
-      checklist_template: checklistSteps.length > 0 ? checklistSteps : undefined,
-      required_parts: requiredParts.length > 0 ? requiredParts.map((p) => ({ part_id: p.part_id, quantity: p.quantity })) : undefined,
+      // What each occurrence makes: the server builds the work order from this (and reads nothing else for it).
+      template: buildTemplate({ title: titleTemplate, fallbackTitle: name, description: descTemplate, checklist: checklistSteps, parts: requiredParts }),
     }
     createPM.mutate(payload, {
       onSuccess: (res) => navigate(`/preventive-maintenance/${res.data.data.id}`),
@@ -113,7 +120,7 @@ export function PMCreatePage() {
 
   const FREQ_TYPE_CARDS: { id: PmFrequencyType; label: string; icon: string; desc: string }[] = [
     { id: 'time_based', label: 'Time-Based', icon: '⏱', desc: 'Every N days/weeks/months' },
-    { id: 'meter_based', label: 'Meter-Based', icon: '📊', desc: 'Every N hours/cycles' },
+    { id: 'meter_based', label: 'Meter-Based', icon: '📊', desc: 'Every N hours, km or cycles of a meter' },
     { id: 'calendar_based', label: 'Calendar', icon: '📅', desc: 'Specific day of month/week' },
     { id: 'condition_based', label: 'Condition', icon: '⚡', desc: 'Triggered by IoT rule' },
   ]
@@ -190,7 +197,12 @@ export function PMCreatePage() {
                 ))}
               </div>
 
-              {(freqType === 'time_based' || freqType === 'meter_based') && (
+              {byMeter && (
+                <MeterScheduleFields assetId={assetId} meterId={meterId} onMeter={setMeterId} value={freqValue} onValue={setFreqValue}
+                  lastService={lastService} onLastService={setLastService} />
+              )}
+
+              {freqType === 'time_based' && (
                 <div className="flex gap-3 items-end">
                   <div className="flex-1">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Every</label>
@@ -200,9 +212,7 @@ export function PMCreatePage() {
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Unit</label>
                     <select value={freqUnit} onChange={(e) => setFreqUnit(e.target.value as PmFrequencyUnit)}
                       className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
-                      {freqType === 'time_based'
-                        ? ['days','weeks','months'].map((u) => <option key={u} value={u}>{u}</option>)
-                        : ['hours','cycles','km'].map((u) => <option key={u} value={u}>{u}</option>)}
+                      {['days','weeks','months'].map((u) => <option key={u} value={u}>{u}</option>)}
                     </select>
                   </div>
                 </div>
@@ -227,8 +237,8 @@ export function PMCreatePage() {
                 <Input type="number" min={0} step={0.5} value={estimatedHours} onChange={(e) => setEstimatedHours(e.target.value)} placeholder="e.g. 1.5" className="w-32" />
               </div>
 
-              {/* Schedule preview */}
-              <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-3">
+              {/* Schedule preview (dates; a schedule by meter has the reading it falls due at, above) */}
+              {!byMeter && <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-3">
                 <p className="text-xs font-medium text-blue-700 dark:text-blue-300 mb-2 flex items-center gap-1">📅 Schedule Preview</p>
                 <ol className="space-y-1">
                   {previewDates.map((d, i) => {
@@ -243,7 +253,7 @@ export function PMCreatePage() {
                     )
                   })}
                 </ol>
-              </div>
+              </div>}
             </div>
           )}
 
@@ -287,10 +297,11 @@ export function PMCreatePage() {
                   <div className="flex justify-between"><dt className="text-gray-500">Asset</dt><dd>{asset?.name} ({asset?.asset_tag})</dd></div>
                   <div className="flex justify-between"><dt className="text-gray-500">Priority</dt><dd className="capitalize">{priority}</dd></div>
                   <div className="flex justify-between"><dt className="text-gray-500">Schedule</dt>
-                    <dd><PMFrequencyBadge frequencyType={freqType} frequencyValue={freqValue} frequencyUnit={freqUnit} /></dd>
+                    <dd><PMFrequencyBadge frequencyType={freqType} frequencyValue={freqValue} frequencyUnit={byMeter ? meter?.unit : freqUnit} /></dd>
                   </div>
                   <div className="flex justify-between"><dt className="text-gray-500">Starts</dt><dd>{formatDate(new Date(startDate))}</dd></div>
-                  <div className="flex justify-between"><dt className="text-gray-500">First due</dt><dd>{formatDate(previewDates[0])}</dd></div>
+                  <div className="flex justify-between"><dt className="text-gray-500">First due</dt>
+                    <dd>{byMeter ? (meter ? `At ${((lastService.trim() !== '' && !Number.isNaN(Number(lastService)) ? Number(lastService) : meter.reading) + freqValue).toLocaleString()} ${meter.unit}` : '—') : formatDate(previewDates[0])}</dd></div>
                   <div className="flex justify-between"><dt className="text-gray-500">Template</dt><dd className="truncate max-w-[60%]">{titleTemplate || name}</dd></div>
                   {checklistSteps.length > 0 && <div className="flex justify-between"><dt className="text-gray-500">Checklist</dt><dd>{checklistSteps.length} steps ({checklistSteps.filter((s) => s.required).length} required)</dd></div>}
                   {requiredParts.length > 0 && <div className="flex justify-between"><dt className="text-gray-500">Parts</dt><dd>{requiredParts.map((p) => `${p.part?.name} ×${p.quantity}`).join(', ')}</dd></div>}

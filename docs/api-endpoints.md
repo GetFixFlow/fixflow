@@ -6,7 +6,7 @@ the like stand for a value, and `:format` is left out. Live updates are a WebSoc
 holds the standard routes of the sign-in library that nothing uses (`sign_up/edit` and the like): the ones to use are
 `sign_in`, `sign_out`, `two_factor`, `password` and `me`; `sign_up` works only until the first company exists.
 
-There are 192 endpoints in 37 groups: [activity_logs](#activity-logs), [ai](#ai), [api_keys](#api-keys), [assets](#assets), [auth](#auth), [backups](#backups), [branding](#branding), [chat_settings](#chat-settings), [dashboard](#dashboard), [data_usage](#data-usage), [email_settings](#email-settings), [getting_started](#getting-started), [health](#health), [imports](#imports), [invitations](#invitations), [iot](#iot), [iot_alerts](#iot-alerts), [iot_rules](#iot-rules), [localization_settings](#localization-settings), [locations](#locations), [notification_preferences](#notification-preferences), [organization_settings](#organization-settings), [parts](#parts), [preventive_maintenances](#preventive-maintenances), [profile](#profile), [public_assets](#public-assets), [public_request_form](#public-request-form), [push_subscriptions](#push-subscriptions), [reports](#reports), [sample_data](#sample-data), [sessions](#sessions), [setup](#setup), [storage](#storage), [system_health](#system-health), [users](#users), [work_orders](#work-orders), [work_requests](#work-requests).
+There are 198 endpoints in 38 groups: [activity_logs](#activity-logs), [ai](#ai), [api_keys](#api-keys), [assets](#assets), [auth](#auth), [backups](#backups), [branding](#branding), [chat_settings](#chat-settings), [dashboard](#dashboard), [data_usage](#data-usage), [email_settings](#email-settings), [getting_started](#getting-started), [health](#health), [imports](#imports), [invitations](#invitations), [iot](#iot), [iot_alerts](#iot-alerts), [iot_rules](#iot-rules), [localization_settings](#localization-settings), [locations](#locations), [meters](#meters), [notification_preferences](#notification-preferences), [organization_settings](#organization-settings), [parts](#parts), [preventive_maintenances](#preventive-maintenances), [profile](#profile), [public_assets](#public-assets), [public_request_form](#public-request-form), [push_subscriptions](#push-subscriptions), [reports](#reports), [sample_data](#sample-data), [sessions](#sessions), [setup](#setup), [storage](#storage), [system_health](#system-health), [users](#users), [work_orders](#work-orders), [work_requests](#work-requests).
 
 ## activity-logs
 
@@ -35,6 +35,8 @@ There are 192 endpoints in 37 groups: [activity_logs](#activity-logs), [ai](#ai)
 | --- | --- | --- |
 | GET | `/api/v1/assets` | `api/v1/assets#index` |
 | POST | `/api/v1/assets` | `api/v1/assets#create` |
+| GET | `/api/v1/assets/:asset_id/meters` | `api/v1/meters#index` |
+| POST | `/api/v1/assets/:asset_id/meters` | `api/v1/meters#create` |
 | DELETE | `/api/v1/assets/:id` | `api/v1/assets#destroy` |
 | GET | `/api/v1/assets/:id` | `api/v1/assets#show` |
 | PATCH, PUT | `/api/v1/assets/:id` | `api/v1/assets#update` |
@@ -187,6 +189,15 @@ There are 192 endpoints in 37 groups: [activity_logs](#activity-logs), [ai](#ai)
 | GET | `/api/v1/locations/:id` | `api/v1/locations#show` |
 | PATCH, PUT | `/api/v1/locations/:id` | `api/v1/locations#update` |
 | GET | `/api/v1/locations/tree` | `api/v1/locations#tree` |
+
+## meters
+
+| Method | Path | Handled by |
+| --- | --- | --- |
+| DELETE | `/api/v1/meters/:id` | `api/v1/meters#destroy` |
+| PATCH, PUT | `/api/v1/meters/:id` | `api/v1/meters#update` |
+| GET | `/api/v1/meters/:meter_id/readings` | `api/v1/meter_readings#index` |
+| POST | `/api/v1/meters/:meter_id/readings` | `api/v1/meter_readings#create` |
 
 ## notification-preferences
 

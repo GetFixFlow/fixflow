@@ -109,7 +109,7 @@ module Api
       def pm_params
         params.require(:preventive_maintenance).permit(
           :name, :description, :asset_id, :assigned_to_id, :priority,
-          :frequency_type, :frequency_value, :frequency_unit,
+          :frequency_type, :frequency_value, :frequency_unit, :meter_id, :last_service_reading,
           :start_date, :end_date, :estimated_hours,
           template: {}
         )

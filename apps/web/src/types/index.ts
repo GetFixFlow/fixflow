@@ -300,7 +300,8 @@ export interface PublicAsset {
 // ── Preventive Maintenance ────────────────────────────────────────────────────
 
 export type PmFrequencyType = 'time_based' | 'meter_based' | 'calendar_based' | 'condition_based'
-export type PmFrequencyUnit = 'days' | 'weeks' | 'months' | 'hours' | 'cycles'
+/** Days, weeks or months for a schedule by time; for one that follows a meter, that meter's unit (hours, km, cycles ...). */
+export type PmFrequencyUnit = 'days' | 'weeks' | 'months' | 'hours' | 'cycles' | (string & {})
 export type PmStatus = 'active' | 'paused' | 'archived'
 export type PmExecutionStatus = 'pending' | 'generated' | 'completed' | 'skipped'
 
@@ -342,6 +343,9 @@ export interface PreventiveMaintenance {
   start_date?: string
   end_date?: string | null
   next_due_at?: string | null
+  /** Meter-based schedules: the meter followed, and the reading at which the schedule falls due. */
+  meter?: { id: number; name: string; unit: string; reading: number } | null
+  next_due_reading?: number | null
   last_run_at?: string | null
   times_generated?: number
   times_completed?: number

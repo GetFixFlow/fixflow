@@ -11,11 +11,14 @@ class PmSchedulerJob < ApplicationJob
       .where("next_due_at <= ?", Time.current + 24.hours)
       .includes(:organization, :asset, :assigned_to)
 
-    due_pms.each do |pm|
+    # Schedules that follow a meter are made due by a reading (see MeterReadingRecorder); this catches any that were missed.
+    meter_pms = PreventiveMaintenance.status_active.freq_meter_based.includes(:organization, :asset, :assigned_to, :meter)
+
+    (due_pms.to_a + meter_pms.to_a).uniq.each do |pm|
       if PmSchedulerService.should_generate?(pm)
         PmSchedulerService.generate_work_order(pm)
         generated += 1
-      else
+      elsif !pm.freq_meter_based? # a meter schedule that is not due yet is the normal case, not a skip
         skipped += 1
       end
     rescue => e

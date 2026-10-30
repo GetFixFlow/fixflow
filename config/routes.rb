@@ -91,6 +91,12 @@ Rails.application.routes.draw do
           get  :history
           post :qr_code
         end
+        resources :meters, only: %i[index create]
+      end
+
+      # Meters (running hours, kilometres, cycles) and their readings
+      resources :meters, only: %i[update destroy] do
+        resources :readings, only: %i[index create], controller: "meter_readings"
       end
 
       resources :work_orders do

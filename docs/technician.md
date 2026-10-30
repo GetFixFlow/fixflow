@@ -33,6 +33,10 @@ While you work, the same page has:
 - **Attachments**: add a photo of the fault, the repair or a delivery note. Photos are shrunk before they are sent, so they are quick even on a weak signal.
 - **Parts**: record the parts you used, so stock and cost stay right.
 
+## Hours and kilometres
+
+If the machine has a counter (running hours, kilometres), your manager may ask you to read it. Open the asset (the scan button at the top finds it from its label), choose the **Meters** tab, press **Record reading**, type the number. A reading lower than the last one is refused: check the number. When a counter reaches a service point, a work order is made by itself ([Meters](meters.md)).
+
 ## Complete the job
 
 **✓ Complete** asks for:

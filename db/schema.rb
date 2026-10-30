@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_120400) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_120500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -191,6 +191,37 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_120400) do
     t.index ["organization_id"], name: "index_locations_on_organization_id"
   end
 
+  create_table "meter_readings", force: :cascade do |t|
+    t.bigint "meter_id", null: false
+    t.bigint "recorded_by_id"
+    t.decimal "value", precision: 14, scale: 2, null: false
+    t.datetime "recorded_at", null: false
+    t.integer "source", default: 0, null: false
+    t.boolean "reset", default: false, null: false
+    t.text "note"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["meter_id", "recorded_at"], name: "index_meter_readings_on_meter_id_and_recorded_at"
+    t.index ["meter_id"], name: "index_meter_readings_on_meter_id"
+    t.index ["recorded_by_id"], name: "index_meter_readings_on_recorded_by_id"
+  end
+
+  create_table "meters", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "asset_id", null: false
+    t.string "name", null: false
+    t.string "unit", null: false
+    t.decimal "reading", precision: 14, scale: 2, default: "0.0", null: false
+    t.datetime "last_reading_at"
+    t.string "sensor_metric"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["asset_id", "name"], name: "index_meters_on_asset_id_and_name", unique: true
+    t.index ["asset_id", "sensor_metric"], name: "index_meters_on_asset_id_and_sensor_metric", unique: true, where: "(sensor_metric IS NOT NULL)"
+    t.index ["asset_id"], name: "index_meters_on_asset_id"
+    t.index ["organization_id"], name: "index_meters_on_organization_id"
+  end
+
   create_table "organizations", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name", null: false
@@ -258,8 +289,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_120400) do
     t.integer "times_generated", default: 0, null: false
     t.integer "times_skipped", default: 0, null: false
     t.datetime "updated_at", null: false
+    t.bigint "meter_id"
+    t.decimal "next_due_reading", precision: 14, scale: 2
     t.index ["asset_id"], name: "index_preventive_maintenances_on_asset_id"
     t.index ["assigned_to_id"], name: "index_preventive_maintenances_on_assigned_to_id"
+    t.index ["meter_id"], name: "index_preventive_maintenances_on_meter_id"
     t.index ["next_due_at"], name: "index_preventive_maintenances_on_next_due_at"
     t.index ["organization_id", "status"], name: "index_preventive_maintenances_on_organization_id_and_status"
     t.index ["organization_id"], name: "index_preventive_maintenances_on_organization_id"
@@ -483,11 +517,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_120400) do
   add_foreign_key "iot_rules", "users", column: "assigned_to_id"
   add_foreign_key "iot_rules", "users", column: "created_by_id"
   add_foreign_key "locations", "organizations"
+  add_foreign_key "meter_readings", "meters"
+  add_foreign_key "meter_readings", "users", column: "recorded_by_id"
+  add_foreign_key "meters", "assets"
+  add_foreign_key "meters", "organizations"
   add_foreign_key "parts", "locations"
   add_foreign_key "parts", "organizations"
   add_foreign_key "pm_executions", "preventive_maintenances"
   add_foreign_key "pm_executions", "work_orders"
   add_foreign_key "preventive_maintenances", "assets"
+  add_foreign_key "preventive_maintenances", "meters"
   add_foreign_key "preventive_maintenances", "organizations"
   add_foreign_key "preventive_maintenances", "users", column: "assigned_to_id"
   add_foreign_key "push_subscriptions", "users"

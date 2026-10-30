@@ -5,6 +5,7 @@ import { PMDueDateDisplay } from './PMDueDateDisplay'
 import { formatFrequency } from './PMFrequencyBadge'
 import type { PreventiveMaintenance } from '@/types'
 import { formatDate } from '@/lib/localeFormat'
+import { meterDueText } from '@/lib/pmMeter'
 
 export function PMScheduleInfo({ pm }: { pm: PreventiveMaintenance }) {
   const dueAt = pm.next_due_at
@@ -24,7 +25,7 @@ export function PMScheduleInfo({ pm }: { pm: PreventiveMaintenance }) {
           </div>
           <div className="flex justify-between">
             <dt className="text-gray-500">Next Due</dt>
-            <dd><PMDueDateDisplay dueDate={dueAt} showIcon={false} /></dd>
+            <dd className="text-right">{meterDueText(pm) ?? <PMDueDateDisplay dueDate={dueAt} showIcon={false} />}</dd>
           </div>
           <div className="flex justify-between">
             <dt className="text-gray-500">Last Run</dt>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { meterDueText } from '@/lib/pmMeter'
 import { Link } from 'react-router-dom'
 import { MoreVertical, Play, Pause, RotateCcw, Archive, Eye, Pencil, Zap } from 'lucide-react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
@@ -96,7 +97,7 @@ export function PMScheduleCard({ pm, onTrigger, onPause, onResume, onArchive }: 
         <div className="rounded-lg bg-gray-50 dark:bg-gray-800/50 p-2.5 space-y-1.5 text-sm">
           <div className="flex items-center gap-1.5">
             ⏰ <span className="text-gray-600 dark:text-gray-400 text-xs">Next due:</span>
-            <PMDueDateDisplay dueDate={dueAt} showIcon={false} className="text-xs" />
+            {meterDueText(pm) ? <span className="text-xs text-gray-600 dark:text-gray-400">{meterDueText(pm)}</span> : <PMDueDateDisplay dueDate={dueAt} showIcon={false} className="text-xs" />}
           </div>
           <div className="flex items-center gap-1.5">
             <PMFrequencyBadge
