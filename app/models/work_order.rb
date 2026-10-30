@@ -4,10 +4,11 @@ class WorkOrder < ApplicationRecord
 
   has_paper_trail only: %i[status assignee_id verified_by_id completed_at verified_at]
   include Auditable
+  include VendorWork
 
   # Moving a work order through its states is logged by the transition itself (log_activity); an update is only an
   # edit of what the work is.
-  audited watch: %w[title description priority due_date asset_id estimated_hours]
+  audited watch: %w[title description priority due_date asset_id estimated_hours vendor_id vendor_cost vendor_reference]
 
   # ─── Constants ─────────────────────────────────────────────────────────────
 

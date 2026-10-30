@@ -30,6 +30,7 @@ These pages are for the person who **installs and looks after** a FixFlow server
 | Set up the company in the first week | [Administrator guide](administrator.md) |
 | Run work orders, checklists and QR-label requests | [Work orders and maintenance](work-orders.md) |
 | Count hours or kilometres and service by the count | [Meters and usage-based maintenance](meters.md) |
+| Keep a list of contractors and give them work | [Vendors and contractors](vendors.md) |
 | Connect sensors and set alert rules | [Sensors and IoT](iot.md) |
 | Understand the reports and the dashboard | [Reports and the dashboard](reports.md) |
 | Get messages on a phone when work is assigned | [Notifications](notifications.md) |

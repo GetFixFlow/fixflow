@@ -32,6 +32,7 @@ import { WorkOrderActivityLog } from '@/components/work-orders/WorkOrderActivity
 import { WorkOrderCosts } from '@/components/work-orders/WorkOrderCosts'
 import { WorkOrderRelated } from '@/components/work-orders/WorkOrderRelated'
 import { AssignModal } from '@/components/work-orders/modals/AssignModal'
+import { WorkOrderVendor } from '@/components/work-orders/WorkOrderVendor'
 import { CompleteModal } from '@/components/work-orders/modals/CompleteModal'
 import { RejectModal } from '@/components/work-orders/modals/RejectModal'
 import { HoldModal } from '@/components/work-orders/modals/HoldModal'
@@ -490,8 +491,11 @@ export function WorkOrderDetailPage() {
               actualHours={wo.actual_hours ?? undefined}
               laborCost={wo.labor_cost}
               laborRate={wo.labor_rate}
+              vendorCost={wo.vendor_cost}
             />
           </section>
+
+          <WorkOrderVendor workOrder={wo} canManage={canManage} />
 
           {/* Related */}
           <section className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">

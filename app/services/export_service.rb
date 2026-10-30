@@ -12,13 +12,13 @@ class ExportService
 
   # `work_orders` are WorkOrder records (with asset and assignee loaded).
   def self.work_orders_csv(work_orders)
-    build(%w[work_order_number title priority status asset assignee due_date started_at completed_at
-             labor_cost parts_cost total_cost created_at]) do |csv|
+    build(%w[work_order_number title priority status asset assignee vendor due_date started_at completed_at
+             labor_cost parts_cost vendor_cost total_cost created_at]) do |csv|
       work_orders.each do |wo|
         csv << [
           wo.work_order_number, wo.title, wo.priority, wo.status, wo.asset&.name, wo.assignee&.full_name,
-          wo.due_date, wo.started_at, wo.completed_at, wo.labor_cost, wo.parts_cost,
-          wo.labor_cost.to_d + wo.parts_cost.to_d, wo.created_at
+          wo.vendor&.name, wo.due_date, wo.started_at, wo.completed_at, wo.labor_cost, wo.parts_cost, wo.vendor_cost,
+          wo.labor_cost.to_d + wo.parts_cost.to_d + wo.vendor_cost.to_d, wo.created_at
         ]
       end
     end
@@ -44,13 +44,17 @@ class ExportService
   end
 
   def self.cost_by_asset_csv(assets)
-    table(%w[asset labor_cost parts_cost total_cost work_orders], assets,
-          %i[asset_name labor_cost parts_cost total_cost wo_count])
+    table(%w[asset labor_cost parts_cost vendor_cost total_cost work_orders], assets,
+          %i[asset_name labor_cost parts_cost vendor_cost total_cost wo_count])
   end
 
   def self.cost_by_location_csv(locations)
-    table(%w[location labor_cost parts_cost total_cost work_orders], locations,
-          %i[location_name labor_cost parts_cost total_cost wo_count])
+    table(%w[location labor_cost parts_cost vendor_cost total_cost work_orders], locations,
+          %i[location_name labor_cost parts_cost vendor_cost total_cost wo_count])
+  end
+
+  def self.cost_by_vendor_csv(vendors)
+    table(%w[vendor vendor_cost work_orders], vendors, %i[vendor_name vendor_cost wo_count])
   end
 
   # IotAlert records (with rule, asset and work order loaded).

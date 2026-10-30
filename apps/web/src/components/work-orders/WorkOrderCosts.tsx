@@ -10,6 +10,8 @@ interface WorkOrderCostsProps {
   laborCost?: number | string | null
   /** The hourly rate the labor cost was worked out at. */
   laborRate?: number | string | null
+  /** What an outside company charged. Sent to managers and administrators only, like the labor cost. */
+  vendorCost?: number | string | null
 }
 
 const Row = ({ label, value, bold, note }: { label: string; value: string; bold?: boolean; note?: string }) => (
@@ -22,7 +24,7 @@ const Row = ({ label, value, bold, note }: { label: string; value: string; bold?
   </div>
 )
 
-export function WorkOrderCosts({ workOrderId, actualHours, laborCost, laborRate }: WorkOrderCostsProps) {
+export function WorkOrderCosts({ workOrderId, actualHours, laborCost, laborRate, vendorCost }: WorkOrderCostsProps) {
   const { data: parts = [] } = useWorkOrderParts(workOrderId)
 
   // Rails serializes decimal columns as JSON strings to avoid float precision loss: coerce before doing math.
@@ -31,6 +33,7 @@ export function WorkOrderCosts({ workOrderId, actualHours, laborCost, laborRate 
   const hours = actualHours != null ? Number(actualHours) : 0
   const rate = laborRate != null ? Number(laborRate) : 0
   const labor = canSeeLabor ? Number(laborCost) : 0
+  const vendor = vendorCost != null ? Number(vendorCost) : 0
 
   const laborLabel =
     hours > 0 && rate > 0 ? `Labor cost (${hours} hrs × ${formatMoney(rate)}/hr)` : hours > 0 ? `Labor cost (${hours} hrs)` : 'Labor cost'
@@ -51,7 +54,8 @@ export function WorkOrderCosts({ workOrderId, actualHours, laborCost, laborRate 
               value={formatMoney(labor)}
               note={noRate ? 'No hourly rate is set, so labor is counted as nothing. Set one in Settings, Company, or on the person in Users.' : undefined}
             />
-            <Row label="Total cost" value={formatMoney(partsCost + labor)} bold />
+            {vendor > 0 && <Row label="Vendor charge" value={formatMoney(vendor)} />}
+            <Row label="Total cost" value={formatMoney(partsCost + labor + vendor)} bold />
           </>
         )}
       </div>

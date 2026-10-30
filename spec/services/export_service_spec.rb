@@ -14,8 +14,8 @@ RSpec.describe ExportService, type: :service do
     end
 
     it "keeps non-Latin text as it is" do
-      csv = described_class.cost_by_location_csv([{ location_name: "ஆலை · Café", labor_cost: 1, parts_cost: 2, total_cost: 3,
-wo_count: 1 }])
+      csv = described_class.cost_by_location_csv([{ location_name: "ஆலை · Café", labor_cost: 1, parts_cost: 2, vendor_cost: 0,
+                                                    total_cost: 3, wo_count: 1 }])
 
       expect(parse(csv).first["location"]).to eq("ஆலை · Café")
     end
@@ -54,20 +54,23 @@ wo_count: 1 }])
   end
 
   describe ".work_orders_csv" do
-    it "writes each work order with its asset, assignee, costs and times" do
-      tech = create(:user, organization: organization, first_name: "Tina", last_name: "Tech")
-      asset = create(:asset, organization: organization, name: "Pump A")
-      work_order = create(:work_order, :completed, organization: organization, asset: asset, assignee: tech, labor_cost: 100,
-                                                   parts_cost: 50.5, due_date: Time.zone.local(2026, 5, 1, 9, 30),
-                                                   completed_at: Time.zone.local(2026, 5, 2, 17, 0))
+    let(:tech) { create(:user, organization: organization, first_name: "Tina", last_name: "Tech") }
+    let(:work_order) do
+      create(:work_order, :completed, organization: organization, assignee: tech, labor_cost: 100, parts_cost: 50.5, vendor_cost: 200,
+                                      asset: create(:asset, organization: organization, name: "Pump A"),
+                                      vendor: create(:vendor, organization: organization, name: "Acme Electric"),
+                                      due_date: Time.zone.local(2026, 5, 1, 9, 30), completed_at: Time.zone.local(2026, 5, 2, 17, 0))
+    end
 
+    it "writes each work order with its asset, assignee, costs and times" do
       rows = parse(described_class.work_orders_csv([work_order]))
 
-      expect(rows.headers).to eq(%w[work_order_number title priority status asset assignee due_date started_at completed_at
-                                    labor_cost parts_cost total_cost created_at])
+      expect(rows.headers).to eq(%w[work_order_number title priority status asset assignee vendor due_date started_at
+                                    completed_at labor_cost parts_cost vendor_cost total_cost created_at])
       expect(rows.first.to_h).to include("work_order_number" => work_order.work_order_number, "asset" => "Pump A",
-                                         "assignee" => "Tina Tech", "labor_cost" => "100.0", "parts_cost" => "50.5",
-                                         "total_cost" => "150.5", "due_date" => "2026-05-01 09:30",
+                                         "assignee" => "Tina Tech", "vendor" => "Acme Electric", "labor_cost" => "100.0",
+                                         "parts_cost" => "50.5", "vendor_cost" => "200.0", "total_cost" => "350.5",
+                                         "due_date" => "2026-05-01 09:30",
                                          "completed_at" => "2026-05-02 17:00", "started_at" => nil)
     end
 
@@ -120,18 +123,25 @@ wo_count: 1 }])
   end
 
   describe ".cost_by_asset_csv and .cost_by_location_csv" do
-    it "write labor, parts, total and the number of work orders" do
+    it "write labor, parts, vendor, total and the number of work orders" do
       assets = parse(described_class.cost_by_asset_csv([
-        { asset_id: 1, asset_name: "Pump", labor_cost: 150.0, parts_cost: 50.0, total_cost: 200.0, wo_count: 2 }
+        { asset_id: 1, asset_name: "Pump", labor_cost: 150.0, parts_cost: 50.0, vendor_cost: 10.0, total_cost: 210.0, wo_count: 2 }
       ]))
       places = parse(described_class.cost_by_location_csv([
-        { location_id: 1, location_name: "Plant > Floor 1", labor_cost: 1.5, parts_cost: 2.0, total_cost: 3.5, wo_count: 1 }
+        { location_id: 1, location_name: "Plant > Floor 1", labor_cost: 1.5, parts_cost: 2.0, vendor_cost: 0.0, total_cost: 3.5,
+          wo_count: 1 }
       ]))
 
-      expect(assets.first.to_h).to eq("asset" => "Pump", "labor_cost" => "150.0", "parts_cost" => "50.0",
-                                      "total_cost" => "200.0", "work_orders" => "2")
+      expect(assets.first.to_h).to eq("asset" => "Pump", "labor_cost" => "150.0", "parts_cost" => "50.0", "vendor_cost" => "10.0",
+                                      "total_cost" => "210.0", "work_orders" => "2")
       expect(places.first.to_h).to eq("location" => "Plant > Floor 1", "labor_cost" => "1.5", "parts_cost" => "2.0",
-                                      "total_cost" => "3.5", "work_orders" => "1")
+                                      "vendor_cost" => "0.0", "total_cost" => "3.5", "work_orders" => "1")
+    end
+
+    it "writes what each vendor charged, and keeps a vendor name that looks like a formula as text" do
+      vendors = parse(described_class.cost_by_vendor_csv([{ vendor_id: 1, vendor_name: "=SUM(A1)", vendor_cost: 750.0, wo_count: 2 }]))
+
+      expect(vendors.first.to_h).to eq("vendor" => "'=SUM(A1)", "vendor_cost" => "750.0", "work_orders" => "2")
     end
   end
 

@@ -19,14 +19,18 @@ describe('CostAnalysisPage with the server\'s real responses', () => {
   it('shows the totals and the assets that cost most', async () => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     render(<QueryClientProvider client={client}><MemoryRouter><CostAnalysisPage /></MemoryRouter></QueryClientProvider>)
-    const { total_cost, labor_cost, parts_cost, avg_cost_per_wo } = fixtures.costSummary
+    const { total_cost, labor_cost, parts_cost, vendor_cost, avg_cost_per_wo } = fixtures.costSummary
     expect(total_cost).toBeGreaterThan(0)
     await waitFor(async () => expect(await kpiValue(screen, 'Total Cost')).toBe(formatCurrency(total_cost)))
     expect(await kpiValue(screen, 'Labor Costs')).toBe(formatCurrency(labor_cost))
     expect(await kpiValue(screen, 'Parts Costs')).toBe(formatCurrency(parts_cost))
+    expect(vendor_cost).toBeGreaterThan(0)
+    expect(await kpiValue(screen, 'Vendor Costs')).toBe(formatCurrency(vendor_cost))
     expect(await kpiValue(screen, 'Cost per WO')).toBe(formatCurrency(avg_cost_per_wo))
     const top = fixtures.costByAsset.assets[0]
     const row = (await screen.findByText(top.asset_name)).closest('tr')!
     expect(row).toHaveTextContent(formatCurrency(top.total_cost))
+    const vendor = fixtures.costByVendor.vendors[0]
+    expect((await screen.findByText(vendor.vendor_name)).closest('tr')).toHaveTextContent(formatCurrency(vendor.vendor_cost))
   })
 })

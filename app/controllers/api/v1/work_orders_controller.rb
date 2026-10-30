@@ -3,7 +3,10 @@ module Api
     class WorkOrdersController < Api::V1::BaseController
       before_action :set_work_order, only: %i[show update destroy assign start complete verify reject hold cancel transition]
       before_action :require_manager!, only: %i[verify reject]
+      before_action :require_manager_for_vendor!, only: %i[create update]
 
+      # The vendor who did the work, what they charged and their invoice number: a manager's to enter.
+      VENDOR_FIELDS = %w[vendor_id vendor_cost vendor_reference].freeze
       ALLOWED_SORTS = %w[priority due_date created_at updated_at work_order_number].freeze
 
       # GET /api/v1/work_orders
@@ -249,6 +252,7 @@ module Api
         end
         scope = scope.by_assignee(params[:assignee_id])   if params[:assignee_id].present?
         scope = scope.by_asset(params[:asset_id])         if params[:asset_id].present?
+        scope = scope.where(vendor_id: params[:vendor_id]) if params[:vendor_id].present?
         scope = scope.overdue                             if params[:overdue] == "true"
         scope = scope.assigned_to(current_user.id)        if params[:my_work_orders] == "true"
         scope = scope.search_by_keyword(params[:search])  if params[:search].present?
@@ -291,11 +295,18 @@ module Api
         end
       end
 
+      def require_manager_for_vendor!
+        sent = params[:work_order].respond_to?(:keys) && params[:work_order].keys.intersect?(VENDOR_FIELDS)
+        return unless sent && !current_user.manager_or_above?
+
+        render_error("Only a manager can give a work order to a vendor or enter what the vendor charged", :forbidden)
+      end
+
       def work_order_params
         params.require(:work_order).permit(
           :title, :description, :priority, :asset_id, :assignee_id,
           :due_date, :estimated_hours, :actual_hours, :completion_notes,
-          :rejection_reason, checklist: [ :step, :completed ]
+          :rejection_reason, *VENDOR_FIELDS, checklist: [ :step, :completed ]
         )
       end
     end

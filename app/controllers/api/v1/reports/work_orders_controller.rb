@@ -121,7 +121,7 @@ module Api
 
         # The work orders an export holds, newest first. Cut at MAX_EXPORT_ROWS, and says so.
         def export_work_orders(scope)
-          rows = scope.includes(:asset, :assignee).order(created_at: :desc, id: :desc).limit(MAX_EXPORT_ROWS + 1).to_a
+          rows = scope.includes(:asset, :assignee, :vendor).order(created_at: :desc, id: :desc).limit(MAX_EXPORT_ROWS + 1).to_a
           response.set_header("X-Export-Truncated", "true") if rows.size > MAX_EXPORT_ROWS
           rows.first(MAX_EXPORT_ROWS)
         end

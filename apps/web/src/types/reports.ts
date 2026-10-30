@@ -101,16 +101,21 @@ export type CostSummary = {
   total_cost: number
   labor_cost: number
   parts_cost: number
+  vendor_cost: number
   work_orders_count: number
   avg_cost_per_wo: number
   group_by: string
-  trend: { period: string; labor: number; parts: number; total: number; wo_count: number }[]
+  trend: { period: string; labor: number; parts: number; vendor: number; total: number; wo_count: number }[]
 }
 
 export type CostByAsset = {
-  assets: { asset_id: number | null; asset_name: string; labor_cost: number; parts_cost: number; total_cost: number; wo_count: number }[]
+  assets: { asset_id: number | null; asset_name: string; labor_cost: number; parts_cost: number; vendor_cost: number; total_cost: number; wo_count: number }[]
   treemap: { name: string; cost: number }[]
   total_assets: number
+}
+
+export type CostByVendor = {
+  vendors: { vendor_id: number; vendor_name: string; vendor_cost: number; wo_count: number }[]
 }
 
 /** A rate that is null when nothing has come due: "no data", not 0 or 100. */

@@ -19,7 +19,7 @@ A preventive maintenance schedule can carry a **checklist** (set when you create
 
 ## Labor cost
 
-A work order's **labor cost** is the hours recorded when it is completed times an **hourly rate**: the technician's own rate if they have one, otherwise the company's default. The rate used is saved with the work order, so raising someone's rate later does not change work already done; correcting the hours works the cost out again at the current rate. Parts and labor add up to the work order's total, and the cost reports now include the labor.
+A work order's **labor cost** is the hours recorded when it is completed times an **hourly rate**: the technician's own rate if they have one, otherwise the company's default. The rate used is saved with the work order, so raising someone's rate later does not change work already done; correcting the hours works the cost out again at the current rate. Parts and labor add up to the work order's total, and the cost reports now include the labor. When an outside company does the work, a manager gives the work order to a [vendor](vendors.md) and what the vendor charged is added to the total as well.
 
 Set the **default rate** in **Settings → Organization** (Hourly labor rate) and, for a particular person, **Settings → Users → Edit → Hourly rate** (administrators only; leave it empty to use the default). Until a rate is set anywhere, labor counts as nothing, and the work order says so rather than guessing. Because wages are sensitive, only **managers and administrators** see labor costs and rates; technicians and requesters see the parts cost only.
 

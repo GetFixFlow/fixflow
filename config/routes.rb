@@ -137,6 +137,11 @@ Rails.application.routes.draw do
         end
       end
 
+      # Vendors and contractors, and the people to call at each
+      resources :vendors do
+        resources :contacts, only: %i[create update destroy], controller: "vendor_contacts"
+      end
+
       resources :parts do
         member     { patch :adjust_stock }
         collection { get :low_stock }
@@ -211,6 +216,7 @@ Rails.application.routes.draw do
         get "costs/summary",                      to: "costs#summary"
         get "costs/by_asset",                     to: "costs#by_asset"
         get "costs/by_location",                  to: "costs#by_location"
+        get "costs/by_vendor",                    to: "costs#by_vendor"
 
         get "assets/health",                      to: "assets#health"
         get "assets/cost_analysis",               to: "assets#cost_analysis"

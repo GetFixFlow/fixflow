@@ -17,21 +17,26 @@ vi.mock('@/components/reports/CostTreemap', () => ({
 }))
 
 const summary = {
-  total_cost: 250, labor_cost: 160, parts_cost: 90, work_orders_count: 4, avg_cost_per_wo: 62.5, group_by: 'week',
-  trend: [{ period: '2026-09-07', labor: 100, parts: 20, total: 120, wo_count: 1 }, { period: '2026-09-14', labor: 60, parts: 70, total: 130, wo_count: 3 }],
+  total_cost: 250, labor_cost: 160, parts_cost: 90, vendor_cost: 0, work_orders_count: 4, avg_cost_per_wo: 62.5, group_by: 'week',
+  trend: [
+    { period: '2026-09-07', labor: 100, parts: 20, vendor: 0, total: 120, wo_count: 1 },
+    { period: '2026-09-14', labor: 60, parts: 70, vendor: 0, total: 130, wo_count: 3 },
+  ],
 }
+const byVendor = { vendors: [] as { vendor_id: number; vendor_name: string; vendor_cost: number; wo_count: number }[] }
 const byAsset = {
   assets: [
-    { asset_id: 1, asset_name: 'Pump', labor_cost: 150, parts_cost: 50, total_cost: 200, wo_count: 2 },
-    { asset_id: null, asset_name: 'No asset', labor_cost: 10, parts_cost: 0, total_cost: 10, wo_count: 1 },
+    { asset_id: 1, asset_name: 'Pump', labor_cost: 150, parts_cost: 50, vendor_cost: 0, total_cost: 200, wo_count: 2 },
+    { asset_id: null, asset_name: 'No asset', labor_cost: 10, parts_cost: 0, vendor_cost: 0, total_cost: 10, wo_count: 1 },
   ],
   treemap: [{ name: 'Pump', cost: 200 }, { name: 'No asset', cost: 10 }], total_assets: 2,
 }
 
 let urls: URL[] = []
 
-function serve(s: object = summary, a: object = byAsset) {
+function serve(s: object = summary, a: object = byAsset, v: object = byVendor) {
   server.use(
+    http.get('/api/v1/reports/costs/by_vendor', ({ request }) => { urls.push(new URL(request.url)); return HttpResponse.json(v) }),
     http.get('/api/v1/reports/costs/summary', ({ request }) => { urls.push(new URL(request.url)); return HttpResponse.json(s) }),
     http.get('/api/v1/reports/costs/by_asset', ({ request }) => { urls.push(new URL(request.url)); return HttpResponse.json(a) }),
   )
@@ -62,6 +67,28 @@ describe('CostAnalysisPage', () => {
     expect(screen.getByText('$160')).toBeInTheDocument()
     expect(screen.getByText('$90')).toBeInTheDocument()
     expect(screen.getByText('$63')).toBeInTheDocument() // 62.5 shown as a whole amount
+  })
+
+  it('adds what vendors charged to the total and shows it apart, with who charged what', async () => {
+    serve({ ...summary, total_cost: 1050, vendor_cost: 800 }, byAsset, {
+      vendors: [{ vendor_id: 1, vendor_name: 'Acme Electric', vendor_cost: 750, wo_count: 2 }, { vendor_id: 2, vendor_name: 'Chill Co', vendor_cost: 50, wo_count: 1 }],
+    })
+    renderPage()
+
+    expect(await screen.findByText('$1,050')).toBeInTheDocument()
+    expect(screen.getByText('Vendor Costs')).toBeInTheDocument()
+    expect(screen.getByText('$800')).toBeInTheDocument()
+    const row = (await screen.findByText('Acme Electric')).closest('tr')!
+    expect(row).toHaveTextContent('$750')
+    expect(row).toHaveTextContent('2')
+    expect(screen.getByText('Chill Co')).toBeInTheDocument()
+  })
+
+  it('says so when no work given to a vendor was finished', async () => {
+    serve()
+    renderPage()
+
+    expect(await screen.findByText('No work given to a vendor was finished in this period.')).toBeInTheDocument()
   })
 
   it('ranks the assets by what their work cost', async () => {
@@ -117,6 +144,7 @@ describe('CostAnalysisPage', () => {
     server.use(
       http.get('/api/v1/reports/costs/summary', () => HttpResponse.json({}, { status: 500 })),
       http.get('/api/v1/reports/costs/by_asset', () => HttpResponse.json({}, { status: 500 })),
+      http.get('/api/v1/reports/costs/by_vendor', () => HttpResponse.json({}, { status: 500 })),
     )
     renderPage()
 

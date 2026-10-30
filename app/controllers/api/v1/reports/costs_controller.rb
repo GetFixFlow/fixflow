@@ -1,7 +1,7 @@
 module Api
   module V1
     module Reports
-      # What finished work cost, from the labor and parts costs on each work order. For managers and
+      # What finished work cost, from the labor, parts and vendor costs on each work order. For managers and
       # administrators (the base controller sees to that). The period and the Filters panel's choices apply.
       class CostsController < Reports::BaseController
         # GET /api/v1/reports/costs/summary
@@ -23,6 +23,13 @@ module Api
           report = report(from, to)
           render_report(report.by_location, "cost_by_location",
                         csv: -> { ExportService.cost_by_location_csv(report.location_rows) })
+        end
+
+        # GET /api/v1/reports/costs/by_vendor
+        def by_vendor
+          from, to = date_range
+          report = report(from, to)
+          render_report(report.by_vendor, "cost_by_vendor", csv: -> { ExportService.cost_by_vendor_csv(report.vendor_rows) })
         end
 
         private

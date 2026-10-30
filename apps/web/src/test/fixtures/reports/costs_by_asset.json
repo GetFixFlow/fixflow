@@ -3,24 +3,26 @@
     {
       "labor_cost": 150.0,
       "parts_cost": 30.5,
-      "total_cost": 180.5,
+      "vendor_cost": 300.0,
+      "total_cost": 480.5,
       "wo_count": 2,
-      "asset_id": 29,
+      "asset_id": 73,
       "asset_name": "Pump"
     },
     {
       "labor_cost": 30.0,
       "parts_cost": 5.0,
+      "vendor_cost": 0.0,
       "total_cost": 35.0,
       "wo_count": 1,
-      "asset_id": 31,
+      "asset_id": 75,
       "asset_name": "Fan"
     }
   ],
   "treemap": [
     {
       "name": "Pump",
-      "cost": 180.5
+      "cost": 480.5
     },
     {
       "name": "Fan",

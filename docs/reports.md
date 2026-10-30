@@ -4,7 +4,7 @@ What the dashboard and each report show, the filters, and exporting.
 
 ## Cost reports and report filters
 
-**Reports → Cost Analysis** shows what finished work cost: the total, labor and parts apart, the average per work order, a trend (a point per day, week or month, chosen by the length of the period), the assets that cost most, and the same by place. A cost counts **in the period the work was completed**, so a job opened last month and finished today is today's cost; only completed and verified work counts. Labor comes from [Labor cost](work-orders.md#labor-cost), so it needs an hourly rate to be more than nothing.
+**Reports → Cost Analysis** shows what finished work cost: the total, labor, parts and [vendor charges](vendors.md) apart, the average per work order, a trend (a point per day, week or month, chosen by the length of the period), the assets that cost most, the same by place, and what each vendor charged. A cost counts **in the period the work was completed**, so a job opened last month and finished today is today's cost; only completed and verified work counts. Labor comes from [Labor cost](work-orders.md#labor-cost), so it needs an hourly rate to be more than nothing.
 
 The **Filters** panel on every report narrows it by places (including everything inside them), assets, the people who did the work, priorities, and where the work order came from (made by hand, from a PM schedule, or from an IoT rule). Choices combine, each narrowing further.
 
@@ -34,10 +34,10 @@ The **Export** menu on a report page downloads the report as a file made by the 
 
 | Report | CSV holds | PDF |
 | --- | --- | --- |
-| Work Orders | every work order in the period matching the filters: number, title, priority, status, asset, assignee, due, started and completed times, labor, parts and total cost | the summary (figures, by priority, trend) |
+| Work Orders | every work order in the period matching the filters: number, title, priority, status, asset, assignee, due, started and completed times, labor, parts, vendor and total cost, and the vendor | the summary (figures, by priority, trend) |
 | Asset Health | one row per place: total, operational, degraded, down, health score | yes |
 | PM Compliance | one row per month: scheduled, completed, skipped, compliance rate | yes |
-| Cost Analysis | the cost of **every** asset that cost something (the screen shows the top 20): labor, parts, total, work orders | no |
+| Cost Analysis | the cost of **every** asset that cost something (the screen shows the top 20): labor, parts, vendors, total, work orders; **Costs by Vendor** has its own file: vendor, charged, work orders | no |
 | Technician Performance | each person's figures | no |
 | IoT Analytics | every alert in the period matching the filters: when, asset, place, rule, severity, status, the reading and limit, who handled it, work order | no |
 
