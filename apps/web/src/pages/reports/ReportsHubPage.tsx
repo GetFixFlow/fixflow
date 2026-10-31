@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Activity, Wrench, ClipboardCheck, Wifi, Users, DollarSign } from 'lucide-react'
+import { Activity, Wrench, ClipboardCheck, Wifi, Users, DollarSign, Timer } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Card, CardContent } from '@/components/ui/Card'
 import { cn } from '@/lib/utils'
@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 const REPORT_SECTIONS = [
   { title: 'Work Orders', icon: Wrench, href: '/reports/work-orders', description: 'Trends, MTTR, priority breakdown, resolution heatmap, backlog aging', color: 'bg-blue-500', kpis: ['Total WOs', 'Avg MTTR', 'Completion Rate', 'Overdue %'] },
   { title: 'Asset Health', icon: Activity, href: '/reports/assets', description: 'Fleet health score, cost analysis, status by location, maintenance history', color: 'bg-green-500', kpis: ['Health Score', 'Operational %', 'Down Assets', 'Total Spend'] },
+  { title: 'Downtime', icon: Timer, href: '/reports/downtime', description: 'Availability, failures, mean time between failures and to restore, for each asset', color: 'bg-red-500', kpis: ['Availability', 'Downtime', 'MTBF', 'MTTR'] },
   { title: 'PM Compliance', icon: ClipboardCheck, href: '/reports/pm-compliance', description: 'Compliance trends, upcoming forecast, missed PMs, frequency analysis', color: 'bg-purple-500', kpis: ['Compliance Rate', 'Scheduled', 'Completed', 'Missed'] },
   { title: 'IoT Analytics', icon: Wifi, href: '/reports/iot', description: 'Alert trends, sensor comparisons, rule effectiveness, auto-resolve rate', color: 'bg-amber-500', kpis: ['Open Alerts', 'Critical Alerts', 'Auto-Resolved', 'Active Rules'] },
   { title: 'Technician Performance', icon: Users, href: '/reports/technicians', description: 'Scorecards, workload heatmap, comparison charts, first-time fix rate', color: 'bg-teal-500', kpis: ['Top Performer', 'Avg Resolution', 'First-Fix Rate', 'Overdue Rate'] },

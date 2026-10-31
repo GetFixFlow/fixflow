@@ -114,6 +114,32 @@ export type CostByAsset = {
   total_assets: number
 }
 
+export type DowntimeFigures = {
+  /** Percent of the hours the asset existed in the period that it was not down. */
+  availability: number
+  downtime_hours: number
+  /** Stops that began in the period. */
+  failures: number
+  /** Mean time between failures, in hours; null without a failure. */
+  mtbf_hours: number | null
+  /** Mean time to restore, in hours; null without a failure. */
+  mttr_hours: number | null
+}
+
+export type DowntimeRow = DowntimeFigures & {
+  id: number
+  name: string
+  asset_tag: string
+  location: string | null
+  down_now: boolean
+}
+
+export interface DowntimeReport {
+  period: { from: string; to: string }
+  summary: DowntimeFigures & { assets: number; down_now: number }
+  assets: DowntimeRow[]
+}
+
 export type CostByVendor = {
   vendors: { vendor_id: number; vendor_name: string; vendor_cost: number; wo_count: number }[]
 }

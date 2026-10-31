@@ -1,0 +1,53 @@
+{
+  "period": {
+    "from": "2026-09-16",
+    "to": "2026-10-16"
+  },
+  "summary": {
+    "availability": 98.91,
+    "downtime_hours": 24.0,
+    "failures": 1,
+    "mtbf_hours": 2172.0,
+    "mttr_hours": 24.0,
+    "assets": 3,
+    "down_now": 1
+  },
+  "assets": [
+    {
+      "availability": 96.72,
+      "downtime_hours": 24.0,
+      "failures": 1,
+      "mtbf_hours": 708.0,
+      "mttr_hours": 24.0,
+      "id": 1,
+      "name": "Pump",
+      "asset_tag": "FF-000001",
+      "location": "Plant 1",
+      "down_now": false
+    },
+    {
+      "availability": 100.0,
+      "downtime_hours": 0.0,
+      "failures": 0,
+      "mtbf_hours": null,
+      "mttr_hours": null,
+      "id": 3,
+      "name": "Fan",
+      "asset_tag": "FF-000003",
+      "location": null,
+      "down_now": false
+    },
+    {
+      "availability": 100.0,
+      "downtime_hours": 0.0,
+      "failures": 0,
+      "mtbf_hours": null,
+      "mttr_hours": null,
+      "id": 2,
+      "name": "Press",
+      "asset_tag": "FF-000002",
+      "location": "Plant 1",
+      "down_now": true
+    }
+  ]
+}

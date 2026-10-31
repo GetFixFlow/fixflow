@@ -3,8 +3,8 @@
 import { http, HttpResponse } from 'msw'
 import { server } from './server'
 import type {
-  AssetHealth, AssetHistory, BacklogReport, CostByAsset, CostByVendor, CostSummary, IotAlertsReport, IotRuleEffectiveness, MttrReport,
-  PmCompliance, PmForecast, WorkOrderSummary,
+  AssetHealth, AssetHistory, BacklogReport, CostByAsset, CostByVendor, CostSummary, DowntimeReport, IotAlertsReport,
+  IotRuleEffectiveness, MttrReport, PmCompliance, PmForecast, WorkOrderSummary,
 } from '@/types/reports'
 import type { TechnicianStats } from '@/components/reports/TechnicianScorecard'
 import type { SystemHealth } from '@/types/system'
@@ -18,6 +18,7 @@ import workOrdersBacklog from './fixtures/reports/work_orders_backlog.json'
 import technicianPerformance from './fixtures/reports/technician_performance.json'
 import assetsHealth from './fixtures/reports/assets_health.json'
 import assetsHistory from './fixtures/reports/assets_history.json'
+import assetsDowntime from './fixtures/reports/assets_downtime.json'
 import costsSummary from './fixtures/reports/costs_summary.json'
 import costsByAsset from './fixtures/reports/costs_by_asset.json'
 import costsByVendor from './fixtures/reports/costs_by_vendor.json'
@@ -46,6 +47,7 @@ export const fixtures: {
   technicians: { technicians: TechnicianStats[] }
   assetHealth: AssetHealth
   assetHistory: AssetHistory
+  assetDowntime: DowntimeReport
   costSummary: CostSummary
   costByAsset: CostByAsset
   costByVendor: CostByVendor
@@ -67,6 +69,7 @@ export const fixtures: {
   technicians: technicianPerformance,
   assetHealth: assetsHealth,
   assetHistory: assetsHistory,
+  assetDowntime: assetsDowntime,
   costSummary: costsSummary,
   costByAsset: costsByAsset,
   costByVendor: costsByVendor,
@@ -89,6 +92,7 @@ const routes: [string, unknown][] = [
   ['/api/v1/reports/work_orders/backlog', fixtures.backlog],
   ['/api/v1/reports/work_orders/technician_performance', fixtures.technicians],
   ['/api/v1/reports/assets/health', fixtures.assetHealth],
+  ['/api/v1/reports/assets/downtime', fixtures.assetDowntime],
   ['/api/v1/reports/costs/summary', fixtures.costSummary],
   ['/api/v1/reports/costs/by_asset', fixtures.costByAsset],
   ['/api/v1/reports/costs/by_vendor', fixtures.costByVendor],

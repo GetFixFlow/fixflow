@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_120800) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_120900) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -81,6 +81,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_120800) do
     t.datetime "updated_at", null: false
     t.index ["asset_id"], name: "index_asset_documents_on_asset_id"
     t.index ["user_id"], name: "index_asset_documents_on_user_id"
+  end
+
+  create_table "asset_downtimes", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "asset_id", null: false
+    t.datetime "started_at", null: false
+    t.datetime "ended_at"
+    t.string "reason"
+    t.bigint "started_by_id"
+    t.bigint "ended_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["asset_id", "started_at"], name: "index_asset_downtimes_on_asset_id_and_started_at"
+    t.index ["asset_id"], name: "index_asset_downtimes_on_asset_id"
+    t.index ["asset_id"], name: "index_asset_downtimes_one_open_per_asset", unique: true, where: "(ended_at IS NULL)"
+    t.index ["ended_by_id"], name: "index_asset_downtimes_on_ended_by_id"
+    t.index ["organization_id"], name: "index_asset_downtimes_on_organization_id"
+    t.index ["started_by_id"], name: "index_asset_downtimes_on_started_by_id"
   end
 
   create_table "assets", force: :cascade do |t|
@@ -585,6 +603,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_120800) do
   add_foreign_key "api_keys", "organizations"
   add_foreign_key "asset_documents", "assets"
   add_foreign_key "asset_documents", "users"
+  add_foreign_key "asset_downtimes", "assets"
+  add_foreign_key "asset_downtimes", "organizations"
+  add_foreign_key "asset_downtimes", "users", column: "ended_by_id"
+  add_foreign_key "asset_downtimes", "users", column: "started_by_id"
   add_foreign_key "assets", "locations"
   add_foreign_key "assets", "organizations"
   add_foreign_key "attachments", "users"

@@ -15,6 +15,18 @@ module Api
                         pdf: -> { PdfReportService.asset_health_report(data, org_name: current_organization.name) })
         end
 
+        # GET /api/v1/reports/assets/downtime  (a period, and the Filters panel's assets and places)
+        # Availability, stops, mean time between failures and to restore, for each asset and for all of them.
+        def downtime
+          from, to = date_range
+          assets = current_organization.assets
+          ids = filtered_asset_ids
+          assets = assets.where(id: ids) if ids
+          data = DowntimeReport.new(assets, from: from, to: to).call
+
+          render_report(data, "asset_downtime", csv: -> { ExportService.asset_downtime_csv(data[:assets]) })
+        end
+
         # GET /api/v1/reports/assets/:id/history
         def history
           asset = current_organization.assets.find(params[:id])
@@ -43,7 +55,7 @@ module Api
             asset:   { id: asset.id, name: asset.name, tag: asset.asset_tag },
             summary: {
               total_work_orders:     asset.work_orders.count,
-              total_downtime_hours:  repaired.sum(repair_hours).to_f.round(1),
+              total_downtime_hours:  asset.downtimes.during(from, to).sum { |downtime| downtime.hours_within(from, to) }.round(1),
               avg_resolution_hours:  repaired.average(repair_hours).to_f.round(1),
               total_maintenance_cost: asset.work_orders.sum("labor_cost + parts_cost + vendor_cost").to_f.round(2),
               pm_compliance_rate:    pm_compliance_for_asset(asset),

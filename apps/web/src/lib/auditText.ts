@@ -12,6 +12,8 @@ export const RECORD_TYPES: Record<string, string> = {
   Part: 'Part',
   Meter: 'Meter',
   Vendor: 'Vendor',
+  PurchaseOrder: 'Purchase order',
+  AssetDowntime: 'Downtime',
   Organization: 'Company',
 }
 

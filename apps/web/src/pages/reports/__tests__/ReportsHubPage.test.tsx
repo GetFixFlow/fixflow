@@ -10,10 +10,11 @@ function Wrapper({ children }: { children: React.ReactNode }) {
 }
 
 describe('ReportsHubPage', () => {
-  it('renders all 6 report sections', () => {
+  it('renders all 7 report sections', () => {
     render(<ReportsHubPage />, { wrapper: Wrapper })
     expect(screen.getByText('Work Orders')).toBeInTheDocument()
     expect(screen.getByText('Asset Health')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Downtime' })).toBeInTheDocument()
     expect(screen.getByText('PM Compliance')).toBeInTheDocument()
     expect(screen.getByText('IoT Analytics')).toBeInTheDocument()
     expect(screen.getByText('Technician Performance')).toBeInTheDocument()

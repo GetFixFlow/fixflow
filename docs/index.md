@@ -33,6 +33,7 @@ These pages are for the person who **installs and looks after** a FixFlow server
 | Keep a list of contractors and give them work | [Vendors and contractors](vendors.md) |
 | Ask for parts, approve, order and receive them | [Purchasing parts](purchasing.md) |
 | Keep manuals with a machine, and track its warranty | [Asset documents and warranty](asset-documents.md) |
+| Record when a machine stopped, and see its availability | [Downtime and availability](downtime.md) |
 | Connect sensors and set alert rules | [Sensors and IoT](iot.md) |
 | Understand the reports and the dashboard | [Reports and the dashboard](reports.md) |
 | Get messages on a phone when work is assigned | [Notifications](notifications.md) |

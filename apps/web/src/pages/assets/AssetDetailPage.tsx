@@ -26,6 +26,7 @@ import { AssetTimeline, type TimelineEvent } from '@/components/assets/AssetTime
 import { SensorReadingCard } from '@/components/assets/SensorReadingCard'
 import { SensorChart } from '@/components/assets/SensorChart'
 import { warrantyStatus } from '@/lib/warranty'
+import { AssetDowntime } from '@/components/assets/AssetDowntime'
 import { AssetDocuments } from '@/components/assets/AssetDocuments'
 import { AssetMeters } from '@/components/assets/AssetMeters'
 import { LocationBreadcrumb } from '@/components/shared/LocationBreadcrumb'
@@ -250,7 +251,7 @@ export function AssetDetailPage() {
       {/* Tabs */}
       <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
         <Tabs.List className="flex border-b border-gray-200 dark:border-gray-700">
-          {['overview', 'work-orders', 'meters', 'documents', 'history', 'iot-data', 'details'].map((tab) => (
+          {['overview', 'work-orders', 'meters', 'downtime', 'documents', 'history', 'iot-data', 'details'].map((tab) => (
             <Tabs.Trigger
               key={tab}
               value={tab}
@@ -390,6 +391,11 @@ export function AssetDetailPage() {
         {/* Maintenance History */}
         <Tabs.Content value="history" className="pt-4">
           <AssetTimeline events={timelineEvents} />
+        </Tabs.Content>
+
+        {/* Downtime */}
+        <Tabs.Content value="downtime" className="pt-4">
+          <AssetDowntime assetId={asset.id} canManage={canManage} />
         </Tabs.Content>
 
         {/* Documents */}

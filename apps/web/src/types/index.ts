@@ -217,6 +217,20 @@ export interface WorkOrderComment {
   pending?: boolean
 }
 
+/** A time an asset was out of action; still going on when `open`. */
+export interface Downtime {
+  id: number
+  asset_id: number
+  started_at: string
+  ended_at: string | null
+  reason: string | null
+  open: boolean
+  /** Hours it lasted, so far if it is still going on. */
+  hours: number
+  started_by: string | null
+  ended_by: string | null
+}
+
 /** A file kept with an asset; the API shapes it like a work order's attachment. */
 export type AssetDocument = WorkOrderAttachment
 

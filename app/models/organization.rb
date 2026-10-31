@@ -5,6 +5,7 @@ class Organization < ApplicationRecord
   has_many :users, dependent: :destroy
   has_many :locations, dependent: :destroy
   has_many :assets, dependent: :destroy
+  has_many :asset_downtimes, dependent: :destroy
   has_many :work_orders, dependent: :destroy
   has_many :preventive_maintenances, dependent: :destroy
   has_many :purchase_orders, dependent: :destroy # before the vendors and parts they name

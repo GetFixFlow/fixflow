@@ -97,6 +97,21 @@ describe('AssetDetailPage', () => {
     expect(await screen.findByRole('link', { name: 'pump-manual.pdf' })).toBeInTheDocument()
   })
 
+  it('has a downtime tab that shows when the asset is down', async () => {
+    setupHandlers()
+    server.use(http.get('/api/v1/assets/1/downtimes', () => HttpResponse.json({
+      downtimes: [{ id: 1, asset_id: 1, started_at: '2026-10-15T08:00:00Z', ended_at: null, reason: 'Overheating', open: true, hours: 4,
+        started_by: null, ended_by: null }],
+    })))
+    useAuthStore.setState({ user: { id: 1, email: '', full_name: 'Admin', role: 'admin', organization_id: 1 }, token: 'token', isAuthenticated: true })
+    render(<AssetDetailPage />, { wrapper })
+    await waitForAssetLoaded()
+
+    await userEvent.click(screen.getByRole('tab', { name: /downtime/i }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/down since .*overheating/i)
+  })
+
   describe('the warranty', () => {
     const inDays = (days: number) => {
       const date = new Date()

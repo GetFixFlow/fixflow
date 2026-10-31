@@ -1,7 +1,7 @@
 import { apiClient } from './client'
 import type {
-  AssetHealth, AssetHistory, BacklogReport, CostByAsset, CostByVendor, CostSummary, IotAlertsReport, IotRuleEffectiveness, MttrReport,
-  PmCompliance, PmForecast, WorkOrderSummary,
+  AssetHealth, AssetHistory, BacklogReport, CostByAsset, CostByVendor, CostSummary, DowntimeReport, IotAlertsReport,
+  IotRuleEffectiveness, MttrReport, PmCompliance, PmForecast, WorkOrderSummary,
 } from '@/types/reports'
 import type { TechnicianStats } from '@/components/reports/TechnicianScorecard'
 
@@ -23,6 +23,8 @@ export const reportsApi = {
   assets: {
     health: (params?: Record<string, unknown>) =>
       apiClient.get<AssetHealth>('/reports/assets/health', { params }),
+    downtime: (params?: Record<string, unknown>) =>
+      apiClient.get<DowntimeReport>('/reports/assets/downtime', { params }),
     history: (id: number) => apiClient.get<AssetHistory>(`/reports/assets/${id}/history`),
   },
 
