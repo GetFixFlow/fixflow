@@ -28,7 +28,7 @@ const step2Schema = z.object({
   model: z.string().max(100).optional(),
   year_manufactured: z.coerce.number().min(1900).max(new Date().getFullYear()).optional().or(z.literal('')),
   purchase_date: z.string().optional(),
-  warranty_expiry: z.string().optional(),
+  warranty_expires_on: z.string().optional(),
 })
 
 type Step1Values = z.infer<typeof step1Schema>
@@ -61,7 +61,7 @@ export function AssetCreatePage() {
     model: '',
     year_manufactured: '',
     purchase_date: '',
-    warranty_expiry: '',
+    warranty_expires_on: '',
   })
 
   const step1Form = useForm<Step1Values>({
@@ -95,7 +95,7 @@ export function AssetCreatePage() {
       model: formData.model || undefined,
       year_manufactured: formData.year_manufactured ? Number(formData.year_manufactured) : undefined,
       purchase_date: formData.purchase_date || undefined,
-      warranty_expiry: formData.warranty_expiry || undefined,
+      warranty_expires_on: formData.warranty_expires_on || undefined,
     }
     const result = await createMutation.mutateAsync(payload)
     const newId = (result.data as { data?: { id?: number } }).data?.id
@@ -262,7 +262,7 @@ export function AssetCreatePage() {
                 id="warranty-expiry"
                 label="Warranty Expiry"
                 type="date"
-                {...step2Form.register('warranty_expiry')}
+                {...step2Form.register('warranty_expires_on')}
               />
               <div className="flex justify-between">
                 <Button type="button" variant="outline" onClick={() => setStep(1)}>

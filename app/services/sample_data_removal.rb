@@ -62,6 +62,8 @@ class SampleDataRemoval
   end
 
   def asset_in_use(asset)
+    return "you added documents to this asset" if asset.documents.exists?
+
     own_work = WorkOrder.where(asset_id: asset.id).where.not(id: sample_ids("WorkOrder")).exists?
     schedules = PreventiveMaintenance.where(asset_id: asset.id)
     # Removing an asset removes its schedules, so a schedule that was kept keeps its asset too.

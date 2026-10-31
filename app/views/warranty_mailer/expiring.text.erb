@@ -1,0 +1,13 @@
+Hi <%= @manager.full_name %>,
+
+<%= @assets.size == 1 ? "The warranty on this asset ends" : "The warranties on these assets end" %> within 30 days. Anything covered is cheaper to repair under warranty, so report problems before then.
+
+<% @assets.each do |asset| %>
+- <%= asset.warranty_expires_on.strftime("%-d %b %Y") %>: <%= asset.name %> (<%= asset.asset_tag %>)
+<% end %>
+
+You will not be emailed again about these dates.
+
+See the assets: <%= @url %>
+
+— FixFlow

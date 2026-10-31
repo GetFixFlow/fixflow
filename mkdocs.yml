@@ -85,6 +85,7 @@ nav:
       - Meters and usage-based maintenance: meters.md
       - Vendors and contractors: vendors.md
       - Purchasing parts: purchasing.md
+      - Asset documents and warranty: asset-documents.md
       - Sensors and IoT: iot.md
       - Reports and the dashboard: reports.md
       - Notifications: notifications.md

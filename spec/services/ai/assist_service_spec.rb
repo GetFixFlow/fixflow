@@ -44,6 +44,23 @@ RSpec.describe Ai::AssistService do
       expect(context.scan("Self WO").size).to eq(1) # only appears once, in the CURRENT WORK ORDER section
     end
 
+    it "includes the text of the PDF manuals kept with the asset, and no other file" do
+      create(:asset_document, asset: asset, file_name: "pump-manual.pdf")
+      create(:asset_document, asset: asset, file_name: "nameplate.png", content_type: "image/png")
+      allow(Ai::PdfTextExtractorService).to receive(:extract).and_return("Torque the bolts to 40 Nm")
+
+      context = described_class.build_context(work_order)
+
+      expect(context).to include("--- pump-manual.pdf ---", "Torque the bolts to 40 Nm")
+      expect(context).not_to include("nameplate.png")
+    end
+
+    it "says so when no manual is kept with the asset" do
+      create(:asset_document, asset: asset, file_name: "nameplate.png", content_type: "image/png")
+
+      expect(described_class.build_context(work_order)).to include("(no manuals uploaded)")
+    end
+
     it "handles a work order with no asset gracefully" do
       wo = create(:work_order, organization: organization, asset: nil)
       expect { described_class.build_context(wo) }.not_to raise_error

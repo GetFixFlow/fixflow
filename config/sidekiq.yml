@@ -27,6 +27,12 @@
       :queue: notifications
       :description: "Notify managers of overdue PMs and degrade assets"
 
+    warranty_expiring:
+      :cron: "30 8 * * *"
+      :class: WarrantyExpiringJob
+      :queue: notifications
+      :description: "Tell managers which warranties end within 30 days"
+
     iot_aggregate:
       :cron: "0 * * * *"
       :class: Iot::AggregateReadingsJob

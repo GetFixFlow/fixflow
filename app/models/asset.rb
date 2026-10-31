@@ -15,8 +15,7 @@ class Asset < ApplicationRecord
   has_many :sensor_aggregates, dependent: :destroy
   has_many :iot_rules,         dependent: :destroy
   has_many :iot_alerts,        dependent: :destroy
-  has_many_attached :photos
-  has_many_attached :documents
+  has_many :documents, class_name: "AssetDocument", dependent: :destroy
 
   validates :name, presence: true
   validates :status, inclusion: { in: STATUSES }
@@ -33,6 +32,14 @@ class Asset < ApplicationRecord
   }
   scope :operational,           ->              { where(status: "operational") }
   scope :needs_attention,       ->              { where(status: %w[degraded down]) }
+  # A warranty that ends within `days` days (or ends today) and whose end date nobody has been warned about yet.
+  scope :warranty_ending_within, lambda { |days, today: Date.current|
+    where(warranty_expires_on: today..(today + days))
+      .where("warranty_alerted_on IS DISTINCT FROM warranty_expires_on")
+  }
+
+  # The manuals the AI assistant may read: the PDFs kept with the asset, as files.
+  def manuals(limit = 2) = documents.pdfs.includes(file_attachment: :blob).order(:id).first(limit).map(&:file)
 
   private
 

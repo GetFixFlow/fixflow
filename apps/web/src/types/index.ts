@@ -161,12 +161,13 @@ export interface Asset {
   custom_fields?: Record<string, unknown>
   created_at: string
   updated_at: string
+  /** The day the warranty ends (2027-03-01); managers are told 30 days before. */
+  warranty_expires_on?: string | null
   // Extended view
   open_work_orders_count?: number
   // Expected by the asset UI; the API does not return these yet.
   last_work_order_date?: string | null
   year_manufactured?: number | null
-  warranty_expiry?: string | null
 }
 
 // ── Work Order ────────────────────────────────────────────────────────────────
@@ -215,6 +216,9 @@ export interface WorkOrderComment {
   /** Written without a connection and not sent yet. */
   pending?: boolean
 }
+
+/** A file kept with an asset; the API shapes it like a work order's attachment. */
+export type AssetDocument = WorkOrderAttachment
 
 export interface WorkOrderAttachment {
   id: number

@@ -24,7 +24,7 @@ const schema = z.object({
   model: z.string().max(100).optional(),
   year_manufactured: z.coerce.number().min(1900).max(new Date().getFullYear()).optional().or(z.literal('')),
   purchase_date: z.string().optional(),
-  warranty_expiry: z.string().optional(),
+  warranty_expires_on: z.string().optional(),
   description: z.string().max(1000).optional(),
   custom_fields: z.record(z.string(), z.string()).optional(),
 })
@@ -62,7 +62,7 @@ export function AssetEditPage() {
         model: asset.model ?? '',
         year_manufactured: asset.year_manufactured ?? '',
         purchase_date: asset.purchase_date ?? '',
-        warranty_expiry: asset.warranty_expiry ?? '',
+        warranty_expires_on: asset.warranty_expires_on ?? '',
         description: asset.description ?? '',
         custom_fields: Object.fromEntries(Object.entries(asset.custom_fields ?? {}).map(([k, v]) => [k, String(v)])),
       })
@@ -174,7 +174,7 @@ export function AssetEditPage() {
             <div className="grid grid-cols-3 gap-4">
               <Input id="year" label="Year" type="number" {...register('year_manufactured')} />
               <Input id="purchase-date" label="Purchase Date" type="date" {...register('purchase_date')} />
-              <Input id="warranty" label="Warranty Expiry" type="date" {...register('warranty_expiry')} />
+              <Input id="warranty" label="Warranty Expiry" type="date" {...register('warranty_expires_on')} />
             </div>
           </CardContent>
         </Card>

@@ -88,8 +88,8 @@ module Ai
     private_class_method :format_checklist
 
     def self.document_excerpts(asset)
-      docs = asset.documents.limit(2)
-      return "(no manuals uploaded)" if docs.none?
+      docs = asset.manuals
+      return "(no manuals uploaded)" if docs.empty?
 
       docs.map { |doc| "--- #{doc.filename} ---\n#{Ai::PdfTextExtractorService.extract(doc)}" }.join("\n\n")
     end
