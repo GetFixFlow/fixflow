@@ -36,6 +36,7 @@ function serve(body: { data: Schedule } = fixtures.schedule) {
   return { asked, moves }
 }
 
+const last = <T,>(list: T[]) => list[list.length - 1]
 const chip = (title: RegExp) => screen.getByRole('link', { name: title }).closest('[draggable]')!
 const cell = (person: number | null, day: string) => screen.getByTestId(`cell-${person ?? 'nobody'}-${day}`)
 const dataTransfer = () => ({ setData: vi.fn(), getData: vi.fn(), effectAllowed: '', dropEffect: '' })
@@ -140,10 +141,10 @@ describe('the schedule', () => {
     await screen.findByText('Alice Silva')
 
     await userEvent.setup({ advanceTimers: () => {} }).click(screen.getByRole('button', { name: 'Next week' }))
-    await waitFor(() => expect(asked.at(-1)!.searchParams.get('from')).toBe('2026-10-18'))
+    await waitFor(() => expect(last(asked).searchParams.get('from')).toBe('2026-10-18'))
 
     await userEvent.setup({ advanceTimers: () => {} }).click(screen.getByRole('button', { name: 'Today' }))
-    await waitFor(() => expect(asked.at(-1)!.searchParams.get('from')).toBe('2026-10-11'))
+    await waitFor(() => expect(last(asked).searchParams.get('from')).toBe('2026-10-11'))
   })
 
   it('shows one day, with more about each work order, in the day view', async () => {
@@ -153,8 +154,8 @@ describe('the schedule', () => {
 
     await userEvent.setup({ advanceTimers: () => {} }).click(screen.getByRole('button', { name: 'Day' }))
 
-    await waitFor(() => expect(asked.at(-1)!.searchParams.get('from')).toBe('2026-10-14'))
-    expect(asked.at(-1)!.searchParams.get('to')).toBe('2026-10-14')
+    await waitFor(() => expect(last(asked).searchParams.get('from')).toBe('2026-10-14'))
+    expect(last(asked).searchParams.get('to')).toBe('2026-10-14')
     expect(screen.getByRole('button', { name: 'Day' })).toHaveAttribute('aria-pressed', 'true')
   })
 
