@@ -3,7 +3,7 @@
 #
 # Applied today: timezone, wo_number_prefix, default_priority, default_due_days, the regional display settings
 # (date_format, time_format, currency, number_format, first_day_of_week), and work_hours, work_days and holidays (the
-# hours a day holds on the schedule, see TeamSchedule).
+# hours a day holds on the schedule, see TeamSchedule) and approval_limit (see WorkOrderApproval).
 # The rest are stored and returned but nothing reads them yet.
 module OrganizationSettings
   extend ActiveSupport::Concern
@@ -30,6 +30,7 @@ module OrganizationSettings
     "default_priority" => "medium",
     "default_due_days" => 7,
     "labor_rate" => 0,
+    "approval_limit" => 0, # 0: no approvals
     "require_completion_notes" => false,
     "auto_close_days" => 30,
     "pm_compliance_target" => 90,
@@ -50,7 +51,7 @@ module OrganizationSettings
 
   INTEGER_KEYS = %w[default_due_days auto_close_days pm_compliance_target pm_reminder_days
                     iot_alert_cooldown iot_stale_threshold iot_data_retention_days audit_log_retention_days].freeze
-  DECIMAL_KEYS = %w[labor_rate].freeze
+  DECIMAL_KEYS = %w[labor_rate approval_limit].freeze
   BOOLEAN_KEYS = %w[require_completion_notes pm_pause_on_down update_check public_requests_enabled require_two_factor].freeze
   KEYS = DEFAULTS.keys.freeze
 
@@ -68,6 +69,8 @@ module OrganizationSettings
 
   # What an hour of work costs when the person doing it has no rate of their own.
   def default_labor_rate = BigDecimal(settings_with_defaults["labor_rate"].to_s)
+  # What a work order may cost before a manager has to approve it; 0 when nothing needs approving.
+  def approval_limit = BigDecimal(settings_with_defaults["approval_limit"].to_s)
   def default_due_days = settings_with_defaults["default_due_days"].to_i
 
   def timezone_or_default

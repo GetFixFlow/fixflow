@@ -95,6 +95,8 @@ export interface OrgSettings {
   default_due_days: number
   /** What an hour of work costs when the person has no rate of their own. */
   labor_rate: number
+  /** What a work order may cost before a manager has to approve it; 0: nothing needs approving. */
+  approval_limit: number
   require_completion_notes: boolean
   auto_close_days: number
   wo_number_prefix: string

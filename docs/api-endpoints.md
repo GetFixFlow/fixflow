@@ -6,7 +6,7 @@ the like stand for a value, and `:format` is left out. Live updates are a WebSoc
 holds the standard routes of the sign-in library that nothing uses (`sign_up/edit` and the like): the ones to use are
 `sign_in`, `sign_out`, `two_factor`, `password` and `me`; `sign_up` works only until the first company exists.
 
-There are 228 endpoints in 43 groups: [activity_logs](#activity-logs), [ai](#ai), [api_keys](#api-keys), [asset_documents](#asset-documents), [assets](#assets), [auth](#auth), [backups](#backups), [branding](#branding), [chat_settings](#chat-settings), [dashboard](#dashboard), [data_usage](#data-usage), [downtimes](#downtimes), [email_settings](#email-settings), [getting_started](#getting-started), [health](#health), [imports](#imports), [invitations](#invitations), [iot](#iot), [iot_alerts](#iot-alerts), [iot_rules](#iot-rules), [localization_settings](#localization-settings), [locations](#locations), [meters](#meters), [notification_preferences](#notification-preferences), [organization_settings](#organization-settings), [parts](#parts), [preventive_maintenances](#preventive-maintenances), [profile](#profile), [public_assets](#public-assets), [public_request_form](#public-request-form), [purchase_orders](#purchase-orders), [push_subscriptions](#push-subscriptions), [reports](#reports), [sample_data](#sample-data), [schedule](#schedule), [sessions](#sessions), [setup](#setup), [storage](#storage), [system_health](#system-health), [users](#users), [vendors](#vendors), [work_orders](#work-orders), [work_requests](#work-requests).
+There are 230 endpoints in 43 groups: [activity_logs](#activity-logs), [ai](#ai), [api_keys](#api-keys), [asset_documents](#asset-documents), [assets](#assets), [auth](#auth), [backups](#backups), [branding](#branding), [chat_settings](#chat-settings), [dashboard](#dashboard), [data_usage](#data-usage), [downtimes](#downtimes), [email_settings](#email-settings), [getting_started](#getting-started), [health](#health), [imports](#imports), [invitations](#invitations), [iot](#iot), [iot_alerts](#iot-alerts), [iot_rules](#iot-rules), [localization_settings](#localization-settings), [locations](#locations), [meters](#meters), [notification_preferences](#notification-preferences), [organization_settings](#organization-settings), [parts](#parts), [preventive_maintenances](#preventive-maintenances), [profile](#profile), [public_assets](#public-assets), [public_request_form](#public-request-form), [purchase_orders](#purchase-orders), [push_subscriptions](#push-subscriptions), [reports](#reports), [sample_data](#sample-data), [schedule](#schedule), [sessions](#sessions), [setup](#setup), [storage](#storage), [system_health](#system-health), [users](#users), [vendors](#vendors), [work_orders](#work-orders), [work_requests](#work-requests).
 
 ## activity-logs
 
@@ -423,11 +423,13 @@ There are 228 endpoints in 43 groups: [activity_logs](#activity-logs), [ai](#ai)
 | DELETE | `/api/v1/work_orders/:id` | `api/v1/work_orders#destroy` |
 | GET | `/api/v1/work_orders/:id` | `api/v1/work_orders#show` |
 | PATCH, PUT | `/api/v1/work_orders/:id` | `api/v1/work_orders#update` |
+| PATCH | `/api/v1/work_orders/:id/approve` | `api/v1/work_orders#approve` |
 | PATCH | `/api/v1/work_orders/:id/assign` | `api/v1/work_orders#assign` |
 | PATCH | `/api/v1/work_orders/:id/cancel` | `api/v1/work_orders#cancel` |
 | PATCH | `/api/v1/work_orders/:id/complete` | `api/v1/work_orders#complete` |
 | PATCH | `/api/v1/work_orders/:id/hold` | `api/v1/work_orders#hold` |
 | PATCH | `/api/v1/work_orders/:id/reject` | `api/v1/work_orders#reject` |
+| PATCH | `/api/v1/work_orders/:id/request_approval` | `api/v1/work_orders#request_approval` |
 | PATCH | `/api/v1/work_orders/:id/reschedule` | `api/v1/work_orders#reschedule` |
 | PATCH | `/api/v1/work_orders/:id/start` | `api/v1/work_orders#start` |
 | PATCH | `/api/v1/work_orders/:id/transition` | `api/v1/work_orders#transition` |

@@ -41,6 +41,7 @@ const orgSchema = z.object({
   default_priority: z.string(),
   default_due_days: z.coerce.number().min(1).max(365),
   labor_rate: z.coerce.number().min(0).max(100000),
+  approval_limit: z.coerce.number().min(0).max(99999999),
   require_completion_notes: z.boolean(),
   auto_close_days: z.coerce.number().min(0).max(365),
   wo_number_prefix: z.string().min(1),
@@ -65,6 +66,7 @@ const DEFAULT_ORG: Partial<OrgSettings> = {
   default_priority: 'medium',
   default_due_days: 7,
   labor_rate: 0,
+  approval_limit: 0,
   require_completion_notes: false,
   auto_close_days: 30,
   wo_number_prefix: 'WO',
@@ -114,6 +116,7 @@ export function OrganizationPage() {
       default_priority: 'medium',
       default_due_days: 7,
       labor_rate: 0,
+      approval_limit: 0,
       require_completion_notes: false,
       auto_close_days: 30,
       wo_number_prefix: 'WO',
@@ -139,6 +142,7 @@ export function OrganizationPage() {
           default_priority: merged.default_priority ?? 'medium',
           default_due_days: merged.default_due_days ?? 7,
           labor_rate: merged.labor_rate ?? 0,
+          approval_limit: merged.approval_limit ?? 0,
           require_completion_notes: merged.require_completion_notes ?? false,
           auto_close_days: merged.auto_close_days ?? 30,
           wo_number_prefix: merged.wo_number_prefix ?? 'WO',
@@ -179,6 +183,7 @@ export function OrganizationPage() {
       default_priority: data.default_priority,
       default_due_days: data.default_due_days,
       labor_rate: data.labor_rate,
+      approval_limit: data.approval_limit,
       require_completion_notes: data.require_completion_notes,
       auto_close_days: data.auto_close_days,
       wo_number_prefix: data.wo_number_prefix,
@@ -323,6 +328,15 @@ export function OrganizationPage() {
                 <Input id="labor-rate" {...form.register('labor_rate')} type="number" min={0} step="0.01" />
                 <p className="text-xs text-gray-500 mt-1">
                   What an hour of work costs when the technician has no rate of their own. A person&apos;s own rate is set in Users. Without any rate, labor is counted as nothing.
+                </p>
+              </div>
+              <div>
+                <label htmlFor="approval-limit" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Approval limit ({currencySymbol})
+                </label>
+                <Input id="approval-limit" {...form.register('approval_limit')} type="number" min={0} step="0.01" />
+                <p className="text-xs text-gray-500 mt-1">
+                  A work order expected to cost more than this (parts, a vendor&apos;s charge and labor, from the estimate until hours are recorded) needs a manager&apos;s approval before it is started, and again before it is completed if the cost has grown. 0 means nothing needs approving.
                 </p>
               </div>
               <div>

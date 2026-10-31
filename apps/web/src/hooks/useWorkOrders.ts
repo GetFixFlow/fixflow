@@ -136,8 +136,32 @@ export function useTransitionWorkOrder() {
       qc.invalidateQueries({ queryKey: [...WO_KEY, vars.id] })
       toast.success('Status updated.')
     },
-    onError: () => toast.error('Invalid transition.'),
+    onError: (error: AxiosError<{ error?: { message?: string } }>) =>
+      toast.error(error.response?.data?.error?.message ?? 'Invalid transition.'),
   })
+}
+
+/** A manager approves work over the approval limit; the person doing it asks the managers to. */
+export function useApproval() {
+  const qc = useQueryClient()
+  const refresh = (id: number) => {
+    qc.invalidateQueries({ queryKey: WO_KEY })
+    qc.invalidateQueries({ queryKey: [...WO_KEY, id] })
+  }
+  const failure = (error: AxiosError<{ error?: { message?: string } }>) =>
+    toast.error(error.response?.data?.error?.message ?? 'Could not do that.')
+  return {
+    approve: useMutation({
+      mutationFn: (id: number) => workOrdersApi.approve(id),
+      onSuccess: (_, id) => { refresh(id); toast.success('Approved.') },
+      onError: failure,
+    }),
+    request: useMutation({
+      mutationFn: (id: number) => workOrdersApi.requestApproval(id),
+      onSuccess: (_, id) => { refresh(id); toast.success('The managers have been asked.') },
+      onError: failure,
+    }),
+  }
 }
 
 export function useAssignWorkOrder() {

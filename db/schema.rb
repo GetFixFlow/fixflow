@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_120900) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_121000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -575,6 +575,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_120900) do
     t.bigint "vendor_id"
     t.decimal "vendor_cost", precision: 10, scale: 2, default: "0.0", null: false
     t.string "vendor_reference"
+    t.bigint "approved_by_id"
+    t.datetime "approved_at"
+    t.decimal "approved_cost", precision: 12, scale: 2
+    t.datetime "approval_requested_at"
+    t.index ["approved_by_id"], name: "index_work_orders_on_approved_by_id"
     t.index ["asset_id", "created_at"], name: "index_work_orders_on_asset_id_and_created_at"
     t.index ["asset_id"], name: "index_work_orders_on_asset_id"
     t.index ["assignee_id", "status"], name: "index_work_orders_on_assignee_id_and_status"
@@ -657,6 +662,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_120900) do
   add_foreign_key "work_orders", "iot_rules"
   add_foreign_key "work_orders", "organizations"
   add_foreign_key "work_orders", "preventive_maintenances"
+  add_foreign_key "work_orders", "users", column: "approved_by_id"
   add_foreign_key "work_orders", "users", column: "assignee_id"
   add_foreign_key "work_orders", "users", column: "requester_id"
   add_foreign_key "work_orders", "users", column: "verified_by_id"

@@ -111,6 +111,8 @@ Rails.application.routes.draw do
         member do
           patch :assign
           patch :reschedule
+          patch :approve
+          patch :request_approval
           patch :start
           patch :complete
           patch :verify

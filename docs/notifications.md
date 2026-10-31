@@ -21,6 +21,7 @@ A push notification is a message that appears on a phone or computer even when F
 | Someone reports a problem from a QR label | managers and administrators |
 | A part is running low or out | managers and administrators |
 | Someone asks for parts to be bought | managers and administrators |
+| A work order is over the approval limit and needs approving ([Approval of costly work](work-orders.md#approval-of-costly-work)) | managers and administrators, other than the person doing the work |
 
 The summaries of maintenance due and overdue are email only. Everything is on by default for a device once it is turned on, and emails and push are independent: a person can have push without email.
 
@@ -70,6 +71,7 @@ An administrator can have FixFlow post to a **Slack** or **Microsoft Teams** cha
 | A critical or high sensor alert is raised | "Critical sensor alert: Pump 3" and what the rule says (medium and low are not posted: they would bury the serious ones) |
 | A part is running low or out | "Running low: Belt" and how many are left |
 | Someone asks for parts to be bought | "PO-000007 needs a decision" and how many parts |
+| A work order is over the approval limit and needs approving | "WO-000012 needs approval" and the title |
 | A warranty ends within 30 days | "2 warranties ending soon" and the first asset names with their dates ([Asset documents and warranty](asset-documents.md#warranty)) |
 
 Each message has a link back to the page in FixFlow. It carries a work order's number and title, a sensor's name and reading, a part's name and count, and for an assignment the name of the person it went to; **no requesters' names or email addresses, no costs, no comments**.
