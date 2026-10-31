@@ -5,7 +5,7 @@ The order that works for most companies. Each step names the screen and the page
 ## Day 1: make it yours
 
 1. **Create the first account.** The first time you open the address, **Set up FixFlow** asks for the company name and your name, work email and a password (10 or more characters; a few words in a row work well). That account is the administrator.
-2. **Settings, Organization**: the company's name, the priority and due date a new request gets, the **work hours, work days and holidays** (they decide how much work a day holds on the [Schedule](schedule.md)), and the **hourly labor rate** that turns recorded hours into cost. Until a rate is set, labor counts as nothing.
+2. **Settings, Organization**: the company's name, the priority and due date a new request gets, the **work hours, work days and holidays** (they decide how much work a day holds on the [Schedule](schedule.md)), and the **hourly labor rate** that turns recorded hours into cost. Until a rate is set, labor counts as nothing. Optionally an **approval limit**: work expected to cost more needs a manager's approval ([Approval of costly work](work-orders.md#approval-of-costly-work)).
 3. **Settings, Branding**: your logo, colour and the sign-in page's headline.
 4. **Settings, Localization**: how dates, times, numbers and money are shown to everyone.
 5. **Settings, Email Settings**: where invitations, resets and notifications are sent from. Without email nothing breaks; you copy invitation links yourself. See [Configuration](configuration.md#email).

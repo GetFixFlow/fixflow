@@ -17,7 +17,7 @@ vi.mock('@/hooks/useSettings', () => ({
 
 const SAVED_ORG = {
   name: 'Acme Corp', slug: 'acme', industry: 'Manufacturing', size: '11-50', website: '', address: '',
-  default_priority: 'high', default_due_days: 3, labor_rate: 37.5, require_completion_notes: false, auto_close_days: 30,
+  default_priority: 'high', default_due_days: 3, labor_rate: 37.5, approval_limit: 500, require_completion_notes: false, auto_close_days: 30,
   wo_number_prefix: 'MNT', pm_compliance_target: 90, pm_reminder_days: 7, pm_pause_on_down: false,
   iot_alert_cooldown: 60, iot_stale_threshold: 300, iot_data_retention_days: 365, iot_auto_wo_threshold: 'critical',
   work_hours: { start: '07:00', end: '15:00' }, work_days: [1, 2, 3, 4, 5, 6],
@@ -82,6 +82,19 @@ describe('OrganizationPage', () => {
 
       await waitFor(() => expect(mocks.mutate).toHaveBeenCalled())
       expect(mocks.mutate.mock.calls[0][0]).toMatchObject({ labor_rate: 42.25 })
+    })
+
+    it('shows the approval limit, and saves a changed one', async () => {
+      render(<OrganizationPage />, { wrapper: Wrapper })
+      const limit = await screen.findByLabelText(/approval limit/i)
+      expect(limit).toHaveValue(500)
+
+      await userEvent.clear(limit)
+      await userEvent.type(limit, '1200')
+      await userEvent.click(screen.getByRole('button', { name: /save/i }))
+
+      await waitFor(() => expect(mocks.mutate).toHaveBeenCalled())
+      expect(mocks.mutate.mock.calls[0][0]).toMatchObject({ approval_limit: 1200 })
     })
 
     it('keeps the URL slug read-only', async () => {

@@ -32,6 +32,12 @@ module EmailPreferenceCases
         id = create(:purchase_order, organization: org).id
         -> { PurchaseRequestedJob.perform_now(id) }
       } },
+    { event: "wo_approval_needed", role: "manager", subject: /Needs approval/,
+      setup: lambda { |org, _person|
+        org.update!(settings: org.settings.merge("approval_limit" => 100))
+        id = create(:work_order, organization: org, vendor_cost: 500, approval_requested_at: Time.current).id
+        -> { ApprovalRequestedJob.perform_now(id) }
+      } },
     { event: "warranty_expiring", role: "manager", subject: /warranty ending/,
       setup: lambda { |org, _person|
         create(:asset, organization: org, warranty_expires_on: Date.current + 5)

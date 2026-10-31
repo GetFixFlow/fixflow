@@ -19,6 +19,16 @@ class WorkOrderMailer < ApplicationMailer
     )
   end
 
+  def approval_needed(work_order, manager)
+    @work_order = work_order
+    @manager    = manager
+    @url        = "#{EmailSetup.base_url}/work-orders/#{work_order.id}"
+    mail(
+      to:      manager.email,
+      subject: "[FixFlow] Needs approval: #{work_order.work_order_number}"
+    )
+  end
+
   def verified(work_order)
     @work_order = work_order
     @requester  = work_order.requester

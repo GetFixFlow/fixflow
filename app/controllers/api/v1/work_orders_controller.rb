@@ -1,8 +1,10 @@
 module Api
   module V1
     class WorkOrdersController < Api::V1::BaseController
-      before_action :set_work_order, only: %i[show update destroy assign reschedule start complete verify reject hold cancel transition]
-      before_action :require_manager!, only: %i[verify reject reschedule]
+      before_action :set_work_order,
+                    only: %i[show update destroy assign reschedule approve request_approval start complete verify reject hold
+                             cancel transition]
+      before_action :require_manager!, only: %i[verify reject reschedule approve]
       before_action :require_manager_for_vendor!, only: %i[create update]
 
       # The vendor who did the work, what they charged and their invoice number: a manager's to enter.
@@ -80,6 +82,30 @@ module Api
         render_error(e.message, :unprocessable_entity, code: e.code)
       rescue Date::Error
         render_error("due_on must be a date (YYYY-MM-DD)", :bad_request, code: "INVALID_DATE")
+      end
+
+      # PATCH /api/v1/work_orders/:id/approve  (a manager, not the person doing the work)
+      def approve
+        unless @work_order.approvable_by?(current_user)
+          return render_error("You cannot approve work you are doing yourself.", :forbidden, code: "OWN_WORK")
+        end
+        unless @work_order.open_status?
+          return render_error("Only work that is not finished can be approved.", :unprocessable_entity, code: "NOT_OPEN")
+        end
+        return render_not_needed unless @work_order.approval_needed?
+
+        @work_order.approve!(by: current_user)
+        render json: { data: render_extended(@work_order) }
+      end
+
+      # PATCH /api/v1/work_orders/:id/request_approval  (the person doing the work, or a manager): tells the managers
+      def request_approval
+        authorize_assignee_or_manager!
+        return if performed?
+        return render_not_needed unless @work_order.approval_needed?
+
+        @work_order.request_approval!
+        render json: { data: render_extended(@work_order) }
       end
 
       # PATCH /api/v1/work_orders/:id/start
@@ -217,6 +243,7 @@ module Api
 
       def fire_transition!(event)
         return render_unfinished_checklist if event == :complete && @work_order.incomplete_required_steps.any?
+        return render_approval_needed(event) if event.in?(%i[start complete]) && @work_order.approval_needed?
 
         unless @work_order.public_send(:"may_#{event}?")
           return render_error(
@@ -228,12 +255,30 @@ module Api
         @work_order.public_send(:"#{event}!")
 
         if @work_order.valid?
-          render json: { data: WorkOrderBlueprint.render_as_hash(@work_order, view: :extended, labor: current_user.manager_or_above?) }
+          render json: { data: render_extended(@work_order) }
         else
           render json: { errors: @work_order.errors.full_messages }, status: :unprocessable_entity
         end
       rescue ActiveRecord::RecordInvalid => e
         render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
+      end
+
+      def render_not_needed
+        render_error("This work order does not need approving.", :unprocessable_entity, code: "NOT_NEEDED")
+      end
+
+      def render_extended(work_order)
+        WorkOrderBlueprint.render_as_hash(work_order, view: :extended, labor: current_user.manager_or_above?)
+      end
+
+      # Over the company's limit and not approved: the managers are asked, once, and the person is told. What it costs is
+      # for managers to know, as it is made of wages.
+      def render_approval_needed(event)
+        @work_order.request_approval!
+        details = current_user.manager_or_above? ? { expected_cost: @work_order.expected_cost, limit: @work_order.approval_limit } : {}
+        render_error("A manager has to approve this work order before it is #{event == :start ? 'started' : 'completed'}: " \
+                     "it costs more than the company's approval limit. The managers have been asked.",
+                     :unprocessable_entity, code: "APPROVAL_REQUIRED", details: details)
       end
 
       # Work cannot be completed with required checklist steps undone. Says which ones, so the
@@ -260,6 +305,14 @@ module Api
 
       # ─── Filtering ───────────────────────────────────────────────────────
 
+      # Work that is not finished and is waiting for a manager to approve it (managers only, as it is made of wages).
+      def waiting_for_approval(scope)
+        return scope.none unless current_user.manager_or_above? && current_organization.approval_limit.positive?
+
+        ids = scope.open.includes(:assignee, :organization).select(&:approval_needed?).map(&:id)
+        scope.where(id: ids)
+      end
+
       def apply_filters(scope)
         if params[:status].present?
           scope = scope.by_status(params[:status].split(",").map(&:strip))
@@ -273,6 +326,7 @@ module Api
         scope = scope.overdue                             if params[:overdue] == "true"
         scope = scope.assigned_to(current_user.id)        if params[:my_work_orders] == "true"
         scope = scope.search_by_keyword(params[:search])  if params[:search].present?
+        scope = waiting_for_approval(scope)               if params[:needs_approval] == "true"
         scope = scope.due_from(params[:due_date_from])    if params[:due_date_from].present?
         scope = scope.due_to(params[:due_date_to])        if params[:due_date_to].present?
 

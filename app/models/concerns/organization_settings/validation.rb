@@ -39,6 +39,7 @@ module OrganizationSettings
     def validate_numbers(values)
       validate_integer_range(values, "default_due_days", 1..365)
       validate_labor_rate(values["labor_rate"], :labor_rate)
+      validate_amount(values["approval_limit"], :approval_limit)
       validate_integer_range(values, "auto_close_days", 0..365)
       validate_integer_range(values, "pm_compliance_target", 0..100)
       validate_integer_range(values, "pm_reminder_days", 0..30)
@@ -66,6 +67,12 @@ module OrganizationSettings
       return if value.is_a?(Numeric) && value >= 0 && value <= 100_000
 
       errors.add(attribute, "must be an amount from 0 to 100000")
+    end
+
+    def validate_amount(value, attribute)
+      return if value.is_a?(Numeric) && value >= 0 && value < 10**8
+
+      errors.add(attribute, "must be an amount from 0 up (0 means no approvals)")
     end
 
     def validate_integer_range(values, key, range)

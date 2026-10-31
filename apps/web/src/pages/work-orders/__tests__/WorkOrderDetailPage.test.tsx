@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { toast } from 'sonner'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
@@ -8,6 +9,8 @@ import { server } from '@/test/server'
 import { WorkOrderDetailPage } from '../WorkOrderDetailPage'
 import { useAuthStore } from '@/stores/authStore'
 import type { WorkOrder } from '@/types'
+
+vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn(), info: vi.fn() } }))
 
 const mockWO: WorkOrder = {
   id: 1,
@@ -117,6 +120,28 @@ describe('WorkOrderDetailPage', () => {
     await waitFor(() =>
       expect(screen.getByText(/start work/i)).toBeInTheDocument(),
     )
+  })
+
+  it('shows the approval notice on work that is over the limit, with the cost for a manager', async () => {
+    setupHandlers({ ...mockWO, status: 'assigned', approval_needed: true, expected_cost: '980.00' })
+    render(<WorkOrderDetailPage />, { wrapper })
+
+    const notice = await screen.findByRole('status')
+    expect(notice).toHaveTextContent(/needs a manager's approval before it can be started/i)
+    expect(notice).toHaveTextContent('980.00')
+    expect(screen.getByRole('button', { name: 'Approve' })).toBeInTheDocument()
+  })
+
+  it('shows the server\'s reason, not a vague one, when Start is refused for want of approval', async () => {
+    setupHandlers({ ...mockWO, status: 'assigned', assignee_id: 3 })
+    useAuthStore.setState({ user: { id: 3, email: '', full_name: 'Carlos Tech', role: 'technician', organization_id: 1 }, token: 'token', isAuthenticated: true })
+    server.use(http.patch('/api/v1/work_orders/1/transition', () =>
+      HttpResponse.json({ error: { code: 'APPROVAL_REQUIRED', message: 'A manager has to approve this work order before it is started.' } }, { status: 422 })))
+    render(<WorkOrderDetailPage />, { wrapper })
+
+    await userEvent.click(await screen.findByText(/start work/i))
+
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('A manager has to approve this work order before it is started.'))
   })
 
   it('manager sees Verify button on completed WO', async () => {

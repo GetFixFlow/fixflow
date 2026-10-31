@@ -14,7 +14,8 @@ class ChatConfig
     "iot_alert" => "A critical or high sensor alert is raised",
     "part_low_stock" => "A part is running low or out",
     "po_requested" => "Someone asks for parts to be bought",
-    "warranty_expiring" => "A warranty ends within 30 days"
+    "warranty_expiring" => "A warranty ends within 30 days",
+    "wo_approval_needed" => "A work order is over the approval limit and needs approving"
   }.freeze
   FIELDS = %w[kind enabled events last_sent_at last_error].freeze
 

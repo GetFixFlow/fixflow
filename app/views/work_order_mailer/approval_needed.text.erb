@@ -1,0 +1,11 @@
+Hi <%= @manager.full_name %>,
+
+A work order costs more than the company's approval limit, so it cannot be started or finished until a manager approves it.
+
+Work Order: <%= @work_order.work_order_number %>
+Title:      <%= @work_order.title %>
+Priority:   <%= @work_order.priority.upcase %>
+
+Review and approve it: <%= @url %>
+
+— FixFlow

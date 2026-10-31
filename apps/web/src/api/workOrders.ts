@@ -24,6 +24,12 @@ export const workOrdersApi = {
 
   destroy: (id: number) => apiClient.delete(`/work_orders/${id}`),
 
+  /** A manager approves work that is over the company's approval limit. */
+  approve: (id: number) => apiClient.patch<{ data: WorkOrder }>(`/work_orders/${id}/approve`),
+
+  /** Asks the managers to approve it (they are told once). */
+  requestApproval: (id: number) => apiClient.patch<{ data: WorkOrder }>(`/work_orders/${id}/request_approval`),
+
   transition: (id: number, event: string, payload?: Record<string, unknown>) =>
     apiClient.patch<{ data: WorkOrder }>(`/work_orders/${id}/transition`, { event, ...payload }),
 
