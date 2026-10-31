@@ -9,6 +9,7 @@ class Vendor < ApplicationRecord
   belongs_to :organization
   has_many :contacts, class_name: "VendorContact", dependent: :destroy
   has_many :work_orders, dependent: :restrict_with_error
+  has_many :purchase_orders, dependent: :restrict_with_error
 
   normalizes :name, :category, :phone, :email, :website, with: ->(text) { text.to_s.strip.presence }
 

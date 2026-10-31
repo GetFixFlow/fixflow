@@ -1,0 +1,16 @@
+Hi <%= @manager.full_name %>,
+
+<%= @order.requested_by&.full_name.presence || "Someone" %> has asked for parts, and it needs your decision.
+
+Request:  <%= @order.number %>
+<% if @order.reason.present? %>
+Why:      <%= @order.reason %>
+<% end %>
+
+<% @order.lines.each do |line| %>
+- <%= line.part.name %>: <%= line.quantity.to_f %> <%= line.part.unit %>
+<% end %>
+
+Approve or turn it down: <%= @url %>
+
+— FixFlow

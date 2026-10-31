@@ -15,6 +15,7 @@ const EVENTS = [
   { key: 'wo_needs_verification', label: 'Work is finished and needs verifying' },
   { key: 'iot_alert', label: 'A critical or high sensor alert is raised' },
   { key: 'part_low_stock', label: 'A part is running low or out' },
+  { key: 'po_requested', label: 'Someone asks for parts to be bought' },
 ]
 const empty = { kind: 'slack', enabled: false, events: EVENTS.map((e) => e.key), url_set: false, url_hint: null, last_sent_at: null, last_error: null, available_events: EVENTS }
 const saved = { ...empty, enabled: true, url_set: true, url_hint: 'hooks.slack.com', last_sent_at: '2026-10-30T08:00:00Z' }
@@ -92,7 +93,7 @@ describe('ChatSettingsPage', () => {
       kind: 'teams',
       enabled: true,
       url: 'https://prod-1.logic.azure.com/workflows/abc',
-      events: ['wo_new_request', 'wo_assigned', 'wo_needs_verification', 'iot_alert'],
+      events: ['wo_new_request', 'wo_assigned', 'wo_needs_verification', 'iot_alert', 'po_requested'],
     })
   })
 

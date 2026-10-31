@@ -41,7 +41,7 @@ q: "%#{Vendor.sanitize_sql_like(params[:search])}%")
       # DELETE /api/v1/vendors/:id (administrators; refused once the vendor has work orders: deactivate instead)
       def destroy
         unless @vendor.destroy
-          return render_error("This vendor has work orders, so it cannot be deleted. Deactivate it instead.",
+          return render_error("This vendor has work or purchase orders, so it cannot be deleted. Deactivate it instead.",
                               :unprocessable_entity, code: "VENDOR_IN_USE")
         end
 

@@ -9,11 +9,11 @@ module EmailPreferences
   # The emails that exist today, by who gets them:
   EMAIL_EVENTS = %w[
     wo_assigned wo_verified pm_generated pm_due_soon
-    wo_needs_verification wo_new_request pm_overdue part_low_stock
+    wo_needs_verification wo_new_request pm_overdue part_low_stock po_requested
   ].freeze
 
   # Of those, the ones that are time-sensitive enough to push to a phone. The daily summaries are not.
-  PUSH_EVENTS = %w[wo_assigned wo_verified pm_generated wo_needs_verification wo_new_request part_low_stock].freeze
+  PUSH_EVENTS = %w[wo_assigned wo_verified pm_generated wo_needs_verification wo_new_request part_low_stock po_requested].freeze
 
   class_methods do
     # Of the people in the current scope (a company's managers, say), those who want this email.

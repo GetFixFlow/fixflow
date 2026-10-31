@@ -162,6 +162,19 @@ reason: /work orders or schedules you created/))
       expect(real.work_order_parts.count).to eq(1)
     end
 
+    it "keeps a sample part that is on a purchase request" do
+      load_sample
+      part = org.parts.find_by(name: "Sample: Oil filter")
+      request = org.purchase_orders.new(reason: "Running low")
+      request.lines.build(part: part, quantity: 4)
+      request.save!
+
+      report = described_class.remove!(org)
+
+      expect(org.parts.pluck(:name)).to eq(["Sample: Oil filter"])
+      expect(report[:kept]).to include(a_hash_including(type: "Part", reason: /purchase request or order/))
+    end
+
     it "keeps a sample place that has real things in it, together with the places above it" do
       load_sample
       floor = org.locations.find_by(name: "Sample: Floor 1")

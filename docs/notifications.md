@@ -20,6 +20,7 @@ A push notification is a message that appears on a phone or computer even when F
 | Work is finished and needs verifying | managers and administrators |
 | Someone reports a problem from a QR label | managers and administrators |
 | A part is running low or out | managers and administrators |
+| Someone asks for parts to be bought | managers and administrators |
 
 The summaries of maintenance due and overdue are email only. Everything is on by default for a device once it is turned on, and emails and push are independent: a person can have push without email.
 

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Boxes, Pencil, Plus, Search, SlidersHorizontal, Trash2, Upload } from 'lucide-react'
+import { Boxes, Pencil, Plus, Search, ShoppingCart, SlidersHorizontal, Trash2, Upload } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -8,6 +8,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { PartFormModal } from '@/components/parts/PartFormModal'
 import { StockAdjustModal } from '@/components/parts/StockAdjustModal'
+import { PurchaseRequestModal } from '@/components/purchasing/PurchaseRequestModal'
 import { useCatalog, useDebouncedValue, useDeletePart } from '@/hooks/useParts'
 import { useAuthStore } from '@/stores/authStore'
 import type { Part } from '@/types'
@@ -30,6 +31,7 @@ export function PartsPage() {
   const [page, setPage] = useState(1)
   const [editing, setEditing] = useState<Part | 'new' | null>(null)
   const [adjusting, setAdjusting] = useState<Part | null>(null)
+  const [requesting, setRequesting] = useState<Part | null>(null)
 
   const debounced = useDebouncedValue(search, 300)
   const { data, isLoading, isError, refetch } = useCatalog({ search: debounced, lowStock: lowOnly, page })
@@ -122,6 +124,9 @@ export function PartsPage() {
                       <Button variant="ghost" size="sm" onClick={() => setAdjusting(part)} aria-label={`Adjust stock of ${part.name}`}>
                         <SlidersHorizontal className="h-4 w-4" />Adjust
                       </Button>
+                      <Button variant="ghost" size="sm" onClick={() => setRequesting(part)} aria-label={`Ask for more ${part.name}`}>
+                        <ShoppingCart className="h-4 w-4" />Order
+                      </Button>
                       {canManage && (
                         <Button variant="ghost" size="icon" onClick={() => setEditing(part)} aria-label={`Edit ${part.name}`}>
                           <Pencil className="h-4 w-4" />
@@ -155,6 +160,7 @@ export function PartsPage() {
         <PartFormModal open part={editing === 'new' ? undefined : editing} onClose={() => setEditing(null)} />
       )}
       {adjusting && <StockAdjustModal part={adjusting} onClose={() => setAdjusting(null)} />}
+      {requesting && <PurchaseRequestModal part={requesting} canPrice={canManage} onClose={() => setRequesting(null)} />}
     </div>
   )
 }

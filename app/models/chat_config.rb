@@ -12,7 +12,8 @@ class ChatConfig
     "wo_assigned" => "A work order is assigned",
     "wo_needs_verification" => "Work is finished and needs verifying",
     "iot_alert" => "A critical or high sensor alert is raised",
-    "part_low_stock" => "A part is running low or out"
+    "part_low_stock" => "A part is running low or out",
+    "po_requested" => "Someone asks for parts to be bought"
   }.freeze
   FIELDS = %w[kind enabled events last_sent_at last_error].freeze
 

@@ -53,6 +53,7 @@ const EMAIL_EVENTS: EmailEvent[] = [
   { key: 'pm_due_soon', label: 'Maintenance is due this week', hint: 'A summary of your schedules due within 7 days (managers get all of them).', group: 'Preventive maintenance' },
   { key: 'pm_overdue', label: 'Maintenance is overdue', hint: 'A summary of overdue schedules.', group: 'Preventive maintenance', minRole: 'manager' },
   { key: 'part_low_stock', label: 'A part is running low or out', hint: 'Sent once each time stock reaches its reorder point, and again if it runs out.', group: 'Inventory', minRole: 'manager' },
+  { key: 'po_requested', label: 'Someone asks for parts to be bought', hint: 'Sent when a purchase request is waiting for your decision.', group: 'Inventory', minRole: 'manager' },
 ]
 
 // What a screen reader says for each Push box (the row's own label belongs to the email box).
@@ -63,6 +64,7 @@ const PUSH_EVENTS: Record<string, string> = {
   wo_needs_verification: 'work to verify',
   wo_new_request: 'a reported problem',
   part_low_stock: 'a part running low',
+  po_requested: 'a purchase request',
 }
 
 const SOUND_KEY = 'fixflow-alert-sound'

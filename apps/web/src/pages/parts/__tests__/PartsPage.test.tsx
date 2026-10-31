@@ -62,6 +62,23 @@ describe('PartsPage', () => {
     expect(screen.getByText('3 in the catalog')).toBeInTheDocument()
   })
 
+  it('starts a purchase request from a part, with enough to get back above its reorder point', async () => {
+    signInAs('technician')
+    let body: unknown
+    server.use(http.post('/api/v1/purchase_orders', async ({ request }) => {
+      body = await request.json()
+      return HttpResponse.json({ data: {} }, { status: 201 })
+    }))
+    renderPage()
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Ask for more Drive chain' }))
+
+    expect(screen.getByLabelText('How many Drive chain')).toHaveValue(3) // 2 x 2 - 1 on hand
+    expect(screen.getByLabelText('Why is it needed?')).toHaveValue('Drive chain is running low')
+    await userEvent.click(screen.getByRole('button', { name: 'Send request' }))
+    await waitFor(() => expect(body).toEqual({ purchase_order: { reason: 'Drive chain is running low', notes: null }, lines: [{ part_id: 2, quantity: 3 }] }))
+  })
+
   it('searches by name as you type', async () => {
     renderPage()
     await screen.findByText('Hydraulic seal')

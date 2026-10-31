@@ -7,6 +7,7 @@ class Organization < ApplicationRecord
   has_many :assets, dependent: :destroy
   has_many :work_orders, dependent: :destroy
   has_many :preventive_maintenances, dependent: :destroy
+  has_many :purchase_orders, dependent: :destroy # before the vendors and parts they name
   has_many :vendors, dependent: :destroy # after the work orders above: a vendor with work orders cannot be deleted
   has_many :parts, dependent: :destroy
   has_many :meters, dependent: :destroy
