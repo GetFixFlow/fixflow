@@ -1,0 +1,311 @@
+{
+  "data": {
+    "from": "2026-10-12",
+    "to": "2026-10-18",
+    "today": "2026-10-16",
+    "days": [
+      {
+        "date": "2026-10-12",
+        "working": true,
+        "holiday": null,
+        "hours": 9.0
+      },
+      {
+        "date": "2026-10-13",
+        "working": true,
+        "holiday": null,
+        "hours": 9.0
+      },
+      {
+        "date": "2026-10-14",
+        "working": false,
+        "holiday": "Founders' Day",
+        "hours": 0.0
+      },
+      {
+        "date": "2026-10-15",
+        "working": true,
+        "holiday": null,
+        "hours": 9.0
+      },
+      {
+        "date": "2026-10-16",
+        "working": true,
+        "holiday": null,
+        "hours": 9.0
+      },
+      {
+        "date": "2026-10-17",
+        "working": false,
+        "holiday": null,
+        "hours": 0.0
+      },
+      {
+        "date": "2026-10-18",
+        "working": false,
+        "holiday": null,
+        "hours": 0.0
+      }
+    ],
+    "technicians": [
+      {
+        "id": 2,
+        "name": "Alice Silva",
+        "role": "technician",
+        "days": [
+          {
+            "date": "2026-10-12",
+            "count": 0,
+            "hours": 0,
+            "overloaded": false
+          },
+          {
+            "date": "2026-10-13",
+            "count": 1,
+            "hours": 3.0,
+            "overloaded": false
+          },
+          {
+            "date": "2026-10-14",
+            "count": 0,
+            "hours": 0,
+            "overloaded": false
+          },
+          {
+            "date": "2026-10-15",
+            "count": 1,
+            "hours": 1.0,
+            "overloaded": false
+          },
+          {
+            "date": "2026-10-16",
+            "count": 0,
+            "hours": 0,
+            "overloaded": false
+          },
+          {
+            "date": "2026-10-17",
+            "count": 0,
+            "hours": 0,
+            "overloaded": false
+          },
+          {
+            "date": "2026-10-18",
+            "count": 0,
+            "hours": 0,
+            "overloaded": false
+          }
+        ],
+        "earlier": {
+          "count": 2,
+          "hours": 2.0
+        }
+      },
+      {
+        "id": 3,
+        "name": "Bob Perera",
+        "role": "technician",
+        "days": [
+          {
+            "date": "2026-10-12",
+            "count": 0,
+            "hours": 0,
+            "overloaded": false
+          },
+          {
+            "date": "2026-10-13",
+            "count": 0,
+            "hours": 0,
+            "overloaded": false
+          },
+          {
+            "date": "2026-10-14",
+            "count": 0,
+            "hours": 0,
+            "overloaded": false
+          },
+          {
+            "date": "2026-10-15",
+            "count": 0,
+            "hours": 0,
+            "overloaded": false
+          },
+          {
+            "date": "2026-10-16",
+            "count": 0,
+            "hours": 0,
+            "overloaded": false
+          },
+          {
+            "date": "2026-10-17",
+            "count": 0,
+            "hours": 0,
+            "overloaded": false
+          },
+          {
+            "date": "2026-10-18",
+            "count": 0,
+            "hours": 0,
+            "overloaded": false
+          }
+        ],
+        "earlier": {
+          "count": 2,
+          "hours": 2.0
+        }
+      }
+    ],
+    "unassigned": {
+      "id": null,
+      "name": null,
+      "role": null,
+      "days": [
+        {
+          "date": "2026-10-12",
+          "count": 0,
+          "hours": 0,
+          "overloaded": false
+        },
+        {
+          "date": "2026-10-13",
+          "count": 0,
+          "hours": 0,
+          "overloaded": false
+        },
+        {
+          "date": "2026-10-14",
+          "count": 1,
+          "hours": 1.0,
+          "overloaded": true
+        },
+        {
+          "date": "2026-10-15",
+          "count": 1,
+          "hours": 1.0,
+          "overloaded": false
+        },
+        {
+          "date": "2026-10-16",
+          "count": 0,
+          "hours": 0,
+          "overloaded": false
+        },
+        {
+          "date": "2026-10-17",
+          "count": 0,
+          "hours": 0,
+          "overloaded": false
+        },
+        {
+          "date": "2026-10-18",
+          "count": 0,
+          "hours": 0,
+          "overloaded": false
+        }
+      ],
+      "earlier": {
+        "count": 0,
+        "hours": 0.0
+      }
+    },
+    "work_orders": [
+      {
+        "id": 8,
+        "work_order_number": "WO-000008",
+        "title": "Job on Pump",
+        "priority": "medium",
+        "status": "assigned",
+        "assignee_id": 2,
+        "day": "2026-10-13",
+        "hours": 3.0,
+        "estimated": true,
+        "asset": "Pump"
+      },
+      {
+        "id": 10,
+        "work_order_number": "WO-000010",
+        "title": "Job on Fan",
+        "priority": "medium",
+        "status": "open",
+        "assignee_id": null,
+        "day": "2026-10-14",
+        "hours": 1.0,
+        "estimated": false,
+        "asset": "Fan"
+      },
+      {
+        "id": 12,
+        "work_order_number": "WO-000012",
+        "title": "Odd job",
+        "priority": "medium",
+        "status": "open",
+        "assignee_id": null,
+        "day": "2026-10-15",
+        "hours": 1.0,
+        "estimated": false,
+        "asset": null
+      },
+      {
+        "id": 3,
+        "work_order_number": "WO-000003",
+        "title": "Job on Press",
+        "priority": "high",
+        "status": "open",
+        "assignee_id": 2,
+        "day": "2026-10-15",
+        "hours": 1.0,
+        "estimated": false,
+        "asset": "Press"
+      },
+      {
+        "id": 4,
+        "work_order_number": "WO-000004",
+        "title": "Job on Press",
+        "priority": "low",
+        "status": "assigned",
+        "assignee_id": 3,
+        "day": null,
+        "hours": 1.0,
+        "estimated": false,
+        "asset": "Press"
+      },
+      {
+        "id": 5,
+        "work_order_number": "WO-000005",
+        "title": "Job on Fan",
+        "priority": "medium",
+        "status": "in_progress",
+        "assignee_id": 2,
+        "day": null,
+        "hours": 1.0,
+        "estimated": false,
+        "asset": "Fan"
+      },
+      {
+        "id": 11,
+        "work_order_number": "WO-000011",
+        "title": "Job on Fan",
+        "priority": "medium",
+        "status": "open",
+        "assignee_id": 2,
+        "day": null,
+        "hours": 1.0,
+        "estimated": false,
+        "asset": "Fan"
+      },
+      {
+        "id": 9,
+        "work_order_number": "WO-000009",
+        "title": "Job on Press",
+        "priority": "medium",
+        "status": "assigned",
+        "assignee_id": 3,
+        "day": "2026-10-08",
+        "hours": 1.0,
+        "estimated": false,
+        "asset": "Press"
+      }
+    ],
+    "truncated": false
+  }
+}

@@ -140,6 +140,14 @@ class WorkOrder < ApplicationRecord
     update!(parts_cost: work_order_parts.sum("quantity_used * COALESCE(unit_cost, 0)"))
   end
 
+  def log_activity(action)
+    ActivityLogService.log(
+      action:   "work_order.#{action}",
+      resource: self,
+      metadata: { status: status, work_order_number: work_order_number }
+    )
+  end
+
   private
 
   # Labor is priced when hours are recorded (or changed): hours x the assignee's rate, else the company's.
@@ -152,14 +160,6 @@ class WorkOrder < ApplicationRecord
       self.labor_rate = assignee&.hourly_rate || organization.default_labor_rate
       self.labor_cost = (actual_hours * labor_rate).round(2)
     end
-  end
-
-  def log_activity(action)
-    ActivityLogService.log(
-      action:   "work_order.#{action}",
-      resource: self,
-      metadata: { status: status, work_order_number: work_order_number }
-    )
   end
 
   def generate_work_order_number

@@ -33,6 +33,8 @@ import backups from './fixtures/reports/backups.json'
 import dashboardFull from './fixtures/reports/dashboard_full.json'
 import dashboardTechnician from './fixtures/reports/dashboard_technician.json'
 import dashboardRequester from './fixtures/reports/dashboard_requester.json'
+import schedule from './fixtures/reports/schedule.json'
+import type { Schedule } from '@/types/schedule'
 
 // JSON files give every text field the type `string`, so a type with a fixed set of words (HealthStatus) cannot be
 // assigned from one directly. `Widen<T>` is T with those words widened to `string`: the JSON must still have every
@@ -62,6 +64,7 @@ export const fixtures: {
   dashboardFull: DashboardStats
   dashboardTechnician: TechnicianDashboardStats
   dashboardRequester: RequesterDashboardStats
+  schedule: { data: Schedule }
 } = {
   workOrderSummary: workOrdersSummary,
   mttr: workOrdersMttr,
@@ -84,6 +87,7 @@ export const fixtures: {
   dashboardFull,
   dashboardTechnician,
   dashboardRequester,
+  schedule: typed<{ data: Schedule }>(schedule),
 }
 
 const routes: [string, unknown][] = [

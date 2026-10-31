@@ -148,6 +148,20 @@ RSpec.describe "Report response shapes", type: :request do
     expect_fixture("assets_downtime", fetch("reports/assets/downtime", **period))
   end
 
+  it "schedule" do
+    org.assign_company_settings("holidays" => [{ "date" => "2026-10-14", "name" => "Founders' Day" }])
+    org.save!
+    alice
+    bob
+    week = Time.utc(2026, 10, 13, 9, 0)
+    make(pump, status: "assigned", assignee: alice, due_date: week, estimated_hours: 3)
+    make(press, status: "assigned", assignee: bob, due_date: week - 5.days)
+    make(fan, status: "open", due_date: week + 1.day)
+    make(fan, status: "open", due_date: nil, assignee: alice)
+    create(:work_order, organization: org, status: "open", due_date: week + 2.days, title: "Odd job", asset: nil)
+    expect_fixture("schedule", fetch("schedule", from: "2026-10-12", to: "2026-10-18"))
+  end
+
   it "dashboard_full (managers and administrators)" do
     expect_fixture("dashboard_full", fetch("dashboard"))
   end

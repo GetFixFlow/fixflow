@@ -42,6 +42,7 @@ const ReportsHubPage = lazy(() => import('@/pages/reports/ReportsHubPage').then(
 const WorkOrderReportsPage = lazy(() => import('@/pages/reports/WorkOrderReportsPage').then(m => ({ default: m.WorkOrderReportsPage })))
 const AssetHealthReportPage = lazy(() => import('@/pages/reports/AssetHealthReportPage').then(m => ({ default: m.AssetHealthReportPage })))
 const DowntimeReportPage = lazy(() => import('@/pages/reports/DowntimeReportPage').then(m => ({ default: m.DowntimeReportPage })))
+const SchedulePage = lazy(() => import('@/pages/schedule/SchedulePage').then(m => ({ default: m.SchedulePage })))
 const PMComplianceReportPage = lazy(() => import('@/pages/reports/PMComplianceReportPage').then(m => ({ default: m.PMComplianceReportPage })))
 const IoTAnalyticsReportPage = lazy(() => import('@/pages/reports/IoTAnalyticsReportPage').then(m => ({ default: m.IoTAnalyticsReportPage })))
 const TechnicianPerformancePage = lazy(() => import('@/pages/reports/TechnicianPerformancePage').then(m => ({ default: m.TechnicianPerformancePage })))
@@ -122,6 +123,7 @@ export const router = createBrowserRouter([
             element: <ProtectedRoute allowedRoles={['admin', 'manager']} />,
             children: [
               { path: '/import', element: <Lazy><ImportPage /></Lazy> },
+              { path: '/schedule', element: <Lazy><SchedulePage /></Lazy> },
               { path: '/reports', element: <Lazy><ReportsHubPage /></Lazy> },
               { path: '/reports/work-orders', element: <Lazy><WorkOrderReportsPage /></Lazy> },
               { path: '/reports/assets', element: <Lazy><AssetHealthReportPage /></Lazy> },
