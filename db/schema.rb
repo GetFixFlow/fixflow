@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_120700) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_120800) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -73,6 +73,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_120700) do
     t.index ["organization_id"], name: "index_api_keys_on_organization_id"
   end
 
+  create_table "asset_documents", force: :cascade do |t|
+    t.bigint "asset_id", null: false
+    t.bigint "user_id", null: false
+    t.string "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["asset_id"], name: "index_asset_documents_on_asset_id"
+    t.index ["user_id"], name: "index_asset_documents_on_user_id"
+  end
+
   create_table "assets", force: :cascade do |t|
     t.string "asset_tag"
     t.datetime "created_at", null: false
@@ -85,11 +95,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_120700) do
     t.string "status", default: "operational", null: false
     t.datetime "updated_at", null: false
     t.string "public_code", null: false
+    t.date "warranty_expires_on"
+    t.date "warranty_alerted_on"
     t.index ["asset_tag"], name: "index_assets_on_asset_tag"
     t.index ["custom_fields"], name: "index_assets_on_custom_fields", using: :gin
     t.index ["discarded_at"], name: "index_assets_on_discarded_at"
     t.index ["location_id"], name: "index_assets_on_location_id"
     t.index ["organization_id", "status"], name: "index_assets_on_organization_id_and_status"
+    t.index ["organization_id", "warranty_expires_on"], name: "index_assets_on_organization_and_warranty", where: "(warranty_expires_on IS NOT NULL)"
     t.index ["organization_id"], name: "index_assets_on_organization_id"
     t.index ["public_code"], name: "index_assets_on_public_code", unique: true
     t.index ["serial_number"], name: "index_assets_on_serial_number"
@@ -570,6 +583,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_120700) do
   add_foreign_key "activity_logs", "organizations"
   add_foreign_key "activity_logs", "users"
   add_foreign_key "api_keys", "organizations"
+  add_foreign_key "asset_documents", "assets"
+  add_foreign_key "asset_documents", "users"
   add_foreign_key "assets", "locations"
   add_foreign_key "assets", "organizations"
   add_foreign_key "attachments", "users"

@@ -42,7 +42,7 @@ module Api
         end
 
         def manual_citations(work_order)
-          work_order.asset&.documents&.limit(2)&.map(&:filename)&.map(&:to_s) || []
+          work_order.asset&.manuals&.map { |file| file.filename.to_s } || []
         end
       end
     end

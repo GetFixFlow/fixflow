@@ -149,6 +149,18 @@ reason: /work orders or schedules you created/))
       expect(org.work_orders.pluck(:title)).to eq(["Real job on the sample pump"])
     end
 
+    it "keeps a sample asset that has a manual added to it, and the manual" do
+      load_sample
+      sample_asset = org.assets.find_by(name: "Sample: Pump 01")
+      create(:asset_document, asset: sample_asset)
+
+      report = described_class.remove!(org)
+
+      expect(org.assets.pluck(:name)).to eq(["Sample: Pump 01"])
+      expect(report[:kept]).to include(a_hash_including(type: "Asset", name: "Sample: Pump 01", reason: /you added documents/))
+      expect(sample_asset.documents.count).to eq(1)
+    end
+
     it "keeps a sample part used on a real work order" do
       load_sample
       part = org.parts.find_by(name: "Sample: Oil filter")

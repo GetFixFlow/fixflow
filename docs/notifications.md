@@ -69,6 +69,8 @@ An administrator can have FixFlow post to a **Slack** or **Microsoft Teams** cha
 | Work is finished and needs verifying | "WO-000012 is finished and needs verifying" |
 | A critical or high sensor alert is raised | "Critical sensor alert: Pump 3" and what the rule says (medium and low are not posted: they would bury the serious ones) |
 | A part is running low or out | "Running low: Belt" and how many are left |
+| Someone asks for parts to be bought | "PO-000007 needs a decision" and how many parts |
+| A warranty ends within 30 days | "2 warranties ending soon" and the first asset names with their dates ([Asset documents and warranty](asset-documents.md#warranty)) |
 
 Each message has a link back to the page in FixFlow. It carries a work order's number and title, a sensor's name and reading, a part's name and count, and for an assignment the name of the person it went to; **no requesters' names or email addresses, no costs, no comments**.
 

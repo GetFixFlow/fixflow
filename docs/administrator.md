@@ -19,6 +19,7 @@ Set where backups go **before** you rely on the install, and do one test restore
 
 - **Import from a spreadsheet**: **Assets, Import CSV**. Places first, then assets, then parts. [Importing data](import.md) has the columns and a template to fill in.
 - **Or look around with sample data** first: **Settings, Import / Export, Sample data**, or the *Add sample data* link on the dashboard's Getting started card. **Remove sample data** takes it out again ([Importing data](import.md#sample-data-and-the-first-steps)).
+- **Keep the manual with the machine**: open the asset, **Documents**, and add it; set **Warranty expires on** and managers are warned 30 days before ([Asset documents and warranty](asset-documents.md)).
 - **Print QR labels**: **Assets, Print labels**. Stick one on each machine. Anyone who scans it can report a problem without an account ([Work orders](work-orders.md#reporting-a-problem-without-an-account-qr-labels)).
 
 ## Day 3: your people

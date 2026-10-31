@@ -92,7 +92,9 @@ Rails.application.routes.draw do
           post :qr_code
         end
         resources :meters, only: %i[index create]
+        resources :documents, only: %i[index create], controller: "asset_documents"
       end
+      resources :asset_documents, only: %i[destroy]
 
       # Meters (running hours, kilometres, cycles) and their readings
       resources :meters, only: %i[update destroy] do

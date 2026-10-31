@@ -6,7 +6,7 @@ the like stand for a value, and `:format` is left out. Live updates are a WebSoc
 holds the standard routes of the sign-in library that nothing uses (`sign_up/edit` and the like): the ones to use are
 `sign_in`, `sign_out`, `two_factor`, `password` and `me`; `sign_up` works only until the first company exists.
 
-There are 217 endpoints in 40 groups: [activity_logs](#activity-logs), [ai](#ai), [api_keys](#api-keys), [assets](#assets), [auth](#auth), [backups](#backups), [branding](#branding), [chat_settings](#chat-settings), [dashboard](#dashboard), [data_usage](#data-usage), [email_settings](#email-settings), [getting_started](#getting-started), [health](#health), [imports](#imports), [invitations](#invitations), [iot](#iot), [iot_alerts](#iot-alerts), [iot_rules](#iot-rules), [localization_settings](#localization-settings), [locations](#locations), [meters](#meters), [notification_preferences](#notification-preferences), [organization_settings](#organization-settings), [parts](#parts), [preventive_maintenances](#preventive-maintenances), [profile](#profile), [public_assets](#public-assets), [public_request_form](#public-request-form), [purchase_orders](#purchase-orders), [push_subscriptions](#push-subscriptions), [reports](#reports), [sample_data](#sample-data), [sessions](#sessions), [setup](#setup), [storage](#storage), [system_health](#system-health), [users](#users), [vendors](#vendors), [work_orders](#work-orders), [work_requests](#work-requests).
+There are 220 endpoints in 41 groups: [activity_logs](#activity-logs), [ai](#ai), [api_keys](#api-keys), [asset_documents](#asset-documents), [assets](#assets), [auth](#auth), [backups](#backups), [branding](#branding), [chat_settings](#chat-settings), [dashboard](#dashboard), [data_usage](#data-usage), [email_settings](#email-settings), [getting_started](#getting-started), [health](#health), [imports](#imports), [invitations](#invitations), [iot](#iot), [iot_alerts](#iot-alerts), [iot_rules](#iot-rules), [localization_settings](#localization-settings), [locations](#locations), [meters](#meters), [notification_preferences](#notification-preferences), [organization_settings](#organization-settings), [parts](#parts), [preventive_maintenances](#preventive-maintenances), [profile](#profile), [public_assets](#public-assets), [public_request_form](#public-request-form), [purchase_orders](#purchase-orders), [push_subscriptions](#push-subscriptions), [reports](#reports), [sample_data](#sample-data), [sessions](#sessions), [setup](#setup), [storage](#storage), [system_health](#system-health), [users](#users), [vendors](#vendors), [work_orders](#work-orders), [work_requests](#work-requests).
 
 ## activity-logs
 
@@ -29,12 +29,20 @@ There are 217 endpoints in 40 groups: [activity_logs](#activity-logs), [ai](#ai)
 | POST | `/api/v1/api_keys` | `api/v1/api_keys#create` |
 | DELETE | `/api/v1/api_keys/:id` | `api/v1/api_keys#destroy` |
 
+## asset-documents
+
+| Method | Path | Handled by |
+| --- | --- | --- |
+| DELETE | `/api/v1/asset_documents/:id` | `api/v1/asset_documents#destroy` |
+
 ## assets
 
 | Method | Path | Handled by |
 | --- | --- | --- |
 | GET | `/api/v1/assets` | `api/v1/assets#index` |
 | POST | `/api/v1/assets` | `api/v1/assets#create` |
+| GET | `/api/v1/assets/:asset_id/documents` | `api/v1/asset_documents#index` |
+| POST | `/api/v1/assets/:asset_id/documents` | `api/v1/asset_documents#create` |
 | GET | `/api/v1/assets/:asset_id/meters` | `api/v1/meters#index` |
 | POST | `/api/v1/assets/:asset_id/meters` | `api/v1/meters#create` |
 | DELETE | `/api/v1/assets/:id` | `api/v1/assets#destroy` |

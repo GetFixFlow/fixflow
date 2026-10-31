@@ -98,7 +98,7 @@ module Api
 
       def asset_params
         params.require(:asset).permit(:name, :asset_tag, :serial_number, :status,
-          :location_id, custom_fields: {})
+          :location_id, :warranty_expires_on, custom_fields: {})
       end
     end
   end

@@ -32,6 +32,11 @@ module EmailPreferenceCases
         id = create(:purchase_order, organization: org).id
         -> { PurchaseRequestedJob.perform_now(id) }
       } },
+    { event: "warranty_expiring", role: "manager", subject: /warranty ending/,
+      setup: lambda { |org, _person|
+        create(:asset, organization: org, warranty_expires_on: Date.current + 5)
+        -> { WarrantyExpiringJob.perform_now }
+      } },
     { event: "pm_overdue", role: "manager", subject: /Overdue PM/,
       setup: lambda { |org, _person|
         create(:preventive_maintenance, :overdue_pm, organization: org)

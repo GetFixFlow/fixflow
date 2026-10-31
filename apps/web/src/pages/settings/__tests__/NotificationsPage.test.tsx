@@ -12,7 +12,7 @@ import { ENDPOINT, SERVER_KEY, installPushBrowser, removePushBrowser } from '@/t
 const PUSH_EVENTS = ['wo_assigned', 'wo_verified', 'wo_needs_verification', 'wo_new_request', 'pm_generated', 'part_low_stock', 'po_requested']
 const EVENTS = [
   'wo_assigned', 'wo_verified', 'wo_needs_verification', 'wo_new_request',
-  'pm_generated', 'pm_due_soon', 'pm_overdue', 'part_low_stock', 'po_requested',
+  'pm_generated', 'pm_due_soon', 'pm_overdue', 'part_low_stock', 'po_requested', 'warranty_expiring',
 ]
 
 function prefs(overrides: Record<string, boolean> = {}, emailEnabled = true, pushOverrides: Record<string, boolean> = {}, pushEnabled = true) {

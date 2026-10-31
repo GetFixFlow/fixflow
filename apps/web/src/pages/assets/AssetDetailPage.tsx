@@ -12,6 +12,7 @@ import {
   Hash,
   Wrench,
   Calendar,
+  ShieldCheck,
 } from 'lucide-react'
 import * as Tabs from '@radix-ui/react-tabs'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
@@ -24,6 +25,8 @@ import { AssetQRCode } from '@/components/assets/AssetQRCode'
 import { AssetTimeline, type TimelineEvent } from '@/components/assets/AssetTimeline'
 import { SensorReadingCard } from '@/components/assets/SensorReadingCard'
 import { SensorChart } from '@/components/assets/SensorChart'
+import { warrantyStatus } from '@/lib/warranty'
+import { AssetDocuments } from '@/components/assets/AssetDocuments'
 import { AssetMeters } from '@/components/assets/AssetMeters'
 import { LocationBreadcrumb } from '@/components/shared/LocationBreadcrumb'
 import { useAsset, useDeleteAsset } from '@/hooks/useAssets'
@@ -58,6 +61,22 @@ function InfoCard({
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+const WARRANTY_TONE = {
+  ok: 'border-gray-200 bg-gray-50 text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300',
+  soon: 'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-300',
+  ended: 'border-gray-200 bg-gray-100 text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400',
+} as const
+
+function WarrantyNote({ endsOn }: { endsOn: string }) {
+  const { tone, text } = warrantyStatus(endsOn)
+  return (
+    <div role="status" className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${WARRANTY_TONE[tone]}`}>
+      <ShieldCheck className="h-4 w-4 shrink-0" />
+      <span>Warranty {text} ({formatDate(endsOn)}).</span>
+    </div>
   )
 }
 
@@ -226,10 +245,12 @@ export function AssetDetailPage() {
         </InfoCard>
       </div>
 
+      {asset.warranty_expires_on && <WarrantyNote endsOn={asset.warranty_expires_on} />}
+
       {/* Tabs */}
       <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
         <Tabs.List className="flex border-b border-gray-200 dark:border-gray-700">
-          {['overview', 'work-orders', 'meters', 'history', 'iot-data', 'details'].map((tab) => (
+          {['overview', 'work-orders', 'meters', 'documents', 'history', 'iot-data', 'details'].map((tab) => (
             <Tabs.Trigger
               key={tab}
               value={tab}
@@ -257,7 +278,7 @@ export function AssetDetailPage() {
                       ['Year', asset.year_manufactured],
                       ['Status', asset.status],
                       ['Purchase Date', asset.purchase_date ? formatDate(new Date(asset.purchase_date)) : null],
-                      ['Warranty Expiry', asset.warranty_expiry ? formatDate(new Date(asset.warranty_expiry)) : null],
+                      ['Warranty Expiry', asset.warranty_expires_on ? formatDate(asset.warranty_expires_on) : null],
                     ].map(([label, value]) =>
                       value != null ? (
                         <div key={label as string}>
@@ -369,6 +390,11 @@ export function AssetDetailPage() {
         {/* Maintenance History */}
         <Tabs.Content value="history" className="pt-4">
           <AssetTimeline events={timelineEvents} />
+        </Tabs.Content>
+
+        {/* Documents */}
+        <Tabs.Content value="documents" className="pt-4">
+          <AssetDocuments assetId={asset.id} canManage={canManage} userId={user?.id} />
         </Tabs.Content>
 
         {/* Meters */}

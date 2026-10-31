@@ -32,6 +32,16 @@ RSpec.describe "Api::V1::Ai::Assist", type: :request do
       expect(response).to have_http_status(:service_unavailable)
     end
 
+    it "names the manuals it drew on in the last frame" do
+      create(:asset_document, asset: asset, file_name: "pump-manual.pdf")
+      allow(Ai::PdfTextExtractorService).to receive(:extract).and_return("text")
+      allow(Ai::Client).to receive(:stream)
+
+      post "/api/v1/ai/assist", params: { work_order_id: work_order.id, message: "hi" }, headers: auth_headers_for(user)
+
+      expect(response.body).to include('"citations":["pump-manual.pdf"]')
+    end
+
     it "streams a text/event-stream response with accumulated deltas and a done frame" do
       allow(Ai::Client).to receive(:stream) do |messages:, system:, &block|
         block.call("Hello ")

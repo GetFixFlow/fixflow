@@ -54,6 +54,7 @@ const EMAIL_EVENTS: EmailEvent[] = [
   { key: 'pm_overdue', label: 'Maintenance is overdue', hint: 'A summary of overdue schedules.', group: 'Preventive maintenance', minRole: 'manager' },
   { key: 'part_low_stock', label: 'A part is running low or out', hint: 'Sent once each time stock reaches its reorder point, and again if it runs out.', group: 'Inventory', minRole: 'manager' },
   { key: 'po_requested', label: 'Someone asks for parts to be bought', hint: 'Sent when a purchase request is waiting for your decision.', group: 'Inventory', minRole: 'manager' },
+  { key: 'warranty_expiring', label: 'A warranty ends within 30 days', hint: 'A morning email listing the assets whose warranty is about to end. Each date is sent once.', group: 'Assets', minRole: 'manager' },
 ]
 
 // What a screen reader says for each Push box (the row's own label belongs to the email box).
