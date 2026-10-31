@@ -27,6 +27,11 @@ module EmailPreferenceCases
         id = create(:part, organization: org).id
         -> { LowStockAlertJob.perform_now(id, "low") }
       } },
+    { event: "po_requested", role: "manager", subject: /Parts requested/,
+      setup: lambda { |org, _person|
+        id = create(:purchase_order, organization: org).id
+        -> { PurchaseRequestedJob.perform_now(id) }
+      } },
     { event: "pm_overdue", role: "manager", subject: /Overdue PM/,
       setup: lambda { |org, _person|
         create(:preventive_maintenance, :overdue_pm, organization: org)

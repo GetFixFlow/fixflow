@@ -619,6 +619,48 @@ export interface Part {
   updated_at: string
 }
 
+export type PurchaseOrderStatus = 'requested' | 'approved' | 'ordered' | 'partially_received' | 'received' | 'rejected' | 'cancelled'
+
+export interface PurchaseOrderLine {
+  id: number
+  part_id: number
+  part_name: string
+  part_sku?: string | null
+  unit?: string | null
+  quantity: number
+  /** What one costs; the part's own cost when the request was made without one. */
+  unit_cost?: number | null
+  quantity_received: number
+  total?: number | null
+}
+
+/** A request to buy parts, and the order that follows it. */
+export interface PurchaseOrder {
+  id: number
+  number: string
+  status: PurchaseOrderStatus
+  vendor_id?: number | null
+  vendor?: { id: number; name: string } | null
+  requested_by?: { id: number; name: string } | null
+  decided_by?: { id: number; name: string } | null
+  reason?: string | null
+  rejection_reason?: string | null
+  notes?: string | null
+  supplier_reference?: string | null
+  expected_on?: string | null
+  decided_at?: string | null
+  ordered_at?: string | null
+  received_at?: string | null
+  line_count: number
+  total: number
+  /** Whether the lines can still be changed: nothing has been bought yet. */
+  editable: boolean
+  /** Only on a single order, not in the list. */
+  lines?: PurchaseOrderLine[]
+  created_at: string
+  updated_at: string
+}
+
 // ── Activity Log ──────────────────────────────────────────────────────────────
 
 export interface ActivityLog {

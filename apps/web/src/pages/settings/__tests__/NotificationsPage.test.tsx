@@ -9,10 +9,10 @@ import { useAuthStore } from '@/stores/authStore'
 import { NotificationsPage } from '../NotificationsPage'
 import { ENDPOINT, SERVER_KEY, installPushBrowser, removePushBrowser } from '@/test/pushBrowser'
 
-const PUSH_EVENTS = ['wo_assigned', 'wo_verified', 'wo_needs_verification', 'wo_new_request', 'pm_generated', 'part_low_stock']
+const PUSH_EVENTS = ['wo_assigned', 'wo_verified', 'wo_needs_verification', 'wo_new_request', 'pm_generated', 'part_low_stock', 'po_requested']
 const EVENTS = [
   'wo_assigned', 'wo_verified', 'wo_needs_verification', 'wo_new_request',
-  'pm_generated', 'pm_due_soon', 'pm_overdue', 'part_low_stock',
+  'pm_generated', 'pm_due_soon', 'pm_overdue', 'part_low_stock', 'po_requested',
 ]
 
 function prefs(overrides: Record<string, boolean> = {}, emailEnabled = true, pushOverrides: Record<string, boolean> = {}, pushEnabled = true) {

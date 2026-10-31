@@ -72,6 +72,7 @@ class SampleDataRemoval
   end
 
   def part_in_use(part)
+    return "it is on a purchase request or order you made" if PurchaseOrderLine.exists?(part_id: part.id)
     return unless WorkOrderPart.where(part_id: part.id).where.not(work_order_id: sample_ids("WorkOrder")).exists?
 
     "it has been used on work orders you created"

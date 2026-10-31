@@ -6,6 +6,7 @@ class Part < ApplicationRecord
   belongs_to :location, optional: true
   has_many :work_order_parts, dependent: :destroy
   has_many :work_orders, through: :work_order_parts
+  has_many :purchase_order_lines, dependent: :restrict_with_error
 
   before_validation { self.sku = sku.presence&.strip }
   before_destroy :ensure_never_used, prepend: true
@@ -55,9 +56,9 @@ class Part < ApplicationRecord
 
   # Deleting a used part would delete its lines from every work order and quietly change their cost.
   def ensure_never_used
-    return unless work_order_parts.exists?
+    return unless work_order_parts.exists? || purchase_order_lines.exists?
 
-    errors.add(:base, "#{name} has been used on work orders, so it cannot be deleted. Set its stock to 0 instead.")
+    errors.add(:base, "#{name} has been used on work orders or purchase orders, so it cannot be deleted. Set its stock to 0 instead.")
     throw :abort
   end
 end

@@ -147,6 +147,18 @@ Rails.application.routes.draw do
         collection { get :low_stock }
       end
 
+      # Asking for parts, approving, ordering and receiving them
+      resources :purchase_orders, only: %i[index show create update] do
+        member do
+          post :approve
+          post :reject
+          post :order
+          post :receive
+          post :close
+          post :cancel
+        end
+      end
+
       # ── IoT data ingestion (API key auth) ─────────────────────────────────
       post "iot/ingest",              to: "iot#ingest"
 

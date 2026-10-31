@@ -6,7 +6,7 @@ the like stand for a value, and `:format` is left out. Live updates are a WebSoc
 holds the standard routes of the sign-in library that nothing uses (`sign_up/edit` and the like): the ones to use are
 `sign_in`, `sign_out`, `two_factor`, `password` and `me`; `sign_up` works only until the first company exists.
 
-There are 207 endpoints in 39 groups: [activity_logs](#activity-logs), [ai](#ai), [api_keys](#api-keys), [assets](#assets), [auth](#auth), [backups](#backups), [branding](#branding), [chat_settings](#chat-settings), [dashboard](#dashboard), [data_usage](#data-usage), [email_settings](#email-settings), [getting_started](#getting-started), [health](#health), [imports](#imports), [invitations](#invitations), [iot](#iot), [iot_alerts](#iot-alerts), [iot_rules](#iot-rules), [localization_settings](#localization-settings), [locations](#locations), [meters](#meters), [notification_preferences](#notification-preferences), [organization_settings](#organization-settings), [parts](#parts), [preventive_maintenances](#preventive-maintenances), [profile](#profile), [public_assets](#public-assets), [public_request_form](#public-request-form), [push_subscriptions](#push-subscriptions), [reports](#reports), [sample_data](#sample-data), [sessions](#sessions), [setup](#setup), [storage](#storage), [system_health](#system-health), [users](#users), [vendors](#vendors), [work_orders](#work-orders), [work_requests](#work-requests).
+There are 217 endpoints in 40 groups: [activity_logs](#activity-logs), [ai](#ai), [api_keys](#api-keys), [assets](#assets), [auth](#auth), [backups](#backups), [branding](#branding), [chat_settings](#chat-settings), [dashboard](#dashboard), [data_usage](#data-usage), [email_settings](#email-settings), [getting_started](#getting-started), [health](#health), [imports](#imports), [invitations](#invitations), [iot](#iot), [iot_alerts](#iot-alerts), [iot_rules](#iot-rules), [localization_settings](#localization-settings), [locations](#locations), [meters](#meters), [notification_preferences](#notification-preferences), [organization_settings](#organization-settings), [parts](#parts), [preventive_maintenances](#preventive-maintenances), [profile](#profile), [public_assets](#public-assets), [public_request_form](#public-request-form), [purchase_orders](#purchase-orders), [push_subscriptions](#push-subscriptions), [reports](#reports), [sample_data](#sample-data), [sessions](#sessions), [setup](#setup), [storage](#storage), [system_health](#system-health), [users](#users), [vendors](#vendors), [work_orders](#work-orders), [work_requests](#work-requests).
 
 ## activity-logs
 
@@ -266,6 +266,21 @@ There are 207 endpoints in 39 groups: [activity_logs](#activity-logs), [ai](#ai)
 | Method | Path | Handled by |
 | --- | --- | --- |
 | GET | `/api/v1/public_request_form` | `api/v1/work_requests#form` |
+
+## purchase-orders
+
+| Method | Path | Handled by |
+| --- | --- | --- |
+| GET | `/api/v1/purchase_orders` | `api/v1/purchase_orders#index` |
+| POST | `/api/v1/purchase_orders` | `api/v1/purchase_orders#create` |
+| GET | `/api/v1/purchase_orders/:id` | `api/v1/purchase_orders#show` |
+| PATCH, PUT | `/api/v1/purchase_orders/:id` | `api/v1/purchase_orders#update` |
+| POST | `/api/v1/purchase_orders/:id/approve` | `api/v1/purchase_orders#approve` |
+| POST | `/api/v1/purchase_orders/:id/cancel` | `api/v1/purchase_orders#cancel` |
+| POST | `/api/v1/purchase_orders/:id/close` | `api/v1/purchase_orders#close` |
+| POST | `/api/v1/purchase_orders/:id/order` | `api/v1/purchase_orders#order` |
+| POST | `/api/v1/purchase_orders/:id/receive` | `api/v1/purchase_orders#receive` |
+| POST | `/api/v1/purchase_orders/:id/reject` | `api/v1/purchase_orders#reject` |
 
 ## push-subscriptions
 

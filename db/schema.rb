@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_120600) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_120700) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -300,6 +300,43 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_120600) do
     t.index ["status"], name: "index_preventive_maintenances_on_status"
   end
 
+  create_table "purchase_order_lines", force: :cascade do |t|
+    t.bigint "purchase_order_id", null: false
+    t.bigint "part_id", null: false
+    t.decimal "quantity", precision: 10, scale: 2, null: false
+    t.decimal "unit_cost", precision: 10, scale: 2
+    t.decimal "quantity_received", precision: 10, scale: 2, default: "0.0", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["part_id"], name: "index_purchase_order_lines_on_part_id"
+    t.index ["purchase_order_id"], name: "index_purchase_order_lines_on_purchase_order_id"
+  end
+
+  create_table "purchase_orders", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.string "number", null: false
+    t.string "status", default: "requested", null: false
+    t.bigint "vendor_id"
+    t.bigint "requested_by_id"
+    t.bigint "decided_by_id"
+    t.text "reason"
+    t.text "rejection_reason"
+    t.text "notes"
+    t.string "supplier_reference"
+    t.date "expected_on"
+    t.datetime "decided_at"
+    t.datetime "ordered_at"
+    t.datetime "received_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["decided_by_id"], name: "index_purchase_orders_on_decided_by_id"
+    t.index ["organization_id", "number"], name: "index_purchase_orders_on_organization_id_and_number", unique: true
+    t.index ["organization_id", "status"], name: "index_purchase_orders_on_organization_id_and_status"
+    t.index ["organization_id"], name: "index_purchase_orders_on_organization_id"
+    t.index ["requested_by_id"], name: "index_purchase_orders_on_requested_by_id"
+    t.index ["vendor_id"], name: "index_purchase_orders_on_vendor_id"
+  end
+
   create_table "push_subscriptions", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.text "endpoint", null: false
@@ -560,6 +597,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_120600) do
   add_foreign_key "preventive_maintenances", "meters"
   add_foreign_key "preventive_maintenances", "organizations"
   add_foreign_key "preventive_maintenances", "users", column: "assigned_to_id"
+  add_foreign_key "purchase_order_lines", "parts"
+  add_foreign_key "purchase_order_lines", "purchase_orders"
+  add_foreign_key "purchase_orders", "organizations"
+  add_foreign_key "purchase_orders", "users", column: "decided_by_id"
+  add_foreign_key "purchase_orders", "users", column: "requested_by_id"
+  add_foreign_key "purchase_orders", "vendors"
   add_foreign_key "push_subscriptions", "users"
   add_foreign_key "sample_records", "organizations"
   add_foreign_key "sensor_aggregates", "assets"

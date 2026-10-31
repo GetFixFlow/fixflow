@@ -84,6 +84,7 @@ nav:
       - Work orders and maintenance: work-orders.md
       - Meters and usage-based maintenance: meters.md
       - Vendors and contractors: vendors.md
+      - Purchasing parts: purchasing.md
       - Sensors and IoT: iot.md
       - Reports and the dashboard: reports.md
       - Notifications: notifications.md
