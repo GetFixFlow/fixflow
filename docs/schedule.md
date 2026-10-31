@@ -14,7 +14,7 @@ Choose **Week** or **Day**, and step with the arrows or press **Today**. Each ro
 
 A day is **overloaded** when the hours on it are more than a working day, and when there is any work on a day off. The day then turns red, says how far over it is ("over by 2.5 h", in words and not only colour), and is listed in the red notice at the top ("Alice Silva, Tue 13: 11.5 h of 9 h"). When there is none the page says so.
 
-What a working day holds comes from **Settings, Organization**: the **work hours** (a 08:00 to 17:00 day holds 9 hours; lunch is not taken out), the **work days** and the **holidays**. Days off and holidays are shaded and named in the column heading. Everyone has the same day; part-time hours are not modelled.
+What a working day holds comes from **Settings, Organization**: the **work hours** (a 08:00 to 17:00 day holds 9 hours; lunch is not taken out), the **work days** and the **holidays** (a holiday marked yearly falls on the same day every year). Days off and holidays are shaded and named in the column heading. Everyone has the same day; part-time hours are not modelled.
 
 Only open work counts (open, assigned, in progress, on hold, waiting for parts). Finished and cancelled work is not shown.
 
