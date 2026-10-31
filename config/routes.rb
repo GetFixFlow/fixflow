@@ -93,6 +93,10 @@ Rails.application.routes.draw do
         end
         resources :meters, only: %i[index create]
         resources :documents, only: %i[index create], controller: "asset_documents"
+        resources :downtimes, only: %i[index create]
+      end
+      resources :downtimes, only: %i[update destroy] do
+        post :restart, on: :member
       end
       resources :asset_documents, only: %i[destroy]
 
@@ -234,6 +238,7 @@ Rails.application.routes.draw do
 
         get "assets/health",                      to: "assets#health"
         get "assets/cost_analysis",               to: "assets#cost_analysis"
+        get "assets/downtime",                    to: "assets#downtime"
         get "assets/:id/history",                 to: "assets#history", as: :asset_history
 
         get "pm/compliance",                      to: "pm#compliance"

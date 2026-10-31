@@ -6,7 +6,7 @@ the like stand for a value, and `:format` is left out. Live updates are a WebSoc
 holds the standard routes of the sign-in library that nothing uses (`sign_up/edit` and the like): the ones to use are
 `sign_in`, `sign_out`, `two_factor`, `password` and `me`; `sign_up` works only until the first company exists.
 
-There are 220 endpoints in 41 groups: [activity_logs](#activity-logs), [ai](#ai), [api_keys](#api-keys), [asset_documents](#asset-documents), [assets](#assets), [auth](#auth), [backups](#backups), [branding](#branding), [chat_settings](#chat-settings), [dashboard](#dashboard), [data_usage](#data-usage), [email_settings](#email-settings), [getting_started](#getting-started), [health](#health), [imports](#imports), [invitations](#invitations), [iot](#iot), [iot_alerts](#iot-alerts), [iot_rules](#iot-rules), [localization_settings](#localization-settings), [locations](#locations), [meters](#meters), [notification_preferences](#notification-preferences), [organization_settings](#organization-settings), [parts](#parts), [preventive_maintenances](#preventive-maintenances), [profile](#profile), [public_assets](#public-assets), [public_request_form](#public-request-form), [purchase_orders](#purchase-orders), [push_subscriptions](#push-subscriptions), [reports](#reports), [sample_data](#sample-data), [sessions](#sessions), [setup](#setup), [storage](#storage), [system_health](#system-health), [users](#users), [vendors](#vendors), [work_orders](#work-orders), [work_requests](#work-requests).
+There are 226 endpoints in 42 groups: [activity_logs](#activity-logs), [ai](#ai), [api_keys](#api-keys), [asset_documents](#asset-documents), [assets](#assets), [auth](#auth), [backups](#backups), [branding](#branding), [chat_settings](#chat-settings), [dashboard](#dashboard), [data_usage](#data-usage), [downtimes](#downtimes), [email_settings](#email-settings), [getting_started](#getting-started), [health](#health), [imports](#imports), [invitations](#invitations), [iot](#iot), [iot_alerts](#iot-alerts), [iot_rules](#iot-rules), [localization_settings](#localization-settings), [locations](#locations), [meters](#meters), [notification_preferences](#notification-preferences), [organization_settings](#organization-settings), [parts](#parts), [preventive_maintenances](#preventive-maintenances), [profile](#profile), [public_assets](#public-assets), [public_request_form](#public-request-form), [purchase_orders](#purchase-orders), [push_subscriptions](#push-subscriptions), [reports](#reports), [sample_data](#sample-data), [sessions](#sessions), [setup](#setup), [storage](#storage), [system_health](#system-health), [users](#users), [vendors](#vendors), [work_orders](#work-orders), [work_requests](#work-requests).
 
 ## activity-logs
 
@@ -43,6 +43,8 @@ There are 220 endpoints in 41 groups: [activity_logs](#activity-logs), [ai](#ai)
 | POST | `/api/v1/assets` | `api/v1/assets#create` |
 | GET | `/api/v1/assets/:asset_id/documents` | `api/v1/asset_documents#index` |
 | POST | `/api/v1/assets/:asset_id/documents` | `api/v1/asset_documents#create` |
+| GET | `/api/v1/assets/:asset_id/downtimes` | `api/v1/downtimes#index` |
+| POST | `/api/v1/assets/:asset_id/downtimes` | `api/v1/downtimes#create` |
 | GET | `/api/v1/assets/:asset_id/meters` | `api/v1/meters#index` |
 | POST | `/api/v1/assets/:asset_id/meters` | `api/v1/meters#create` |
 | DELETE | `/api/v1/assets/:id` | `api/v1/assets#destroy` |
@@ -107,6 +109,14 @@ There are 220 endpoints in 41 groups: [activity_logs](#activity-logs), [ai](#ai)
 | Method | Path | Handled by |
 | --- | --- | --- |
 | GET | `/api/v1/data_usage` | `api/v1/data_usage#show` |
+
+## downtimes
+
+| Method | Path | Handled by |
+| --- | --- | --- |
+| DELETE | `/api/v1/downtimes/:id` | `api/v1/downtimes#destroy` |
+| PATCH, PUT | `/api/v1/downtimes/:id` | `api/v1/downtimes#update` |
+| POST | `/api/v1/downtimes/:id/restart` | `api/v1/downtimes#restart` |
 
 ## email-settings
 
@@ -305,6 +315,7 @@ There are 220 endpoints in 41 groups: [activity_logs](#activity-logs), [ai](#ai)
 | --- | --- | --- |
 | GET | `/api/v1/reports/assets/:id/history` | `api/v1/reports/assets#history` |
 | GET | `/api/v1/reports/assets/cost_analysis` | `api/v1/reports/assets#cost_analysis` |
+| GET | `/api/v1/reports/assets/downtime` | `api/v1/reports/assets#downtime` |
 | GET | `/api/v1/reports/assets/health` | `api/v1/reports/assets#health` |
 | GET | `/api/v1/reports/costs/by_asset` | `api/v1/reports/costs#by_asset` |
 | GET | `/api/v1/reports/costs/by_location` | `api/v1/reports/costs#by_location` |

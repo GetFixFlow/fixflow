@@ -30,6 +30,12 @@ class ExportService
           %i[location total operational degraded down health_score])
   end
 
+  # The downtime report's table: one row per asset.
+  def self.asset_downtime_csv(assets)
+    table(%w[asset tag location availability downtime_hours failures mtbf_hours mttr_hours],
+          assets, %i[name asset_tag location availability downtime_hours failures mtbf_hours mttr_hours])
+  end
+
   def self.pm_compliance_csv(by_month)
     table(%w[month scheduled completed skipped compliance_rate], by_month,
           %i[month scheduled completed skipped compliance_rate])

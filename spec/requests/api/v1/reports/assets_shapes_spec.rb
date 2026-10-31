@@ -84,11 +84,14 @@ RSpec.describe "Asset report figures", type: :request do
       create(:work_order, organization: org, asset: pump, created_at: Time.utc(2026, 9, 10), preventive_maintenance: schedule)
       rule = create(:iot_rule, organization: org, asset: pump)
       create(:iot_alert, iot_rule: rule, asset: pump, created_at: Time.utc(2026, 8, 20))
+      # the time it was out of action (not the hours spent repairing it, which is 12): 5 and 9 hours
+      create(:asset_downtime, organization: org, asset: pump, started_at: now - 30.hours, ended_at: now - 25.hours)
+      create(:asset_downtime, organization: org, asset: pump, started_at: now - 14.hours, ended_at: now - 5.hours)
     end
 
     it "gives the figures as numbers, with the average hours of work" do
       summary = get_json("assets/#{pump.id}/history")["summary"]
-      expect(summary).to include("total_work_orders" => 3, "avg_resolution_hours" => 6.0, "total_downtime_hours" => 12.0,
+      expect(summary).to include("total_work_orders" => 3, "avg_resolution_hours" => 6.0, "total_downtime_hours" => 14.0,
                                  "total_maintenance_cost" => 120.5, "iot_alerts_total" => 1)
       expect(summary.values_at("total_downtime_hours", "total_maintenance_cost", "avg_resolution_hours")).to all(be_a(Float))
     end

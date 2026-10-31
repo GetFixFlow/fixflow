@@ -15,6 +15,7 @@ class Asset < ApplicationRecord
   has_many :sensor_aggregates, dependent: :destroy
   has_many :iot_rules,         dependent: :destroy
   has_many :iot_alerts,        dependent: :destroy
+  has_many :downtimes, class_name: "AssetDowntime", dependent: :destroy
   has_many :documents, class_name: "AssetDocument", dependent: :destroy
 
   validates :name, presence: true
@@ -24,6 +25,7 @@ class Asset < ApplicationRecord
   has_secure_token :public_code, length: 24
 
   before_create :generate_asset_tag
+  after_save :track_downtime, if: :saved_change_to_status?
 
   scope :by_status,             ->(status)      { where(status: status) }
   scope :by_location,           ->(location_id) { where(location_id: location_id) }
@@ -42,6 +44,16 @@ class Asset < ApplicationRecord
   def manuals(limit = 2) = documents.pdfs.includes(file_attachment: :blob).order(:id).first(limit).map(&:file)
 
   private
+
+  # An asset that is down has a downtime open; when it is anything else the downtime ends.
+  def track_downtime
+    open = downtimes.open.first
+    if status == "down"
+      downtimes.create!(organization: organization, started_at: Time.current, started_by: Current.user, unaudited: true) unless open
+    elsif open
+      open.update!(ended_at: [Time.current, open.started_at].max, ended_by: Current.user, unaudited: true)
+    end
+  end
 
   # Putting an asset away (soft delete) is a delete as far as the log is concerned.
   def audit_update_verb

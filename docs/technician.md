@@ -51,6 +51,10 @@ After that the job waits for a manager to **verify** it (somebody other than you
 
 Keep working. Start, hold, resume, complete, comments, ticks and photos are all saved on the phone, marked *Waiting to sync*, and sent when the connection returns. The status at the top shows what is waiting, and tells you if the server refused something (for example, the job was reassigned meanwhile). Things that need someone else's decision, such as assigning or verifying, need a connection.
 
+## When a machine stops
+
+Open the asset, the **Downtime** tab, and press **It stopped**; when it runs again, **Running again**. The time is kept and the asset's status follows, so the managers' availability report is true ([Downtime and availability](downtime.md)).
+
 ## Seeing something broken that is not yet a job
 
 Anyone can scan the QR label on a machine with the phone's camera: it opens a short form that creates a work order, no account needed. If you are signed in, you can also press **New Work Order** under **Work Orders**.

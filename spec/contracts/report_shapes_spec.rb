@@ -50,9 +50,9 @@ RSpec.describe "Report response shapes", type: :request do
   let(:alice)   { create(:user, organization: org, first_name: "Alice", last_name: "Silva") }
   let(:bob)     { create(:user, organization: org, first_name: "Bob", last_name: "Perera") }
   let(:plant)   { create(:location, organization: org, name: "Plant 1") }
-  let(:pump)    { create(:asset, organization: org, name: "Pump", location: plant, status: "operational") }
-  let(:press)   { create(:asset, organization: org, name: "Press", location: plant, status: "down") }
-  let(:fan)     { create(:asset, organization: org, name: "Fan", status: "degraded") }
+  let(:pump)    { create(:asset, organization: org, name: "Pump", location: plant, created_at: Time.utc(2026, 8, 1)) }
+  let(:press)   { create(:asset, organization: org, name: "Press", location: plant, status: "down", created_at: Time.utc(2026, 8, 1)) }
+  let(:fan)     { create(:asset, organization: org, name: "Fan", status: "degraded", created_at: Time.utc(2026, 8, 1)) }
   let(:now)     { Time.utc(2026, 10, 16, 12, 0) }
   let(:period)  { { from: "2026-09-16", to: "2026-10-16" } }
 
@@ -115,6 +115,7 @@ RSpec.describe "Report response shapes", type: :request do
     create(:sensor_reading, organization: org, asset: pump, recorded_at: now - 1.day)
     create(:preventive_maintenance, organization: org, asset: pump, assigned_to: alice, next_due_at: now + 2.days)
     create(:activity_log, organization: org, user: alice, resource_name: "WO-1")
+    create(:asset_downtime, organization: org, asset: pump, started_at: now - 3.days, ended_at: now - 2.days)
   end
 
   before { Auditable.silenced { build_company } }
@@ -141,6 +142,10 @@ RSpec.describe "Report response shapes", type: :request do
 
   it "assets_history" do
     expect_fixture("assets_history", fetch("reports/assets/#{pump.id}/history"))
+  end
+
+  it "assets_downtime" do
+    expect_fixture("assets_downtime", fetch("reports/assets/downtime", **period))
   end
 
   it "dashboard_full (managers and administrators)" do
