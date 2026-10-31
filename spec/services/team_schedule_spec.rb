@@ -34,6 +34,17 @@ RSpec.describe TeamSchedule do
     end
   end
 
+  describe "yearly holidays" do
+    it "fall on the same day in every year, and a one-off holiday only in its own year" do
+      org.assign_company_settings("holidays" => [{ "date" => "2020-10-13", "name" => "Founders' Day", "repeating" => true },
+                                                 { "date" => "2025-10-15", "name" => "Closed once", "repeating" => false }])
+      org.save!
+
+      expect(week[:days][1]).to include(working: false, holiday: "Founders' Day")
+      expect(week[:days][3]).to include(working: true, holiday: nil)
+    end
+  end
+
   describe "the load" do
     it "adds up the hours of the work due each day, for each person" do
       job(monday.in_time_zone + 9.hours, hours: 3)

@@ -40,10 +40,15 @@ class TeamSchedule
   # Each day of the period with the hours it can hold: none on a day off or a holiday.
   def days
     @days ||= (@from..@to).map do |date|
-      holiday = settings["holidays"].find { |h| h["date"] == date.iso8601 }
+      holiday = settings["holidays"].find { |h| holiday_on?(h, date) }
       working = settings["work_days"].include?(date.wday) && holiday.nil?
       { date: date.iso8601, working: working, holiday: holiday&.fetch("name"), hours: working ? working_hours : 0.0 }
     end
+  end
+
+  # A holiday is on its date, and on the same day of every year when it is marked as yearly.
+  def holiday_on?(holiday, date)
+    holiday["date"] == date.iso8601 || (holiday["repeating"] && holiday["date"].to_s[5..] == date.strftime("%m-%d"))
   end
 
   def working_hours
