@@ -1,8 +1,8 @@
 module Api
   module V1
     class WorkOrdersController < Api::V1::BaseController
-      before_action :set_work_order, only: %i[show update destroy assign start complete verify reject hold cancel transition]
-      before_action :require_manager!, only: %i[verify reject]
+      before_action :set_work_order, only: %i[show update destroy assign reschedule start complete verify reject hold cancel transition]
+      before_action :require_manager!, only: %i[verify reject reschedule]
       before_action :require_manager_for_vendor!, only: %i[create update]
 
       # The vendor who did the work, what they charged and their invoice number: a manager's to enter.
@@ -67,6 +67,19 @@ module Api
         assignee = current_organization.users.find(params[:assignee_id])
         @work_order.assignee = assignee
         fire_transition!(:assign)
+      end
+
+      # PATCH /api/v1/work_orders/:id/reschedule  (assignee_id: someone, or empty for nobody; due_on: a date), as when
+      # a work order is dragged on the schedule. Leave out what is not to change.
+      def reschedule
+        assignee = params.key?(:assignee_id) ? find_assignee(params[:assignee_id]) : :keep
+        due_on = params[:due_on].presence && Date.iso8601(params[:due_on].to_s)
+        ScheduleMove.call(@work_order, assignee: assignee, due_on: due_on)
+        render json: { data: WorkOrderBlueprint.render_as_hash(@work_order.reload) }
+      rescue ScheduleMove::Refused => e
+        render_error(e.message, :unprocessable_entity, code: e.code)
+      rescue Date::Error
+        render_error("due_on must be a date (YYYY-MM-DD)", :bad_request, code: "INVALID_DATE")
       end
 
       # PATCH /api/v1/work_orders/:id/start
@@ -191,6 +204,10 @@ module Api
       end
 
       private
+
+      def find_assignee(id)
+        id.presence && current_organization.users.find(id)
+      end
 
       def set_work_order
         @work_order = current_organization.work_orders.find(params[:id])

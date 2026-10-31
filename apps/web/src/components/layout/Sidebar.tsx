@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Zap,
+  CalendarDays,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUiStore } from '@/stores/uiStore'
@@ -30,6 +31,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
   { label: 'Work Orders', to: '/work-orders', icon: ClipboardList },
+  { label: 'Schedule', to: '/schedule', icon: CalendarDays, roles: ['admin', 'manager'] },
   { label: 'Assets', to: '/assets', icon: Package },
   { label: 'Parts', to: '/parts', icon: Boxes, roles: ['admin', 'manager', 'technician'] },
   { label: 'Vendors', to: '/vendors', icon: Building2, roles: ['admin', 'manager', 'technician'] },

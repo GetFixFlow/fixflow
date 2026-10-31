@@ -1,8 +1,9 @@
 # The company settings screen. The name is a column; everything else lives in the
 # settings jsonb column, merged over these defaults.
 #
-# Applied today: timezone, wo_number_prefix, default_priority, default_due_days, and the regional
-# display settings (date_format, time_format, currency, number_format, first_day_of_week).
+# Applied today: timezone, wo_number_prefix, default_priority, default_due_days, the regional display settings
+# (date_format, time_format, currency, number_format, first_day_of_week), and work_hours, work_days and holidays (the
+# hours a day holds on the schedule, see TeamSchedule).
 # The rest are stored and returned but nothing reads them yet.
 module OrganizationSettings
   extend ActiveSupport::Concern

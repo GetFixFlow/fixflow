@@ -29,6 +29,7 @@ These pages are for the person who **installs and looks after** a FixFlow server
 | Start as a technician, on a phone | [Quick start for technicians](technician.md) |
 | Set up the company in the first week | [Administrator guide](administrator.md) |
 | Run work orders, checklists and QR-label requests | [Work orders and maintenance](work-orders.md) |
+| See who is busy, who is overloaded, and move work by dragging | [The schedule and workload](schedule.md) |
 | Count hours or kilometres and service by the count | [Meters and usage-based maintenance](meters.md) |
 | Keep a list of contractors and give them work | [Vendors and contractors](vendors.md) |
 | Ask for parts, approve, order and receive them | [Purchasing parts](purchasing.md) |

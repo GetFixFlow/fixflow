@@ -105,9 +105,12 @@ Rails.application.routes.draw do
         resources :readings, only: %i[index create], controller: "meter_readings"
       end
 
+      get "schedule", to: "schedules#show"
+
       resources :work_orders do
         member do
           patch :assign
+          patch :reschedule
           patch :start
           patch :complete
           patch :verify
