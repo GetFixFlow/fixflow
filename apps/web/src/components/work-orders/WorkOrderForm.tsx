@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -7,7 +7,10 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { LocationSelect } from '@/components/shared/LocationSelect'
 import { AssetSelect } from '@/components/assets/AssetSelect'
-import type { WorkOrder, Priority } from '@/types'
+import { CustomFieldInputs } from '@/components/custom-fields/CustomFieldInputs'
+import { activeFields, useCustomFields } from '@/hooks/useCustomFields'
+import { missingRequired, toPayload } from '@/lib/customFields'
+import type { Priority } from '@/types'
 
 const schema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters').max(200),
@@ -18,6 +21,8 @@ const schema = z.object({
   estimated_hours: z.number().positive().optional(),
   assignee_id: z.number().optional(),
   initial_comment: z.string().optional(),
+  /** What is filled in for the company's custom fields, by field key. */
+  custom_values: z.record(z.string(), z.union([z.string(), z.boolean()])).optional(),
 })
 
 export type WorkOrderFormValues = z.infer<typeof schema>
@@ -64,8 +69,26 @@ export function WorkOrderForm({
 
   const priority = watch('priority')
 
+  const { data: allFields } = useCustomFields('work_order')
+  const customFields = activeFields(allFields)
+  const [customErrors, setCustomErrors] = useState<Record<string, string>>({})
+
+  // A new work order sends every custom field. An edit sends them only when one changed, so correcting a typo in the title
+  // of an old work order is not held up by a required field that was added after it.
+  const submit = handleSubmit(async (values) => {
+    const { custom_values: current = {}, ...rest } = values
+    const sent = toPayload(customFields, current)
+    const changed = mode === 'create' || JSON.stringify(sent) !== JSON.stringify(toPayload(customFields, defaultValues?.custom_values ?? {}))
+    if (!changed) return onSubmit(rest)
+
+    const missing = missingRequired(customFields, current)
+    setCustomErrors(missing)
+    if (Object.keys(missing).length > 0) return
+    await onSubmit({ ...rest, custom_values: sent })
+  })
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={submit} className="space-y-6">
       {/* What needs fixing */}
       <section className="space-y-4">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
@@ -184,6 +207,21 @@ export function WorkOrderForm({
           </div>
         </div>
       </section>
+
+      {customFields.length > 0 && (
+        <section className="space-y-4">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            More details
+          </h2>
+          <CustomFieldInputs
+            fields={customFields}
+            values={watch('custom_values') ?? {}}
+            onChange={(next) => setValue('custom_values', next, { shouldDirty: true })}
+            errors={customErrors}
+            idPrefix="wo-cf"
+          />
+        </section>
+      )}
 
       {/* Additional */}
       <section className="space-y-4">

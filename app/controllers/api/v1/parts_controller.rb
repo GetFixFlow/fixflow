@@ -29,15 +29,19 @@ module Api
       end
 
       def create
-        part = current_organization.parts.create!(part_params)
+        part = current_organization.parts.new(part_params)
+        part.require_custom_values = true
+        part.save!
         record(part, "part.created")
         render json: PartBlueprint.render_as_hash(part), status: :created
       end
 
       # The stock level is not edited here: use adjust_stock, which keeps a record of who changed it.
       def update
+        @part.require_custom_values = part_params.key?(:custom_values)
         @part.update!(part_params)
-        record(@part, "part.updated", changes: @part.previous_changes.except("updated_at"))
+        record(@part, "part.updated", changes: @part.previous_changes.except("updated_at", "custom_values"),
+                                      custom_fields: @part.custom_field_keys_changed)
         render json: PartBlueprint.render_as_hash(@part)
       end
 
@@ -81,7 +85,7 @@ code: "VALIDATION_ERROR")
       end
 
       def part_params
-        allowed = %i[name sku reorder_point unit unit_cost location_id]
+        allowed = [:name, :sku, :reorder_point, :unit, :unit_cost, :location_id, { custom_values: {} }]
         allowed << :quantity_on_hand if action_name == "create"
         params.expect(part: allowed)
       end

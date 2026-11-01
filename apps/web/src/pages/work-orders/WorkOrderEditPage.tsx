@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react'
 import { WorkOrderForm, type WorkOrderFormValues } from '@/components/work-orders/WorkOrderForm'
 import { useWorkOrder, useUpdateWorkOrder } from '@/hooks/useWorkOrders'
 import { useAuthStore } from '@/stores/authStore'
+import { toInputValues } from '@/lib/customFields'
 import { Skeleton } from '@/components/ui/Skeleton'
 
 export function WorkOrderEditPage() {
@@ -24,6 +25,7 @@ export function WorkOrderEditPage() {
       asset_id: values.asset_id,
       due_date: values.due_date,
       estimated_hours: values.estimated_hours,
+      custom_values: values.custom_values,
     })
     navigate(`/work-orders/${id}`)
   }
@@ -67,6 +69,7 @@ export function WorkOrderEditPage() {
     asset_id: wo.asset_id ?? undefined,
     due_date: wo.due_date?.slice(0, 16),
     estimated_hours: wo.estimated_hours ?? undefined,
+    custom_values: toInputValues(wo.custom_values),
   }
 
   return (

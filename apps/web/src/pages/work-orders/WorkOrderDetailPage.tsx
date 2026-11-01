@@ -41,6 +41,7 @@ import { CancelModal } from '@/components/work-orders/modals/CancelModal'
 import { VerifyModal } from '@/components/work-orders/modals/VerifyModal'
 import { PartLogModal } from '@/components/work-orders/modals/PartLogModal'
 import { AIButton } from '@/components/ai/AIButton'
+import { CustomValues } from '@/components/custom-fields/CustomValues'
 import { FixFlowAssistDrawer } from '@/components/ai/FixFlowAssistDrawer'
 import type { ActivityEvent } from '@/components/work-orders/WorkOrderActivityLog'
 
@@ -322,6 +323,8 @@ export function WorkOrderDetailPage() {
               </p>
             </section>
           )}
+
+          <CustomValues entity="work_order" values={wo.custom_values} />
 
           {/* Checklist */}
           {wo.checklist && wo.checklist.length > 0 && (

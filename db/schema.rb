@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_121000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_121100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -153,6 +153,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_121000) do
     t.index ["user_id"], name: "index_comments_on_user_id"
   end
 
+  create_table "custom_fields", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.string "entity", null: false
+    t.string "key", null: false
+    t.string "label", null: false
+    t.string "kind", null: false
+    t.jsonb "options", default: [], null: false
+    t.boolean "required", default: false, null: false
+    t.boolean "in_list", default: false, null: false
+    t.boolean "active", default: true, null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id", "entity", "key"], name: "index_custom_fields_on_organization_id_and_entity_and_key", unique: true
+    t.index ["organization_id"], name: "index_custom_fields_on_organization_id"
+  end
+
   create_table "iot_alerts", force: :cascade do |t|
     t.datetime "acknowledged_at"
     t.bigint "acknowledged_by_id"
@@ -276,6 +293,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_121000) do
     t.string "unit", default: "each"
     t.datetime "updated_at", null: false
     t.decimal "unit_cost", precision: 10, scale: 2
+    t.jsonb "custom_values", default: {}, null: false
     t.index "organization_id, lower((sku)::text)", name: "index_parts_on_organization_id_and_lower_sku", unique: true, where: "(sku IS NOT NULL)"
     t.index ["location_id"], name: "index_parts_on_location_id"
     t.index ["organization_id", "name"], name: "index_parts_on_organization_id_and_name"
@@ -579,6 +597,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_121000) do
     t.datetime "approved_at"
     t.decimal "approved_cost", precision: 12, scale: 2
     t.datetime "approval_requested_at"
+    t.jsonb "custom_values", default: {}, null: false
     t.index ["approved_by_id"], name: "index_work_orders_on_approved_by_id"
     t.index ["asset_id", "created_at"], name: "index_work_orders_on_asset_id_and_created_at"
     t.index ["asset_id"], name: "index_work_orders_on_asset_id"
@@ -617,6 +636,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_121000) do
   add_foreign_key "attachments", "users"
   add_foreign_key "attachments", "work_orders"
   add_foreign_key "comments", "users"
+  add_foreign_key "custom_fields", "organizations"
   add_foreign_key "iot_alerts", "assets"
   add_foreign_key "iot_alerts", "iot_rules"
   add_foreign_key "iot_alerts", "sensor_readings"

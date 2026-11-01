@@ -6,10 +6,11 @@ class WorkOrder < ApplicationRecord
   include Auditable
   include VendorWork
   include WorkOrderApproval
+  include HasCustomValues
 
   # Moving a work order through its states is logged by the transition itself (log_activity); an update is only an
   # edit of what the work is.
-  audited watch: %w[title description priority due_date asset_id estimated_hours vendor_id vendor_cost vendor_reference]
+  audited watch: %w[title description priority due_date asset_id estimated_hours vendor_id vendor_cost vendor_reference custom_values]
 
   # ─── Constants ─────────────────────────────────────────────────────────────
 

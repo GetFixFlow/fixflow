@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/authStore'
 import {
   User, Bell, Lock, Building2, Palette, Mail, Globe, Users, Shield,
-  Radio, Database, FileArchive, Search, Settings, ChevronRight, Sparkles, Activity, MessageSquare,
+  Radio, Database, FileArchive, Search, Settings, ChevronRight, Sparkles, Activity, MessageSquare, ListPlus,
 } from 'lucide-react'
 
 interface NavItem {
@@ -38,6 +38,7 @@ const NAV_SECTIONS: NavSection[] = [
       { href: '/settings/branding', label: 'Branding', icon: Palette },
       { href: '/settings/email', label: 'Email Settings', icon: Mail },
       { href: '/settings/localization', label: 'Localization', icon: Globe },
+      { href: '/settings/custom-fields', label: 'Custom Fields', icon: ListPlus },
     ],
   },
   {

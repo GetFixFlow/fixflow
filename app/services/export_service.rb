@@ -11,17 +11,24 @@ class ExportService
   FORMULA_START = /\A[=+\-@\t\r]/
 
   # `work_orders` are WorkOrder records (with asset and assignee loaded).
-  def self.work_orders_csv(work_orders)
-    build(%w[work_order_number title priority status asset assignee vendor due_date started_at completed_at
-             labor_cost parts_cost vendor_cost total_cost created_at]) do |csv|
+  # `custom_fields` are the company's fields that are on (CustomField), each added as a column headed by its label.
+  def self.work_orders_csv(work_orders, custom_fields = [])
+    headers = %w[work_order_number title priority status asset assignee vendor due_date started_at completed_at
+                 labor_cost parts_cost vendor_cost total_cost created_at]
+    build(headers + custom_headers(custom_fields, headers)) do |csv|
       work_orders.each do |wo|
         csv << [
           wo.work_order_number, wo.title, wo.priority, wo.status, wo.asset&.name, wo.assignee&.full_name,
           wo.vendor&.name, wo.due_date, wo.started_at, wo.completed_at, wo.labor_cost, wo.parts_cost, wo.vendor_cost,
           wo.labor_cost.to_d + wo.parts_cost.to_d + wo.vendor_cost.to_d, wo.created_at
-        ]
+        ].concat(custom_fields.map { |field| field.display(wo.custom_values[field.key]) })
       end
     end
+  end
+
+  # A field called "status" must not look like the column of that name.
+  def self.custom_headers(custom_fields, taken)
+    custom_fields.map { |field| taken.include?(field.label.downcase) ? "#{field.label} (custom)" : field.label }
   end
 
   # The asset health report's table: one row per place.

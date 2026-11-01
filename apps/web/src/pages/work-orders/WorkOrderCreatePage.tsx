@@ -23,6 +23,7 @@ export function WorkOrderCreatePage() {
       asset_id: values.asset_id,
       due_date: values.due_date,
       estimated_hours: values.estimated_hours,
+      custom_values: values.custom_values,
       source: 'manual',
       requester_id: user?.id,
     })

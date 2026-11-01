@@ -48,7 +48,7 @@ module Api
 
           # .csv lists the work orders behind the figures (same period and filters); .pdf is the summary.
           render_report(data, "work_orders",
-                        csv: -> { ExportService.work_orders_csv(export_work_orders(scope)) },
+                        csv: -> { ExportService.work_orders_csv(export_work_orders(scope), export_custom_fields) },
                         pdf: -> { PdfReportService.work_order_summary(data, org_name: current_organization.name) })
         end
 
@@ -124,6 +124,11 @@ module Api
           rows = scope.includes(:asset, :assignee, :vendor).order(created_at: :desc, id: :desc).limit(MAX_EXPORT_ROWS + 1).to_a
           response.set_header("X-Export-Truncated", "true") if rows.size > MAX_EXPORT_ROWS
           rows.first(MAX_EXPORT_ROWS)
+        end
+
+        # The company's work order fields that are on, one column each in the export.
+        def export_custom_fields
+          current_organization.custom_fields.active.where(entity: "work_order").ordered.to_a
         end
 
         def by_priority_stats(scope)
