@@ -85,6 +85,29 @@ describe('WorkOrdersListPage', () => {
     await waitFor(() => expect(screen.getByText('WO #')).toBeInTheDocument())
   })
 
+  it('has a Needs Approval tab for managers, which asks the server for the work waiting for a decision', async () => {
+    const asked: URL[] = []
+    server.use(http.get('/api/v1/work_orders', ({ request }) => {
+      asked.push(new URL(request.url))
+      return HttpResponse.json({ work_orders: [mockWOs[0]], meta: { request_id: 'test', timestamp: '' } })
+    }))
+    render(<WorkOrdersListPage />, { wrapper })
+
+    await userEvent.click(screen.getByRole('tab', { name: /needs approval/i }))
+
+    await waitFor(() => expect(asked.some((url) => url.searchParams.get('needs_approval') === 'true')).toBe(true))
+    expect(asked[0].searchParams.get('needs_approval')).toBeNull()
+  })
+
+  it('does not show the Needs Approval tab to a technician', async () => {
+    setupHandlers()
+    useAuthStore.setState({ user: { id: 3, email: '', full_name: 'Tia Tech', role: 'technician', organization_id: 1 }, token: 'token', isAuthenticated: true })
+    render(<WorkOrdersListPage />, { wrapper })
+
+    await screen.findByRole('tab', { name: /my work orders/i })
+    expect(screen.queryByRole('tab', { name: /needs approval/i })).toBeNull()
+  })
+
   it('overdue tab shows only overdue WOs', async () => {
     setupHandlers()
     render(<WorkOrdersListPage />, { wrapper })

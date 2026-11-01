@@ -277,6 +277,15 @@ export interface WorkOrder {
   vendor?: { id: number; name: string } | null
   /** What an outside company charged and their invoice number: only managers and administrators are sent these. */
   vendor_cost?: number | string | null
+  /** Over the company's approval limit and not yet approved: a manager has to approve it before it starts or finishes. */
+  approval_needed?: boolean
+  /** When the managers were first asked (cleared by an approval). */
+  approval_requested_at?: string | null
+  approved_at?: string | null
+  approved_by?: { id: number; full_name: string } | null
+  /** What it is expected to cost, and the cost that was approved: managers only (they are made of wages). */
+  expected_cost?: number | string | null
+  approved_cost?: number | string | null
   vendor_reference?: string | null
   completion_notes?: string | null
   rejection_reason?: string | null

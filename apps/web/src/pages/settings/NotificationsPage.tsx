@@ -49,6 +49,7 @@ const EMAIL_EVENTS: EmailEvent[] = [
   { key: 'wo_verified', label: 'A work order I requested is finished', hint: 'Sent to the person who asked for the work, once it is verified.', group: 'Work orders' },
   { key: 'wo_needs_verification', label: 'Work is finished and needs verifying', hint: 'Sent when a technician completes a work order.', group: 'Work orders', minRole: 'manager' },
   { key: 'wo_new_request', label: 'Someone reports a problem', hint: 'Sent when a person without an account reports a problem from a QR label.', group: 'Work orders', minRole: 'manager' },
+  { key: 'wo_approval_needed', label: 'A work order needs my approval', hint: 'Sent once when a work order costs more than the approval limit and is waiting for a manager.', group: 'Work orders', minRole: 'manager' },
   { key: 'pm_generated', label: 'A scheduled work order is created for me', hint: 'Sent when a preventive maintenance schedule creates a work order assigned to you.', group: 'Preventive maintenance' },
   { key: 'pm_due_soon', label: 'Maintenance is due this week', hint: 'A summary of your schedules due within 7 days (managers get all of them).', group: 'Preventive maintenance' },
   { key: 'pm_overdue', label: 'Maintenance is overdue', hint: 'A summary of overdue schedules.', group: 'Preventive maintenance', minRole: 'manager' },
@@ -66,6 +67,7 @@ const PUSH_EVENTS: Record<string, string> = {
   wo_new_request: 'a reported problem',
   part_low_stock: 'a part running low',
   po_requested: 'a purchase request',
+  wo_approval_needed: 'work to approve',
 }
 
 const SOUND_KEY = 'fixflow-alert-sound'

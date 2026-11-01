@@ -1,3 +1,4 @@
+import { ApprovalNotice } from '@/components/work-orders/ApprovalNotice'
 import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import {
@@ -217,6 +218,8 @@ export function WorkOrderDetailPage() {
           Ask AI
         </AIButton>
       </div>
+
+      {!isReadOnly && wo.status !== 'completed' && <ApprovalNotice wo={wo} userId={user?.id} isManager={isManager} />}
 
       {/* Action bar */}
       {!isReadOnly && (

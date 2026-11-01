@@ -14,7 +14,7 @@ import { WorkOrderStats } from '@/components/work-orders/WorkOrderStats'
 import type { WorkOrder } from '@/types'
 
 type ViewMode = 'kanban' | 'table' | 'calendar'
-type TabId = 'all' | 'my' | 'overdue' | 'unassigned' | 'pending_verify'
+type TabId = 'all' | 'my' | 'overdue' | 'unassigned' | 'pending_verify' | 'needs_approval'
 
 const TABS: { id: TabId; label: string; roles?: string[] }[] = [
   { id: 'all', label: 'All' },
@@ -22,6 +22,7 @@ const TABS: { id: TabId; label: string; roles?: string[] }[] = [
   { id: 'overdue', label: 'Overdue' },
   { id: 'unassigned', label: 'Unassigned', roles: ['admin', 'manager'] },
   { id: 'pending_verify', label: 'Pending Verify', roles: ['admin', 'manager'] },
+  { id: 'needs_approval', label: 'Needs Approval', roles: ['admin', 'manager'] },
 ]
 
 function filterWorkOrders(
@@ -110,6 +111,7 @@ export function WorkOrdersListPage() {
     if (tab === 'my') p.my_work_orders = true
     if (tab === 'unassigned') p.unassigned = true
     if (tab === 'pending_verify') p.status = 'completed'
+    if (tab === 'needs_approval') p.needs_approval = true
     return p
   }, [filters, tab])
 
@@ -148,6 +150,8 @@ export function WorkOrdersListPage() {
     ).length,
     unassigned: workOrders.filter((wo) => !wo.assignee_id && wo.status === 'open').length,
     pending_verify: workOrders.filter((wo) => wo.status === 'completed').length,
+    // The list does not say which work needs approving: the server picks them, so only this tab can count them.
+    needs_approval: tab === 'needs_approval' ? workOrders.length : 0,
   }
 
   const stats = {

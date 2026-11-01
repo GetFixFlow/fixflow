@@ -23,6 +23,17 @@ A work order's **labor cost** is the hours recorded when it is completed times a
 
 Set the **default rate** in **Settings → Organization** (Hourly labor rate) and, for a particular person, **Settings → Users → Edit → Hourly rate** (administrators only; leave it empty to use the default). Until a rate is set anywhere, labor counts as nothing, and the work order says so rather than guessing. Because wages are sensitive, only **managers and administrators** see labor costs and rates; technicians and requesters see the parts cost only.
 
+## Approval of costly work
+
+A company can set an **approval limit** in **Settings, Organization** (Approval limit; `0` means no approvals, which is how every company starts). A work order that is expected to cost **more than the limit** cannot be **started** until a **manager or administrator approves** it, and cannot be **completed** if its cost has grown past what was approved.
+
+- **What it is expected to cost:** the parts used, plus what a vendor charges, plus labor. Labor is the estimated hours at the assignee's rate (or the company's default rate) until hours are recorded, and then the hours recorded. A work order with no estimate, no parts and no vendor charge is expected to cost nothing, so give costly work an **estimate**. Exactly the limit is not over it.
+- **Who sees what:** everyone sees a notice on the work order saying it needs approval. Only managers and administrators see the cost (it is made of wages); a technician is told only that it is over the limit.
+- **Asking:** when the technician presses Start (or Complete) on such work, it is refused with the reason, and the managers are told once (push, email and chat, the *A work order needs my approval* switch in Notifications). The technician can also press **Ask a manager** on the notice. It is not sent again for the same work until it has been approved.
+- **Approving:** a manager opens the work order and presses **Approve** (the **Needs Approval** tab of the work orders list shows what is waiting). **Not the person doing the work:** a manager who is the assignee needs another manager to approve it, as with verifying. The approval is recorded with who, when and the cost approved.
+- **Growing costs:** if parts, hours or a vendor's charge later take the cost above what was approved, it needs approving again before it is completed. Lowering the limit, or raising it, applies from then on to work not yet started.
+- A technician can edit the estimate of their own work, so an unrealistic estimate can get work started without a decision. The check at completion uses the hours and parts actually recorded, which catches it, but only after the money is spent. Approval is not a spending control on its own; it is a prompt to look.
+
 ## Reporting a problem without an account (QR labels)
 
 Every asset's QR label links to a public form, `/request?asset=<code>`, where anyone (a visitor, a nurse, a tenant) can report a problem **without an account**. The form says which equipment the label is on, asks for a name (an email is optional), and what is wrong. It becomes an ordinary work order (priority and due date from **Settings → Organization**), the managers are emailed, and the person gets a link, `/request/<token>`, to follow it: received, assigned, in progress, completed (or closed without work). If the link is lost the request cannot be looked up again, so the form says to keep it, and remembers the last five on that device.

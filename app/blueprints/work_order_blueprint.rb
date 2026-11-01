@@ -41,6 +41,15 @@ class WorkOrderBlueprint < Blueprinter::Base
     # (pass `labor: true`).
     field(:labor_cost) { |wo, options| options[:labor] ? wo.labor_cost : nil }
     field(:labor_rate) { |wo, options| options[:labor] ? wo.labor_rate : nil }
+    # Whether a manager has to approve it before it starts or finishes (see WorkOrderApproval); what it is expected to
+    # cost is made of wages, so it is for managers, as the labor figures are.
+    field(:approval_needed, &:approval_needed?)
+    field(:approval_requested_at)
+    field(:approved_at)
+    field(:expected_cost) { |wo, options| options[:labor] ? wo.expected_cost : nil }
+    field(:approved_cost) { |wo, options| options[:labor] ? wo.approved_cost : nil }
+    field(:approved_by) { |wo| wo.approved_by ? { id: wo.approved_by.id, full_name: wo.approved_by.full_name } : nil }
+
     # What an outside company charged is a manager's to see, as wages are.
     field(:vendor_cost) { |wo, options| options[:labor] ? wo.vendor_cost : nil }
     field(:vendor_reference) { |wo, options| options[:labor] ? wo.vendor_reference : nil }
