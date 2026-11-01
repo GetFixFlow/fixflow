@@ -11,6 +11,8 @@ import { StockAdjustModal } from '@/components/parts/StockAdjustModal'
 import { PurchaseRequestModal } from '@/components/purchasing/PurchaseRequestModal'
 import { useCatalog, useDebouncedValue, useDeletePart } from '@/hooks/useParts'
 import { useAuthStore } from '@/stores/authStore'
+import { activeFields, useCustomFields } from '@/hooks/useCustomFields'
+import { shownValue } from '@/lib/customFields'
 import type { Part } from '@/types'
 import { formatMoney } from '@/lib/localeFormat'
 
@@ -36,6 +38,8 @@ export function PartsPage() {
   const debounced = useDebouncedValue(search, 300)
   const { data, isLoading, isError, refetch } = useCatalog({ search: debounced, lowStock: lowOnly, page })
   const deletePart = useDeletePart()
+  const { data: customFields } = useCustomFields('part')
+  const listFields = activeFields(customFields).filter((field) => field.in_list)
 
   const parts = data?.parts ?? []
   const meta = data?.meta
@@ -104,7 +108,7 @@ export function PartsPage() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-700/50">
               <tr>
-                {['Part', 'SKU', 'On hand', 'Reorder at', 'Unit cost', 'Status'].map((h) => (
+                {['Part', 'SKU', 'On hand', 'Reorder at', 'Unit cost', 'Status', ...listFields.map((field) => field.label)].map((h) => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{h}</th>
                 ))}
                 <th className="px-4 py-3"><span className="sr-only">Actions</span></th>
@@ -119,6 +123,11 @@ export function PartsPage() {
                   <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{part.reorder_point}</td>
                   <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{formatMoney(part.unit_cost)}</td>
                   <td className="px-4 py-3"><StockBadge part={part} /></td>
+                  {listFields.map((field) => (
+                    <td key={field.key} className="px-4 py-3 text-gray-700 dark:text-gray-300">
+                      {shownValue(field, part.custom_values?.[field.key]) || <span className="text-gray-400">—</span>}
+                    </td>
+                  ))}
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-1">
                       <Button variant="ghost" size="sm" onClick={() => setAdjusting(part)} aria-label={`Adjust stock of ${part.name}`}>

@@ -32,7 +32,9 @@ module Api
         attrs = work_order_params
         attrs[:priority] = current_organization.default_priority if attrs[:priority].blank?
         attrs[:due_date] = current_organization.default_due_days.days.from_now if attrs[:due_date].blank?
-        work_order = current_organization.work_orders.create!(attrs.merge(requester: current_user))
+        work_order = current_organization.work_orders.new(attrs.merge(requester: current_user))
+        work_order.require_custom_values = true
+        work_order.save!
         render json: { data: WorkOrderBlueprint.render_as_hash(work_order) }, status: :created
       end
 
@@ -48,6 +50,7 @@ module Api
           end
           attrs[:checklist] = merge_checklist(attrs[:checklist])
         end
+        @work_order.require_custom_values = attrs.key?(:custom_values)
         @work_order.update!(attrs)
         render json: { data: WorkOrderBlueprint.render_as_hash(@work_order) }
       end
@@ -377,7 +380,7 @@ module Api
         params.require(:work_order).permit(
           :title, :description, :priority, :asset_id, :assignee_id,
           :due_date, :estimated_hours, :actual_hours, :completion_notes,
-          :rejection_reason, *VENDOR_FIELDS, checklist: [ :step, :completed ]
+          :rejection_reason, *VENDOR_FIELDS, checklist: [ :step, :completed ], custom_values: {}
         )
       end
     end

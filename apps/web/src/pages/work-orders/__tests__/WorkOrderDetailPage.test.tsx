@@ -8,6 +8,7 @@ import { http, HttpResponse } from 'msw'
 import { server } from '@/test/server'
 import { WorkOrderDetailPage } from '../WorkOrderDetailPage'
 import { useAuthStore } from '@/stores/authStore'
+import { customField } from '@/test/customFields'
 import type { WorkOrder } from '@/types'
 
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn(), info: vi.fn() } }))
@@ -90,6 +91,18 @@ describe('WorkOrderDetailPage', () => {
     await waitFor(() => expect(screen.getByRole('heading', { name: 'Fix Pump-01' })).toBeInTheDocument())
     expect(screen.getByText('WO-000001')).toBeInTheDocument()
     expect(screen.getByText('The pump is making noise.')).toBeInTheDocument()
+  })
+
+  it('shows what is filled in for the custom fields, and only those that are on', async () => {
+    server.use(http.get('/api/v1/custom_fields', () => HttpResponse.json({
+      custom_fields: [customField({ label: 'Cost centre' }), customField({ label: 'Retired', active: false })],
+    })))
+    setupHandlers({ ...mockWO, custom_values: { cost_centre: 'CC-7', retired: 'old' } })
+    render(<WorkOrderDetailPage />, { wrapper })
+
+    expect(await screen.findByText('CC-7')).toBeInTheDocument()
+    expect(screen.getByText('Cost centre')).toBeInTheDocument()
+    expect(screen.queryByText('old')).not.toBeInTheDocument()
   })
 
   it('shows tabs', async () => {

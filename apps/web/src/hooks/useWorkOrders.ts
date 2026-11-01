@@ -49,7 +49,8 @@ export function useCreateWorkOrder() {
       qc.invalidateQueries({ queryKey: WO_KEY })
       toast.success(`Work order ${res.data.data.work_order_number} created.`)
     },
-    onError: () => toast.error('Failed to create work order.'),
+    onError: (error: AxiosError<{ error?: { message?: string } }>) =>
+      toast.error(error.response?.data?.error?.message ?? 'Failed to create work order.'),
   })
 }
 
@@ -61,7 +62,8 @@ export function useUpdateWorkOrder(id: number) {
       qc.invalidateQueries({ queryKey: WO_KEY })
       toast.success('Work order updated.')
     },
-    onError: () => toast.error('Failed to update work order.'),
+    onError: (error: AxiosError<{ error?: { message?: string } }>) =>
+      toast.error(error.response?.data?.error?.message ?? 'Failed to update work order.'),
   })
 }
 

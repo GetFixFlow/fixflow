@@ -148,6 +148,11 @@ Rails.application.routes.draw do
         end
       end
 
+      # Fields an administrator adds to work orders and parts
+      resources :custom_fields, only: %i[index create update destroy] do
+        collection { patch :reorder }
+      end
+
       # Vendors and contractors, and the people to call at each
       resources :vendors do
         resources :contacts, only: %i[create update destroy], controller: "vendor_contacts"
