@@ -178,7 +178,7 @@ export function WorkOrderForm({
               type="number"
               step="0.5"
               min="0.5"
-              {...register('estimated_hours', { valueAsNumber: true })}
+              {...register('estimated_hours', { setValueAs: (value) => (value === '' || value == null ? undefined : Number(value)) })}
               placeholder="e.g. 2.0"
             />
           </div>
