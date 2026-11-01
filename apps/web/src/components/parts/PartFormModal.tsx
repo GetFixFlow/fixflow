@@ -1,10 +1,14 @@
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { CustomFieldInputs } from '@/components/custom-fields/CustomFieldInputs'
 import { useCreatePart, useUpdatePart } from '@/hooks/useParts'
+import { activeFields, useCustomFields } from '@/hooks/useCustomFields'
+import { missingRequired, toInputValues, toPayload, type CustomInputValues } from '@/lib/customFields'
 import type { Part } from '@/types'
 
 const amount = (label: string, { required }: { required: boolean }) =>
@@ -50,6 +54,11 @@ export function PartFormModal({ open, onClose, part }: PartFormModalProps) {
   })
   const { errors } = form.formState
 
+  const customFields = activeFields(useCustomFields('part').data)
+  const [startValues] = useState<CustomInputValues>(() => toInputValues(part?.custom_values))
+  const [customValues, setCustomValues] = useState<CustomInputValues>(startValues)
+  const [customErrors, setCustomErrors] = useState<Record<string, string>>({})
+
   const onSubmit = form.handleSubmit((data) => {
     const fields = {
       name: data.name,
@@ -58,10 +67,19 @@ export function PartFormModal({ open, onClose, part }: PartFormModalProps) {
       reorder_point: Number(data.reorder_point || 0),
       unit_cost: data.unit_cost === '' ? null : Number(data.unit_cost),
     }
+    // Like a work order: a new part sends every custom field, an edit only when one changed.
+    const sent = toPayload(customFields, customValues)
+    const changed = !part || JSON.stringify(sent) !== JSON.stringify(toPayload(customFields, startValues))
+    if (changed) {
+      const missing = missingRequired(customFields, customValues)
+      setCustomErrors(missing)
+      if (Object.keys(missing).length > 0) return
+    }
+    const withCustom = changed ? { ...fields, custom_values: sent } : fields
     if (part) {
-      update.mutate(fields, { onSuccess: onClose })
+      update.mutate(withCustom, { onSuccess: onClose })
     } else {
-      create.mutate({ ...fields, quantity_on_hand: Number(data.quantity_on_hand || 0) }, { onSuccess: onClose })
+      create.mutate({ ...withCustom, quantity_on_hand: Number(data.quantity_on_hand || 0) }, { onSuccess: onClose })
     }
   })
 
@@ -110,6 +128,9 @@ export function PartFormModal({ open, onClose, part }: PartFormModalProps) {
             {...form.register('unit_cost')}
           />
         </div>
+        {customFields.length > 0 && (
+          <CustomFieldInputs fields={customFields} values={customValues} onChange={setCustomValues} errors={customErrors} idPrefix="part-cf" />
+        )}
         <p className="text-xs text-gray-500">A part is flagged as low when the stock falls to its reorder point or below.</p>
         <div className="flex gap-2 pt-2">
           <Button type="button" variant="outline" onClick={onClose} className="flex-1">Cancel</Button>

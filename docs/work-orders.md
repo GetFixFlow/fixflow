@@ -17,6 +17,8 @@ A work order can be **cancelled** from any state before it is verified. Only som
 
 A preventive maintenance schedule can carry a **checklist** (set when you create or edit the schedule). Each work order it generates gets a copy, and the technician ticks the steps on their phone as they work. A step is **required** unless it is marked optional: the work order **cannot be completed while a required step is undone**, and the server says which ones are missing. Each tick records **who did it and when**, shown under the step, and the checklist is **locked once the work order is completed**, so what was done stays on the record. Managers can tick steps too. Ticking works **offline**: the tick is kept on the phone, marked "Waiting to sync", and sent when the connection returns (if the work order was completed in the meantime, you are told the tick was not kept).
 
+Your company can add its own fields to the work order form (a cost centre, say): see [Custom fields](custom-fields.md).
+
 ## Labor cost
 
 A work order's **labor cost** is the hours recorded when it is completed times an **hourly rate**: the technician's own rate if they have one, otherwise the company's default. The rate used is saved with the work order, so raising someone's rate later does not change work already done; correcting the hours works the cost out again at the current rate. Parts and labor add up to the work order's total, and the cost reports now include the labor. When an outside company does the work, a manager gives the work order to a [vendor](vendors.md) and what the vendor charged is added to the total as well.

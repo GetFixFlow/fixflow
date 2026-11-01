@@ -42,6 +42,7 @@ Under **Preventive Maintenance**, create a schedule for each recurring job: a na
 | --- | --- | --- |
 | You have sensors | Connect them, set alert rules | **Settings, IoT & API Keys**, [Sensors and IoT](iot.md) |
 | A new version is out | Upgrade, or roll back | **Settings, System Health** says when one is out; [Upgrading](upgrading.md) |
+| You need to record something FixFlow does not ask (a cost centre, a hazard class) | Add a field to work orders or parts | **Settings, Custom Fields**, [Custom fields](custom-fields.md) |
 | You want to know who changed what | Read the log | **Settings, Audit Log** |
 | You want less data kept | Set how long things are kept | **Settings, Data Retention** |
 | The public request form is being abused | Turn it off | **Settings, Advanced Settings** |

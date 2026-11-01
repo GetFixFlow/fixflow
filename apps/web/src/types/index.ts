@@ -1,3 +1,5 @@
+import type { CustomValues } from './customFields'
+
 // ── Shared primitives ────────────────────────────────────────────────────────
 
 export type Role = 'admin' | 'manager' | 'technician' | 'requester'
@@ -256,6 +258,8 @@ export interface WorkOrderPart {
 export interface WorkOrder {
   id: number
   work_order_number: string
+  /** What was filled in for the company's custom fields, by field key. */
+  custom_values?: CustomValues
   /** How many of this person's changes to it are waiting to be sent. Set by the app, not the server. */
   pending_sync?: number
   title: string
@@ -633,6 +637,7 @@ export interface Vendor {
 export interface Part {
   id: number
   name: string
+  custom_values?: CustomValues
   sku?: string | null
   quantity_on_hand: number
   reorder_point: number

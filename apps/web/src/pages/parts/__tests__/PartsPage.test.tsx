@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { server } from '@/test/server'
 import { useAuthStore } from '@/stores/authStore'
 import { PartsPage } from '../PartsPage'
+import { customField } from '@/test/customFields'
 import type { Role } from '@/types'
 
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }))
@@ -51,6 +52,22 @@ beforeEach(() => {
 })
 
 describe('PartsPage', () => {
+  it('adds a column for each part field chosen for the list, with its value on each part', async () => {
+    const shelf = customField({ label: 'Shelf', entity: 'part', in_list: true })
+    const grade = customField({ label: 'Grade', entity: 'part' })
+    server.use(
+      http.get('/api/v1/custom_fields', () => HttpResponse.json({ custom_fields: [shelf, grade] })),
+      http.get('/api/v1/parts', () =>
+        HttpResponse.json({ parts: [part(1, 'Hydraulic seal', { custom_values: { shelf: 'A1', grade: 'B' } }), part(2, 'Fuse')], meta: meta(2) })),
+    )
+    renderPage()
+
+    expect(await screen.findByRole('columnheader', { name: 'Shelf' })).toBeInTheDocument()
+    expect(screen.queryByRole('columnheader', { name: 'Grade' })).not.toBeInTheDocument()
+    expect(within(screen.getByText('Hydraulic seal').closest('tr')!).getByText('A1')).toBeInTheDocument()
+    expect(screen.queryByText('B')).not.toBeInTheDocument()
+  })
+
   it('lists the catalog with stock status and cost', async () => {
     renderPage()
 

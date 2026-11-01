@@ -9,6 +9,8 @@ import { Skeleton } from '@/components/ui/Skeleton'
 import { WorkOrderStatusBadge } from './WorkOrderStatusBadge'
 import { WorkOrderPriorityBadge } from './WorkOrderPriorityBadge'
 import { WorkOrderDueDate } from './WorkOrderDueDate'
+import { activeFields, useCustomFields } from '@/hooks/useCustomFields'
+import { shownValue } from '@/lib/customFields'
 import type { WorkOrder, WorkOrderSource } from '@/types'
 
 const SOURCE_ICONS: Record<WorkOrderSource, React.ElementType> = {
@@ -73,6 +75,10 @@ export function WorkOrdersTable({
   rowActions = [],
   emptyMessage = 'No work orders found.',
 }: WorkOrdersTableProps) {
+  // The custom fields an administrator chose to show in the lists, one column each.
+  const { data: customFields } = useCustomFields('work_order')
+  const listFields = activeFields(customFields).filter((field) => field.in_list)
+
   const allSelected =
     workOrders.length > 0 && selectedIds && workOrders.every((wo) => selectedIds.has(wo.id))
 
@@ -152,6 +158,11 @@ export function WorkOrdersTable({
             <th className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">
               Due Date
             </th>
+            {listFields.map((field) => (
+              <th key={field.key} className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">
+                {field.label}
+              </th>
+            ))}
             <th className="w-8 px-2 py-3" />
           </tr>
         </thead>
@@ -239,6 +250,11 @@ export function WorkOrdersTable({
                 <td className={cn('px-4 py-3', compact && 'py-2')}>
                   <WorkOrderDueDate dueDate={wo.due_date} />
                 </td>
+                {listFields.map((field) => (
+                  <td key={field.key} className={cn('px-4 py-3 text-gray-700 dark:text-gray-300', compact && 'py-2')}>
+                    {shownValue(field, wo.custom_values?.[field.key]) || <span className="text-gray-400">—</span>}
+                  </td>
+                ))}
                 <td className="px-2 py-3">
                   {visibleActions.length > 0 && (
                     <DropdownMenu.Root>

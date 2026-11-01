@@ -5,7 +5,7 @@ class WorkOrderBlueprint < Blueprinter::Base
 
   fields :work_order_number, :title, :priority, :status,
     :asset_id, :assignee_id, :requester_id, :vendor_id, :organization_id,
-    :due_date, :created_at, :updated_at
+    :due_date, :custom_values, :created_at, :updated_at
 
   field(:asset) do |wo|
     wo.asset ? { id: wo.asset.id, name: wo.asset.name, asset_tag: wo.asset.asset_tag } : nil
@@ -35,7 +35,7 @@ class WorkOrderBlueprint < Blueprinter::Base
       :due_date, :estimated_hours, :actual_hours,
       :started_at, :completed_at, :verified_at,
       :completion_notes, :rejection_reason, :cancellation_reason,
-      :parts_cost, :checklist, :created_at, :updated_at
+      :parts_cost, :checklist, :custom_values, :created_at, :updated_at
 
     # What the work cost in wages reveals what people are paid: managers and administrators only
     # (pass `labor: true`).

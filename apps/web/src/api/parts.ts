@@ -14,6 +14,8 @@ export interface PartInput {
   reorder_point: number
   unit: string
   unit_cost: number | null
+  /** What is filled in for the company's custom fields; an empty string clears one. */
+  custom_values?: Record<string, string | boolean>
   /** Only used when adding a part; afterwards stock changes go through adjustStock. */
   quantity_on_hand?: number
 }

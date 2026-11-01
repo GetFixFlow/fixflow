@@ -67,6 +67,7 @@ const AuditLogPage = lazy(() => import('@/pages/settings/AuditLogPage').then(m =
 const ImportExportPage = lazy(() => import('@/pages/settings/ImportExportPage').then(m => ({ default: m.ImportExportPage })))
 const AdvancedSettingsPage = lazy(() => import('@/pages/settings/AdvancedSettingsPage').then(m => ({ default: m.AdvancedSettingsPage })))
 const SystemHealthPage = lazy(() => import('@/pages/settings/SystemHealthPage').then(m => ({ default: m.SystemHealthPage })))
+const CustomFieldsPage = lazy(() => import('@/pages/settings/CustomFieldsPage').then(m => ({ default: m.CustomFieldsPage })))
 const AISettingsPage = lazy(() => import('@/pages/settings/AISettingsPage').then(m => ({ default: m.AISettingsPage })))
 
 function Lazy({ children }: { children: React.ReactNode }) {
@@ -161,6 +162,7 @@ export const router = createBrowserRouter([
                       { path: 'branding', element: <Lazy><BrandingPage /></Lazy> },
                       { path: 'email', element: <Lazy><EmailSettingsPage /></Lazy> },
                       { path: 'localization', element: <Lazy><LocalizationPage /></Lazy> },
+                      { path: 'custom-fields', element: <Lazy><CustomFieldsPage /></Lazy> },
                       { path: 'roles', element: <Lazy><RolesPage /></Lazy> },
                       { path: 'iot', element: <Lazy><IoTSettingsPage /></Lazy> },
                       { path: 'data-retention', element: <Lazy><DataRetentionPage /></Lazy> },
