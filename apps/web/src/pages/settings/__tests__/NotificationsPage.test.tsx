@@ -12,7 +12,7 @@ import { ENDPOINT, SERVER_KEY, installPushBrowser, removePushBrowser } from '@/t
 const PUSH_EVENTS = ['wo_assigned', 'wo_verified', 'wo_needs_verification', 'wo_new_request', 'pm_generated', 'part_low_stock', 'po_requested']
 const EVENTS = [
   'wo_assigned', 'wo_verified', 'wo_needs_verification', 'wo_new_request',
-  'pm_generated', 'pm_due_soon', 'pm_overdue', 'part_low_stock', 'po_requested', 'warranty_expiring',
+  'pm_generated', 'pm_due_soon', 'pm_overdue', 'part_low_stock', 'po_requested', 'warranty_expiring', 'report_scheduled',
 ]
 
 function prefs(overrides: Record<string, boolean> = {}, emailEnabled = true, pushOverrides: Record<string, boolean> = {}, pushEnabled = true) {
@@ -125,6 +125,7 @@ describe('NotificationsPage', () => {
     expect(!!screen.queryByLabelText(/maintenance is overdue/i)).toBe(shown)
     expect(!!screen.queryByLabelText(/a part is running low or out/i)).toBe(shown)
     expect(!!screen.queryByLabelText(/someone reports a problem/i)).toBe(shown)
+    expect(!!screen.queryByLabelText(/a scheduled report is emailed to me/i)).toBe(shown)
     // What everyone gets, everyone sees.
     expect(screen.getByLabelText(/a scheduled work order is created for me/i)).toBeInTheDocument()
   })

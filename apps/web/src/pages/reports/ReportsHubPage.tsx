@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
-import { Activity, Wrench, ClipboardCheck, Wifi, Users, DollarSign, Timer } from 'lucide-react'
+import { Activity, Bookmark, Wrench, ClipboardCheck, Wifi, Users, DollarSign, Timer } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Card, CardContent } from '@/components/ui/Card'
 import { cn } from '@/lib/utils'
@@ -18,7 +19,15 @@ export function ReportsHubPage() {
   const navigate = useNavigate()
   return (
     <div className="space-y-6">
-      <PageHeader title="Reports & Analytics" description="Operational insights across your entire CMMS" />
+      <PageHeader
+        title="Reports & Analytics"
+        description="Operational insights across your entire CMMS"
+        actions={
+          <Link to="/reports/saved" className="inline-flex items-center gap-1.5 text-sm text-brand-600 hover:underline dark:text-brand-400">
+            <Bookmark className="h-4 w-4" />Saved reports
+          </Link>
+        }
+      />
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {REPORT_SECTIONS.map((section) => (
           <Card key={section.href} className="cursor-pointer hover:shadow-md transition-all hover:border-gray-300"

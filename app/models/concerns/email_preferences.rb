@@ -10,6 +10,7 @@ module EmailPreferences
   EMAIL_EVENTS = %w[
     wo_assigned wo_verified pm_generated pm_due_soon
     wo_needs_verification wo_new_request pm_overdue part_low_stock po_requested warranty_expiring wo_approval_needed
+    report_scheduled
   ].freeze
 
   # Of those, the ones that are time-sensitive enough to push to a phone. The daily summaries are not.
