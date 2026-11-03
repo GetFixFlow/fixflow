@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_121100) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_121200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -410,6 +410,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_121100) do
     t.index ["record_type", "record_id"], name: "index_sample_records_on_record_type_and_record_id", unique: true
   end
 
+  create_table "saved_reports", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "user_id", null: false
+    t.string "name", null: false
+    t.string "report", null: false
+    t.string "period", default: "last_30_days", null: false
+    t.jsonb "filters", default: {}, null: false
+    t.integer "send_on"
+    t.bigint "recipient_ids", default: [], null: false, array: true
+    t.date "last_sent_on"
+    t.datetime "last_sent_at"
+    t.text "last_error"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index "organization_id, report, lower((name)::text)", name: "index_saved_reports_on_org_report_and_lower_name", unique: true
+    t.index ["organization_id"], name: "index_saved_reports_on_organization_id"
+    t.index ["user_id"], name: "index_saved_reports_on_user_id"
+  end
+
   create_table "sensor_aggregates", force: :cascade do |t|
     t.bigint "asset_id", null: false
     t.decimal "avg_value", precision: 15, scale: 6
@@ -667,6 +686,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_121100) do
   add_foreign_key "purchase_orders", "vendors"
   add_foreign_key "push_subscriptions", "users"
   add_foreign_key "sample_records", "organizations"
+  add_foreign_key "saved_reports", "organizations"
+  add_foreign_key "saved_reports", "users"
   add_foreign_key "sensor_aggregates", "assets"
   add_foreign_key "sensor_readings", "assets"
   add_foreign_key "sensor_readings", "organizations"

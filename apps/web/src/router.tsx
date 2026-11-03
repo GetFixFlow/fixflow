@@ -39,6 +39,7 @@ const PMDetailPage = lazy(() => import('@/pages/preventive-maintenance/PMDetailP
 const PMEditPage = lazy(() => import('@/pages/preventive-maintenance/PMEditPage').then(m => ({ default: m.PMEditPage })))
 const IotPage = lazy(() => import('@/pages/iot/IotPage').then(m => ({ default: m.IotPage })))
 const ReportsHubPage = lazy(() => import('@/pages/reports/ReportsHubPage').then(m => ({ default: m.ReportsHubPage })))
+const SavedReportsPage = lazy(() => import('@/pages/reports/SavedReportsPage').then(m => ({ default: m.SavedReportsPage })))
 const WorkOrderReportsPage = lazy(() => import('@/pages/reports/WorkOrderReportsPage').then(m => ({ default: m.WorkOrderReportsPage })))
 const AssetHealthReportPage = lazy(() => import('@/pages/reports/AssetHealthReportPage').then(m => ({ default: m.AssetHealthReportPage })))
 const DowntimeReportPage = lazy(() => import('@/pages/reports/DowntimeReportPage').then(m => ({ default: m.DowntimeReportPage })))
@@ -126,6 +127,7 @@ export const router = createBrowserRouter([
               { path: '/import', element: <Lazy><ImportPage /></Lazy> },
               { path: '/schedule', element: <Lazy><SchedulePage /></Lazy> },
               { path: '/reports', element: <Lazy><ReportsHubPage /></Lazy> },
+              { path: '/reports/saved', element: <Lazy><SavedReportsPage /></Lazy> },
               { path: '/reports/work-orders', element: <Lazy><WorkOrderReportsPage /></Lazy> },
               { path: '/reports/assets', element: <Lazy><AssetHealthReportPage /></Lazy> },
               { path: '/reports/downtime', element: <Lazy><DowntimeReportPage /></Lazy> },
