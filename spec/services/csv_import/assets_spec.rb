@@ -18,6 +18,46 @@ RSpec.describe CsvImport::Assets do
     expect(fan.asset_tag).to match(/\AFF-\d{6}\z/) # made up as usual when the file has none
   end
 
+  describe "barcodes" do
+    it "keeps the barcode column with the asset, not as a custom field" do
+      result = importer.import!("name,barcode\nPump 1,5012345678900\nFan,\n")
+
+      expect(org.assets.find_by(name: "Pump 1").barcode).to eq("5012345678900")
+      expect(org.assets.find_by(name: "Fan").barcode).to be_nil
+      expect(org.assets.find_by(name: "Pump 1").custom_fields).to eq({})
+      expect(result.columns[:custom]).to eq([])
+    end
+
+    it "reads bar_code as barcode" do
+      importer.import!("name,bar_code\nPump 1,ABC\n")
+
+      expect(org.assets.first.barcode).to eq("ABC")
+    end
+
+    it "refuses a barcode that is on another asset, twice in the file (whatever the case), or too long" do
+      create(:asset, organization: org, barcode: "TAKEN-1")
+      long = "x" * 65
+      result = importer.preview("name,barcode\nA,taken-1\nB,NEW-1\nC,new-1\nD,#{long}\n")
+
+      expect(messages(result)).to contain_exactly(
+        [2, "barcode", "An asset with the barcode \"taken-1\" already exists."],
+        [4, "barcode", "The barcode \"new-1\" is also on row 3."],
+        [5, "barcode", "The barcode is longer than 64 characters."]
+      )
+    end
+
+    it "does not count a barcode on an asset that is put away" do
+      create(:asset, :discarded, organization: org, barcode: "OLD-1")
+
+      expect(importer.import!("name,barcode\nA,OLD-1\n")).to be_valid
+    end
+
+    it "is in the template the import page offers" do
+      expect(described_class::COLUMNS).to include("barcode")
+      expect(described_class::EXAMPLE.size).to eq(described_class::COLUMNS.size)
+    end
+  end
+
   it "finds a place by its full path or, when only one has that name, by the name alone, ignoring case and spacing" do
     result = importer.import!("name,location\nA,plant>floor 1\nB,  STORES \nC,Plant\n")
 

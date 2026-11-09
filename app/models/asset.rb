@@ -18,8 +18,14 @@ class Asset < ApplicationRecord
   has_many :downtimes, class_name: "AssetDowntime", dependent: :destroy
   has_many :documents, class_name: "AssetDocument", dependent: :destroy
 
+  normalizes :barcode, with: ->(text) { text.to_s.gsub(/[[:cntrl:]]/, "").strip.presence }
+
   validates :name, presence: true
   validates :status, inclusion: { in: STATUSES }
+  validates :barcode, length: { maximum: 64 }
+  validates :barcode, uniqueness: { scope: :organization_id, case_sensitive: false, conditions: -> { kept },
+                                    message: "is already on another asset" }, # rubocop:disable Rails/I18nLocaleTexts
+                      allow_nil: true, unless: :discarded?
 
   # The random code printed in the QR label's link (see PublicWorkRequest).
   has_secure_token :public_code, length: 24
@@ -30,7 +36,8 @@ class Asset < ApplicationRecord
   scope :by_status,             ->(status)      { where(status: status) }
   scope :by_location,           ->(location_id) { where(location_id: location_id) }
   scope :search_by_name_or_tag, lambda { |query|
-    where("name ILIKE :q OR asset_tag ILIKE :q OR public_code = :exact", q: "%#{query}%", exact: query)
+    where("name ILIKE :q OR asset_tag ILIKE :q OR serial_number ILIKE :q OR barcode ILIKE :q OR public_code = :exact",
+          q: "%#{sanitize_sql_like(query)}%", exact: query)
   }
   scope :operational,           ->              { where(status: "operational") }
   scope :needs_attention,       ->              { where(status: %w[degraded down]) }

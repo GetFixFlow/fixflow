@@ -18,6 +18,7 @@ const schema = z.object({
   name: z.string().min(2).max(100),
   asset_tag: z.string().max(50).optional(),
   serial_number: z.string().max(100).optional(),
+  barcode: z.string().max(64).optional(),
   status: z.enum(['operational', 'degraded', 'down', 'decommissioned'] as const),
   location_id: z.number().nullable().optional(),
   manufacturer: z.string().max(100).optional(),
@@ -56,6 +57,7 @@ export function AssetEditPage() {
         name: asset.name,
         asset_tag: asset.asset_tag,
         serial_number: asset.serial_number ?? '',
+        barcode: asset.barcode ?? '',
         status: asset.status,
         location_id: asset.location_id ?? null,
         manufacturer: asset.manufacturer ?? '',
@@ -70,11 +72,15 @@ export function AssetEditPage() {
   }, [asset, reset])
 
   const onSubmit = async (data: FormValues) => {
-    await updateMutation.mutateAsync({
-      ...data,
-      year_manufactured: data.year_manufactured ? Number(data.year_manufactured) : undefined,
-      location_id: data.location_id ?? null,
-    })
+    try {
+      await updateMutation.mutateAsync({
+        ...data,
+        year_manufactured: data.year_manufactured ? Number(data.year_manufactured) : undefined,
+        location_id: data.location_id ?? null,
+      })
+    } catch {
+      return // the reason is already on screen (a barcode another asset has, say); stay here so it can be changed
+    }
     navigate(`/assets/${assetId}`)
   }
 
@@ -130,6 +136,16 @@ export function AssetEditPage() {
                 label="Serial Number"
                 {...register('serial_number')}
               />
+            </div>
+            <div>
+              <Input
+                id="barcode"
+                label="Barcode"
+                placeholder="The number on the sticker already on the machine"
+                error={errors.barcode?.message}
+                {...register('barcode')}
+              />
+              <p className="mt-1 text-xs text-gray-500">Scanning it opens this asset. Leave it empty if there is none.</p>
             </div>
             <div>
               <label htmlFor="status" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">

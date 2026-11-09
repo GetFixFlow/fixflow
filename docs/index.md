@@ -30,6 +30,7 @@ These pages are for the person who **installs and looks after** a FixFlow server
 | Set up the company in the first week | [Administrator guide](administrator.md) |
 | Run work orders, checklists and QR-label requests | [Work orders and maintenance](work-orders.md) |
 | See who is busy, who is overloaded, and move work by dragging | [The schedule and workload](schedule.md) |
+| Find a machine by scanning, and print a sheet of labels | [Scanning and labels](scanning-and-labels.md) |
 | Add your own fields to work orders and parts | [Custom fields](custom-fields.md) |
 | Count hours or kilometres and service by the count | [Meters and usage-based maintenance](meters.md) |
 | Keep a list of contractors and give them work | [Vendors and contractors](vendors.md) |

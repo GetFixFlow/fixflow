@@ -40,7 +40,7 @@ A company can set an **approval limit** in **Settings, Organization** (Approval 
 
 Every asset's QR label links to a public form, `/request?asset=<code>`, where anyone (a visitor, a nurse, a tenant) can report a problem **without an account**. The form says which equipment the label is on, asks for a name (an email is optional), and what is wrong. It becomes an ordinary work order (priority and due date from **Settings → Organization**), the managers are emailed, and the person gets a link, `/request/<token>`, to follow it: received, assigned, in progress, completed (or closed without work). If the link is lost the request cannot be looked up again, so the form says to keep it, and remembers the last five on that device.
 
-Print labels from **Assets → Print labels** (or an asset's page). **Labels printed by older versions pointed at the asset page and still need a sign-in**: reprint them. A label that is not recognised (an asset since removed) still lets the person report the problem by typing the place and equipment.
+Print labels from **Assets → Print labels** (many at once: see [Scanning and labels](scanning-and-labels.md)) or an asset's page. **Labels printed by older versions pointed at the asset page and still need a sign-in**: reprint them. A label that is not recognised (an asset since removed) still lets the person report the problem by typing the place and equipment.
 
 **What strangers can and cannot do.** The two public calls (`POST /api/v1/work_requests`, `GET /api/v1/work_requests/:token`) plus the label lookup (`GET /api/v1/public_assets/:code`) are the only ones that need no sign-in, and they are built for hostile callers:
 

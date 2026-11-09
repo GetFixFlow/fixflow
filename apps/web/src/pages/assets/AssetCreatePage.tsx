@@ -19,6 +19,7 @@ const step1Schema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(100),
   asset_tag: z.string().max(50).optional(),
   serial_number: z.string().max(100).optional(),
+  barcode: z.string().max(64).optional(),
   status: z.enum(['operational', 'degraded', 'down', 'decommissioned'] as const),
 })
 
@@ -55,6 +56,7 @@ export function AssetCreatePage() {
     name: '',
     asset_tag: '',
     serial_number: '',
+    barcode: '',
     status: 'operational',
     location_id: null,
     manufacturer: '',
@@ -89,6 +91,7 @@ export function AssetCreatePage() {
       name: formData.name,
       asset_tag: formData.asset_tag || undefined,
       serial_number: formData.serial_number || undefined,
+      barcode: formData.barcode || undefined,
       status: formData.status,
       location_id: formData.location_id ?? undefined,
       manufacturer: formData.manufacturer || undefined,
@@ -97,7 +100,12 @@ export function AssetCreatePage() {
       purchase_date: formData.purchase_date || undefined,
       warranty_expires_on: formData.warranty_expires_on || undefined,
     }
-    const result = await createMutation.mutateAsync(payload)
+    let result
+    try {
+      result = await createMutation.mutateAsync(payload)
+    } catch {
+      return // the reason is already on screen (a barcode another asset has, say); stay here so it can be changed
+    }
     const newId = (result.data as { data?: { id?: number } }).data?.id
     if (newId) {
       setCreatedId(newId)
@@ -181,6 +189,13 @@ export function AssetCreatePage() {
                 label="Serial Number"
                 placeholder="e.g. SN-PUMP-001"
                 {...step1Form.register('serial_number')}
+              />
+              <Input
+                id="barcode"
+                label="Barcode"
+                placeholder="Optional: the number on the sticker already on the machine"
+                error={step1Form.formState.errors.barcode?.message}
+                {...step1Form.register('barcode')}
               />
               <div>
                 <label
