@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { KPICard } from '@/components/reports/KPICard'
 import { ChartContainer } from '@/components/reports/ChartContainer'
 import { ExportDropdown } from '@/components/reports/ExportDropdown'
+import { SavedReportsMenu } from '@/components/reports/SavedReportsMenu'
 import { PrintHeader } from '@/components/reports/PrintHeader'
 import { ReportFiltersSidebar } from '@/components/reports/ReportFiltersSidebar'
 import { AssetHealthDonut } from '@/components/reports/AssetHealthDonut'
@@ -60,6 +61,7 @@ export function AssetHealthReportPage() {
       <div className="flex items-start justify-between print:hidden">
         <PageHeader title="Asset Health" description={dateRange} />
         <div className="flex items-center gap-2 pt-1">
+          <SavedReportsMenu report="asset_health" />
           <Button variant="outline" onClick={() => setFiltersOpen(true)}><SlidersHorizontal className="h-4 w-4 mr-1.5" />Filters</Button>
           <ExportDropdown
             isExporting={exporting}

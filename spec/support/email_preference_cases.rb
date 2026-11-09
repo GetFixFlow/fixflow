@@ -43,6 +43,13 @@ module EmailPreferenceCases
         create(:asset, organization: org, warranty_expires_on: Date.current + 5)
         -> { WarrantyExpiringJob.perform_now }
       } },
+    { event: "report_scheduled", role: "manager", subject: /Weekly review/,
+      setup: lambda { |org, person|
+        owner = create(:user, :manager, organization: org)
+        now = Time.current.in_time_zone(org.timezone_or_default).change(hour: 12)
+        create(:saved_report, organization: org, user: owner, name: "Weekly review", send_on: now.wday, recipient_ids: [person.id])
+        -> { ScheduledReportsJob.perform_now(now) }
+      } },
     { event: "pm_overdue", role: "manager", subject: /Overdue PM/,
       setup: lambda { |org, _person|
         create(:preventive_maintenance, :overdue_pm, organization: org)

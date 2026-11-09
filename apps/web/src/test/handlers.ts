@@ -2,6 +2,8 @@ import { http, HttpResponse } from 'msw'
 
 export const handlers = [
   // No custom fields unless a test adds some: every work order and part form asks for them.
+  // No saved reports unless a test adds some: every report page that can be saved asks for them.
+  http.get('/api/v1/saved_reports', () => HttpResponse.json({ saved_reports: [], eligible_recipients: [] })),
   http.get('/api/v1/custom_fields', () => HttpResponse.json({ custom_fields: [] })),
 
   http.get('/api/v1/branding', () => {

@@ -28,6 +28,7 @@ class User < ApplicationRecord
   has_many :comments, dependent: :destroy
   has_many :user_sessions, dependent: :delete_all
   has_many :push_subscriptions, dependent: :delete_all
+  has_many :saved_reports, dependent: :destroy
 
   # ── Sessions ────────────────────────────────────────────────────────────
   #

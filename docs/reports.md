@@ -29,6 +29,21 @@ The first screen differs by role, and the server decides what each person gets. 
 
 **PM Compliance** is the same figure as on the PM dashboard: of the maintenance that came due in the last 30 days, the share that was completed; skipped and missed ones count against it. It shows "—" when nothing came due. "Due this week" counts schedules due in the next seven days; overdue schedules are counted apart.
 
+## Saved reports, and a PDF by email every week
+
+Choose the filters on **Work Orders**, **Asset Health** or **PM Compliance** and press **Save view**: the filters are kept under a name, and the **Saved views** list on that page brings them back with one click. Every manager and administrator sees all of the company's saved views; the person who saved one, and administrators, can change or delete it. (These are the three reports that can make a PDF.) **Update filters** brings the selected view up to date with the filters you have chosen now. **Manage** (or the link on the Reports page) opens the list of all of them.
+
+**The period moves with the calendar.** A saved view keeps a period, not dates: *the last 7, 30 or 90 days*, *this month so far* or *last month*. "The last 7 days" means the seven whole days before today, so a report that goes out on Monday morning covers a finished week.
+
+**Emailing it.** Tick **Email it as a PDF every week**, choose the weekday and who gets it. It goes out from **7 in the morning, company time** (the time zone in Settings, Organization) on that day, once, as an attachment with the same figures as **Export as PDF** on the screen. A few things to know:
+
+- **Only managers and administrators can be chosen**, because a report shows what work cost, which is made of wages.
+- It is made **as the person who saved it**, with the same rules as the screen. If that person stops being a manager or is deactivated, the report is not sent and the **Saved reports** page says why, in red. An administrator can save it again as themselves.
+- Each person chosen can turn it off for themselves under **Settings, Notifications** ("A scheduled report is emailed to me"). If nobody is left to send to, nothing is sent and the page says so.
+- **Email me now** on the Saved reports page sends the PDF to you alone, to check it looks right without waiting for the day. It does not change the schedule.
+- If the mail server fails, FixFlow tries again the next hour of the same day. If it reaches some people and not others, it counts as sent and the page names the addresses it could not reach, so the ones who got it do not get it twice. If the server was down for the whole day, that week's report is skipped.
+- Emailing needs the mail server to be set up ([Configuration](configuration.md#email)). The weekly emails are sent by the background worker.
+
 ## Exporting reports
 
 The **Export** menu on a report page downloads the report as a file made by the server, with the same dates and filters as the screen (managers and administrators only, like the reports themselves):

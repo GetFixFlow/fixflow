@@ -148,6 +148,11 @@ Rails.application.routes.draw do
         end
       end
 
+      # A report's filters kept under a name, and emailed weekly as a PDF
+      resources :saved_reports, only: %i[index create update destroy] do
+        member { post :send_now }
+      end
+
       # Fields an administrator adds to work orders and parts
       resources :custom_fields, only: %i[index create update destroy] do
         collection { patch :reorder }

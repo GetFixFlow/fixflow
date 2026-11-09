@@ -1,0 +1,13 @@
+Hi <%= @person.full_name %>,
+
+Attached is "<%= @report.name %>", the <%= @report.title.downcase %> report for <%= @result.from.strftime("%-d %b %Y") %> to <%= @result.to.strftime("%-d %b %Y") %>.
+
+<% if @report.send_on %>
+<%= @report.user.full_name %> set this up to be emailed every <%= Date::DAYNAMES[@report.send_on] %> to <%= @report.recipient_ids.size == 1 ? "one person" : "#{@report.recipient_ids.size} people" %>. To stop getting it, turn off "A scheduled report is emailed to me" under Settings, Notifications, or ask <%= @report.user.first_name %> to take you off the list.
+<% else %>
+You asked for this copy yourself. This report is not emailed on a schedule.
+<% end %>
+
+See and change the saved reports: <%= @url %>
+
+— FixFlow

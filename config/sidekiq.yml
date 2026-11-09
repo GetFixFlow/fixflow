@@ -33,6 +33,12 @@
       :queue: notifications
       :description: "Tell managers which warranties end within 30 days"
 
+    scheduled_reports:
+      :cron: "5 * * * *"
+      :class: ScheduledReportsJob
+      :queue: scheduled
+      :description: "Email the saved reports whose day it is"
+
     iot_aggregate:
       :cron: "0 * * * *"
       :class: Iot::AggregateReadingsJob

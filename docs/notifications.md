@@ -4,7 +4,7 @@ FixFlow tells people about work in three ways: **email**, **push notifications**
 
 ## Email
 
-Invitations and password reset links are always sent. The rest, and how to connect a mail server, are in [Configuration](configuration.md#email).
+Invitations and password reset links are always sent. The rest, and how to connect a mail server, are in [Configuration](configuration.md#email). A manager who is chosen to receive a saved report gets its PDF every week ([Saved reports](reports.md#saved-reports-and-a-pdf-by-email-every-week)); each person can turn that off under Settings, Notifications.
 
 ## Push notifications
 
