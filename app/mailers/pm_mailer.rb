@@ -4,28 +4,21 @@ class PmMailer < ApplicationMailer
   def due_soon_summary(user, pm_list)
     @user    = user
     @pm_list = pm_list
-    mail(
-      to:      user.email,
-      subject: "[FixFlow] #{pm_list.size} Preventive Maintenance Schedule(s) Due This Week"
-    )
+    in_language_of(user) { mail(to: user.email, subject: t(".subject", count: pm_list.size)) }
   end
 
   def overdue_summary(manager, pm_list)
     @manager = manager
     @pm_list = pm_list
-    mail(
-      to:      manager.email,
-      subject: "[FixFlow] #{pm_list.size} Overdue PM Schedule(s) Require Attention"
-    )
+    in_language_of(manager) { mail(to: manager.email, subject: t(".subject", count: pm_list.size)) }
   end
 
   def work_order_generated(pm, work_order)
     @pm         = pm
     @work_order = work_order
     @assignee   = pm.assigned_to
-    mail(
-      to:      @assignee.email,
-      subject: "[FixFlow] PM Work Order Auto-Generated: #{work_order.work_order_number}"
-    )
+    in_language_of(@assignee) do
+      mail(to: @assignee.email, subject: t(".subject", number: work_order.work_order_number))
+    end
   end
 end

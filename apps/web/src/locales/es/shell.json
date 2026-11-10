@@ -1,0 +1,94 @@
+{
+  "shell": {
+    "nav": {
+      "dashboard": "Panel",
+      "work_orders": "Órdenes de trabajo",
+      "schedule": "Programación",
+      "assets": "Activos",
+      "parts": "Repuestos",
+      "vendors": "Proveedores",
+      "purchasing": "Compras",
+      "preventive_maintenance": "Mantenimiento preventivo",
+      "iot_alerts": "Alertas IoT",
+      "reports": "Informes",
+      "settings": "Configuración"
+    },
+    "sidebar": {
+      "expand": "Expandir la barra lateral",
+      "collapse": "Contraer la barra lateral"
+    },
+    "header": {
+      "search": "Buscar...",
+      "scan_qr": "Escanear código QR",
+      "toggle_theme": "Cambiar el tema",
+      "notifications": "Notificaciones",
+      "notifications_new_one": "Notificaciones: {{count}} alerta nueva",
+      "notifications_new_other": "Notificaciones: {{count}} alertas nuevas",
+      "profile": "Perfil",
+      "help": "Ayuda y guías",
+      "sign_out": "Cerrar sesión"
+    },
+    "sync": {
+      "status": "Estado de sincronización",
+      "offline": "Sin conexión",
+      "offline_waiting_one": "Sin conexión · {{count}} en espera",
+      "offline_waiting_other": "Sin conexión · {{count}} en espera",
+      "not_saved_one": "{{count}} sin guardar",
+      "not_saved_other": "{{count}} sin guardar",
+      "waiting_one": "{{count}} esperando para sincronizar",
+      "waiting_other": "{{count}} esperando para sincronizar",
+      "offline_notice": "No tienes conexión. Tus cambios se guardan en este dispositivo y se envían cuando vuelva la conexión.",
+      "waiting_title": "Esperando para enviarse",
+      "send_now": "Enviar ahora",
+      "rejected_title": "No aceptados",
+      "dismiss": "Descartar",
+      "sent_one": "{{count}} cambio enviado.",
+      "sent_other": "{{count}} cambios enviados.",
+      "not_accepted_one": "{{count}} cambio no fue aceptado. Abre el estado de sincronización, arriba, para ver el motivo.",
+      "not_accepted_other": "{{count}} cambios no fueron aceptados. Abre el estado de sincronización, arriba, para ver el motivo."
+    },
+    "error": {
+      "title": "Algo salió mal",
+      "reload": "Recargar la página"
+    },
+    "not_found": {
+      "title": "Página no encontrada",
+      "back": "Volver al panel"
+    },
+    "loading": "Cargando...",
+    "update": {
+      "title": "Actualización disponible",
+      "body": "Recarga para obtener la última versión.",
+      "reload": "Recargar"
+    },
+    "shortcuts": {
+      "title": "Atajos de teclado",
+      "new_work_order": "Nueva orden de trabajo",
+      "focus_search": "Ir a la búsqueda",
+      "close": "Cerrar ventana / volver",
+      "start": "Iniciar el trabajo (si me lo asignaron)",
+      "complete": "Completar (si está en curso)",
+      "verify": "Verificar (si está completada, gerente)",
+      "edit": "Editar la orden (gerente)",
+      "help": "Mostrar los atajos de teclado",
+      "toggle": "Pulsa <kbd>?</kbd> para mostrar u ocultar este panel"
+    },
+    "locations": {
+      "collapse": "Contraer",
+      "expand": "Expandir",
+      "options": "Opciones de la ubicación",
+      "add_child": "Añadir sububicación",
+      "loading": "Cargando ubicaciones",
+      "search_placeholder": "Buscar ubicaciones...",
+      "search": "Buscar ubicaciones",
+      "no_match": "Ninguna ubicación coincide con tu búsqueda.",
+      "none_yet": "Aún no hay ubicaciones.",
+      "hierarchy": "Jerarquía de ubicaciones",
+      "select": "Selecciona una ubicación...",
+      "clear": "Borrar la selección",
+      "none_available": "No hay ubicaciones disponibles",
+      "unknown": "Ubicación desconocida",
+      "path": "Ruta de la ubicación"
+    }
+  }
+}

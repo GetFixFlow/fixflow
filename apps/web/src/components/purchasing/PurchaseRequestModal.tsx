@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { t as translate } from '@/i18n'
 import { Plus, Trash2 } from 'lucide-react'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
@@ -25,7 +27,7 @@ const rowFor = (part: Part, quantity = ''): Row => ({
   part_id: part.id,
   name: part.name,
   sku: part.sku,
-  unit: part.unit ?? 'each',
+  unit: part.unit ?? translate('purchasing.request.default_unit'),
   quantity,
   unit_cost: part.unit_cost != null ? String(part.unit_cost) : '',
 })
@@ -42,6 +44,7 @@ interface PurchaseRequestModalProps {
 
 /** Asking for parts: what is needed, how many, and why. Also used to change a request that has not been ordered. */
 export function PurchaseRequestModal({ onClose, order, part, canPrice = false }: PurchaseRequestModalProps) {
+  const { t } = useTranslation()
   const create = useCreatePurchaseOrder()
   const update = useUpdatePurchaseOrder(order?.id ?? 0)
   const pending = create.isPending || update.isPending
@@ -53,13 +56,13 @@ export function PurchaseRequestModal({ onClose, order, part, canPrice = false }:
           part_id: line.part_id,
           name: line.part_name,
           sku: line.part_sku,
-          unit: line.unit ?? 'each',
+          unit: line.unit ?? t('purchasing.request.default_unit'),
           quantity: String(line.quantity),
           unit_cost: line.unit_cost != null ? String(line.unit_cost) : '',
         }))
       : part ? [rowFor(part, String(suggestedQuantity(part)))] : [],
   )
-  const [reason, setReason] = useState(order?.reason ?? (part?.low_stock ? `${part.name} is running low` : ''))
+  const [reason, setReason] = useState(order?.reason ?? (part?.low_stock ? t('purchasing.request.running_low', { name: part.name }) : ''))
   const [notes, setNotes] = useState(order?.notes ?? '')
   const [search, setSearch] = useState('')
   const [adding, setAdding] = useState(false)
@@ -72,8 +75,8 @@ export function PurchaseRequestModal({ onClose, order, part, canPrice = false }:
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (rows.length === 0) return setError('Add at least one part.')
-    if (rows.some((row) => !(Number(row.quantity) > 0))) return setError('Enter how many of each part, above zero.')
+    if (rows.length === 0) return setError(t('purchasing.request.add_one_part'))
+    if (rows.some((row) => !(Number(row.quantity) > 0))) return setError(t('purchasing.request.quantity_required'))
     setError(undefined)
     const lines = rows.map((row) => ({
       id: row.id,
@@ -91,15 +94,15 @@ export function PurchaseRequestModal({ onClose, order, part, canPrice = false }:
     <Modal
       open
       onClose={onClose}
-      title={order ? `Change ${order.number}` : 'Ask for parts'}
-      description={order ? undefined : 'A manager approves it, then it is ordered. The stock goes up when the parts arrive.'}
+      title={order ? t('purchasing.request.change_title', { number: order.number }) : t('purchasing.request.ask_title')}
+      description={order ? undefined : t('purchasing.request.ask_description')}
     >
       <form onSubmit={submit} className="space-y-4" noValidate>
         <div className="space-y-2">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Parts</p>
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('purchasing.request.parts')}</p>
           {rows.length === 0 && !adding && (
             <p className="rounded-lg border-2 border-dashed border-gray-200 py-4 text-center text-sm text-gray-400 dark:border-gray-700">
-              No parts added yet
+              {t('purchasing.request.no_parts')}
             </p>
           )}
           {rows.map((row, index) => (
@@ -109,24 +112,24 @@ export function PurchaseRequestModal({ onClose, order, part, canPrice = false }:
                 {row.sku && <p className="text-xs text-gray-400">{row.sku}</p>}
               </div>
               <label className="text-xs text-gray-500">
-                How many ({row.unit})
+                {t('purchasing.request.how_many', { unit: row.unit })}
                 <input
-                  type="number" min="0" step="any" value={row.quantity} aria-label={`How many ${row.name}`}
+                  type="number" min="0" step="any" value={row.quantity} aria-label={t('purchasing.request.how_many_aria', { name: row.name })}
                   onChange={(e) => change(index, { quantity: e.target.value })}
                   className={`${fieldClass} mt-0.5 w-24`}
                 />
               </label>
               {canPrice && (
                 <label className="text-xs text-gray-500">
-                  Each
+                  {t('purchasing.request.each')}
                   <input
-                    type="number" min="0" step="any" value={row.unit_cost} aria-label={`Cost of ${row.name}`}
+                    type="number" min="0" step="any" value={row.unit_cost} aria-label={t('purchasing.request.cost_aria', { name: row.name })}
                     onChange={(e) => change(index, { unit_cost: e.target.value })}
                     className={`${fieldClass} mt-0.5 w-24`}
                   />
                 </label>
               )}
-              <Button type="button" variant="ghost" size="icon" aria-label={`Remove ${row.name}`} onClick={() => setRows((all) => all.filter((_, i) => i !== index))}>
+              <Button type="button" variant="ghost" size="icon" aria-label={t('purchasing.request.remove_aria', { name: row.name })} onClick={() => setRows((all) => all.filter((_, i) => i !== index))}>
                 <Trash2 className="h-4 w-4 text-red-500" />
               </Button>
             </div>
@@ -135,7 +138,7 @@ export function PurchaseRequestModal({ onClose, order, part, canPrice = false }:
           {adding ? (
             <div className="space-y-2 rounded-lg border border-gray-200 p-2 dark:border-gray-700">
               <input
-                autoFocus type="text" placeholder="Search parts…" aria-label="Search parts" value={search}
+                autoFocus type="text" placeholder={t('purchasing.request.search_placeholder')} aria-label={t('purchasing.request.search_aria')} value={search}
                 onChange={(e) => setSearch(e.target.value)} className={fieldClass}
               />
               <div className="max-h-40 space-y-0.5 overflow-y-auto">
@@ -146,35 +149,35 @@ export function PurchaseRequestModal({ onClose, order, part, canPrice = false }:
                     className="flex w-full items-center justify-between rounded px-2 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     <span className="text-gray-900 dark:text-gray-100">{p.name} <span className="ml-1 text-xs text-gray-400">{p.sku}</span></span>
-                    <span className="text-xs text-gray-400">{p.quantity_on_hand} in stock</span>
+                    <span className="text-xs text-gray-400">{t('purchasing.request.in_stock', { quantity: p.quantity_on_hand })}</span>
                   </button>
                 ))}
                 {!isLoading && choices.length === 0 && (
-                  <p className="px-2 py-1 text-xs text-gray-400">{search ? 'No matching parts' : 'No other parts to add'}</p>
+                  <p className="px-2 py-1 text-xs text-gray-400">{search ? t('purchasing.request.no_matching') : t('purchasing.request.no_other')}</p>
                 )}
               </div>
-              <Button type="button" variant="ghost" size="sm" className="w-full" onClick={() => { setAdding(false); setSearch('') }}>Cancel</Button>
+              <Button type="button" variant="ghost" size="sm" className="w-full" onClick={() => { setAdding(false); setSearch('') }}>{t('common.actions.cancel')}</Button>
             </div>
           ) : (
             <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => setAdding(true)}>
-              <Plus className="mr-1 h-4 w-4" />Add part
+              <Plus className="mr-1 h-4 w-4" />{t('purchasing.request.add_part')}
             </Button>
           )}
           {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
         </div>
 
         <div>
-          <label htmlFor="po-reason" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Why is it needed?</label>
+          <label htmlFor="po-reason" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t('purchasing.request.why')}</label>
           <textarea id="po-reason" rows={2} value={reason} onChange={(e) => setReason(e.target.value)} className={fieldClass} />
         </div>
         <div>
-          <label htmlFor="po-notes" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Notes</label>
+          <label htmlFor="po-notes" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t('purchasing.request.notes')}</label>
           <textarea id="po-notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} className={fieldClass} />
         </div>
 
         <div className="flex gap-2 pt-2">
-          <Button type="button" variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
-          <Button type="submit" disabled={pending} className="flex-1">{pending ? 'Sending…' : order ? 'Save changes' : 'Send request'}</Button>
+          <Button type="button" variant="outline" onClick={onClose} className="flex-1">{t('common.actions.cancel')}</Button>
+          <Button type="submit" disabled={pending} className="flex-1">{pending ? t('purchasing.request.sending') : order ? t('purchasing.request.save_changes') : t('purchasing.request.send')}</Button>
         </div>
       </form>
     </Modal>

@@ -1,3 +1,5 @@
+import { label as statusLabel } from '@/i18n'
+import { useTranslation } from 'react-i18next'
 import { ClipboardList, PlayCircle, CheckCircle, AlertTriangle, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -15,30 +17,31 @@ interface WorkOrderStatsProps {
 }
 
 export function WorkOrderStats({ stats, className }: WorkOrderStatsProps) {
+  const { t } = useTranslation()
   const items = [
     {
-      label: 'Open',
+      label: statusLabel('status', 'open'),
       value: stats.open ?? 0,
       icon: ClipboardList,
       color: 'text-blue-600 dark:text-blue-400',
       bg: 'bg-blue-50 dark:bg-blue-900/20',
     },
     {
-      label: 'In Progress',
+      label: statusLabel('status', 'in_progress'),
       value: stats.in_progress ?? 0,
       icon: PlayCircle,
       color: 'text-yellow-600 dark:text-yellow-400',
       bg: 'bg-yellow-50 dark:bg-yellow-900/20',
     },
     {
-      label: 'Completed',
+      label: statusLabel('status', 'completed'),
       value: stats.completed_this_month ?? 0,
       icon: CheckCircle,
       color: 'text-green-600 dark:text-green-400',
       bg: 'bg-green-50 dark:bg-green-900/20',
     },
     {
-      label: 'Overdue',
+      label: t('workOrders.stats.overdue'),
       value: stats.overdue ?? 0,
       icon: AlertTriangle,
       color: 'text-red-600 dark:text-red-400',
@@ -75,18 +78,19 @@ export function WorkOrderStatsBadges({
 }: {
   stats: WorkOrderStatsData & { total?: number }
 }) {
+  const { t } = useTranslation()
   return (
     <div className="flex flex-wrap items-center gap-2">
       {(stats.total ?? 0) > 0 && (
         <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
           <Clock className="h-3 w-3" />
-          {stats.total} total
+          {t('workOrders.stats.total', { count: stats.total })}
         </span>
       )}
       {(stats.overdue ?? 0) > 0 && (
         <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-400">
           <AlertTriangle className="h-3 w-3" />
-          {stats.overdue} overdue
+          {t('workOrders.stats.overdue_count', { count: stats.overdue })}
         </span>
       )}
     </div>

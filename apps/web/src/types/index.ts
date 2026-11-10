@@ -48,6 +48,10 @@ export interface User {
   /** What an hour of this person's work costs. Only administrators are sent it. */
   hourly_rate?: number | null
   department?: string | null
+  /** The language this person chose; null when they use the company's. */
+  locale?: string | null
+  /** The language that applies to them: their own choice, else the company's. */
+  language?: string
   organization_name?: string
   created_at?: string
   active?: boolean

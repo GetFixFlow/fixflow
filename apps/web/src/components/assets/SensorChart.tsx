@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   LineChart,
   Line,
@@ -12,7 +13,7 @@ import {
 import { Card, CardContent } from '@/components/ui/Card'
 import { cn } from '@/lib/utils'
 import type { SensorReading, SensorType } from '@/types'
-import { format } from 'date-fns'
+import { currentLanguage } from '@/i18n'
 
 type TimeRange = '1h' | '6h' | '24h' | '7d'
 
@@ -34,12 +35,17 @@ function filterByRange(readings: SensorReading[], range: TimeRange): SensorReadi
   return readings.filter((r) => new Date(r.recorded_at).getTime() >= cutoff)
 }
 
+/** Dates on the chart in the language of the screens ("Oct 13", "Oct 13, 14:30"). */
+const dayText = (value: string) => new Intl.DateTimeFormat(currentLanguage(), { month: 'short', day: 'numeric' }).format(new Date(value))
+const clockText = (value: string) => new Intl.DateTimeFormat(currentLanguage(), { hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(value))
+
 export function SensorChart({
   readings,
   sensorTypes,
   thresholds = {},
   className,
 }: SensorChartProps) {
+  const { t } = useTranslation()
   const [range, setRange] = useState<TimeRange>('24h')
 
   const filtered = filterByRange(readings, range)
@@ -61,7 +67,7 @@ export function SensorChart({
     <Card className={className}>
       <CardContent className="p-4">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Sensor Readings</h3>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t('assets.sensor.title')}</h3>
           <div className="flex gap-1">
             {RANGE_LABELS.map((r) => (
               <button
@@ -82,7 +88,7 @@ export function SensorChart({
 
         {data.length === 0 ? (
           <div className="flex h-40 items-center justify-center text-sm text-gray-400">
-            No readings in this time range
+            {t('assets.sensor.empty')}
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={220}>
@@ -90,13 +96,13 @@ export function SensorChart({
               <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
               <XAxis
                 dataKey="time"
-                tickFormatter={(v) => format(new Date(v as string), range === '7d' ? 'MMM d' : 'HH:mm')}
+                tickFormatter={(v) => (range === '7d' ? dayText(v as string) : clockText(v as string))}
                 tick={{ fontSize: 11 }}
                 className="text-gray-500 dark:text-gray-400"
               />
               <YAxis tick={{ fontSize: 11 }} className="text-gray-500 dark:text-gray-400" />
               <Tooltip
-                labelFormatter={(v) => format(new Date(v as string), 'MMM d, HH:mm')}
+                labelFormatter={(v) => `${dayText(v as string)}, ${clockText(v as string)}`}
                 contentStyle={{
                   backgroundColor: 'var(--tooltip-bg, white)',
                   border: '1px solid #e5e7eb',
@@ -122,7 +128,7 @@ export function SensorChart({
                     y={thresholds[type]}
                     stroke="#ef4444"
                     strokeDasharray="4 4"
-                    label={{ value: `${type} limit`, fill: '#ef4444', fontSize: 10 }}
+                    label={{ value: t('assets.sensor.limit', { type }), fill: '#ef4444', fontSize: 10 }}
                   />
                 ) : null,
               )}

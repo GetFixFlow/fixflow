@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 import { OfflineSync } from './OfflineSync'
@@ -13,7 +14,9 @@ export function AppLayout() {
   // New IoT alerts arrive on any screen, not just the IoT ones.
   useAlertNotifications()
   // Screens format dates and amounts as they are drawn, so when the settings change they are drawn again.
-  const localeKey = JSON.stringify(useLocaleStore((s) => s.locale))
+  // The same when the language changes, so that texts written outside a component (a label, a toast) are drawn again too.
+  const { i18n } = useTranslation()
+  const localeKey = `${i18n.language}:${JSON.stringify(useLocaleStore((s) => s.locale))}`
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

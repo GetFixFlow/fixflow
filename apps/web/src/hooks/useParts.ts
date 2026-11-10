@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import type { AxiosError } from 'axios'
 import { toast } from 'sonner'
 import { partsApi } from '@/api/parts'
+import { t } from '@/i18n'
 
 /** The part catalog, optionally narrowed by name or SKU. */
 export function useParts(search = '', enabled = true) {
@@ -45,19 +46,19 @@ function useRefreshingMutation<TArgs>(fn: (args: TArgs) => Promise<unknown>, suc
 }
 
 export const useCreatePart = () =>
-  useRefreshingMutation(partsApi.create, 'Part added.', 'Could not add the part.')
+  useRefreshingMutation(partsApi.create, t('parts.toasts.added'), t('parts.toasts.add_failed'))
 
 export const useUpdatePart = (id: number) =>
-  useRefreshingMutation((part: Parameters<typeof partsApi.update>[1]) => partsApi.update(id, part), 'Part updated.', 'Could not update the part.')
+  useRefreshingMutation((part: Parameters<typeof partsApi.update>[1]) => partsApi.update(id, part), t('parts.toasts.updated'), t('parts.toasts.update_failed'))
 
 export const useDeletePart = () =>
-  useRefreshingMutation((id: number) => partsApi.remove(id), 'Part deleted.', 'Could not delete the part.')
+  useRefreshingMutation((id: number) => partsApi.remove(id), t('parts.toasts.deleted'), t('parts.toasts.delete_failed'))
 
 export const useAdjustStock = (id: number) =>
   useRefreshingMutation(
     (body: Parameters<typeof partsApi.adjustStock>[1]) => partsApi.adjustStock(id, body),
-    'Stock updated.',
-    'Could not change the stock.',
+    t('parts.toasts.stock_updated'),
+    t('parts.toasts.stock_failed'),
   )
 
 /** A value that only changes after it has stopped changing for `delay` ms, so typing does not search every key. */

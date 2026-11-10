@@ -1,3 +1,5 @@
+import { LanguageSelect } from '@/components/ui/LanguageSelect'
+import { useTranslation } from 'react-i18next'
 import { useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
@@ -8,35 +10,25 @@ import { workRequestsApi } from '@/api'
 import type { WorkRequestStatus } from '@/types'
 import { formatDate } from '@/lib/localeFormat'
 
-const STATUS_STEPS: Array<{
-  key: Exclude<WorkRequestStatus, 'cancelled'>
-  label: string
-  description: string
-}> = [
-  { key: 'received', label: 'Request received', description: 'Your request has been logged.' },
-  { key: 'assigned', label: 'Assigned to technician', description: 'A technician has been assigned.' },
-  { key: 'in_progress', label: 'Work in progress', description: 'Maintenance is underway.' },
-  { key: 'completed', label: 'Completed', description: 'Issue resolved.' },
+const STATUS_STEPS: Array<{ key: Exclude<WorkRequestStatus, 'cancelled'> }> = [
+  { key: 'received' },
+  { key: 'assigned' },
+  { key: 'in_progress' },
+  { key: 'completed' },
 ]
-
-const STATUS_LABEL: Record<WorkRequestStatus, string> = {
-  received: 'RECEIVED',
-  assigned: 'ASSIGNED',
-  in_progress: 'IN PROGRESS',
-  completed: 'COMPLETED',
-  cancelled: 'CANCELLED',
-}
 
 // Checked again now and then while the work is still going on.
 const REFRESH_MS = 60_000
 
 function Notice({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation()
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900">
+      <div className="absolute right-4 top-4 z-10"><LanguageSelect /></div>
       <div className="text-center">
         {children}
         <Link to="/request" className="mt-3 block text-sm text-brand-600 hover:underline">
-          Submit a new request
+          {t('workOrders.status.new')}
         </Link>
       </div>
     </div>
@@ -44,6 +36,7 @@ function Notice({ children }: { children: React.ReactNode }) {
 }
 
 export function WorkRequestStatusPage() {
+  const { t } = useTranslation()
   const { token } = useParams<{ token: string }>()
 
   // The link is the only secret: keep it out of the Referer header sent to anything the page opens.
@@ -78,7 +71,7 @@ export function WorkRequestStatusPage() {
       return (
         <Notice>
           <p className="text-gray-600 dark:text-gray-400">
-            Request not found. Check that the whole link was copied.
+            {t('workOrders.status.not_found')}
           </p>
         </Notice>
       )
@@ -86,14 +79,14 @@ export function WorkRequestStatusPage() {
     if (status === 429) {
       return (
         <Notice>
-          <p className="text-gray-600 dark:text-gray-400">Too many requests. Please wait a few minutes and try again.</p>
+          <p className="text-gray-600 dark:text-gray-400">{t('workOrders.status.too_many')}</p>
         </Notice>
       )
     }
     return (
       <Notice>
         <p className="text-gray-600 dark:text-gray-400">
-          We could not load your request. Check your connection and refresh the page.
+          {t('workOrders.status.load_failed')}
         </p>
       </Notice>
     )
@@ -104,14 +97,15 @@ export function WorkRequestStatusPage() {
 
   return (
     <div className="flex min-h-screen items-start justify-center bg-gray-50 p-4 dark:bg-gray-900">
+      <div className="absolute right-4 top-4 z-10"><LanguageSelect /></div>
       <div className="w-full max-w-lg space-y-6 py-12">
         <div className="text-center">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-600">
             <Zap className="h-6 w-6 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Request status</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('workOrders.status.title')}</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Submitted {formatDate(new Date(data.created_at))}
+            {t('workOrders.status.submitted', { date: formatDate(new Date(data.created_at)) })}
           </p>
         </div>
 
@@ -128,7 +122,7 @@ export function WorkRequestStatusPage() {
                   'bg-brand-100 text-brand-700 dark:bg-brand-900/20 dark:text-brand-400',
               )}
             >
-              {STATUS_LABEL[data.status]}
+              {t(`workOrders.status.label_${data.status}`)}
             </span>
           </div>
 
@@ -136,8 +130,7 @@ export function WorkRequestStatusPage() {
             <div className="flex items-start gap-3">
               <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-gray-400" />
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                This request was closed without work being done. If the problem is still there, please submit a new
-                request.
+                {t('workOrders.status.closed')}
               </p>
             </div>
           ) : (
@@ -167,9 +160,9 @@ export function WorkRequestStatusPage() {
                           done ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400 dark:text-gray-500',
                         )}
                       >
-                        {step.label}
+                        {t(`workOrders.status.step_${step.key}`)}
                       </p>
-                      {done && <p className="text-xs text-gray-500 dark:text-gray-400">{step.description}</p>}
+                      {done && <p className="text-xs text-gray-500 dark:text-gray-400">{t(`workOrders.status.step_${step.key}_help`)}</p>}
                     </div>
                   </li>
                 )
@@ -179,7 +172,7 @@ export function WorkRequestStatusPage() {
 
           {data.description && (
             <div className="mt-4 border-t border-gray-100 pt-4 dark:border-gray-700">
-              <p className="text-xs text-gray-500 dark:text-gray-400">Your request:</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t('workOrders.status.yours')}</p>
               {/* Shown as plain text, line breaks kept: what a stranger typed is never treated as markup. */}
               <p className="mt-1 whitespace-pre-line text-sm italic text-gray-700 dark:text-gray-300">
                 “{data.description}”
@@ -190,7 +183,7 @@ export function WorkRequestStatusPage() {
 
         <div className="text-center">
           <Link to="/request" className="text-sm text-brand-600 hover:underline dark:text-brand-400">
-            Submit another request
+            {t('workOrders.status.another')}
           </Link>
         </div>
       </div>

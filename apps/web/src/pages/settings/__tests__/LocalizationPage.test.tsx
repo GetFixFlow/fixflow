@@ -100,12 +100,23 @@ describe('LocalizationPage', () => {
     expect(useLocaleStore.getState().locale.currency).toBe('USD')
   })
 
-  it('no longer offers a language, as there are no translations yet', async () => {
+  it('offers the languages that ship, and saves the one chosen as the company\'s', async () => {
     serve()
+    let sent: { localization?: { language?: string } } = {}
+    server.use(http.patch('/api/v1/localization_settings', async ({ request }) => {
+      sent = (await request.json()) as typeof sent
+      return HttpResponse.json({ localization: { ...saved, language: 'es' } })
+    }))
     renderPage()
 
-    await screen.findByLabelText('Currency')
-    expect(screen.queryByLabelText(/language/i)).not.toBeInTheDocument()
+    const language = await screen.findByLabelText('Language')
+    expect(language).toHaveValue('en')
+    expect(screen.getByRole('option', { name: 'Español' })).toBeInTheDocument()
+
+    await userEvent.selectOptions(language, 'es')
+    await userEvent.click(screen.getByRole('button', { name: 'Save localization' }))
+
+    await waitFor(() => expect(sent.localization?.language).toBe('es'))
   })
 
   it('says so when it could not load, instead of showing defaults as if they were saved', async () => {

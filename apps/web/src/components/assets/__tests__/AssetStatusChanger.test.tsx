@@ -29,8 +29,8 @@ describe('AssetStatusChanger', () => {
   it('opens popover on click showing status options', async () => {
     render(<AssetStatusChanger asset={mockAsset} />, { wrapper })
     await userEvent.click(screen.getByLabelText('Change asset status'))
-    expect(screen.getByText('degraded')).toBeInTheDocument()
-    expect(screen.getByText('down')).toBeInTheDocument()
+    expect(screen.getByText('Degraded')).toBeInTheDocument()
+    expect(screen.getByText('Down')).toBeInTheDocument()
   })
 
   it('marks current status as current', async () => {
@@ -43,7 +43,7 @@ describe('AssetStatusChanger', () => {
     render(<AssetStatusChanger asset={mockAsset} />, { wrapper })
     await userEvent.click(screen.getByLabelText('Change asset status'))
     // Click "down" - should show confirmation
-    const downBtn = screen.getAllByText('down')[0]
+    const downBtn = screen.getAllByText('Down')[0]
     await userEvent.click(downBtn)
     expect(screen.getByText(/confirm/i)).toBeInTheDocument()
   })
@@ -51,7 +51,7 @@ describe('AssetStatusChanger', () => {
   it('shows confirmation for decommissioned', async () => {
     render(<AssetStatusChanger asset={mockAsset} />, { wrapper })
     await userEvent.click(screen.getByLabelText('Change asset status'))
-    const decommBtn = screen.getByText('decommissioned')
+    const decommBtn = screen.getByText('Decommissioned')
     await userEvent.click(decommBtn)
     expect(screen.getByText(/confirm/i)).toBeInTheDocument()
   })
@@ -59,7 +59,7 @@ describe('AssetStatusChanger', () => {
   it('can cancel destructive status change', async () => {
     render(<AssetStatusChanger asset={mockAsset} />, { wrapper })
     await userEvent.click(screen.getByLabelText('Change asset status'))
-    const downBtn = screen.getAllByText('down')[0]
+    const downBtn = screen.getAllByText('Down')[0]
     await userEvent.click(downBtn)
     await userEvent.click(screen.getByText('Cancel'))
     // Should be back to status list

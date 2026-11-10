@@ -1,0 +1,72 @@
+{
+  "dashboard": {
+    "title": "Panel",
+    "overview": "Resumen de tus operaciones de mantenimiento",
+    "welcome": "Te damos la bienvenida de nuevo, {{name}}",
+    "happening": "Esto es lo que está pasando en tus operaciones de mantenimiento",
+    "open_wo": "Órdenes de trabajo abiertas",
+    "n_overdue": "{{count}} vencidas",
+    "asset_health": "Salud de los activos",
+    "n_operational": "{{operational}} de {{total}} operativos",
+    "pm_compliance": "Cumplimiento de MP",
+    "n_overdue_schedules": "{{count}} programas vencidos",
+    "iot_alerts": "Alertas de IoT",
+    "n_critical": "{{count}} críticas",
+    "completed_week": "Completadas esta semana",
+    "due_week": "Vencen esta semana (MP)",
+    "in_progress": "En curso",
+    "asset_breakdown": "Desglose por estado de los activos",
+    "recent": "Actividad reciente",
+    "no_activity": "Sin actividad reciente",
+    "asset_overview": "Resumen del estado de los activos",
+    "start": {
+      "confirm_remove": "¿Quitar los datos de ejemplo? Todo lo que añadiste tú se conserva. Los elementos de ejemplo sobre los que ya has trabajado se mantienen.",
+      "sample_note": "Parte de lo que ves son datos de ejemplo (llamados «Sample: …»), para que puedas explorar.",
+      "removing": "Quitando…",
+      "remove": "Quitar datos de ejemplo",
+      "title": "Primeros pasos",
+      "intro": "Tres cosas que hacer primero. Se marcan solas a medida que las haces.",
+      "dismiss": "Ocultar esto",
+      "done": "Hecho",
+      "not_done": "Aún no hecho",
+      "go": "Ir",
+      "import": "Importar desde una hoja de cálculo",
+      "adding": "Añadiendo…",
+      "add": "Añadir datos de ejemplo para explorar",
+      "steps": {
+        "assets": {
+          "title": "Añade tus equipos",
+          "description": "Añade un activo o importa una hoja de cálculo con ellos."
+        },
+        "work_order": {
+          "title": "Crea una orden de trabajo",
+          "description": "Registra un trabajo, asígnalo y síguelo hasta terminarlo."
+        },
+        "team": {
+          "title": "Invita a tu equipo",
+          "description": "Técnicos, gerentes y solicitantes ven cada uno lo que necesitan."
+        }
+      }
+    },
+    "tech": {
+      "description": "Tus órdenes de trabajo y el mantenimiento próximo",
+      "assigned": "Asignadas a mí",
+      "waiting": "esperando a iniciarse",
+      "overdue": "Vencidas",
+      "past_due": "abiertas y pasada la fecha de vencimiento",
+      "completed_today": "Completadas hoy",
+      "see": "Ver mis órdenes de trabajo →",
+      "upcoming": "Mantenimiento próximo",
+      "nothing": "No tienes nada programado",
+      "no_date": "Sin fecha",
+      "recent": "Tu actividad reciente"
+    },
+    "req": {
+      "description": "Cómo van tus solicitudes",
+      "mine": "Mis solicitudes",
+      "open": "Aún abiertas",
+      "not_finished": "aún sin terminar",
+      "see": "Ver mis solicitudes →"
+    }
+  }
+}

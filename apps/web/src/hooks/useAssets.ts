@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { assetsApi } from '@/api'
 import type { Asset } from '@/types'
 import type { LabelFilters } from '@/types/scanning'
+import { t } from '@/i18n'
 
 export const ASSETS_KEY = ['assets'] as const
 
@@ -36,10 +37,10 @@ export function useCreateAsset() {
     mutationFn: (data: Partial<Asset>) => assetsApi.create(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ASSETS_KEY })
-      toast.success('Asset created.')
+      toast.success(t('assets.toasts.created'))
     },
     onError: (error: AxiosError<{ error?: { message?: string } }>) =>
-      toast.error(error.response?.data?.error?.message ?? 'Failed to create asset.'),
+      toast.error(error.response?.data?.error?.message ?? t('assets.toasts.create_failed')),
   })
 }
 
@@ -49,10 +50,10 @@ export function useUpdateAsset(id: number) {
     mutationFn: (data: Partial<Asset>) => assetsApi.update(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ASSETS_KEY })
-      toast.success('Asset updated.')
+      toast.success(t('assets.toasts.updated'))
     },
     onError: (error: AxiosError<{ error?: { message?: string } }>) =>
-      toast.error(error.response?.data?.error?.message ?? 'Failed to update asset.'),
+      toast.error(error.response?.data?.error?.message ?? t('assets.toasts.update_failed')),
   })
 }
 
@@ -62,8 +63,8 @@ export function useDeleteAsset() {
     mutationFn: (id: number) => assetsApi.destroy(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ASSETS_KEY })
-      toast.success('Asset deleted.')
+      toast.success(t('assets.toasts.deleted'))
     },
-    onError: () => toast.error('Failed to delete asset.'),
+    onError: () => toast.error(t('assets.toasts.delete_failed')),
   })
 }

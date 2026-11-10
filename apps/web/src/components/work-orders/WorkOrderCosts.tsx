@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { DollarSign } from 'lucide-react'
 import { useWorkOrderParts } from '@/hooks/useWorkOrders'
 import { partLineTotal } from '@/utils/parts'
@@ -25,6 +26,7 @@ const Row = ({ label, value, bold, note }: { label: string; value: string; bold?
 )
 
 export function WorkOrderCosts({ workOrderId, actualHours, laborCost, laborRate, vendorCost }: WorkOrderCostsProps) {
+  const { t } = useTranslation()
   const { data: parts = [] } = useWorkOrderParts(workOrderId)
 
   // Rails serializes decimal columns as JSON strings to avoid float precision loss: coerce before doing math.
@@ -36,26 +38,28 @@ export function WorkOrderCosts({ workOrderId, actualHours, laborCost, laborRate,
   const vendor = vendorCost != null ? Number(vendorCost) : 0
 
   const laborLabel =
-    hours > 0 && rate > 0 ? `Labor cost (${hours} hrs × ${formatMoney(rate)}/hr)` : hours > 0 ? `Labor cost (${hours} hrs)` : 'Labor cost'
+    hours > 0 && rate > 0
+      ? t('workOrders.costs.labor_rate', { hours, rate: formatMoney(rate) })
+      : hours > 0 ? t('workOrders.costs.labor_hours', { hours }) : t('workOrders.costs.labor')
   const noRate = canSeeLabor && hours > 0 && rate === 0
 
   return (
     <div className="space-y-1">
       <div className="flex items-center gap-2 mb-2">
         <DollarSign className="h-4 w-4 text-gray-400" />
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Cost Summary</span>
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('workOrders.costs.summary')}</span>
       </div>
       <div className="divide-y divide-gray-100 dark:divide-gray-700">
-        <Row label="Parts cost" value={formatMoney(partsCost)} />
+        <Row label={t('workOrders.costs.parts')} value={formatMoney(partsCost)} />
         {canSeeLabor && (
           <>
             <Row
               label={laborLabel}
               value={formatMoney(labor)}
-              note={noRate ? 'No hourly rate is set, so labor is counted as nothing. Set one in Settings, Company, or on the person in Users.' : undefined}
+              note={noRate ? t('workOrders.costs.no_rate') : undefined}
             />
-            {vendor > 0 && <Row label="Vendor charge" value={formatMoney(vendor)} />}
-            <Row label="Total cost" value={formatMoney(partsCost + labor + vendor)} bold />
+            {vendor > 0 && <Row label={t('workOrders.costs.vendor')} value={formatMoney(vendor)} />}
+            <Row label={t('workOrders.costs.total')} value={formatMoney(partsCost + labor + vendor)} bold />
           </>
         )}
       </div>

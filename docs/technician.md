@@ -7,6 +7,7 @@ Everything a technician does in a day, on a phone: find your work, do it, close 
 1. **Open the invitation link** your administrator sent you, choose a password and sign in. If your company asks for two-factor sign-in, the app walks you through it.
 2. **Put FixFlow on your home screen.** Open the address in your phone's browser, then use the browser's menu: *Add to Home screen* (Android) or *Share, Add to Home Screen* (iPhone). It then opens like any other app and keeps working when the signal drops (see [Working offline](work-orders.md#working-offline)). This needs the server to use HTTPS; if the option is missing, ask your administrator.
 3. **Switch on push messages** so a new job reaches you without opening the app: **Settings, Notifications**, then *Push notifications on this device*. See [Notifications](notifications.md).
+4. **Choose your language** if you prefer Spanish: **Settings, Profile**, then *Language*. The emails FixFlow sends you follow it too. See [Languages and translating](translating.md).
 
 ## Find your work
 

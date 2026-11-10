@@ -1,27 +1,23 @@
+import { label } from '@/i18n'
+import { useTranslation } from 'react-i18next'
 import { CheckCircle, Circle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { WorkOrderStatus } from '@/types'
 
 const STAGE_ORDER: WorkOrderStatus[] = ['open', 'assigned', 'in_progress', 'completed', 'verified']
-const STAGE_LABELS: Partial<Record<WorkOrderStatus, string>> = {
-  open: 'Open',
-  assigned: 'Assigned',
-  in_progress: 'In Progress',
-  completed: 'Completed',
-  verified: 'Verified',
-}
 
 interface WorkOrderTimelineProps {
   status: WorkOrderStatus
 }
 
 export function WorkOrderTimeline({ status }: WorkOrderTimelineProps) {
+  const { t } = useTranslation()
   const currentIdx = STAGE_ORDER.indexOf(status)
   // cancelled/on_hold/pending_parts don't move the stage index forward
   const effectiveIdx = currentIdx === -1 ? 0 : currentIdx
 
   return (
-    <div className="flex items-center gap-0" aria-label="Work order progress">
+    <div className="flex items-center gap-0" aria-label={t('workOrders.timeline.progress')}>
       {STAGE_ORDER.map((stage, idx) => {
         const done = idx < effectiveIdx
         const active = idx === effectiveIdx
@@ -39,7 +35,7 @@ export function WorkOrderTimeline({ status }: WorkOrderTimelineProps) {
                     ? 'border-brand-600 bg-white text-brand-600 dark:bg-gray-900'
                     : 'border-gray-300 bg-white text-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-600',
                 )}
-                aria-label={`${STAGE_LABELS[stage]} — ${done ? 'completed' : active ? 'current' : 'pending'}`}
+                aria-label={t('workOrders.timeline.stage', { stage: label('status', stage), state: t(`workOrders.timeline.${done ? 'completed' : active ? 'current' : 'pending'}`) })}
               >
                 {done ? (
                   <CheckCircle className="h-4 w-4" />
@@ -55,7 +51,7 @@ export function WorkOrderTimeline({ status }: WorkOrderTimelineProps) {
                     : 'text-gray-400 dark:text-gray-500',
                 )}
               >
-                {STAGE_LABELS[stage]}
+                {label('status', stage)}
               </span>
             </div>
 

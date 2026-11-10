@@ -1,5 +1,6 @@
 import { Bell, Moon, Sun, Search, ScanLine } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import * as Avatar from '@radix-ui/react-avatar'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { useAuthStore } from '@/stores/authStore'
@@ -12,6 +13,7 @@ import { cn } from '@/lib/utils'
 import { env } from '@/lib/env'
 
 export function Header() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const { darkMode, toggleDarkMode, sidebarCollapsed, setCommandPaletteOpen } = useUiStore()
@@ -37,18 +39,18 @@ export function Header() {
         className="flex items-center gap-2 rounded-md border border-gray-200 px-3 py-1.5 text-sm text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:border-gray-600 dark:text-gray-400 dark:hover:border-gray-500"
       >
         <Search className="h-4 w-4" />
-        <span>Search...</span>
+        <span>{t('shell.header.search')}</span>
         <kbd className="ml-2 rounded bg-gray-100 px-1.5 py-0.5 text-xs dark:bg-gray-700">⌘K</kbd>
       </button>
 
       <div className="flex items-center gap-2">
         <SyncStatus />
         {user && user.role !== 'requester' && (
-          <Button variant="ghost" size="icon" aria-label="Scan QR code" onClick={() => navigate('/assets/scan')}>
+          <Button variant="ghost" size="icon" aria-label={t('shell.header.scan_qr')} onClick={() => navigate('/assets/scan')}>
             <ScanLine className="h-4 w-4" />
           </Button>
         )}
-        <Button variant="ghost" size="icon" onClick={toggleDarkMode} aria-label="Toggle theme">
+        <Button variant="ghost" size="icon" onClick={toggleDarkMode} aria-label={t('shell.header.toggle_theme')}>
           {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>
 
@@ -56,7 +58,7 @@ export function Header() {
           variant="ghost"
           size="icon"
           className="relative"
-          aria-label={newAlerts.length > 0 ? `Notifications: ${newAlerts.length} new alerts` : 'Notifications'}
+          aria-label={newAlerts.length > 0 ? t('shell.header.notifications_new', { count: newAlerts.length }) : t('shell.header.notifications')}
           onClick={() => { clearAlerts(); navigate('/iot/alerts') }}
         >
           <Bell className="h-4 w-4" />
@@ -91,19 +93,19 @@ export function Header() {
                 className="flex cursor-pointer rounded-sm px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 focus:outline-none"
                 onSelect={() => navigate('/settings/profile')}
               >
-                Profile
+                {t('shell.header.profile')}
               </DropdownMenu.Item>
               <DropdownMenu.Item
                 asChild
                 className="flex cursor-pointer rounded-sm px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 focus:outline-none"
               >
-                <a href={env.docsUrl} target="_blank" rel="noopener noreferrer">Help and guides</a>
+                <a href={env.docsUrl} target="_blank" rel="noopener noreferrer">{t('shell.header.help')}</a>
               </DropdownMenu.Item>
               <DropdownMenu.Item
                 className="flex cursor-pointer rounded-sm px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none"
                 onSelect={() => logout()}
               >
-                Sign out
+                {t('shell.header.sign_out')}
               </DropdownMenu.Item>
             </DropdownMenu.Content>
           </DropdownMenu.Portal>

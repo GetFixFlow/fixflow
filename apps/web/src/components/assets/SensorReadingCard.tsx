@@ -1,8 +1,9 @@
 import { Thermometer, Activity, Gauge, Zap, Droplets, Wind } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/Card'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import type { SensorType } from '@/types'
-import { formatDistanceToNow } from 'date-fns'
+import { timeAgo } from '@/lib/timeAgo'
 
 const SENSOR_ICONS: Record<SensorType, React.ElementType> = {
   temperature: Thermometer,
@@ -12,16 +13,6 @@ const SENSOR_ICONS: Record<SensorType, React.ElementType> = {
   current: Zap,
   voltage: Zap,
   custom: Wind,
-}
-
-const SENSOR_LABELS: Record<SensorType, string> = {
-  temperature: 'Temperature',
-  humidity: 'Humidity',
-  vibration: 'Vibration',
-  pressure: 'Pressure',
-  current: 'Current',
-  voltage: 'Voltage',
-  custom: 'Custom',
 }
 
 interface SensorReadingCardProps {
@@ -41,10 +32,10 @@ export function SensorReadingCard({
   threshold,
   className,
 }: SensorReadingCardProps) {
+  const { t } = useTranslation()
   const Icon = SENSOR_ICONS[sensorType] ?? Activity
-  const label = SENSOR_LABELS[sensorType] ?? sensorType
+  const label = t(`assets.sensor.types.${sensorType}`, { defaultValue: sensorType })
   const isAlert = threshold != null && value > threshold
-  const timeAgo = formatDistanceToNow(new Date(recordedAt), { addSuffix: true })
 
   return (
     <Card className={cn('transition-shadow', isAlert && 'border-red-300 dark:border-red-700', className)}>
@@ -65,11 +56,11 @@ export function SensorReadingCard({
           </div>
           {isAlert ? (
             <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/40 dark:text-red-300">
-              Alert
+              {t('assets.sensor.alert')}
             </span>
           ) : (
             <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/40 dark:text-green-300">
-              Normal ✓
+              {t('assets.sensor.normal')}
             </span>
           )}
         </div>
@@ -80,9 +71,9 @@ export function SensorReadingCard({
           <span className="ml-1 text-sm font-normal text-gray-500">{unit}</span>
         </p>
         {threshold != null && (
-          <p className="text-xs text-gray-400 dark:text-gray-500">Threshold: {threshold} {unit}</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">{t('assets.sensor.threshold', { value: threshold, unit })}</p>
         )}
-        <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">Updated {timeAgo}</p>
+        <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">{t('assets.sensor.updated', { when: timeAgo(recordedAt) })}</p>
       </CardContent>
     </Card>
   )

@@ -1,4 +1,5 @@
 import { Wrench, RefreshCw, Zap, Activity } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { formatDate } from '@/lib/localeFormat'
 
@@ -26,16 +27,17 @@ interface AssetTimelineProps {
 }
 
 export function AssetTimeline({ events, className }: AssetTimelineProps) {
+  const { t } = useTranslation()
   if (events.length === 0) {
     return (
       <div className="py-8 text-center text-sm text-gray-400 dark:text-gray-500">
-        No history yet.
+        {t('assets.timeline.empty')}
       </div>
     )
   }
 
   return (
-    <div className={cn('space-y-0', className)} aria-label="Asset maintenance history">
+    <div className={cn('space-y-0', className)} aria-label={t('assets.timeline.aria')}>
       {events.map((event, index) => {
         const { icon: Icon, color, bg } = EVENT_STYLES[event.type]
         const isLast = index === events.length - 1

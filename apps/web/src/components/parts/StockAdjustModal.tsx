@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -11,6 +12,7 @@ interface StockAdjustModalProps {
 }
 
 export function StockAdjustModal({ part, onClose }: StockAdjustModalProps) {
+  const { t } = useTranslation()
   const adjust = useAdjustStock(part.id)
   const [direction, setDirection] = useState<'add' | 'remove'>('add')
   const [quantity, setQuantity] = useState('')
@@ -18,21 +20,21 @@ export function StockAdjustModal({ part, onClose }: StockAdjustModalProps) {
   const [error, setError] = useState<string>()
 
   const amount = Number(quantity)
-  const unit = part.unit ?? 'each'
+  const unit = part.unit ?? t('parts.form.default_unit')
   const after = Number.isFinite(amount) && amount > 0 ? Number(part.quantity_on_hand) + (direction === 'add' ? amount : -amount) : null
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!(amount > 0)) return setError('Enter a quantity greater than zero.')
-    if (after != null && after < 0) return setError(`Only ${part.quantity_on_hand} ${unit} in stock.`)
+    if (!(amount > 0)) return setError(t('parts.adjust.quantity_positive'))
+    if (after != null && after < 0) return setError(t('parts.adjust.only_in_stock', { quantity: part.quantity_on_hand, unit }))
     setError(undefined)
     adjust.mutate({ quantity: amount, direction, reason: reason.trim() || undefined }, { onSuccess: onClose })
   }
 
   return (
-    <Modal open onClose={onClose} title={`Adjust stock: ${part.name}`} description={`${part.quantity_on_hand} ${unit} in stock now.`}>
+    <Modal open onClose={onClose} title={t('parts.adjust.title', { name: part.name })} description={t('parts.adjust.description', { quantity: part.quantity_on_hand, unit })}>
       <form onSubmit={submit} className="space-y-4" noValidate>
-        <div className="flex rounded-md border border-gray-300 dark:border-gray-600" role="radiogroup" aria-label="Direction">
+        <div className="flex rounded-md border border-gray-300 dark:border-gray-600" role="radiogroup" aria-label={t('parts.adjust.direction')}>
           {(['add', 'remove'] as const).map((d) => (
             <button
               key={d}
@@ -44,13 +46,13 @@ export function StockAdjustModal({ part, onClose }: StockAdjustModalProps) {
                 direction === d ? 'bg-brand-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300'
               }`}
             >
-              {d === 'add' ? 'Add stock' : 'Remove stock'}
+              {d === 'add' ? t('parts.adjust.add_stock') : t('parts.adjust.remove_stock')}
             </button>
           ))}
         </div>
         <Input
           id="adjust-quantity"
-          label={`Quantity (${unit})`}
+          label={t('parts.adjust.quantity', { unit })}
           type="number"
           step="any"
           min="0"
@@ -61,8 +63,8 @@ export function StockAdjustModal({ part, onClose }: StockAdjustModalProps) {
         />
         <Input
           id="adjust-reason"
-          label="Reason"
-          placeholder="Optional: delivery, stock count, damaged…"
+          label={t('parts.adjust.reason')}
+          placeholder={t('parts.adjust.reason_placeholder')}
           value={reason}
           onChange={(e) => setReason(e.target.value)}
         />
@@ -72,9 +74,9 @@ export function StockAdjustModal({ part, onClose }: StockAdjustModalProps) {
           </p>
         )}
         <div className="flex gap-2 pt-2">
-          <Button type="button" variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
+          <Button type="button" variant="outline" onClick={onClose} className="flex-1">{t('common.actions.cancel')}</Button>
           <Button type="submit" disabled={adjust.isPending} className="flex-1">
-            {adjust.isPending ? 'Saving…' : 'Save'}
+            {adjust.isPending ? t('common.actions.saving') : t('common.actions.save')}
           </Button>
         </div>
       </form>

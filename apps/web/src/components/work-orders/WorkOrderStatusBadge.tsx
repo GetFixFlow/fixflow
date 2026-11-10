@@ -1,3 +1,5 @@
+import { label } from '@/i18n'
+import { useTranslation } from 'react-i18next'
 import {
   Circle,
   UserCheck,
@@ -11,17 +13,6 @@ import {
 import { Badge, statusBadge } from '@/components/ui/Badge'
 import { cn } from '@/lib/utils'
 import type { WorkOrderStatus } from '@/types'
-
-const STATUS_LABELS: Record<WorkOrderStatus, string> = {
-  open: 'Open',
-  assigned: 'Assigned',
-  in_progress: 'In Progress',
-  on_hold: 'On Hold',
-  pending_parts: 'Pending Parts',
-  completed: 'Completed',
-  verified: 'Verified',
-  cancelled: 'Cancelled',
-}
 
 const STATUS_ICONS: Record<WorkOrderStatus, React.ElementType> = {
   open: Circle,
@@ -47,8 +38,9 @@ export function WorkOrderStatusBadge({
   showIcon = true,
   className,
 }: WorkOrderStatusBadgeProps) {
+  const { t } = useTranslation()
   const Icon = STATUS_ICONS[status]
-  const label = STATUS_LABELS[status] ?? status.replace('_', ' ')
+  const text = label('status', status)
 
   return (
     <Badge
@@ -59,10 +51,10 @@ export function WorkOrderStatusBadge({
         'gap-1',
         className,
       )}
-      aria-label={`Status: ${label}`}
+      aria-label={t('workOrders.badge.status', { status: text })}
     >
       {showIcon && <Icon className={cn('shrink-0', size === 'sm' ? 'h-2.5 w-2.5' : 'h-3 w-3')} />}
-      {label}
+      {text}
     </Badge>
   )
 }

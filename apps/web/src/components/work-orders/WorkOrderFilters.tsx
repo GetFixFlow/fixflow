@@ -1,3 +1,5 @@
+import { label as word } from '@/i18n'
+import { useTranslation } from 'react-i18next'
 import { Search, X, ChevronDown, Filter } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
@@ -28,17 +30,6 @@ const ALL_STATUSES: WorkOrderStatus[] = [
   'cancelled',
 ]
 
-const STATUS_LABELS: Record<WorkOrderStatus, string> = {
-  open: 'Open',
-  assigned: 'Assigned',
-  in_progress: 'In Progress',
-  on_hold: 'On Hold',
-  pending_parts: 'Pending Parts',
-  completed: 'Completed',
-  verified: 'Verified',
-  cancelled: 'Cancelled',
-}
-
 const ALL_PRIORITIES: Priority[] = ['critical', 'high', 'medium', 'low']
 
 interface FilterChipProps {
@@ -47,12 +38,13 @@ interface FilterChipProps {
 }
 
 function FilterChip({ label, onRemove }: FilterChipProps) {
+  const { t } = useTranslation()
   return (
     <span className="inline-flex items-center gap-1 rounded-full bg-brand-100 px-2.5 py-1 text-xs font-medium text-brand-800 dark:bg-brand-900/30 dark:text-brand-300">
       {label}
       <button
         onClick={onRemove}
-        aria-label={`Remove ${label} filter`}
+        aria-label={t('workOrders.filters.remove', { label })}
         className="rounded-full p-0.5 hover:bg-brand-200 dark:hover:bg-brand-800"
       >
         <X className="h-3 w-3" />
@@ -122,26 +114,27 @@ interface WorkOrderFiltersProps {
 }
 
 export function WorkOrderFilters({ filters, onChange, showAssigneeFilter = false }: WorkOrderFiltersProps) {
+  const { t } = useTranslation()
   const update = (partial: Partial<WorkOrderFilterState>) => onChange({ ...filters, ...partial })
 
   const activeChips: { label: string; onRemove: () => void }[] = []
 
   filters.statuses.forEach((s) => {
     activeChips.push({
-      label: `Status: ${STATUS_LABELS[s]}`,
+      label: t('workOrders.filters.status_chip', { status: word('status', s) }),
       onRemove: () => update({ statuses: filters.statuses.filter((x) => x !== s) }),
     })
   })
 
   filters.priorities.forEach((p) => {
     activeChips.push({
-      label: `Priority: ${p.charAt(0).toUpperCase() + p.slice(1)}`,
+      label: t('workOrders.filters.priority_chip', { priority: word('priority', p) }),
       onRemove: () => update({ priorities: filters.priorities.filter((x) => x !== p) }),
     })
   })
 
   if (filters.overdue_only) {
-    activeChips.push({ label: 'Overdue only', onRemove: () => update({ overdue_only: false }) })
+    activeChips.push({ label: t('workOrders.filters.overdue'), onRemove: () => update({ overdue_only: false }) })
   }
 
   const hasFilters =
@@ -158,24 +151,24 @@ export function WorkOrderFilters({ filters, onChange, showAssigneeFilter = false
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <Input
             className="pl-9"
-            placeholder="Search title, WO number, asset..."
+            placeholder={t('workOrders.filters.search')}
             value={filters.search}
             onChange={(e) => update({ search: e.target.value })}
           />
         </div>
 
         <MultiSelectDropdown
-          label="Status"
-          options={ALL_STATUSES.map((s) => ({ value: s, label: STATUS_LABELS[s] }))}
+          label={t('workOrders.filters.status')}
+          options={ALL_STATUSES.map((s) => ({ value: s, label: word('status', s) }))}
           selected={filters.statuses}
           onChange={(vals) => update({ statuses: vals as WorkOrderStatus[] })}
         />
 
         <MultiSelectDropdown
-          label="Priority"
+          label={t('workOrders.filters.priority')}
           options={ALL_PRIORITIES.map((p) => ({
             value: p,
-            label: p.charAt(0).toUpperCase() + p.slice(1),
+            label: word('priority', p),
           }))}
           selected={filters.priorities}
           onChange={(vals) => update({ priorities: vals as Priority[] })}
@@ -189,7 +182,7 @@ export function WorkOrderFilters({ filters, onChange, showAssigneeFilter = false
             className="h-4 w-4 rounded border-gray-300 text-brand-600"
           />
           <Filter className="h-3.5 w-3.5" />
-          Overdue only
+          {t('workOrders.filters.overdue')}
         </label>
       </div>
 
@@ -211,7 +204,7 @@ export function WorkOrderFilters({ filters, onChange, showAssigneeFilter = false
               }
               className="text-xs text-gray-500 underline hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
             >
-              Clear all filters
+              {t('workOrders.filters.clear')}
             </button>
           )}
         </div>

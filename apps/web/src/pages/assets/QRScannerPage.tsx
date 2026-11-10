@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import { Camera, AlertCircle, Link2, ScanLine, Search } from 'lucide-react'
 import { toast } from 'sonner'
+import { Trans, useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { LinkBarcodeModal } from '@/components/assets/LinkBarcodeModal'
@@ -30,20 +31,15 @@ const scanBox = (width: number, height: number) => ({
   height: Math.max(50, Math.floor(Math.min(width, height) * 0.5)),
 })
 
-const MATCH_LABELS: Record<string, string> = {
-  asset_tag: 'tag',
-  barcode: 'barcode',
-  serial_number: 'serial number',
-  label: 'label',
-  link: 'link',
-}
-
-/** "Matched the barcode and the serial number", for the list of assets a code could be. */
-const matchedOn = (match: LookupMatch) => match.matched_on.map((field) => MATCH_LABELS[field] ?? field).join(' and ')
-
 type Outcome = { code: string; matches: LookupMatch[] } | { code: string; failed: true }
 
 export function QRScannerPage() {
+  const { t } = useTranslation()
+  /** "the barcode and the serial number", for the list of assets a code could be. */
+  const matchedOn = (match: LookupMatch) => {
+    const names = match.matched_on.map((field) => t(`assets.scanner.match.${field}`, { defaultValue: field }))
+    return names.length > 1 ? names.slice(0, -1).join(', ') + t('assets.scanner.and') + names[names.length - 1] : names.join('')
+  }
   const navigate = useNavigate()
   const role = useAuthStore((s) => s.user?.role)
   const canLink = role === 'admin' || role === 'manager'
@@ -168,52 +164,54 @@ export function QRScannerPage() {
           {state === 'permission_denied' && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl bg-gray-800 p-6 text-center">
               <AlertCircle className="h-10 w-10 text-red-400" />
-              <p className="text-sm text-gray-300">Camera access was denied.</p>
+              <p className="text-sm text-gray-300">{t('assets.scanner.denied')}</p>
               <p className="text-xs text-gray-500">
-                Enable camera permissions in your browser settings, or type the code below.
+                {t('assets.scanner.denied_help')}
               </p>
             </div>
           )}
           {state === 'not_supported' && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl bg-gray-800 p-6 text-center">
               <AlertCircle className="h-10 w-10 text-yellow-400" />
-              <p className="text-sm text-gray-300">Camera not available.</p>
-              <p className="text-xs text-gray-500">Type or scan the code below.</p>
+              <p className="text-sm text-gray-300">{t('assets.scanner.no_camera')}</p>
+              <p className="text-xs text-gray-500">{t('assets.scanner.no_camera_help')}</p>
             </div>
           )}
           {state === 'error' && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl bg-gray-800 p-6 text-center">
               <AlertCircle className="h-10 w-10 text-red-400" />
-              <p className="text-sm text-gray-300">Scanner error.</p>
+              <p className="text-sm text-gray-300">{t('assets.scanner.error')}</p>
               <p className="text-xs text-gray-500">{errorMsg}</p>
-              <Button size="sm" onClick={startScanner}>Try again</Button>
+              <Button size="sm" onClick={startScanner}>{t('assets.scanner.try_again')}</Button>
             </div>
           )}
         </div>
 
         {state === 'scanning' && (
-          <p className="text-center text-sm text-gray-400">Point the camera at a QR code or a barcode</p>
+          <p className="text-center text-sm text-gray-400">{t('assets.scanner.point')}</p>
         )}
-        {state === 'looking' && <p role="status" className="text-center text-sm text-gray-400">Looking it up…</p>}
+        {state === 'looking' && <p role="status" className="text-center text-sm text-gray-400">{t('assets.scanner.looking')}</p>}
 
         {/* What the scan found, when it was not exactly one asset */}
         {outcome && 'failed' in outcome && (
           <div role="alert" className="w-full space-y-3 rounded-xl bg-gray-800 p-4 text-center">
-            <p className="text-sm text-gray-200">Could not look up {outcome.code}. Check the connection and try again.</p>
-            <Button size="sm" onClick={() => void resolve(outcome.code)}>Try again</Button>
+            <p className="text-sm text-gray-200">{t('assets.scanner.lookup_failed', { code: outcome.code })}</p>
+            <Button size="sm" onClick={() => void resolve(outcome.code)}>{t('assets.scanner.try_again')}</Button>
           </div>
         )}
         {outcome && 'matches' in outcome && outcome.matches.length === 0 && (
           <div role="alert" className="w-full space-y-3 rounded-xl bg-gray-800 p-4 text-center">
-            <p className="text-sm text-gray-200">No asset has the code <span className="break-all font-mono">{outcome.code}</span>.</p>
+            <p className="text-sm text-gray-200">
+              <Trans i18nKey="assets.scanner.none" values={{ code: outcome.code }} components={{ code: <span className="break-all font-mono" /> }} />
+            </p>
             <div className="flex flex-wrap justify-center gap-2">
-              <Button size="sm" onClick={scanAgain}>Scan again</Button>
+              <Button size="sm" onClick={scanAgain}>{t('assets.scanner.scan_again')}</Button>
               <Button size="sm" variant="outline" asChild>
-                <Link to={`/assets?search=${encodeURIComponent(outcome.code)}`}><Search className="h-4 w-4" />Search assets</Link>
+                <Link to={`/assets?search=${encodeURIComponent(outcome.code)}`}><Search className="h-4 w-4" />{t('assets.scanner.search_assets')}</Link>
               </Button>
               {canLink && outcome.code.length <= 64 && (
                 <Button size="sm" variant="outline" onClick={() => setLinking(outcome.code)}>
-                  <Link2 className="h-4 w-4" />Link it to an asset
+                  <Link2 className="h-4 w-4" />{t('assets.scanner.link_it')}
                 </Button>
               )}
             </div>
@@ -222,7 +220,7 @@ export function QRScannerPage() {
         {outcome && 'matches' in outcome && outcome.matches.length > 1 && (
           <div className="w-full space-y-2 rounded-xl bg-gray-800 p-4">
             <p className="text-sm text-gray-200">
-              More than one asset has the code <span className="break-all font-mono">{outcome.code}</span>. Which one?
+              <Trans i18nKey="assets.scanner.many" values={{ code: outcome.code }} components={{ code: <span className="break-all font-mono" /> }} />
             </p>
             <ul className="space-y-1">
               {outcome.matches.map((match) => (
@@ -233,30 +231,30 @@ export function QRScannerPage() {
                   >
                     <span className="block text-sm font-medium">{match.name}</span>
                     <span className="block text-xs text-gray-400">
-                      {match.asset_tag}{match.location ? `, ${match.location}` : ''}. Matched the {matchedOn(match)}.
+                      {t('assets.scanner.matched', { tag: match.asset_tag, place: match.location ? `, ${match.location}` : '', on: matchedOn(match) })}
                     </span>
                   </button>
                 </li>
               ))}
             </ul>
-            <Button size="sm" variant="outline" onClick={scanAgain}>Scan again</Button>
+            <Button size="sm" variant="outline" onClick={scanAgain}>{t('assets.scanner.scan_again')}</Button>
           </div>
         )}
 
         {/* Typing, or a handheld scanner: it types the code and presses Enter */}
         <form onSubmit={submitTyped} className="w-full space-y-2">
-          <label htmlFor="scan-code" className="block text-sm text-gray-400">Or type or scan a code</label>
+          <label htmlFor="scan-code" className="block text-sm text-gray-400">{t('assets.scanner.type_label')}</label>
           <Input
             id="scan-code"
             value={typed}
             onChange={(e) => setTyped(e.target.value)}
-            placeholder="Asset tag, barcode or serial number"
+            placeholder={t('assets.scanner.type_placeholder')}
             autoFocus={hasPointer}
             autoComplete="off"
             className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-500"
           />
           <Button type="submit" className="w-full" disabled={!typed.trim() || state === 'looking'}>
-            Look up
+            {t('assets.scanner.look_up')}
           </Button>
         </form>
       </div>
@@ -266,7 +264,7 @@ export function QRScannerPage() {
           code={linking}
           onClose={() => setLinking(null)}
           onLinked={(assetId) => {
-            toast.success('Linked. Scanning it will now open this asset.')
+            toast.success(t('assets.scanner.linked'))
             navigate(`/assets/${assetId}`)
           }}
         />

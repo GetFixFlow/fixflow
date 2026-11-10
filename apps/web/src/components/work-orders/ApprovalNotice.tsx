@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { ShieldAlert, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { useApproval } from '@/hooks/useWorkOrders'
@@ -15,6 +16,7 @@ interface ApprovalNoticeProps {
  * it. Says so to everyone; gives the managers the cost and the button, and the person doing the work a way to ask.
  */
 export function ApprovalNotice({ wo, userId, isManager }: ApprovalNoticeProps) {
+  const { t } = useTranslation()
   const { approve, request } = useApproval()
   const mine = wo.assignee_id === userId
   const canApprove = isManager && !mine
@@ -24,8 +26,9 @@ export function ApprovalNotice({ wo, userId, isManager }: ApprovalNoticeProps) {
     return (
       <p className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
         <ShieldCheck className="h-4 w-4 text-green-600" aria-hidden />
-        Approved by {wo.approved_by.full_name} on {formatDate(wo.approved_at)}
-        {wo.approved_cost != null && ` for a cost of up to ${formatMoney(wo.approved_cost)}`}.
+        {wo.approved_cost != null
+          ? t('workOrders.approval.approved_cost', { name: wo.approved_by.full_name, date: formatDate(wo.approved_at), cost: formatMoney(wo.approved_cost) })
+          : t('workOrders.approval.approved', { name: wo.approved_by.full_name, date: formatDate(wo.approved_at) })}
       </p>
     )
   }
@@ -36,20 +39,19 @@ export function ApprovalNotice({ wo, userId, isManager }: ApprovalNoticeProps) {
       <div className="flex items-start gap-2">
         <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
         <div>
-          <p className="font-medium">Needs a manager&apos;s approval before it can be {next}.</p>
+          <p className="font-medium">{t(`workOrders.approval.needs_${next}`)}</p>
           <p>
-            It costs more than the company&apos;s approval limit
-            {isManager && wo.expected_cost != null && ` (expected ${formatMoney(wo.expected_cost)})`}.
-            {wo.approval_requested_at && ` The managers were asked on ${formatDate(wo.approval_requested_at)}.`}
+            {t('workOrders.approval.limit', { expected: isManager && wo.expected_cost != null ? t('workOrders.approval.expected', { cost: formatMoney(wo.expected_cost) }) : '' })}
+            {wo.approval_requested_at && ` ${t('workOrders.approval.asked', { date: formatDate(wo.approval_requested_at) })}`}
           </p>
-          {isManager && mine && <p>Another manager has to approve work you are doing yourself.</p>}
+          {isManager && mine && <p>{t('workOrders.approval.another')}</p>}
         </div>
       </div>
       {canApprove && (
-        <Button size="sm" onClick={() => approve.mutate(wo.id)} loading={approve.isPending}>Approve</Button>
+        <Button size="sm" onClick={() => approve.mutate(wo.id)} loading={approve.isPending}>{t('workOrders.approval.approve')}</Button>
       )}
       {!canApprove && mine && !wo.approval_requested_at && (
-        <Button size="sm" variant="outline" onClick={() => request.mutate(wo.id)} loading={request.isPending}>Ask a manager</Button>
+        <Button size="sm" variant="outline" onClick={() => request.mutate(wo.id)} loading={request.isPending}>{t('workOrders.approval.ask')}</Button>
       )}
     </div>
   )

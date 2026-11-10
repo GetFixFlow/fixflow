@@ -1,6 +1,7 @@
 import { Component, type ReactNode } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { t } from '@/i18n'
 
 interface Props { children: ReactNode }
 interface State { hasError: boolean; message?: string }
@@ -25,10 +26,10 @@ export class ErrorBoundary extends Component<Props, State> {
                 <AlertTriangle className="h-10 w-10 text-red-600" />
               </div>
             </div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Something went wrong</h1>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t('shell.error.title')}</h1>
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{this.state.message}</p>
             <Button className="mt-6" onClick={() => window.location.reload()}>
-              Reload page
+              {t('shell.error.reload')}
             </Button>
           </div>
         </div>

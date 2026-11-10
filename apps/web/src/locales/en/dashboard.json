@@ -1,0 +1,72 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "overview": "Overview of your maintenance operations",
+    "welcome": "Welcome back, {{name}}",
+    "happening": "Here's what's happening with your maintenance operations",
+    "open_wo": "Open Work Orders",
+    "n_overdue": "{{count}} overdue",
+    "asset_health": "Asset Health",
+    "n_operational": "{{operational}} of {{total}} operational",
+    "pm_compliance": "PM Compliance",
+    "n_overdue_schedules": "{{count}} overdue schedules",
+    "iot_alerts": "IoT Alerts",
+    "n_critical": "{{count}} critical",
+    "completed_week": "Completed this week",
+    "due_week": "Due this week (PM)",
+    "in_progress": "In progress",
+    "asset_breakdown": "Asset Status Breakdown",
+    "recent": "Recent Activity",
+    "no_activity": "No recent activity",
+    "asset_overview": "Asset Status Overview",
+    "start": {
+      "confirm_remove": "Remove the sample data? Anything you added yourself stays. Sample items you have since built on are kept.",
+      "sample_note": "Some of what you see is sample data (named “Sample: …”), there to look around in.",
+      "removing": "Removing…",
+      "remove": "Remove sample data",
+      "title": "Getting started",
+      "intro": "Three things to do first. They tick off as you do them.",
+      "dismiss": "Put this away",
+      "done": "Done",
+      "not_done": "Not done yet",
+      "go": "Go",
+      "import": "Import from a spreadsheet",
+      "adding": "Adding…",
+      "add": "Add sample data to look around",
+      "steps": {
+        "assets": {
+          "title": "Add your equipment",
+          "description": "Add an asset, or import a spreadsheet of them."
+        },
+        "work_order": {
+          "title": "Create a work order",
+          "description": "Log a job, assign it, and follow it to completion."
+        },
+        "team": {
+          "title": "Invite your team",
+          "description": "Technicians, managers and requesters each see what they need."
+        }
+      }
+    },
+    "tech": {
+      "description": "Your work orders and upcoming maintenance",
+      "assigned": "Assigned to me",
+      "waiting": "waiting to be started",
+      "overdue": "Overdue",
+      "past_due": "open and past the due date",
+      "completed_today": "Completed today",
+      "see": "See my work orders →",
+      "upcoming": "Upcoming maintenance",
+      "nothing": "Nothing is scheduled for you",
+      "no_date": "No date",
+      "recent": "Your recent activity"
+    },
+    "req": {
+      "description": "How your requests are going",
+      "mine": "My requests",
+      "open": "Still open",
+      "not_finished": "not finished yet",
+      "see": "See my requests →"
+    }
+  }
+}

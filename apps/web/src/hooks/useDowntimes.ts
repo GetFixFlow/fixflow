@@ -3,6 +3,7 @@ import type { AxiosError } from 'axios'
 import { toast } from 'sonner'
 import { downtimesApi, type DowntimeInput } from '@/api/downtimes'
 import { ASSETS_KEY } from '@/hooks/useAssets'
+import { t } from '@/i18n'
 
 export const DOWNTIME_KEY = 'downtimes'
 
@@ -35,14 +36,14 @@ function useRefreshing<TArgs>(fn: (args: TArgs) => Promise<unknown>, success: st
 }
 
 export const useRecordDowntime = (assetId: number) =>
-  useRefreshing((data: DowntimeInput) => downtimesApi.create(assetId, data), 'Downtime recorded.', 'Could not record the downtime.')
+  useRefreshing((data: DowntimeInput) => downtimesApi.create(assetId, data), t('assets.toasts.downtime_recorded'), t('assets.toasts.downtime_record_failed'))
 
 export const useRestart = () =>
-  useRefreshing(({ id, endedAt }: { id: number; endedAt?: string }) => downtimesApi.restart(id, endedAt), 'Back in service.',
-    'Could not restart the asset.')
+  useRefreshing(({ id, endedAt }: { id: number; endedAt?: string }) => downtimesApi.restart(id, endedAt), t('assets.toasts.back_in_service'),
+    t('assets.toasts.restart_failed'))
 
 export const useUpdateDowntime = (id: number) =>
-  useRefreshing((data: DowntimeInput) => downtimesApi.update(id, data), 'Downtime updated.', 'Could not update the downtime.')
+  useRefreshing((data: DowntimeInput) => downtimesApi.update(id, data), t('assets.toasts.downtime_updated'), t('assets.toasts.downtime_update_failed'))
 
 export const useDeleteDowntime = () =>
-  useRefreshing((id: number) => downtimesApi.destroy(id), 'Downtime deleted.', 'Could not delete the downtime.')
+  useRefreshing((id: number) => downtimesApi.destroy(id), t('assets.toasts.downtime_deleted'), t('assets.toasts.downtime_delete_failed'))

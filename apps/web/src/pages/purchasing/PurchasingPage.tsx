@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Plus, Search, ShoppingCart } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
@@ -13,16 +14,17 @@ import { useAuthStore } from '@/stores/authStore'
 import { formatDate, formatMoney } from '@/lib/localeFormat'
 import type { PurchaseOrderStatus } from '@/types'
 
-const TABS: { label: string; statuses?: PurchaseOrderStatus[] }[] = [
-  { label: 'Open', statuses: ['requested', 'approved', 'ordered', 'partially_received'] },
-  { label: 'Waiting for approval', statuses: ['requested'] },
-  { label: 'On order', statuses: ['ordered', 'partially_received'] },
-  { label: 'Done', statuses: ['received', 'rejected', 'cancelled'] },
-  { label: 'All' },
+const TABS: { id: string; statuses?: PurchaseOrderStatus[] }[] = [
+  { id: 'open', statuses: ['requested', 'approved', 'ordered', 'partially_received'] },
+  { id: 'waiting', statuses: ['requested'] },
+  { id: 'on_order', statuses: ['ordered', 'partially_received'] },
+  { id: 'done', statuses: ['received', 'rejected', 'cancelled'] },
+  { id: 'all' },
 ]
 
 /** Requests for parts and the orders that follow: ask, approve, order, receive. */
 export function PurchasingPage() {
+  const { t } = useTranslation()
   const user = useAuthStore((s) => s.user)
   const canManage = user?.role === 'admin' || user?.role === 'manager'
 
@@ -43,28 +45,28 @@ export function PurchasingPage() {
   return (
     <div className="space-y-4">
       <PageHeader
-        title="Purchasing"
-        description={waiting > 0 ? `${waiting} waiting for your decision` : 'Requests for parts, and the orders that follow'}
-        actions={<Button size="sm" onClick={() => setAsking(true)}><Plus className="h-4 w-4" />Ask for parts</Button>}
+        title={t('purchasing.page.title')}
+        description={waiting > 0 ? t('purchasing.page.waiting', { count: waiting }) : t('purchasing.page.subtitle')}
+        actions={<Button size="sm" onClick={() => setAsking(true)}><Plus className="h-4 w-4" />{t('purchasing.page.ask')}</Button>}
       />
 
       <div className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
-        <div role="tablist" aria-label="Show" className="flex flex-wrap gap-1">
-          {TABS.map((t, i) => (
+        <div role="tablist" aria-label={t('purchasing.page.show')} className="flex flex-wrap gap-1">
+          {TABS.map((item, i) => (
             <button
-              key={t.label} type="button" role="tab" aria-selected={tab === i}
+              key={item.id} type="button" role="tab" aria-selected={tab === i}
               onClick={() => { setTab(i); setPage(1) }}
               className={`rounded-md px-3 py-1.5 text-sm ${tab === i ? 'bg-brand-600 text-white' : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'}`}
             >
-              {t.label}
-              {t.label === 'Waiting for approval' && canManage && waiting > 0 ? ` (${waiting})` : ''}
+              {t(`purchasing.page.tab_${item.id}`)}
+              {item.id === 'waiting' && canManage && waiting > 0 ? ` (${waiting})` : ''}
             </button>
           ))}
         </div>
         <div className="relative min-w-[200px] flex-1">
           <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
           <input
-            type="search" value={search} aria-label="Search purchase orders" placeholder="Search by number or reason"
+            type="search" value={search} aria-label={t('purchasing.page.search_aria')} placeholder={t('purchasing.page.search_placeholder')}
             onChange={(e) => { setSearch(e.target.value); setPage(1) }}
             className="h-9 w-full rounded-md border border-gray-300 bg-white pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
           />
@@ -74,21 +76,21 @@ export function PurchasingPage() {
       {isLoading ? (
         <div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
       ) : isError ? (
-        <EmptyState icon={ShoppingCart} title="The orders could not be loaded" action={{ label: 'Try again', onClick: () => refetch() }} />
+        <EmptyState icon={ShoppingCart} title={t('purchasing.page.load_failed')} action={{ label: t('common.actions.retry'), onClick: () => refetch() }} />
       ) : orders.length === 0 ? (
         <EmptyState
           icon={ShoppingCart}
-          title={filtered ? 'Nothing here' : 'No requests yet'}
-          description={filtered ? 'Try a different tab or search.' : 'When a part runs low, ask for more here. A manager approves it and orders it.'}
-          action={!filtered ? { label: 'Ask for parts', onClick: () => setAsking(true) } : undefined}
+          title={filtered ? t('purchasing.page.nothing') : t('purchasing.page.no_requests')}
+          description={filtered ? t('purchasing.page.try_different') : t('purchasing.page.empty')}
+          action={!filtered ? { label: t('purchasing.page.ask'), onClick: () => setAsking(true) } : undefined}
         />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-700/50">
               <tr>
-                {['Number', 'Asked by', 'Parts', 'Vendor', 'Total', 'Asked on', 'Status'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{h}</th>
+                {['number', 'asked_by', 'parts', 'vendor', 'total', 'asked_on', 'status'].map((h) => (
+                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t(`purchasing.page.col_${h}`)}</th>
                 ))}
               </tr>
             </thead>
@@ -115,10 +117,10 @@ export function PurchasingPage() {
 
       {meta && meta.total_pages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">Page {meta.current_page} of {meta.total_pages}</p>
+          <p className="text-sm text-gray-500">{t('purchasing.page.page_of', { page: meta.current_page, pages: meta.total_pages })}</p>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Previous</Button>
-            <Button variant="outline" size="sm" disabled={page >= meta.total_pages} onClick={() => setPage((p) => p + 1)}>Next</Button>
+            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>{t('assets.list.previous')}</Button>
+            <Button variant="outline" size="sm" disabled={page >= meta.total_pages} onClick={() => setPage((p) => p + 1)}>{t('assets.list.next')}</Button>
           </div>
         </div>
       )}

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Input } from '@/components/ui/Input'
 import type { CustomInputValues } from '@/lib/customFields'
 import type { CustomField } from '@/types/customFields'
@@ -18,6 +19,7 @@ const SELECT_CLASS =
 
 /** One input for each custom field: text, number, date, a choice list or a yes/no box. */
 export function CustomFieldInputs({ fields, values, onChange, errors = {}, idPrefix = 'cf' }: CustomFieldInputsProps) {
+  const { t } = useTranslation()
   const set = (key: string, value: string | boolean) => onChange({ ...values, [key]: value })
 
   return (
@@ -53,7 +55,7 @@ export function CustomFieldInputs({ fields, values, onChange, errors = {}, idPre
                 onChange={(e) => set(field.key, e.target.value)}
                 className={SELECT_CLASS}
               >
-                <option value="">{field.required ? 'Choose…' : '—'}</option>
+                <option value="">{field.required ? t('workOrders.custom.choose') : '—'}</option>
                 {field.options.map((option) => <option key={option} value={option}>{option}</option>)}
                 {/* A choice that was removed since this record was filled in stays selectable until it is changed. */}
                 {typeof value === 'string' && value !== '' && !field.options.includes(value) && <option value={value}>{value}</option>}

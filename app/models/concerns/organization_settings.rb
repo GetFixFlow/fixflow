@@ -16,10 +16,11 @@ module OrganizationSettings
   NUMBER_FORMATS = ["1,234.56", "1.234,56", "1 234.56", "1 234,56"].freeze
   DAYS_OF_WEEK = %w[monday sunday].freeze
   # The settings shown on the Localization screen.
-  LOCALIZATION_KEYS = %w[timezone date_format time_format currency number_format first_day_of_week].freeze
+  LOCALIZATION_KEYS = %w[language timezone date_format time_format currency number_format first_day_of_week].freeze
 
   DEFAULTS = {
     "industry" => "", "size" => "", "website" => "", "address" => "",
+    "language" => "en", # the language of the screens and emails for people who have not chosen their own
     "timezone" => "UTC",
     "date_format" => "MMM D, YYYY",
     "time_format" => "12h",
@@ -72,6 +73,11 @@ module OrganizationSettings
   # What a work order may cost before a manager has to approve it; 0 when nothing needs approving.
   def approval_limit = BigDecimal(settings_with_defaults["approval_limit"].to_s)
   def default_due_days = settings_with_defaults["default_due_days"].to_i
+
+  def language
+    code = settings_with_defaults["language"].to_s
+    Locales.available?(code) ? code : Locales.default
+  end
 
   def timezone_or_default
     zone = settings_with_defaults["timezone"].to_s

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { parseISO } from 'date-fns'
@@ -12,13 +13,11 @@ import { formatDate, weekStartsOn } from '@/lib/localeFormat'
 import { moveRequest, rangeFor, step, type ViewMode } from '@/lib/scheduleView'
 import type { ScheduledOrder } from '@/types/schedule'
 
-const MODES: { id: ViewMode; label: string }[] = [
-  { id: 'day', label: 'Day' },
-  { id: 'week', label: 'Week' },
-]
+const MODES: ViewMode[] = ['day', 'week']
 
 /** Who is doing what, and when, with the days that hold more than a day's work picked out. Drag work to move it. */
 export function SchedulePage() {
+  const { t } = useTranslation()
   const [mode, setMode] = useState<ViewMode>('week')
   const [anchor, setAnchor] = useState(() => new Date())
   const [picked, setPicked] = useState<ScheduledOrder | null>(null)
@@ -33,37 +32,37 @@ export function SchedulePage() {
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Schedule" description="Drag a work order to another person or day, or use its move button." />
+      <PageHeader title={t('schedule.title')} description={t('schedule.description')} />
 
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-1">
-          <Button variant="outline" size="icon" onClick={() => setAnchor((a) => step(mode, a, -1))} aria-label={`Previous ${mode}`}>
+          <Button variant="outline" size="icon" onClick={() => setAnchor((a) => step(mode, a, -1))} aria-label={t(`schedule.previous_${mode}`)}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setAnchor(new Date())}>Today</Button>
-          <Button variant="outline" size="icon" onClick={() => setAnchor((a) => step(mode, a, 1))} aria-label={`Next ${mode}`}>
+          <Button variant="outline" size="sm" onClick={() => setAnchor(new Date())}>{t('workOrders.due.today')}</Button>
+          <Button variant="outline" size="icon" onClick={() => setAnchor((a) => step(mode, a, 1))} aria-label={t(`schedule.next_${mode}`)}>
             <ChevronRight className="h-4 w-4" />
           </Button>
           <h2 className="ml-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
             {from === to ? formatDate(parseISO(from)) : `${formatDate(parseISO(from))} – ${formatDate(parseISO(to))}`}
           </h2>
         </div>
-        <div className="flex gap-1" role="group" aria-label="View">
-          {MODES.map(({ id, label }) => (
+        <div className="flex gap-1" role="group" aria-label={t('schedule.view')}>
+          {MODES.map((id) => (
             <Button key={id} size="sm" variant={mode === id ? 'secondary' : 'ghost'} aria-pressed={mode === id} onClick={() => setMode(id)}>
-              {label}
+              {t(`schedule.mode_${id}`)}
             </Button>
           ))}
         </div>
       </div>
 
-      {isError && !schedule && <p role="alert" className="text-sm text-red-600">The schedule could not be loaded.</p>}
+      {isError && !schedule && <p role="alert" className="text-sm text-red-600">{t('schedule.load_failed')}</p>}
       {isLoading && <Skeleton className="h-64 w-full" />}
       {schedule && (
         <>
           <OverloadSummary schedule={schedule} />
           {schedule.truncated && (
-            <p className="text-sm text-amber-700 dark:text-amber-400">There is more work than can be listed here. Filter the work orders list to see the rest.</p>
+            <p className="text-sm text-amber-700 dark:text-amber-400">{t('schedule.truncated')}</p>
           )}
           <ScheduleGrid schedule={schedule} mode={mode} onMove={move} onPick={setPicked} />
         </>

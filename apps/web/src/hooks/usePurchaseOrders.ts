@@ -2,6 +2,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import type { AxiosError } from 'axios'
 import { toast } from 'sonner'
 import { purchaseOrdersApi, type PurchaseLineInput, type PurchaseOrderInput, type PurchaseOrderListParams } from '@/api/purchaseOrders'
+import { t } from '@/i18n'
 
 /** One page of the purchase requests and orders, with how many are waiting for a decision (managers only). */
 export function usePurchaseOrderList(params: PurchaseOrderListParams) {
@@ -42,39 +43,39 @@ function useRefreshing<TArgs>(fn: (args: TArgs) => Promise<unknown>, success: st
 export const useCreatePurchaseOrder = () =>
   useRefreshing(
     (args: { order: PurchaseOrderInput; lines: PurchaseLineInput[] }) => purchaseOrdersApi.create(args.order, args.lines),
-    'Request sent.',
-    'Could not send the request.',
+    t('purchasing.toasts.sent'),
+    t('purchasing.toasts.send_failed'),
   )
 
 export const useUpdatePurchaseOrder = (id: number) =>
   useRefreshing(
     (args: { order: PurchaseOrderInput; lines: PurchaseLineInput[] }) => purchaseOrdersApi.update(id, args.order, args.lines),
-    'Request updated.',
-    'Could not update the request.',
+    t('purchasing.toasts.updated'),
+    t('purchasing.toasts.update_failed'),
   )
 
 export const useApprovePurchaseOrder = (id: number) =>
-  useRefreshing(() => purchaseOrdersApi.approve(id), 'Approved.', 'Could not approve it.')
+  useRefreshing(() => purchaseOrdersApi.approve(id), t('purchasing.toasts.approved'), t('purchasing.toasts.approve_failed'))
 
 export const useRejectPurchaseOrder = (id: number) =>
-  useRefreshing((reason: string) => purchaseOrdersApi.reject(id, reason), 'Turned down.', 'Could not turn it down.')
+  useRefreshing((reason: string) => purchaseOrdersApi.reject(id, reason), t('purchasing.toasts.rejected'), t('purchasing.toasts.reject_failed'))
 
 export const usePlaceOrder = (id: number) =>
   useRefreshing(
     (details: Parameters<typeof purchaseOrdersApi.order>[1]) => purchaseOrdersApi.order(id, details),
-    'Marked as ordered.',
-    'Could not place the order.',
+    t('purchasing.toasts.ordered'),
+    t('purchasing.toasts.order_failed'),
   )
 
 export const useReceiveOrder = (id: number) =>
   useRefreshing(
     (lines: Parameters<typeof purchaseOrdersApi.receive>[1]) => purchaseOrdersApi.receive(id, lines),
-    'Received. The stock is updated.',
-    'Could not record the delivery.',
+    t('purchasing.toasts.received'),
+    t('purchasing.toasts.receive_failed'),
   )
 
 export const useCloseOrder = (id: number) =>
-  useRefreshing(() => purchaseOrdersApi.close(id), 'Closed.', 'Could not close it.')
+  useRefreshing(() => purchaseOrdersApi.close(id), t('purchasing.toasts.closed'), t('purchasing.toasts.close_failed'))
 
 export const useCancelOrder = (id: number) =>
-  useRefreshing(() => purchaseOrdersApi.cancel(id), 'Cancelled.', 'Could not cancel it.')
+  useRefreshing(() => purchaseOrdersApi.cancel(id), t('purchasing.toasts.cancelled'), t('purchasing.toasts.cancel_failed'))

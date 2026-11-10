@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom'
 import { server } from './server'
+import i18n from '@/i18n'
 import { beforeAll, afterEach, afterAll, vi } from 'vitest'
 
 // Polyfill missing DOM methods
@@ -35,6 +36,7 @@ beforeAll(() => server.listen({
 }))
 afterEach(() => {
   server.resetHandlers()
+  if (i18n.language !== 'en') void i18n.changeLanguage('en') // a test that chose another language does not leak it
   if (unmocked.length > 0) {
     throw new Error(`No mock handler for: ${unmocked.splice(0).join(', ')}. Add one with server.use(...) in the test.`)
   }

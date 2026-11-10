@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import { label as statusLabel } from '@/i18n'
 import type { AssetStatus } from '@/types'
 
 const STATUS_COLOR: Record<AssetStatus, string> = {
@@ -6,13 +7,6 @@ const STATUS_COLOR: Record<AssetStatus, string> = {
   degraded: 'bg-yellow-500',
   down: 'bg-red-500',
   decommissioned: 'bg-gray-400',
-}
-
-const STATUS_LABEL: Record<AssetStatus, string> = {
-  operational: 'Operational',
-  degraded: 'Degraded',
-  down: 'Down',
-  decommissioned: 'Decommissioned',
 }
 
 interface AssetHealthIndicatorProps {
@@ -27,7 +21,7 @@ export function AssetHealthIndicator({
   className,
 }: AssetHealthIndicatorProps) {
   const color = STATUS_COLOR[status] ?? 'bg-gray-400'
-  const label = STATUS_LABEL[status] ?? status
+  const label = statusLabel('status', status)
 
   if (variant === 'dot') {
     return (

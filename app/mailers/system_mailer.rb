@@ -4,6 +4,6 @@ class SystemMailer < ApplicationMailer
   # Sent from Settings to check that the mail server works.
   def test_email(recipient, from:)
     @recipient = recipient
-    mail(to: recipient.email, from: from)
+    in_language_of(recipient) { mail(to: recipient.email, from: from, subject: t(".subject")) }
   end
 end

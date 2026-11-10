@@ -1,14 +1,9 @@
+import { label } from '@/i18n'
+import { useTranslation } from 'react-i18next'
 import { Flame, ChevronUp, Minus, ChevronDown } from 'lucide-react'
 import { Badge, priorityBadge } from '@/components/ui/Badge'
 import { cn } from '@/lib/utils'
 import type { Priority } from '@/types'
-
-const PRIORITY_LABELS: Record<Priority, string> = {
-  critical: 'Critical',
-  high: 'High',
-  medium: 'Medium',
-  low: 'Low',
-}
 
 const PRIORITY_ICONS: Record<Priority, React.ElementType> = {
   critical: Flame,
@@ -30,8 +25,9 @@ export function WorkOrderPriorityBadge({
   showIcon = true,
   className,
 }: WorkOrderPriorityBadgeProps) {
+  const { t } = useTranslation()
   const Icon = PRIORITY_ICONS[priority]
-  const label = PRIORITY_LABELS[priority] ?? priority
+  const text = label('priority', priority)
 
   return (
     <Badge
@@ -42,10 +38,10 @@ export function WorkOrderPriorityBadge({
         'gap-1 uppercase tracking-wide',
         className,
       )}
-      aria-label={`Priority: ${label}`}
+      aria-label={t('workOrders.badge.priority', { priority: text })}
     >
       {showIcon && <Icon className={cn('shrink-0', size === 'sm' ? 'h-2.5 w-2.5' : 'h-3 w-3')} />}
-      {label}
+      {text}
     </Badge>
   )
 }

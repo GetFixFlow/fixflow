@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AlertTriangle, CirclePlay, OctagonX, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -16,6 +17,7 @@ const LABEL = 'mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300'
 
 /** It stopped: now, earlier today, or a stop that is over (when it ran again is filled in). */
 function StoppedModal({ assetId, open, onClose }: { assetId: number; open: boolean; onClose: () => void }) {
+  const { t } = useTranslation()
   const record = useRecordDowntime(assetId)
   const [startedAt, setStartedAt] = useState(() => toInputValue(new Date()))
   const [endedAt, setEndedAt] = useState('')
@@ -28,25 +30,25 @@ function StoppedModal({ assetId, open, onClose }: { assetId: number; open: boole
     )
 
   return (
-    <Modal open={open} onClose={onClose} title="It stopped"
-      description="Leave 'Running again' empty if it is down now. Fill it in to record a stop that is already over.">
+    <Modal open={open} onClose={onClose} title={t('assets.downtime.stopped_title')}
+      description={t('assets.downtime.stopped_description')}>
       <div className="space-y-3">
         <div>
-          <label htmlFor="downtime-started" className={LABEL}>Stopped</label>
+          <label htmlFor="downtime-started" className={LABEL}>{t('assets.downtime.stopped')}</label>
           <Input id="downtime-started" type="datetime-local" value={startedAt} onChange={(e) => setStartedAt(e.target.value)} />
         </div>
         <div>
-          <label htmlFor="downtime-ended" className={LABEL}>Running again (optional)</label>
+          <label htmlFor="downtime-ended" className={LABEL}>{t('assets.downtime.running_again_optional')}</label>
           <Input id="downtime-ended" type="datetime-local" value={endedAt} onChange={(e) => setEndedAt(e.target.value)} />
         </div>
         <div>
-          <label htmlFor="downtime-reason" className={LABEL}>What happened (optional)</label>
-          <Input id="downtime-reason" value={reason} maxLength={200} onChange={(e) => setReason(e.target.value)} placeholder="Belt snapped" />
+          <label htmlFor="downtime-reason" className={LABEL}>{t('assets.downtime.what_happened_optional')}</label>
+          <Input id="downtime-reason" value={reason} maxLength={200} onChange={(e) => setReason(e.target.value)} placeholder={t('assets.downtime.reason_placeholder')} />
         </div>
         <div className="flex justify-end gap-2 pt-2">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" onClick={onClose}>{t('common.actions.cancel')}</Button>
           <Button onClick={save} loading={record.isPending} disabled={!startedAt}>
-            {endedAt ? 'Record the stop' : 'Mark as down'}
+            {endedAt ? t('assets.downtime.record_stop') : t('assets.downtime.mark_down')}
           </Button>
         </div>
       </div>
@@ -56,22 +58,23 @@ function StoppedModal({ assetId, open, onClose }: { assetId: number; open: boole
 
 /** It runs again: now, or at an earlier time. */
 function RestartModal({ downtime, open, onClose }: { downtime: Downtime; open: boolean; onClose: () => void }) {
+  const { t } = useTranslation()
   const restart = useRestart()
   const [endedAt, setEndedAt] = useState(() => toInputValue(new Date()))
 
   return (
-    <Modal open={open} onClose={onClose} title="It is running again"
-      description="The asset's status goes back to operational. Change the time if it was running before you recorded it.">
+    <Modal open={open} onClose={onClose} title={t('assets.downtime.restart_title')}
+      description={t('assets.downtime.restart_description')}>
       <div className="space-y-3">
         <div>
-          <label htmlFor="downtime-restarted" className={LABEL}>Running again from</label>
+          <label htmlFor="downtime-restarted" className={LABEL}>{t('assets.downtime.running_again_from')}</label>
           <Input id="downtime-restarted" type="datetime-local" value={endedAt} onChange={(e) => setEndedAt(e.target.value)} />
         </div>
         <div className="flex justify-end gap-2 pt-2">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" onClick={onClose}>{t('common.actions.cancel')}</Button>
           <Button loading={restart.isPending} disabled={!endedAt}
             onClick={() => restart.mutate({ id: downtime.id, endedAt: fromInputValue(endedAt) }, { onSuccess: onClose })}>
-            Back in service
+            {t('assets.downtime.back_in_service')}
           </Button>
         </div>
       </div>
@@ -81,36 +84,37 @@ function RestartModal({ downtime, open, onClose }: { downtime: Downtime; open: b
 
 /** A manager corrects the times and the note. The end of a stop that is still going on is set by restarting it. */
 function EditModal({ downtime, open, onClose }: { downtime: Downtime; open: boolean; onClose: () => void }) {
+  const { t } = useTranslation()
   const update = useUpdateDowntime(downtime.id)
   const [startedAt, setStartedAt] = useState(() => toInputValue(downtime.started_at))
   const [endedAt, setEndedAt] = useState(() => (downtime.ended_at ? toInputValue(downtime.ended_at) : ''))
   const [reason, setReason] = useState(downtime.reason ?? '')
 
   return (
-    <Modal open={open} onClose={onClose} title="Correct this downtime">
+    <Modal open={open} onClose={onClose} title={t('assets.downtime.edit_title')}>
       <div className="space-y-3">
         <div>
-          <label htmlFor="edit-started" className={LABEL}>Stopped</label>
+          <label htmlFor="edit-started" className={LABEL}>{t('assets.downtime.stopped')}</label>
           <Input id="edit-started" type="datetime-local" value={startedAt} onChange={(e) => setStartedAt(e.target.value)} />
         </div>
         {!downtime.open && (
           <div>
-            <label htmlFor="edit-ended" className={LABEL}>Running again</label>
+            <label htmlFor="edit-ended" className={LABEL}>{t('assets.downtime.running_again')}</label>
             <Input id="edit-ended" type="datetime-local" value={endedAt} onChange={(e) => setEndedAt(e.target.value)} />
           </div>
         )}
         <div>
-          <label htmlFor="edit-reason" className={LABEL}>What happened</label>
+          <label htmlFor="edit-reason" className={LABEL}>{t('assets.downtime.what_happened')}</label>
           <Input id="edit-reason" value={reason} maxLength={200} onChange={(e) => setReason(e.target.value)} />
         </div>
         <div className="flex justify-end gap-2 pt-2">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" onClick={onClose}>{t('common.actions.cancel')}</Button>
           <Button loading={update.isPending} disabled={!startedAt}
             onClick={() => update.mutate(
               { started_at: fromInputValue(startedAt), ended_at: downtime.open ? undefined : fromInputValue(endedAt), reason: reason.trim() || null },
               { onSuccess: onClose },
             )}>
-            Save
+            {t('common.actions.save')}
           </Button>
         </div>
       </div>
@@ -119,27 +123,28 @@ function EditModal({ downtime, open, onClose }: { downtime: Downtime; open: bool
 }
 
 function DowntimeRow({ downtime, canManage }: { downtime: Downtime; canManage: boolean }) {
+  const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
   const remove = useDeleteDowntime()
   return (
     <li className="flex flex-wrap items-start justify-between gap-3 py-3">
       <div className="min-w-0">
         <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-          {formatDateTime(downtime.started_at)} → {downtime.ended_at ? formatDateTime(downtime.ended_at) : <span className="text-red-600">still down</span>}
+          {formatDateTime(downtime.started_at)} → {downtime.ended_at ? formatDateTime(downtime.ended_at) : <span className="text-red-600">{t('assets.downtime.still_down')}</span>}
           <span className="ml-2 font-normal text-gray-500">{formatHours(downtime.hours)}</span>
         </p>
         {downtime.reason && <p className="text-sm text-gray-700 dark:text-gray-300">{downtime.reason}</p>}
         <p className="text-xs text-gray-500">
-          {downtime.started_by ? `Stopped by ${downtime.started_by}` : 'Recorded by the status'}
-          {downtime.ended_by && `, restarted by ${downtime.ended_by}`}
+          {downtime.started_by ? t('assets.downtime.stopped_by', { name: downtime.started_by }) : t('assets.downtime.recorded_by_status')}
+          {downtime.ended_by && t('assets.downtime.restarted_by', { name: downtime.ended_by })}
         </p>
       </div>
       {canManage && (
         <div className="flex gap-2">
-          <Button size="sm" variant="outline" aria-label="Correct this downtime" onClick={() => setEditing(true)}><Pencil className="h-4 w-4" /></Button>
+          <Button size="sm" variant="outline" aria-label={t('assets.downtime.correct_aria')} onClick={() => setEditing(true)}><Pencil className="h-4 w-4" /></Button>
           {!downtime.open && (
-            <Button size="sm" variant="outline" aria-label="Delete this downtime"
-              onClick={() => { if (window.confirm('Delete this downtime? The reports will no longer count it.')) remove.mutate(downtime.id) }}>
+            <Button size="sm" variant="outline" aria-label={t('assets.downtime.delete_aria')}
+              onClick={() => { if (window.confirm(t('assets.downtime.confirm_delete'))) remove.mutate(downtime.id) }}>
               <Trash2 className="h-4 w-4" />
             </Button>
           )}
@@ -152,32 +157,34 @@ function DowntimeRow({ downtime, canManage }: { downtime: Downtime; canManage: b
 
 /** When the asset stopped and ran again. Anyone who works on it can record a stop or a restart; a manager can correct or delete. */
 export function AssetDowntime({ assetId, canManage }: { assetId: number; canManage: boolean }) {
+  const { t } = useTranslation()
   const { data: downtimes, isLoading, isError } = useDowntimes(assetId)
   const [stopping, setStopping] = useState(false)
   const [restarting, setRestarting] = useState(false)
 
   if (isLoading) return <Skeleton className="h-24 w-full" />
-  if (isError) return <p className="text-sm text-red-600">The downtime could not be loaded.</p>
+  if (isError) return <p className="text-sm text-red-600">{t('assets.downtime.load_failed')}</p>
 
   const current = downtimes?.find((downtime) => downtime.open)
 
   return (
     <div className="space-y-3">
       <p className="text-sm text-gray-500 dark:text-gray-400">
-        When this asset stopped and ran again. Marking it down (here or in its status) starts the clock; the Downtime report works out
-        availability and the time between failures from these.
+        {t('assets.downtime.intro')}
       </p>
       {current ? (
         <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-300 bg-red-50 px-4 py-3 dark:border-red-800 dark:bg-red-900/20">
           <div className="flex items-center gap-2 text-sm text-red-800 dark:text-red-300">
             <AlertTriangle className="h-4 w-4 shrink-0" />
-            <span>Down since {formatDateTime(current.started_at)} ({formatHours(current.hours)}){current.reason ? `: ${current.reason}` : ''}</span>
+            <span>{current.reason
+              ? t('assets.downtime.down_since_reason', { since: formatDateTime(current.started_at), hours: formatHours(current.hours), reason: current.reason })
+              : t('assets.downtime.down_since', { since: formatDateTime(current.started_at), hours: formatHours(current.hours) })}</span>
           </div>
-          <Button size="sm" onClick={() => setRestarting(true)}><CirclePlay className="mr-1.5 h-4 w-4" />Running again</Button>
+          <Button size="sm" onClick={() => setRestarting(true)}><CirclePlay className="mr-1.5 h-4 w-4" />{t('assets.downtime.running_again')}</Button>
         </div>
       ) : (
         <div className="flex justify-end">
-          <Button size="sm" variant="outline" onClick={() => setStopping(true)}><OctagonX className="mr-1.5 h-4 w-4" />It stopped</Button>
+          <Button size="sm" variant="outline" onClick={() => setStopping(true)}><OctagonX className="mr-1.5 h-4 w-4" />{t('assets.downtime.stopped_title')}</Button>
         </div>
       )}
       {downtimes?.length ? (
@@ -189,7 +196,7 @@ export function AssetDowntime({ assetId, canManage }: { assetId: number; canMana
           </CardContent>
         </Card>
       ) : (
-        <EmptyState icon={OctagonX} title="No downtime recorded" description="When this asset stops, mark it down and note what happened. It will show here and in the reports." />
+        <EmptyState icon={OctagonX} title={t('assets.downtime.empty_title')} description={t('assets.downtime.empty_description')} />
       )}
       {stopping && <StoppedModal assetId={assetId} open onClose={() => setStopping(false)} />}
       {restarting && current && <RestartModal downtime={current} open onClose={() => setRestarting(false)} />}

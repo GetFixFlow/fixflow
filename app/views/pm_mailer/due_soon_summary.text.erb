@@ -1,15 +1,13 @@
-Hi <%= @user.full_name %>,
+<%= t("mail.greeting", name: @user.full_name) %>
 
-The following preventive maintenance schedules are due within the next 7 days:
+<%= t(".intro") %>
 
 <% @pm_list.each do |pm| %>
   - <%= pm.name %>
-    Asset:    <%= pm.asset&.name || "N/A" %>
-    Priority: <%= pm.priority.upcase %>
-    Due:      <%= pm.next_due_at&.strftime("%Y-%m-%d") || "Not set" %>
+<%= mail_fields(t("mail.asset") => pm.asset&.name || t("mail.not_applicable"), t("mail.priority") => mail_priority(pm.priority), t("mail.due") => pm.next_due_at&.strftime("%Y-%m-%d") || t("mail.not_set")).indent(4) %>
 
 <% end %>
 
-Please log in to FixFlow to review and prepare for these upcoming PM tasks.
+<%= t(".outro") %>
 
-— FixFlow
+<%= t("mail.signature") %>

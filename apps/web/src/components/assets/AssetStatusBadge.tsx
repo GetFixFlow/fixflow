@@ -1,13 +1,7 @@
 import { Badge, statusBadge } from '@/components/ui/Badge'
 import { cn } from '@/lib/utils'
+import { label } from '@/i18n'
 import type { AssetStatus } from '@/types'
-
-const STATUS_LABELS: Record<AssetStatus, string> = {
-  operational: 'Operational',
-  degraded: 'Degraded',
-  down: 'Down',
-  decommissioned: 'Decommissioned',
-}
 
 interface AssetStatusBadgeProps {
   status: AssetStatus
@@ -17,7 +11,7 @@ interface AssetStatusBadgeProps {
 export function AssetStatusBadge({ status, className }: AssetStatusBadgeProps) {
   return (
     <Badge variant={statusBadge(status)} className={cn('capitalize', className)}>
-      {STATUS_LABELS[status] ?? status}
+      {label('status', status)}
     </Badge>
   )
 }

@@ -1,5 +1,6 @@
+import { useTranslation } from 'react-i18next'
 import { Wrench, RefreshCw, Zap, Activity, UserCheck, CheckCircle, ShieldCheck } from 'lucide-react'
-import { formatDistanceToNow } from 'date-fns'
+import { timeAgo } from '@/lib/timeAgo'
 import { cn } from '@/lib/utils'
 
 export type ActivityEventType =
@@ -54,9 +55,10 @@ interface WorkOrderActivityLogProps {
 }
 
 export function WorkOrderActivityLog({ events, compact = false }: WorkOrderActivityLogProps) {
+  const { t } = useTranslation()
   if (events.length === 0) {
     return (
-      <p className="text-sm italic text-gray-400 dark:text-gray-500">No activity yet.</p>
+      <p className="text-sm italic text-gray-400 dark:text-gray-500">{t('workOrders.activity.none')}</p>
     )
   }
 
@@ -81,7 +83,7 @@ export function WorkOrderActivityLog({ events, compact = false }: WorkOrderActiv
                 <span className="font-medium">{event.actor_name}</span> {event.description}
               </p>
               <time className="text-xs text-gray-400 dark:text-gray-500">
-                {formatDistanceToNow(new Date(event.created_at), { addSuffix: true })}
+                {timeAgo(event.created_at)}
               </time>
             </div>
           </li>

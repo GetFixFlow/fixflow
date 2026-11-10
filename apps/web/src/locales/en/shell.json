@@ -1,0 +1,94 @@
+{
+  "shell": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "work_orders": "Work Orders",
+      "schedule": "Schedule",
+      "assets": "Assets",
+      "parts": "Parts",
+      "vendors": "Vendors",
+      "purchasing": "Purchasing",
+      "preventive_maintenance": "Preventive Maintenance",
+      "iot_alerts": "IoT Alerts",
+      "reports": "Reports",
+      "settings": "Settings"
+    },
+    "sidebar": {
+      "expand": "Expand sidebar",
+      "collapse": "Collapse sidebar"
+    },
+    "header": {
+      "search": "Search...",
+      "scan_qr": "Scan QR code",
+      "toggle_theme": "Toggle theme",
+      "notifications": "Notifications",
+      "notifications_new_one": "Notifications: {{count}} new alerts",
+      "notifications_new_other": "Notifications: {{count}} new alerts",
+      "profile": "Profile",
+      "help": "Help and guides",
+      "sign_out": "Sign out"
+    },
+    "sync": {
+      "status": "Sync status",
+      "offline": "Offline",
+      "offline_waiting_one": "Offline · {{count}} waiting",
+      "offline_waiting_other": "Offline · {{count}} waiting",
+      "not_saved_one": "{{count}} not saved",
+      "not_saved_other": "{{count}} not saved",
+      "waiting_one": "{{count}} waiting to sync",
+      "waiting_other": "{{count}} waiting to sync",
+      "offline_notice": "You are offline. Your changes are saved on this device and are sent when the connection is back.",
+      "waiting_title": "Waiting to be sent",
+      "send_now": "Send now",
+      "rejected_title": "Not accepted",
+      "dismiss": "Dismiss",
+      "sent_one": "{{count}} change sent.",
+      "sent_other": "{{count}} changes sent.",
+      "not_accepted_one": "{{count}} change was not accepted. Open the sync status at the top to see why.",
+      "not_accepted_other": "{{count}} changes were not accepted. Open the sync status at the top to see why."
+    },
+    "error": {
+      "title": "Something went wrong",
+      "reload": "Reload page"
+    },
+    "not_found": {
+      "title": "Page not found",
+      "back": "Back to Dashboard"
+    },
+    "loading": "Loading...",
+    "update": {
+      "title": "Update available",
+      "body": "Reload to get the latest version.",
+      "reload": "Reload"
+    },
+    "shortcuts": {
+      "title": "Keyboard Shortcuts",
+      "new_work_order": "New Work Order",
+      "focus_search": "Focus search",
+      "close": "Close modal / go back",
+      "start": "Start Work (if assigned to me)",
+      "complete": "Complete (if in progress)",
+      "verify": "Verify (if completed, manager)",
+      "edit": "Edit WO (manager)",
+      "help": "Show keyboard shortcuts",
+      "toggle": "Press <kbd>?</kbd> to toggle this panel"
+    },
+    "locations": {
+      "collapse": "Collapse",
+      "expand": "Expand",
+      "options": "Location options",
+      "add_child": "Add child",
+      "loading": "Loading locations",
+      "search_placeholder": "Search locations...",
+      "search": "Search locations",
+      "no_match": "No locations match your search.",
+      "none_yet": "No locations yet.",
+      "hierarchy": "Location hierarchy",
+      "select": "Select a location...",
+      "clear": "Clear selection",
+      "none_available": "No locations available",
+      "unknown": "Unknown location",
+      "path": "Location path"
+    }
+  }
+}

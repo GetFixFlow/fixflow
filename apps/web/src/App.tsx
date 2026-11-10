@@ -7,6 +7,8 @@ import { router } from './router'
 import { queryClient } from './lib/queryClient'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { BrandingApplier } from './components/layout/BrandingApplier'
+import { LanguageApplier } from './components/layout/LanguageApplier'
+import './i18n'
 import { useUiStore } from './stores/uiStore'
 
 function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -23,6 +25,7 @@ export default function App() {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <BrandingApplier />
+          <LanguageApplier />
           <RouterProvider router={router} />
           <Toaster position="top-right" richColors />
           <ReactQueryDevtools initialIsOpen={false} />

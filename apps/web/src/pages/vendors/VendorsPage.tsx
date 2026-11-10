@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Building2, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
@@ -17,6 +18,7 @@ const selectClass =
 
 /** The outside companies that do maintenance work, with the people to call at each. */
 export function VendorsPage() {
+  const { t } = useTranslation()
   const role = useAuthStore((s) => s.user?.role)
   const canManage = role === 'admin' || role === 'manager'
   const canDelete = role === 'admin'
@@ -42,16 +44,16 @@ export function VendorsPage() {
   const filtered = debounced !== '' || category !== '' || status !== ''
 
   const remove = (vendor: Vendor) => {
-    if (!confirm(`Delete "${vendor.name}"? This cannot be undone.`)) return
+    if (!confirm(t('vendors.page.confirm_delete', { name: vendor.name }))) return
     deleteVendor.mutate(vendor.id)
   }
 
   return (
     <div className="space-y-4">
       <PageHeader
-        title="Vendors & Contractors"
-        description={meta ? `${meta.total_count} ${filtered ? 'matching' : 'in the list'}` : 'Outside companies that do maintenance work'}
-        actions={canManage && <Button size="sm" onClick={() => setEditing('new')}><Plus className="h-4 w-4" />Add vendor</Button>}
+        title={t('vendors.page.title')}
+        description={meta ? t(filtered ? 'vendors.page.count_matching' : 'vendors.page.count_list', { count: meta.total_count }) : t('vendors.page.subtitle')}
+        actions={canManage && <Button size="sm" onClick={() => setEditing('new')}><Plus className="h-4 w-4" />{t('vendors.page.add')}</Button>}
       />
 
       <div className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
@@ -61,49 +63,49 @@ export function VendorsPage() {
             type="search"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1) }}
-            placeholder="Search by name or what they do"
-            aria-label="Search vendors"
+            placeholder={t('vendors.page.search_placeholder')}
+            aria-label={t('vendors.page.search_aria')}
             className="h-9 w-full rounded-md border border-gray-300 bg-white pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
           />
         </div>
-        <select aria-label="Category" value={category} onChange={(e) => { setCategory(e.target.value); setPage(1) }} className={selectClass}>
-          <option value="">All categories</option>
+        <select aria-label={t('vendors.page.category_aria')} value={category} onChange={(e) => { setCategory(e.target.value); setPage(1) }} className={selectClass}>
+          <option value="">{t('vendors.page.all_categories')}</option>
           {(data?.categories ?? []).map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
         <select
-          aria-label="Status" value={status} className={selectClass}
+          aria-label={t('vendors.page.status_aria')} value={status} className={selectClass}
           onChange={(e) => { setStatus(e.target.value as typeof status); setPage(1) }}
         >
-          <option value="">Active and not in use</option>
-          <option value="active">Active</option>
-          <option value="inactive">Not in use</option>
+          <option value="">{t('vendors.page.active_and_not')}</option>
+          <option value="active">{t('vendors.page.active')}</option>
+          <option value="inactive">{t('vendors.page.not_in_use')}</option>
         </select>
       </div>
 
       {isLoading ? (
         <div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
       ) : isError ? (
-        <EmptyState icon={Building2} title="The vendors could not be loaded" action={{ label: 'Try again', onClick: () => refetch() }} />
+        <EmptyState icon={Building2} title={t('vendors.page.load_failed')} action={{ label: t('common.actions.retry'), onClick: () => refetch() }} />
       ) : vendors.length === 0 ? (
         <EmptyState
           icon={Building2}
-          title={filtered ? 'No vendors match' : 'No vendors yet'}
+          title={filtered ? t('vendors.page.no_match') : t('vendors.page.no_vendors')}
           description={
             filtered
-              ? 'Try a different search or filter.'
-              : canManage ? 'Add the contractors and repair shops you use, then give work orders to them.' : 'A manager can add the contractors you use.'
+              ? t('vendors.page.try_different')
+              : canManage ? t('vendors.page.empty_manager') : t('vendors.page.empty_other')
           }
-          action={!filtered && canManage ? { label: 'Add vendor', onClick: () => setEditing('new') } : undefined}
+          action={!filtered && canManage ? { label: t('vendors.page.add'), onClick: () => setEditing('new') } : undefined}
         />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-700/50">
               <tr>
-                {['Vendor', 'What they do', 'Phone', 'Email', 'Work orders', 'Status'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{h}</th>
+                {['vendor', 'what', 'phone', 'email', 'work_orders', 'status'].map((h) => (
+                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t(`vendors.page.col_${h}`)}</th>
                 ))}
-                <th className="px-4 py-3"><span className="sr-only">Actions</span></th>
+                <th className="px-4 py-3"><span className="sr-only">{t('vendors.page.col_actions')}</span></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
@@ -119,17 +121,17 @@ export function VendorsPage() {
                   <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{vendor.email ?? '—'}</td>
                   <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{vendor.work_orders_count}</td>
                   <td className="px-4 py-3">
-                    <Badge variant={vendor.active ? 'success' : 'secondary'}>{vendor.active ? 'Active' : 'Not in use'}</Badge>
+                    <Badge variant={vendor.active ? 'success' : 'secondary'}>{vendor.active ? t('vendors.page.active') : t('vendors.page.not_in_use')}</Badge>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-1">
                       {canManage && (
-                        <Button variant="ghost" size="icon" onClick={() => setEditing(vendor)} aria-label={`Edit ${vendor.name}`}>
+                        <Button variant="ghost" size="icon" onClick={() => setEditing(vendor)} aria-label={t('vendors.page.edit_aria', { name: vendor.name })}>
                           <Pencil className="h-4 w-4" />
                         </Button>
                       )}
                       {canDelete && (
-                        <Button variant="ghost" size="icon" onClick={() => remove(vendor)} aria-label={`Delete ${vendor.name}`}>
+                        <Button variant="ghost" size="icon" onClick={() => remove(vendor)} aria-label={t('vendors.page.delete_aria', { name: vendor.name })}>
                           <Trash2 className="h-4 w-4 text-red-500" />
                         </Button>
                       )}
@@ -144,10 +146,10 @@ export function VendorsPage() {
 
       {meta && meta.total_pages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">Page {meta.current_page} of {meta.total_pages}</p>
+          <p className="text-sm text-gray-500">{t('vendors.page.page_of', { page: meta.current_page, pages: meta.total_pages })}</p>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Previous</Button>
-            <Button variant="outline" size="sm" disabled={page >= meta.total_pages} onClick={() => setPage((p) => p + 1)}>Next</Button>
+            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>{t('assets.list.previous')}</Button>
+            <Button variant="outline" size="sm" disabled={page >= meta.total_pages} onClick={() => setPage((p) => p + 1)}>{t('assets.list.next')}</Button>
           </div>
         </div>
       )}

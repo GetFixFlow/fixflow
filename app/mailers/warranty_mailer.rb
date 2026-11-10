@@ -5,6 +5,6 @@ class WarrantyMailer < ApplicationMailer
     @manager = manager
     @assets  = assets
     @url     = "#{EmailSetup.base_url}/assets"
-    mail(to: manager.email, subject: "[FixFlow] #{assets.size} #{'warranty'.pluralize(assets.size)} ending within 30 days")
+    in_language_of(manager) { mail(to: manager.email, subject: t(".subject", count: assets.size)) }
   end
 end

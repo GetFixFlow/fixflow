@@ -1,3 +1,5 @@
+import { label } from '@/i18n'
+import { useTranslation } from 'react-i18next'
 import {
   ClipboardList,
   Package,
@@ -28,13 +30,14 @@ import { GettingStarted } from '@/components/dashboard/GettingStarted'
 import { RequesterDashboard, TechnicianDashboard } from '@/components/dashboard/RoleDashboards'
 
 export function DashboardPage() {
+  const { t } = useTranslation()
   const { data, isLoading } = useDashboard()
   const { user } = useAuthStore()
 
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Dashboard" description="Overview of your maintenance operations" />
+        <PageHeader title={t('dashboard.title')} description={t('dashboard.overview')} />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)}
         </div>
@@ -50,17 +53,17 @@ export function DashboardPage() {
   if ('my_work_orders' in data) return <TechnicianDashboard data={data} name={user?.full_name} />
 
   const assetsByStatus = [
-    { name: 'operational', value: data.assets.operational },
-    { name: 'degraded', value: data.assets.degraded },
-    { name: 'down', value: data.assets.down },
-    { name: 'decommissioned', value: data.assets.decommissioned },
+    { name: label('status', 'operational'), value: data.assets.operational },
+    { name: label('status', 'degraded'), value: data.assets.degraded },
+    { name: label('status', 'down'), value: data.assets.down },
+    { name: label('status', 'decommissioned'), value: data.assets.decommissioned },
   ].filter((entry) => entry.value > 0)
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title={`Welcome back, ${user?.full_name?.split(' ')[0]}`}
-        description="Here's what's happening with your maintenance operations"
+        title={t('dashboard.welcome', { name: user?.full_name?.split(' ')[0] })}
+        description={t('dashboard.happening')}
       />
 
       {/* The administrator's first steps, and a note when what is shown is sample data */}
@@ -69,28 +72,28 @@ export function DashboardPage() {
       {/* Stat cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Open Work Orders"
+          title={t('dashboard.open_wo')}
           value={data.work_orders.open}
-          subtitle={`${data.work_orders.overdue} overdue`}
+          subtitle={t('dashboard.n_overdue', { count: data.work_orders.overdue })}
           icon={ClipboardList}
         />
         <StatCard
-          title="Asset Health"
+          title={t('dashboard.asset_health')}
           value={`${data.assets.health_score}%`}
-          subtitle={`${data.assets.operational} of ${data.assets.total} operational`}
+          subtitle={t('dashboard.n_operational', { operational: data.assets.operational, total: data.assets.total })}
           icon={Package}
           iconClassName={data.assets.health_score < 80 ? 'bg-red-50 dark:bg-red-900/20' : undefined}
         />
         <StatCard
-          title="PM Compliance"
+          title={t('dashboard.pm_compliance')}
           value={data.preventive_maintenance.compliance_rate_30d === null ? '—' : `${data.preventive_maintenance.compliance_rate_30d}%`}
-          subtitle={`${data.preventive_maintenance.overdue} overdue schedules`}
+          subtitle={t('dashboard.n_overdue_schedules', { count: data.preventive_maintenance.overdue })}
           icon={Wrench}
         />
         <StatCard
-          title="IoT Alerts"
+          title={t('dashboard.iot_alerts')}
           value={data.iot.open_alerts}
-          subtitle={`${data.iot.critical_alerts} critical`}
+          subtitle={t('dashboard.n_critical', { count: data.iot.critical_alerts })}
           icon={Radio}
           iconClassName={data.iot.critical_alerts > 0 ? 'bg-red-50 dark:bg-red-900/20' : undefined}
         />
@@ -104,7 +107,7 @@ export function DashboardPage() {
               <CheckCircle className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Completed this week</p>
+              <p className="text-sm text-gray-500">{t('dashboard.completed_week')}</p>
               <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 {data.work_orders.completed_this_week}
               </p>
@@ -117,7 +120,7 @@ export function DashboardPage() {
               <Clock className="h-5 w-5 text-yellow-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Due this week (PM)</p>
+              <p className="text-sm text-gray-500">{t('dashboard.due_week')}</p>
               <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 {data.preventive_maintenance.due_this_week}
               </p>
@@ -130,7 +133,7 @@ export function DashboardPage() {
               <AlertTriangle className="h-5 w-5 text-red-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">In progress</p>
+              <p className="text-sm text-gray-500">{t('dashboard.in_progress')}</p>
               <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 {data.work_orders.in_progress}
               </p>
@@ -144,7 +147,7 @@ export function DashboardPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>Asset Status Breakdown</CardTitle>
+              <CardTitle>{t('dashboard.asset_breakdown')}</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={220}>
@@ -161,11 +164,11 @@ export function DashboardPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
+              <CardTitle>{t('dashboard.recent')}</CardTitle>
             </CardHeader>
             <CardContent>
               {data.recent_activity.length === 0 ? (
-                <p className="text-sm text-gray-500">No recent activity</p>
+                <p className="text-sm text-gray-500">{t('dashboard.no_activity')}</p>
               ) : (
                 <ul className="space-y-3">
                   {data.recent_activity.map((activity, index) => (
@@ -191,7 +194,7 @@ export function DashboardPage() {
       {/* Asset status summary */}
       <Card>
         <CardHeader>
-          <CardTitle>Asset Status Overview</CardTitle>
+          <CardTitle>{t('dashboard.asset_overview')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-3">
@@ -202,7 +205,7 @@ export function DashboardPage() {
               decommissioned: data.assets.decommissioned,
             }).map(([status, count]) => (
               <div key={status} className="flex items-center gap-2">
-                <Badge variant={statusBadge(status)}>{status}</Badge>
+                <Badge variant={statusBadge(status)}>{label('status', status)}</Badge>
                 <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{count}</span>
               </div>
             ))}

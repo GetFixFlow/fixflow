@@ -29,6 +29,11 @@
 
 en:
   hello: "Hello world"
+  language_name: "English"
+  date:
+    formats:
+      mail_day: "%-d %b %Y"
+      mail_day_short: "%-d %b"
   activerecord:
     errors:
       models:

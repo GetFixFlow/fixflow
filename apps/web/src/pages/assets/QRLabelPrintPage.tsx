@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useSearchParams, Link } from 'react-router-dom'
 import type { AxiosError } from 'axios'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Printer } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -12,6 +13,7 @@ import { useAssetLabels } from '@/hooks/useAssets'
 import { useLocations } from '@/hooks/useLocations'
 import { useDebouncedValue } from '@/hooks/useParts'
 import { drawQrCodes, LABEL_SIZES, labelQrValue, PAPER, printStyles, type LabelSizeKey, type PaperKey } from '@/lib/labelSheet'
+import { label as word } from '@/i18n'
 
 const PRINT_ID = 'label-print-root'
 const PREVIEW_LIMIT = 12
@@ -23,6 +25,7 @@ const SELECT_CLASS =
  * ones picked on the Assets list, and print. Each label carries the QR to report a problem and, if wanted, a barcode of the tag.
  */
 export function QRLabelPrintPage() {
+  const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   const origin = window.location.origin
 
@@ -89,26 +92,26 @@ export function QRLabelPrintPage() {
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link to="/assets">
           <ArrowLeft className="h-4 w-4" />
-          Assets
+          {t('assets.print.assets')}
         </Link>
       </Button>
 
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Print labels</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t('assets.print.title')}</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            {chosen.length} label{chosen.length !== 1 ? 's' : ''} chosen
+            {t('assets.print.chosen', { count: chosen.length })}
           </p>
         </div>
         <Button onClick={() => window.print()} disabled={!ready}>
           <Printer className="h-4 w-4" />
-          {chosen.length > 0 && !ready ? 'Preparing…' : 'Print labels'}
+          {chosen.length > 0 && !ready ? t('assets.print.preparing') : t('assets.print.title')}
         </Button>
       </div>
 
       {forbidden ? (
         <p role="alert" className="rounded-lg border border-gray-200 p-6 text-center text-sm text-gray-600 dark:border-gray-700 dark:text-gray-300">
-          Only managers and administrators can print labels.
+          {t('assets.print.forbidden')}
         </p>
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -116,20 +119,20 @@ export function QRLabelPrintPage() {
           <div className="space-y-4">
             <Card>
               <CardContent className="space-y-3 p-4">
-                <h2 className="font-medium text-gray-900 dark:text-gray-100">Which assets</h2>
+                <h2 className="font-medium text-gray-900 dark:text-gray-100">{t('assets.print.which')}</h2>
                 {picked && (
                   <p className="text-xs text-gray-500">
-                    The assets you picked on the list.{' '}
-                    <button onClick={() => setPicked('')} className="text-brand-600 underline dark:text-brand-400">Show all assets</button>
+                    {t('assets.print.picked')}{' '}
+                    <button onClick={() => setPicked('')} className="text-brand-600 underline dark:text-brand-400">{t('assets.print.show_all')}</button>
                   </p>
                 )}
-                <Input id="label-search" label="Search" placeholder="Name, tag, barcode or serial number" value={search} onChange={(e) => changeFilter(setSearch)(e.target.value)} />
-                <LocationSelect id="label-location" label="Place (and the places in it)" locations={locations} value={locationId} onChange={changeFilter(setLocationId)} placeholder="Anywhere" />
+                <Input id="label-search" label={t('assets.print.search')} placeholder={t('assets.print.search_placeholder')} value={search} onChange={(e) => changeFilter(setSearch)(e.target.value)} />
+                <LocationSelect id="label-location" label={t('assets.print.place')} locations={locations} value={locationId} onChange={changeFilter(setLocationId)} placeholder={t('assets.print.anywhere')} />
                 <div>
-                  <label htmlFor="label-status" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                  <label htmlFor="label-status" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t('assets.print.status')}</label>
                   <select id="label-status" value={status} onChange={(e) => changeFilter(setStatus)(e.target.value)} className={SELECT_CLASS}>
-                    <option value="">Any</option>
-                    {['operational', 'degraded', 'down', 'decommissioned'].map((value) => <option key={value} value={value}>{value}</option>)}
+                    <option value="">{t('assets.print.any')}</option>
+                    {['operational', 'degraded', 'down', 'decommissioned'].map((value) => <option key={value} value={value}>{word('status', value)}</option>)}
                   </select>
                 </div>
               </CardContent>
@@ -137,29 +140,29 @@ export function QRLabelPrintPage() {
 
             <Card>
               <CardContent className="space-y-3 p-4">
-                <h2 className="font-medium text-gray-900 dark:text-gray-100">The label</h2>
+                <h2 className="font-medium text-gray-900 dark:text-gray-100">{t('assets.print.the_label')}</h2>
                 <div>
-                  <label htmlFor="label-size" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Size</label>
+                  <label htmlFor="label-size" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t('assets.print.size')}</label>
                   <select id="label-size" value={options.size} onChange={(e) => setOptions({ ...options, size: e.target.value as LabelSizeKey })} className={SELECT_CLASS}>
-                    {(Object.keys(LABEL_SIZES) as LabelSizeKey[]).map((key) => <option key={key} value={key}>{LABEL_SIZES[key].label}</option>)}
+                    {(Object.keys(LABEL_SIZES) as LabelSizeKey[]).map((key) => <option key={key} value={key}>{t(`assets.print.size_${key}`)}</option>)}
                   </select>
                 </div>
                 <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                   <input type="checkbox" checked={options.barcode} onChange={(e) => setOptions({ ...options, barcode: e.target.checked })} className="h-4 w-4 rounded border-gray-300" />
-                  Barcode of the tag
+                  {t('assets.print.barcode')}
                 </label>
                 <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                   <input type="checkbox" checked={options.place} onChange={(e) => setOptions({ ...options, place: e.target.checked })} className="h-4 w-4 rounded border-gray-300" />
-                  The place
+                  {t('assets.print.the_place')}
                 </label>
                 <div>
-                  <label htmlFor="label-paper" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Paper</label>
+                  <label htmlFor="label-paper" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{t('assets.print.paper')}</label>
                   <select id="label-paper" value={paper} onChange={(e) => setPaper(e.target.value as PaperKey)} className={SELECT_CLASS}>
-                    {(Object.keys(PAPER) as PaperKey[]).map((key) => <option key={key} value={key}>{PAPER[key].label}</option>)}
+                    {(Object.keys(PAPER) as PaperKey[]).map((key) => <option key={key} value={key}>{t(`assets.print.paper_${key}`)}</option>)}
                   </select>
                 </div>
                 <p className="text-xs text-gray-500">
-                  Labels are printed at their real size. Print at 100% scale (not &quot;fit to page&quot;), on plain paper to cut or on sticker paper of at least this size.
+                  {t('assets.print.real_size')}
                 </p>
               </CardContent>
             </Card>
@@ -167,22 +170,22 @@ export function QRLabelPrintPage() {
             <Card>
               <CardContent className="space-y-2 p-4">
                 <div className="flex items-center justify-between">
-                  <h2 className="font-medium text-gray-900 dark:text-gray-100">Choose</h2>
+                  <h2 className="font-medium text-gray-900 dark:text-gray-100">{t('assets.print.choose')}</h2>
                   <div className="flex gap-3 text-xs">
                     <button onClick={() => setSelected(new Set(labels.map((label) => label.id)))} className="text-brand-600 hover:underline dark:text-brand-400">
-                      Choose all {labels.length}
+                      {t('assets.print.choose_all', { count: labels.length })}
                     </button>
-                    <button onClick={() => setSelected(new Set())} className="text-brand-600 hover:underline dark:text-brand-400">None</button>
+                    <button onClick={() => setSelected(new Set())} className="text-brand-600 hover:underline dark:text-brand-400">{t('assets.print.none')}</button>
                   </div>
                 </div>
                 {data?.truncated && (
                   <p role="status" className="text-xs text-amber-700 dark:text-amber-400">
-                    {data.total} assets match; the first {labels.length} are shown. Narrow the search to reach the rest.
+                    {t('assets.print.truncated', { total: data.total, shown: labels.length })}
                   </p>
                 )}
                 <div className="max-h-72 space-y-1 overflow-auto">
-                  {isLoading && <p className="py-4 text-center text-sm text-gray-400">Loading…</p>}
-                  {!isLoading && labels.length === 0 && <p className="py-4 text-center text-sm text-gray-400">No assets match.</p>}
+                  {isLoading && <p className="py-4 text-center text-sm text-gray-400">{t('assets.print.loading')}</p>}
+                  {!isLoading && labels.length === 0 && <p className="py-4 text-center text-sm text-gray-400">{t('assets.print.no_match')}</p>}
                   {labels.map((label) => (
                     <label key={label.id} className="flex cursor-pointer items-center gap-2 rounded-md px-1 py-0.5 hover:bg-gray-50 dark:hover:bg-gray-700">
                       <input type="checkbox" checked={selected.has(label.id)} onChange={() => toggle(label.id)} className="rounded border-gray-300 text-brand-600" />
@@ -199,16 +202,16 @@ export function QRLabelPrintPage() {
           <div className="lg:col-span-2">
             <Card>
               <CardContent className="p-4">
-                <h2 className="mb-3 font-medium text-gray-900 dark:text-gray-100">Preview</h2>
+                <h2 className="mb-3 font-medium text-gray-900 dark:text-gray-100">{t('assets.print.preview')}</h2>
                 {chosen.length === 0 ? (
-                  <p className="py-8 text-center text-sm text-gray-400">Choose assets to preview their labels</p>
+                  <p className="py-8 text-center text-sm text-gray-400">{t('assets.print.choose_to_preview')}</p>
                 ) : (
                   <>
                     <div className="overflow-x-auto">
                       <AssetLabelSheet assets={chosen.slice(0, PREVIEW_LIMIT)} options={options} qrCodes={qrCodes} origin={origin} />
                     </div>
                     {chosen.length > PREVIEW_LIMIT && (
-                      <p className="mt-3 text-xs text-gray-500">Showing the first {PREVIEW_LIMIT} of {chosen.length}. All of them are printed.</p>
+                      <p className="mt-3 text-xs text-gray-500">{t('assets.print.showing_first', { limit: PREVIEW_LIMIT, count: chosen.length })}</p>
                     )}
                   </>
                 )}

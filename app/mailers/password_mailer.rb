@@ -4,6 +4,6 @@ class PasswordMailer < ApplicationMailer
   def reset(user, reset_url)
     @user      = user
     @reset_url = reset_url
-    mail(to: user.email, subject: t(".subject"))
+    in_language_of(user) { mail(to: user.email, subject: t(".subject")) }
   end
 end

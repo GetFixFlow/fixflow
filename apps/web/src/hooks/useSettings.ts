@@ -3,6 +3,7 @@ import type { AxiosError } from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { queryClient } from '@/lib/queryClient'
+import { t } from '@/i18n'
 import { settingsApi } from '@/api/settings'
 import { useAuthStore } from '@/stores/authStore'
 import { useLocaleStore } from '@/lib/localeFormat'
@@ -23,10 +24,10 @@ export function useUpdateProfile() {
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ['profile'] })
       updateUser(res.data.user)
-      toast.success('Profile updated.')
+      toast.success(t('settings.toast.profile_updated'))
     },
     onError: (error: AxiosError<{ error?: { message?: string } }>) =>
-      toast.error(error.response?.data?.error?.message ?? 'Failed to update profile.'),
+      toast.error(error.response?.data?.error?.message ?? t('settings.toast.profile_failed')),
   })
 }
 
@@ -37,13 +38,13 @@ export function useChangePassword() {
     mutationFn: settingsApi.profile.changePassword,
     // The server signs the user out everywhere, this session included, so go to sign-in.
     onSuccess: () => {
-      toast.success('Password changed. Please sign in again.')
+      toast.success(t('settings.toast.password_changed'))
       clearAuth()
       queryClient.clear()
       navigate('/login')
     },
     onError: (error: AxiosError<{ error?: { message?: string } }>) =>
-      toast.error(error.response?.data?.error?.message ?? 'Failed to change password.'),
+      toast.error(error.response?.data?.error?.message ?? t('settings.toast.password_failed')),
   })
 }
 
@@ -58,10 +59,10 @@ export function useRevokeSession() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: settingsApi.sessions.revoke,
-    onSuccess: () => toast.success('Session ended.'),
+    onSuccess: () => toast.success(t('settings.toast.session_ended')),
     // Also when it was already gone (ended elsewhere): show the list as it is now.
     onSettled: () => qc.invalidateQueries({ queryKey: ['sessions'] }),
-    onError: () => toast.error('Could not end that session. Try again.'),
+    onError: () => toast.error(t('settings.toast.session_end_failed')),
   })
 }
 
@@ -70,9 +71,9 @@ export function useRevokeAllSessions() {
   return useMutation({
     mutationFn: settingsApi.sessions.revokeAll,
     onSuccess: (res) =>
-      toast.success(res.data.revoked === 1 ? '1 other session ended.' : `${res.data.revoked} other sessions ended.`),
+      toast.success(t('settings.toast.others_ended', { count: res.data.revoked })),
     onSettled: () => qc.invalidateQueries({ queryKey: ['sessions'] }),
-    onError: () => toast.error('Could not end the other sessions. Try again.'),
+    onError: () => toast.error(t('settings.toast.others_end_failed')),
   })
 }
 
@@ -131,10 +132,10 @@ export function useUpdateBranding() {
     mutationFn: settingsApi.branding.update,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['branding'] })
-      toast.success('Branding saved.')
+      toast.success(t('settings.toast.branding_saved'))
     },
     onError: (error: AxiosError<{ error?: { message?: string } }>) =>
-      toast.error(error.response?.data?.error?.message ?? 'Could not save the branding.'),
+      toast.error(error.response?.data?.error?.message ?? t('settings.toast.branding_failed')),
   })
 }
 
@@ -196,9 +197,9 @@ export function useUpdateLocalization() {
     onSuccess: (response) => {
       useLocaleStore.getState().setLocale(response.data.localization)
       qc.invalidateQueries({ queryKey: ['localization'] })
-      toast.success('Localization saved.')
+      toast.success(t('settings.toast.localization_saved'))
     },
     onError: (error: AxiosError<{ error?: { message?: string } }>) =>
-      toast.error(error.response?.data?.error?.message ?? 'Could not save the localization settings.'),
+      toast.error(error.response?.data?.error?.message ?? t('settings.toast.localization_failed')),
   })
 }

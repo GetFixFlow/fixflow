@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -11,23 +13,24 @@ import { activeFields, useCustomFields } from '@/hooks/useCustomFields'
 import { missingRequired, toInputValues, toPayload, type CustomInputValues } from '@/lib/customFields'
 import type { Part } from '@/types'
 
-const amount = (label: string, { required }: { required: boolean }) =>
+const amount = (t: TFunction, label: string, { required }: { required: boolean }) =>
   z
     .string()
     .trim()
-    .refine((v) => (required ? v !== '' : true), `${label} is required`)
-    .refine((v) => v === '' || (Number.isFinite(Number(v)) && Number(v) >= 0), `${label} must be 0 or more`)
+    .refine((v) => (required ? v !== '' : true), t('parts.form.required', { label }))
+    .refine((v) => v === '' || (Number.isFinite(Number(v)) && Number(v) >= 0), t('parts.form.min_zero', { label }))
 
-const schema = z.object({
-  name: z.string().trim().min(1, 'Name is required'),
+// Built when the form is drawn, so that its messages are in the language of the screens.
+const makeSchema = (t: TFunction) => z.object({
+  name: z.string().trim().min(1, t('parts.form.name_required')),
   sku: z.string().trim(),
-  unit: z.string().trim().min(1, 'Unit is required'),
-  quantity_on_hand: amount('Quantity', { required: false }),
-  reorder_point: amount('Reorder point', { required: false }),
-  unit_cost: amount('Unit cost', { required: false }),
+  unit: z.string().trim().min(1, t('parts.form.unit_required')),
+  quantity_on_hand: amount(t, t('parts.form.quantity'), { required: false }),
+  reorder_point: amount(t, t('parts.form.reorder_point'), { required: false }),
+  unit_cost: amount(t, t('parts.form.unit_cost'), { required: false }),
 })
 
-type FormData = z.infer<typeof schema>
+type FormData = z.infer<ReturnType<typeof makeSchema>>
 
 interface PartFormModalProps {
   open: boolean
@@ -37,16 +40,17 @@ interface PartFormModalProps {
 }
 
 export function PartFormModal({ open, onClose, part }: PartFormModalProps) {
+  const { t } = useTranslation()
   const create = useCreatePart()
   const update = useUpdatePart(part?.id ?? 0)
   const pending = create.isPending || update.isPending
 
   const form = useForm<FormData>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(makeSchema(t)),
     defaultValues: {
       name: part?.name ?? '',
       sku: part?.sku ?? '',
-      unit: part?.unit ?? 'each',
+      unit: part?.unit ?? t('parts.form.default_unit'),
       quantity_on_hand: '0',
       reorder_point: String(part?.reorder_point ?? 0),
       unit_cost: part?.unit_cost == null ? '' : String(part.unit_cost),
@@ -87,20 +91,20 @@ export function PartFormModal({ open, onClose, part }: PartFormModalProps) {
     <Modal
       open={open}
       onClose={onClose}
-      title={part ? 'Edit part' : 'Add part'}
-      description={part ? 'To change how many are in stock, use Adjust stock so the change is recorded.' : undefined}
+      title={part ? t('parts.form.edit_title') : t('parts.form.add_title')}
+      description={part ? t('parts.form.edit_description') : undefined}
     >
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
-        <Input id="part-name" label="Name *" error={errors.name?.message} {...form.register('name')} />
+        <Input id="part-name" label={t('parts.form.name')} error={errors.name?.message} {...form.register('name')} />
         <div className="grid grid-cols-2 gap-3">
-          <Input id="part-sku" label="SKU" placeholder="Optional" error={errors.sku?.message} {...form.register('sku')} />
-          <Input id="part-unit" label="Unit *" placeholder="each, m, L…" error={errors.unit?.message} {...form.register('unit')} />
+          <Input id="part-sku" label={t('parts.form.sku')} placeholder={t('parts.form.optional')} error={errors.sku?.message} {...form.register('sku')} />
+          <Input id="part-unit" label={t('parts.form.unit')} placeholder={t('parts.form.unit_placeholder')} error={errors.unit?.message} {...form.register('unit')} />
         </div>
         <div className="grid grid-cols-2 gap-3">
           {!part && (
             <Input
               id="part-quantity"
-              label="Starting stock"
+              label={t('parts.form.starting_stock')}
               type="number"
               step="any"
               min="0"
@@ -110,7 +114,7 @@ export function PartFormModal({ open, onClose, part }: PartFormModalProps) {
           )}
           <Input
             id="part-reorder"
-            label="Reorder point"
+            label={t('parts.form.reorder_point')}
             type="number"
             step="any"
             min="0"
@@ -119,11 +123,11 @@ export function PartFormModal({ open, onClose, part }: PartFormModalProps) {
           />
           <Input
             id="part-cost"
-            label="Unit cost"
+            label={t('parts.form.unit_cost')}
             type="number"
             step="0.01"
             min="0"
-            placeholder="Optional"
+            placeholder={t('parts.form.optional')}
             error={errors.unit_cost?.message}
             {...form.register('unit_cost')}
           />
@@ -131,11 +135,11 @@ export function PartFormModal({ open, onClose, part }: PartFormModalProps) {
         {customFields.length > 0 && (
           <CustomFieldInputs fields={customFields} values={customValues} onChange={setCustomValues} errors={customErrors} idPrefix="part-cf" />
         )}
-        <p className="text-xs text-gray-500">A part is flagged as low when the stock falls to its reorder point or below.</p>
+        <p className="text-xs text-gray-500">{t('parts.form.low_help')}</p>
         <div className="flex gap-2 pt-2">
-          <Button type="button" variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
+          <Button type="button" variant="outline" onClick={onClose} className="flex-1">{t('common.actions.cancel')}</Button>
           <Button type="submit" disabled={pending} className="flex-1">
-            {pending ? 'Saving…' : part ? 'Save changes' : 'Add part'}
+            {pending ? t('common.actions.saving') : part ? t('parts.form.save_changes') : t('parts.form.add')}
           </Button>
         </div>
       </form>

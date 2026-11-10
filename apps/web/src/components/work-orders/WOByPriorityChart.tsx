@@ -1,3 +1,5 @@
+import { label } from '@/i18n'
+import { useTranslation } from 'react-i18next'
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import type { Priority } from '@/types'
 
@@ -13,12 +15,13 @@ interface WOByPriorityChartProps {
 }
 
 export function WOByPriorityChart({ data }: WOByPriorityChartProps) {
+  const { t } = useTranslation()
   const total = Object.values(data).reduce((s, v) => s + v, 0)
 
   const chartData = Object.entries(data)
     .filter(([, count]) => count > 0)
     .map(([priority, count]) => ({
-      name: priority.charAt(0).toUpperCase() + priority.slice(1),
+      name: label('priority', priority),
       value: count,
       key: priority,
     }))
@@ -50,7 +53,7 @@ export function WOByPriorityChart({ data }: WOByPriorityChartProps) {
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
         <div className="text-center" style={{ marginTop: '-10px' }}>
           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{total}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">total</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t('workOrders.charts.total')}</p>
         </div>
       </div>
     </div>

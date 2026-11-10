@@ -1,15 +1,17 @@
-Hi <%= @manager.full_name %>,
+<%= t("mail.greeting", name: @manager.full_name) %>
 
-A work order has been completed and is ready for your verification.
+<%= t(".intro") %>
 
-Work Order: <%= @work_order.work_order_number %>
-Title:      <%= @work_order.title %>
-Priority:   <%= @work_order.priority.upcase %>
-Completed:  <%= @work_order.completed_at&.strftime("%Y-%m-%d %H:%M UTC") || "Unknown" %>
+<%= mail_fields(
+  t("mail.work_order") => @work_order.work_order_number,
+  t("mail.title") => @work_order.title,
+  t("mail.priority") => mail_priority(@work_order.priority),
+  t("mail.completed") => @work_order.completed_at&.strftime("%Y-%m-%d %H:%M UTC") || t("mail.unknown")
+) %>
 
-Completion Notes:
+<%= t("mail.completion_notes") %>:
 <%= @work_order.completion_notes %>
 
-Please log in to FixFlow to review and verify this work order.
+<%= t(".outro") %>
 
-— FixFlow
+<%= t("mail.signature") %>

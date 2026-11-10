@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Code128Barcode } from '@/components/assets/Code128Barcode'
 import { BARCODE_QUIET_ZONE, LABEL_GAP, LABEL_PADDING, LABEL_SIZES, labelQrValue, type LabelSizeKey } from '@/lib/labelSheet'
 import type { LabelAsset } from '@/types/scanning'
@@ -20,6 +21,7 @@ interface AssetLabelProps {
 
 /** One label, in millimetres: the QR code to report a problem, the name, the tag, the place and the tag's barcode. */
 export function AssetLabel({ asset, options, qr, origin }: AssetLabelProps) {
+  const { t } = useTranslation()
   const size = LABEL_SIZES[options.size]
   return (
     <div
@@ -30,7 +32,7 @@ export function AssetLabel({ asset, options, qr, origin }: AssetLabelProps) {
       }}
     >
       {qr ? (
-        <img src={qr} alt={`QR code for ${asset.name}`} data-qr={labelQrValue(asset, origin)} style={{ height: '100%', aspectRatio: '1', flex: 'none' }} />
+        <img src={qr} alt={t('assets.label.qr_alt', { name: asset.name })} data-qr={labelQrValue(asset, origin)} style={{ height: '100%', aspectRatio: '1', flex: 'none' }} />
       ) : (
         <div style={{ height: '100%', aspectRatio: '1', flex: 'none', background: '#f3f4f6' }} />
       )}

@@ -1,8 +1,8 @@
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { MoreHorizontal, User, RefreshCw, Zap, Copy, Check } from 'lucide-react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { Skeleton } from '@/components/ui/Skeleton'
@@ -39,6 +39,7 @@ interface WorkOrdersTableProps {
 }
 
 function CopyableId({ text }: { text: string }) {
+  const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
   const copy = () => {
     navigator.clipboard.writeText(text).catch(() => {})
@@ -52,7 +53,7 @@ function CopyableId({ text }: { text: string }) {
         copy()
       }}
       className="group flex items-center gap-1 font-mono text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-      aria-label={`Copy ${text}`}
+      aria-label={t('workOrders.table.copy', { text })}
     >
       {text}
       {copied ? (
@@ -73,8 +74,9 @@ export function WorkOrdersTable({
   selectedIds,
   onSelectChange,
   rowActions = [],
-  emptyMessage = 'No work orders found.',
+  emptyMessage,
 }: WorkOrdersTableProps) {
+  const { t } = useTranslation()
   // The custom fields an administrator chose to show in the lists, one column each.
   const { data: customFields } = useCustomFields('work_order')
   const listFields = activeFields(customFields).filter((field) => field.in_list)
@@ -112,7 +114,7 @@ export function WorkOrdersTable({
   if (!workOrders.length) {
     return (
       <div className="flex items-center justify-center rounded-lg border border-dashed border-gray-300 py-12 dark:border-gray-600">
-        <p className="text-sm text-gray-500 dark:text-gray-400">{emptyMessage}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{emptyMessage ?? t('workOrders.table.empty')}</p>
       </div>
     )
   }
@@ -128,35 +130,35 @@ export function WorkOrdersTable({
                   type="checkbox"
                   checked={!!allSelected}
                   onChange={toggleAll}
-                  aria-label="Select all"
+                  aria-label={t('workOrders.table.select_all')}
                   className="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
                 />
               </th>
             )}
             <th className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">
-              WO #
+              {t('workOrders.table.number')}
             </th>
             <th className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">
-              Title
+              {t('workOrders.table.title')}
             </th>
             <th className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">
-              Priority
+              {t('workOrders.table.priority')}
             </th>
             <th className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">
-              Status
+              {t('workOrders.table.status')}
             </th>
             {showAsset && (
               <th className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">
-                Asset
+                {t('workOrders.table.asset')}
               </th>
             )}
             {showAssignee && (
               <th className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">
-                Assignee
+                {t('workOrders.table.assignee')}
               </th>
             )}
             <th className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">
-              Due Date
+              {t('workOrders.table.due_date')}
             </th>
             {listFields.map((field) => (
               <th key={field.key} className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400">
@@ -192,7 +194,7 @@ export function WorkOrdersTable({
                       type="checkbox"
                       checked={selectedIds?.has(wo.id) ?? false}
                       onChange={() => toggleRow(wo.id)}
-                      aria-label={`Select ${wo.work_order_number}`}
+                      aria-label={t('workOrders.table.select', { number: wo.work_order_number })}
                       className="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
                     />
                   </td>
@@ -243,7 +245,7 @@ export function WorkOrdersTable({
                         {wo.assignee.full_name}
                       </span>
                     ) : (
-                      <span className="italic text-gray-400">Unassigned</span>
+                      <span className="italic text-gray-400">{t('common.state.unassigned')}</span>
                     )}
                   </td>
                 )}
@@ -263,7 +265,7 @@ export function WorkOrdersTable({
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 opacity-0 group-hover:opacity-100"
-                          aria-label="Row actions"
+                          aria-label={t('workOrders.table.row_actions')}
                         >
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>

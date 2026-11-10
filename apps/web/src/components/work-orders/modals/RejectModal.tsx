@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
@@ -17,6 +18,7 @@ const MOCK_TECHNICIANS = [
 ]
 
 export function RejectModal({ workOrderId, currentAssigneeId, open, onClose }: RejectModalProps) {
+  const { t } = useTranslation()
   const [reason, setReason] = useState('')
   const [reassignTo, setReassignTo] = useState<number | null>(currentAssigneeId ?? null)
   const reject = useRejectWorkOrder()
@@ -34,35 +36,35 @@ export function RejectModal({ workOrderId, currentAssigneeId, open, onClose }: R
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Reject Completion">
+    <Modal open={open} onClose={onClose} title={t('workOrders.reject.title')}>
       <div className="space-y-4">
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Rejection Reason * <span className="text-xs text-gray-400">(min 20 chars)</span>
+            {t('workOrders.reject.reason')} <span className="text-xs text-gray-400">{t('workOrders.complete.notes_min')}</span>
           </label>
           <textarea
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             rows={4}
             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-            placeholder="Explain why this work order cannot be verified..."
+            placeholder={t('workOrders.reject.placeholder')}
           />
-          <p className="mt-0.5 text-xs text-gray-400">{reason.length} chars</p>
+          <p className="mt-0.5 text-xs text-gray-400">{t('workOrders.complete.chars', { count: reason.length })}</p>
         </div>
 
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Re-assign to
+            {t('workOrders.reject.reassign')}
           </label>
           <select
             value={reassignTo ?? ''}
             onChange={(e) => setReassignTo(e.target.value ? Number(e.target.value) : null)}
             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
           >
-            <option value="">Keep current assignee</option>
-            {MOCK_TECHNICIANS.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.full_name}
+            <option value="">{t('workOrders.reject.keep')}</option>
+            {MOCK_TECHNICIANS.map((tech) => (
+              <option key={tech.id} value={tech.id}>
+                {tech.full_name}
               </option>
             ))}
           </select>
@@ -70,7 +72,7 @@ export function RejectModal({ workOrderId, currentAssigneeId, open, onClose }: R
 
         <div className="flex justify-end gap-2 pt-2">
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            {t('common.actions.cancel')}
           </Button>
           <Button
             variant="destructive"
@@ -78,7 +80,7 @@ export function RejectModal({ workOrderId, currentAssigneeId, open, onClose }: R
             disabled={!canSubmit || reject.isPending}
             loading={reject.isPending}
           >
-            Reject &amp; Return
+            {t('workOrders.reject.submit')}
           </Button>
         </div>
       </div>

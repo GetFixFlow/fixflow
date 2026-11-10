@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
@@ -16,6 +17,7 @@ const FIELD =
   'w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100'
 
 export function PartLogModal({ workOrderId, open, onClose }: PartLogModalProps) {
+  const { t } = useTranslation()
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<Part | null>(null)
   const [qty, setQty] = useState('1')
@@ -47,7 +49,7 @@ export function PartLogModal({ workOrderId, open, onClose }: PartLogModalProps) 
   }
 
   return (
-    <Modal open={open} onClose={close} title="Log Parts Used">
+    <Modal open={open} onClose={close} title={t('workOrders.partlog.title')}>
       <div className="space-y-4">
         {selected ? (
           <div className="flex items-start justify-between rounded-md border border-gray-200 px-3 py-2 dark:border-gray-700">
@@ -55,23 +57,23 @@ export function PartLogModal({ workOrderId, open, onClose }: PartLogModalProps) 
               <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{selected.name}</p>
               <p className="text-xs text-gray-500">
                 {selected.sku ? `${selected.sku} · ` : ''}
-                {selected.quantity_on_hand} {selected.unit ?? 'each'} in stock
+                {t('workOrders.partlog.in_stock_unit', { qty: selected.quantity_on_hand, unit: selected.unit ?? t('workOrders.partlog.each') })}
               </p>
             </div>
             <Button variant="ghost" size="sm" onClick={() => setSelected(null)}>
-              Change
+              {t('workOrders.vendor.change')}
             </Button>
           </div>
         ) : (
           <div>
             <label htmlFor="part-search" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Part *
+              {t('workOrders.partlog.part')}
             </label>
             <input
               id="part-search"
               type="search"
               autoFocus
-              placeholder="Search by name or SKU"
+              placeholder={t('workOrders.partlog.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className={FIELD}
@@ -90,14 +92,14 @@ export function PartLogModal({ workOrderId, open, onClose }: PartLogModalProps) 
                       {part.sku && <span className="ml-1 text-xs text-gray-400">{part.sku}</span>}
                     </span>
                     <span className="text-xs text-gray-500">
-                      {part.quantity_on_hand <= 0 ? 'Out of stock' : `${part.quantity_on_hand} in stock`}
+                      {part.quantity_on_hand <= 0 ? t('workOrders.partlog.out') : t('workOrders.partlog.in_stock', { qty: part.quantity_on_hand })}
                     </span>
                   </button>
                 </li>
               ))}
               {!isLoading && parts.length === 0 && (
                 <li className="px-3 py-2 text-xs text-gray-400">
-                  {search ? 'No parts match that search.' : 'No parts have been added yet.'}
+                  {search ? t('workOrders.partlog.no_match') : t('workOrders.partlog.no_parts')}
                 </li>
               )}
             </ul>
@@ -107,7 +109,7 @@ export function PartLogModal({ workOrderId, open, onClose }: PartLogModalProps) 
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label htmlFor="part-qty" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Quantity *
+              {t('workOrders.partlog.quantity')}
             </label>
             <input
               id="part-qty"
@@ -122,7 +124,7 @@ export function PartLogModal({ workOrderId, open, onClose }: PartLogModalProps) 
           </div>
           <div>
             <label htmlFor="part-cost" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Unit Cost ($) *
+              {t('workOrders.partlog.unit_cost')}
             </label>
             <input
               id="part-cost"
@@ -138,23 +140,23 @@ export function PartLogModal({ workOrderId, open, onClose }: PartLogModalProps) 
 
         {overStock && (
           <p role="alert" className="text-sm text-red-600 dark:text-red-400">
-            Quantity exceeds the stock on hand ({selected?.quantity_on_hand}).
+            {t('workOrders.partlog.over', { qty: selected?.quantity_on_hand })}
           </p>
         )}
 
         {canSubmit && (
           <div className="flex items-center justify-between rounded-md bg-gray-50 px-3 py-2 dark:bg-gray-800">
-            <span className="text-sm text-gray-600 dark:text-gray-400">Total:</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">{t('workOrders.partlog.total')}</span>
             <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{formatMoney(total)}</span>
           </div>
         )}
 
         <div className="flex justify-end gap-2 pt-2">
           <Button variant="outline" onClick={close}>
-            Cancel
+            {t('common.actions.cancel')}
           </Button>
           <Button onClick={handleLog} disabled={!canSubmit || logPart.isPending} loading={logPart.isPending}>
-            Log Parts
+            {t('workOrders.partlog.submit')}
           </Button>
         </div>
       </div>

@@ -1,6 +1,9 @@
 class UserBlueprint < Blueprinter::Base
   identifier :id
   fields :email, :role, :first_name, :last_name, :phone, :organization_id, :created_at
+  # The language this person chose, or nil when they use the company's.
+  field :locale
+  field(:language) { |user| Locales.for_user(user) }
   field(:full_name) { |user| user.full_name }
   field(:active) { |user| user.active? }
   field(:invitation_pending) { |user| user.invitation_pending? }

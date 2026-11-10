@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
@@ -14,14 +15,10 @@ interface VerifyModalProps {
   onReject: () => void
 }
 
-const VERIFY_CHECKLIST = [
-  'Work was completed as described',
-  'Asset is functional and tested',
-  'Area cleaned up',
-  'Documentation complete',
-]
+const VERIFY_CHECKLIST = ['completed', 'functional', 'cleaned', 'documented'] as const
 
 export function VerifyModal({ workOrder, open, onClose, onReject }: VerifyModalProps) {
+  const { t } = useTranslation()
   const [note, setNote] = useState('')
   const [checked, setChecked] = useState<Record<string, boolean>>({})
   const verify = useVerifyWorkOrder()
@@ -39,19 +36,19 @@ export function VerifyModal({ workOrder, open, onClose, onReject }: VerifyModalP
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Verify Completion">
+    <Modal open={open} onClose={onClose} title={t('workOrders.verify.title')}>
       <div className="space-y-4">
         {/* Summary */}
         <div className="rounded-lg bg-gray-50 p-3 text-sm space-y-1.5 dark:bg-gray-800">
           <div className="flex justify-between">
-            <span className="text-gray-500">Completed by</span>
+            <span className="text-gray-500">{t('workOrders.verify.completed_by')}</span>
             <span className="font-medium text-gray-900 dark:text-gray-100">
               {workOrder.assignee?.full_name ?? '—'}
             </span>
           </div>
           {workOrder.completed_at && (
             <div className="flex justify-between">
-              <span className="text-gray-500">Completed at</span>
+              <span className="text-gray-500">{t('workOrders.verify.completed_at')}</span>
               <span className="font-medium text-gray-900 dark:text-gray-100">
                 {formatDateTime(new Date(workOrder.completed_at))}
               </span>
@@ -59,23 +56,23 @@ export function VerifyModal({ workOrder, open, onClose, onReject }: VerifyModalP
           )}
           {workOrder.actual_hours && (
             <div className="flex justify-between">
-              <span className="text-gray-500">Actual hours</span>
+              <span className="text-gray-500">{t('workOrders.verify.hours')}</span>
               <span className="font-medium text-gray-900 dark:text-gray-100">
-                {workOrder.actual_hours} hrs
+                {t('workOrders.verify.hrs', { hours: workOrder.actual_hours })}
               </span>
             </div>
           )}
           {parts.length > 0 && (
             <div className="flex justify-between">
-              <span className="text-gray-500">Parts used</span>
+              <span className="text-gray-500">{t('workOrders.verify.parts')}</span>
               <span className="font-medium text-gray-900 dark:text-gray-100">
-                {parts.length} part{parts.length !== 1 && 's'} ({formatMoney(partsCost)})
+                {t('workOrders.verify.parts_used', { count: parts.length, cost: formatMoney(partsCost) })}
               </span>
             </div>
           )}
           {workOrder.completion_notes && (
             <div>
-              <span className="text-gray-500 block">Completion notes</span>
+              <span className="text-gray-500 block">{t('workOrders.verify.notes')}</span>
               <p className="mt-1 text-gray-700 dark:text-gray-300 text-xs italic">
                 "{workOrder.completion_notes}"
               </p>
@@ -86,7 +83,7 @@ export function VerifyModal({ workOrder, open, onClose, onReject }: VerifyModalP
         {/* Verification checklist */}
         <div>
           <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-            Verification checklist
+            {t('workOrders.verify.checklist')}
           </p>
           <div className="space-y-1.5">
             {VERIFY_CHECKLIST.map((item) => (
@@ -100,7 +97,7 @@ export function VerifyModal({ workOrder, open, onClose, onReject }: VerifyModalP
                   onChange={() => toggleCheck(item)}
                   className="h-4 w-4 rounded border-gray-300 text-brand-600"
                 />
-                {item}
+                {t(`workOrders.verify.item_${item}`)}
               </label>
             ))}
           </div>
@@ -109,27 +106,27 @@ export function VerifyModal({ workOrder, open, onClose, onReject }: VerifyModalP
         {/* Note */}
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Verification note
+            {t('workOrders.verify.note')}
           </label>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
             rows={3}
             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-            placeholder="Optional verification notes..."
+            placeholder={t('workOrders.verify.note_placeholder')}
           />
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
           <Button variant="outline" onClick={onReject} className="text-red-600">
-            Reject
+            {t('workOrders.verify.reject')}
           </Button>
           <Button
             onClick={handleVerify}
             disabled={verify.isPending}
             loading={verify.isPending}
           >
-            Verify &amp; Close
+            {t('workOrders.verify.submit')}
           </Button>
         </div>
       </div>

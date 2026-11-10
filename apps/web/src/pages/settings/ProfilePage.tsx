@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Eye, EyeOff, ChevronDown, ChevronUp, Check } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -14,8 +15,9 @@ import {
   useProfile,
   useUpdateProfile,
   useChangePassword,
+  useLocalization,
 } from '@/hooks/useSettings'
-import { format } from 'date-fns'
+import { LANGUAGES, currentLanguage, label } from '@/i18n'
 import { cn } from '@/lib/utils'
 
 function nameToColor(name: string): string {
@@ -25,33 +27,34 @@ function nameToColor(name: string): string {
   return colors[Math.abs(hash) % colors.length]
 }
 
-function passwordStrength(pw: string): { score: number; label: string; color: string } {
+function passwordStrength(pw: string): { score: number; labelKey: string; color: string } {
   let score = 0
   if (pw.length >= 8) score++
   if (/[A-Z]/.test(pw)) score++
   if (/[0-9]/.test(pw)) score++
   if (/[^A-Za-z0-9]/.test(pw)) score++
-  const labels = ['', 'Weak', 'Fair', 'Good', 'Strong']
+  const labelKeys = ['', 'weak', 'fair', 'good', 'strong']
   const colors = ['', 'bg-red-500', 'bg-amber-500', 'bg-yellow-400', 'bg-green-500']
-  return { score, label: labels[score] || '', color: colors[score] || '' }
+  return { score, labelKey: labelKeys[score], color: colors[score] || '' }
 }
 
 const profileSchema = z.object({
-  full_name: z.string().min(2, 'Name is required'),
+  full_name: z.string().min(2, 'settings.profile.errors.name_required'),
   email: z.string().optional(),
   phone: z.string().optional(),
   job_title: z.string().optional(),
   department: z.string().optional(),
+  locale: z.string().optional(),
 })
 
 const passwordSchema = z
   .object({
-    current_password: z.string().min(1, 'Required'),
-    password: z.string().min(10, 'At least 10 characters'),
+    current_password: z.string().min(1, 'common.state.required'),
+    password: z.string().min(10, 'settings.profile.errors.password_min'),
     password_confirmation: z.string(),
   })
   .refine((d) => d.password === d.password_confirmation, {
-    message: 'Passwords do not match',
+    message: 'auth.errors.passwords_match',
     path: ['password_confirmation'],
   })
 
@@ -66,9 +69,11 @@ const ROLE_COLORS: Record<string, string> = {
 }
 
 export function ProfilePage() {
+  const { t } = useTranslation()
   const { user } = useAuthStore()
   const { data: profile, isLoading } = useProfile()
   const updateProfile = useUpdateProfile()
+  const { data: company } = useLocalization()
   const changePassword = useChangePassword()
 
   const [pwVisible, setPwVisible] = useState<Record<string, boolean>>({})
@@ -82,6 +87,7 @@ export function ProfilePage() {
       phone: '',
       job_title: '',
       department: '',
+      locale: '',
     },
     values: profile
       ? {
@@ -90,23 +96,24 @@ export function ProfilePage() {
           phone: profile.phone ?? '',
           job_title: profile.job_title ?? '',
           department: profile.department ?? '',
+          locale: profile.locale ?? '',
         }
       : undefined,
   })
 
   const pwForm = useForm<PasswordFormData>({ resolver: zodResolver(passwordSchema) })
   const newPw = pwForm.watch('password', '')
-  const { score: pwScore, label: pwLabel, color: pwColor } = passwordStrength(newPw)
+  const { score: pwScore, labelKey: pwLabelKey, color: pwColor } = passwordStrength(newPw)
 
   const pwReqs = [
-    { label: 'At least 10 characters (required)', met: newPw.length >= 10 },
-    { label: 'An uppercase letter (stronger, not required)', met: /[A-Z]/.test(newPw) },
-    { label: 'A number (stronger, not required)', met: /[0-9]/.test(newPw) },
-    { label: 'A symbol (stronger, not required)', met: /[^A-Za-z0-9]/.test(newPw) },
+    { label: t('settings.profile.req_length'), met: newPw.length >= 10 },
+    { label: t('settings.profile.req_upper'), met: /[A-Z]/.test(newPw) },
+    { label: t('settings.profile.req_number'), met: /[0-9]/.test(newPw) },
+    { label: t('settings.profile.req_symbol'), met: /[^A-Za-z0-9]/.test(newPw) },
   ]
 
   const onSaveProfile = form.handleSubmit((data) => {
-    updateProfile.mutate({ full_name: data.full_name, phone: data.phone, job_title: data.job_title, department: data.department })
+    updateProfile.mutate({ full_name: data.full_name, phone: data.phone, job_title: data.job_title, department: data.department, locale: data.locale ?? '' })
   })
 
   const onChangePassword = pwForm.handleSubmit((data) => {
@@ -128,12 +135,12 @@ export function ProfilePage() {
 
   return (
     <div className="space-y-6 max-w-2xl">
-      <PageHeader title="My Profile" description="Update your personal information and preferences" />
+      <PageHeader title={t('settings.profile.title')} description={t('settings.profile.description')} />
 
       {/* Profile Form */}
       <Card>
         <CardContent className="p-6 space-y-5">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Profile Information</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t('settings.profile.info')}</h3>
 
           {/* Avatar: initials only; photo upload is not supported yet */}
           <div className="flex items-center gap-4">
@@ -152,59 +159,76 @@ export function ProfilePage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Full Name *
+                    {t('settings.profile.full_name')} *
                   </label>
                   <Input {...form.register('full_name')} />
                   {form.formState.errors.full_name && (
-                    <p className="text-xs text-red-500 mt-1">{form.formState.errors.full_name.message}</p>
+                    <p className="text-xs text-red-500 mt-1">{t(form.formState.errors.full_name.message ?? '')}</p>
                   )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Email
+                    {t('auth.email')}
                   </label>
                   <Input {...form.register('email')} type="email" disabled aria-describedby="email-note" />
-                  <p id="email-note" className="text-xs text-gray-400 mt-1">Your sign-in email cannot be changed here yet.</p>
+                  <p id="email-note" className="text-xs text-gray-400 mt-1">{t('settings.profile.email_note')}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Phone
+                    {t('settings.profile.phone')}
                   </label>
                   <Input {...form.register('phone')} type="tel" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Job Title
+                    {t('settings.profile.job_title')}
                   </label>
                   <Input {...form.register('job_title')} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Department
+                    {t('settings.profile.department')}
                   </label>
                   <Input {...form.register('department')} />
+                </div>
+                <div className="sm:col-span-2">
+                  <label htmlFor="profile-language" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {t('language.label')}
+                  </label>
+                  <select
+                    id="profile-language"
+                    {...form.register('locale')}
+                    className="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                  >
+                    <option value="">
+                      {t('language.use_company', { name: LANGUAGES.find((l) => l.code === company?.language)?.name ?? LANGUAGES[0].name })}
+                    </option>
+                    {LANGUAGES.map((language) => (
+                      <option key={language.code} value={language.code}>{language.name}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
               {/* Read-only fields */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-gray-100 dark:border-gray-700">
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Role</label>
+                  <label className="block text-xs text-gray-400 mb-1">{t('settings.profile.role')}</label>
                   <span className={cn(
                     'inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize',
                     ROLE_COLORS[user?.role ?? 'technician'],
                   )}>
-                    {user?.role}
+                    {label('role', user?.role)}
                   </span>
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Organization</label>
+                  <label className="block text-xs text-gray-400 mb-1">{t('settings.profile.organization')}</label>
                   <p className="text-sm text-gray-700 dark:text-gray-300">{profile?.organization_name ?? '—'}</p>
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Member Since</label>
+                  <label className="block text-xs text-gray-400 mb-1">{t('settings.profile.member_since')}</label>
                   <p className="text-sm text-gray-700 dark:text-gray-300">
-                    {user?.created_at ? format(new Date(user.created_at), 'MMMM yyyy') : '—'}
+                    {user?.created_at ? new Intl.DateTimeFormat(currentLanguage(), { month: 'long', year: 'numeric' }).format(new Date(user.created_at)) : '—'}
                   </p>
                 </div>
               </div>
@@ -212,7 +236,7 @@ export function ProfilePage() {
           )}
 
           <Button onClick={onSaveProfile} disabled={updateProfile.isPending}>
-            {updateProfile.isPending ? 'Saving…' : 'Save Changes'}
+            {updateProfile.isPending ? t('common.actions.saving') : t('settings.profile.save')}
           </Button>
         </CardContent>
       </Card>
@@ -223,16 +247,16 @@ export function ProfilePage() {
           onClick={() => setPwOpen(!pwOpen)}
           className="w-full flex items-center justify-between p-5 text-left"
         >
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Change Password</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t('settings.profile.change_password')}</h3>
           {pwOpen ? <ChevronUp className="h-5 w-5 text-gray-400" /> : <ChevronDown className="h-5 w-5 text-gray-400" />}
         </button>
         {pwOpen && (
           <CardContent className="px-5 pb-5 space-y-4 border-t border-gray-100 dark:border-gray-700">
             {(['current_password', 'password', 'password_confirmation'] as const).map((field) => {
               const labels = {
-                current_password: 'Current Password',
-                password: 'New Password',
-                password_confirmation: 'Confirm Password',
+                current_password: t('settings.profile.current_password'),
+                password: t('settings.profile.new_password'),
+                password_confirmation: t('settings.profile.confirm_password'),
               }
               return (
                 <div key={field}>
@@ -254,7 +278,7 @@ export function ProfilePage() {
                     </button>
                   </div>
                   {pwForm.formState.errors[field] && (
-                    <p className="text-xs text-red-500 mt-1">{pwForm.formState.errors[field]?.message}</p>
+                    <p className="text-xs text-red-500 mt-1">{t(pwForm.formState.errors[field]?.message ?? '')}</p>
                   )}
                 </div>
               )
@@ -263,12 +287,12 @@ export function ProfilePage() {
             {newPw && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-500">Password Strength</span>
+                  <span className="text-gray-500">{t('settings.profile.strength')}</span>
                   <span className={cn(
                     'font-medium',
                     pwScore >= 3 ? 'text-green-600' : pwScore >= 2 ? 'text-amber-600' : 'text-red-600',
                   )}>
-                    {pwLabel}
+                    {pwLabelKey ? t(`settings.profile.strength_${pwLabelKey}`) : ''}
                   </span>
                 </div>
                 <div className="flex gap-1">
@@ -285,13 +309,13 @@ export function ProfilePage() {
                   ))}
                 </div>
                 <p className="text-xs text-gray-500">
-                  Common passwords, and ones made from your name or email address, are refused when you save.
+                  {t('settings.profile.refused')}
                 </p>
               </div>
             )}
 
             <Button onClick={onChangePassword} disabled={changePassword.isPending}>
-              {changePassword.isPending ? 'Updating…' : 'Update Password'}
+              {changePassword.isPending ? t('settings.profile.updating') : t('settings.profile.update_password')}
             </Button>
           </CardContent>
         )}

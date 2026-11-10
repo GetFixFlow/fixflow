@@ -1,3 +1,5 @@
+import { label } from '@/i18n'
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -13,10 +15,10 @@ import { missingRequired, toPayload } from '@/lib/customFields'
 import type { Priority } from '@/types'
 
 const schema = z.object({
-  title: z.string().min(5, 'Title must be at least 5 characters').max(200),
+  title: z.string().min(5, 'workOrders.form.title_short').max(200, 'workOrders.form.title_long'),
   description: z.string().optional(),
   priority: z.enum(['critical', 'high', 'medium', 'low'] as const),
-  asset_id: z.number({ error: 'Asset is required' }),
+  asset_id: z.number({ error: 'workOrders.form.asset_required' }),
   due_date: z.string().optional(),
   estimated_hours: z.number().positive().optional(),
   assignee_id: z.number().optional(),
@@ -27,11 +29,11 @@ const schema = z.object({
 
 export type WorkOrderFormValues = z.infer<typeof schema>
 
-const PRIORITY_OPTIONS: { value: Priority; label: string; color: string }[] = [
-  { value: 'critical', label: '🔴 Critical', color: 'border-red-400 bg-red-50 text-red-700 dark:border-red-600 dark:bg-red-900/20 dark:text-red-300' },
-  { value: 'high', label: '🟠 High', color: 'border-orange-400 bg-orange-50 text-orange-700 dark:border-orange-600 dark:bg-orange-900/20 dark:text-orange-300' },
-  { value: 'medium', label: '🟡 Medium', color: 'border-yellow-400 bg-yellow-50 text-yellow-700 dark:border-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-300' },
-  { value: 'low', label: '🔵 Low', color: 'border-blue-400 bg-blue-50 text-blue-700 dark:border-blue-600 dark:bg-blue-900/20 dark:text-blue-300' },
+const PRIORITY_OPTIONS: { value: Priority; icon: string; color: string }[] = [
+  { value: 'critical', icon: '🔴', color: 'border-red-400 bg-red-50 text-red-700 dark:border-red-600 dark:bg-red-900/20 dark:text-red-300' },
+  { value: 'high', icon: '🟠', color: 'border-orange-400 bg-orange-50 text-orange-700 dark:border-orange-600 dark:bg-orange-900/20 dark:text-orange-300' },
+  { value: 'medium', icon: '🟡', color: 'border-yellow-400 bg-yellow-50 text-yellow-700 dark:border-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-300' },
+  { value: 'low', icon: '🔵', color: 'border-blue-400 bg-blue-50 text-blue-700 dark:border-blue-600 dark:bg-blue-900/20 dark:text-blue-300' },
 ]
 
 interface WorkOrderFormProps {
@@ -51,6 +53,7 @@ export function WorkOrderForm({
   lockedAssetId,
   onCancel,
 }: WorkOrderFormProps) {
+  const { t } = useTranslation()
   const {
     register,
     handleSubmit,
@@ -92,38 +95,38 @@ export function WorkOrderForm({
       {/* What needs fixing */}
       <section className="space-y-4">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-          What needs fixing?
+          {t('workOrders.form.what')}
         </h2>
 
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Title *
+            {t('workOrders.form.title')}
           </label>
           <Input
             {...register('title')}
-            placeholder="Describe the issue..."
+            placeholder={t('workOrders.form.title_placeholder')}
             className={errors.title ? 'border-red-400' : ''}
           />
           {errors.title && (
-            <p className="mt-1 text-xs text-red-500">{errors.title.message}</p>
+            <p className="mt-1 text-xs text-red-500">{t(errors.title.message ?? '')}</p>
           )}
         </div>
 
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Description
+            {t('workOrders.form.description')}
           </label>
           <textarea
             {...register('description')}
             rows={4}
             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-            placeholder="Additional details..."
+            placeholder={t('workOrders.form.description_placeholder')}
           />
         </div>
 
         <div>
           <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Priority *
+            {t('workOrders.form.priority')}
           </label>
           <div className="flex flex-wrap gap-2">
             {PRIORITY_OPTIONS.map((opt) => (
@@ -138,7 +141,7 @@ export function WorkOrderForm({
                     : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400',
                 )}
               >
-                {opt.label}
+                {opt.icon} {label('priority', opt.value)}
               </button>
             ))}
           </div>
@@ -148,16 +151,16 @@ export function WorkOrderForm({
       {/* Which asset */}
       <section className="space-y-4">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-          Which asset?
+          {t('workOrders.form.which_asset')}
         </h2>
 
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Asset *
+            {t('workOrders.form.asset')}
           </label>
           {lockedAssetId ? (
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Pre-filled from asset detail page (ID: {lockedAssetId})
+              {t('workOrders.form.prefilled', { id: lockedAssetId })}
             </p>
           ) : (
             <Controller
@@ -172,7 +175,7 @@ export function WorkOrderForm({
             />
           )}
           {errors.asset_id && (
-            <p className="mt-1 text-xs text-red-500">{errors.asset_id.message}</p>
+            <p className="mt-1 text-xs text-red-500">{t(errors.asset_id.message ?? '')}</p>
           )}
         </div>
       </section>
@@ -180,13 +183,13 @@ export function WorkOrderForm({
       {/* Who & When */}
       <section className="space-y-4">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-          Who &amp; When?
+          {t('workOrders.form.who_when')}
         </h2>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Due Date
+              {t('workOrders.form.due_date')}
             </label>
             <Input
               type="datetime-local"
@@ -195,14 +198,14 @@ export function WorkOrderForm({
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Estimated Hours
+              {t('workOrders.form.estimated_hours')}
             </label>
             <Input
               type="number"
               step="0.5"
               min="0.5"
               {...register('estimated_hours', { setValueAs: (value) => (value === '' || value == null ? undefined : Number(value)) })}
-              placeholder="e.g. 2.0"
+              placeholder={t('workOrders.form.estimated_placeholder')}
             />
           </div>
         </div>
@@ -211,7 +214,7 @@ export function WorkOrderForm({
       {customFields.length > 0 && (
         <section className="space-y-4">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-            More details
+            {t('workOrders.form.more_details')}
           </h2>
           <CustomFieldInputs
             fields={customFields}
@@ -226,19 +229,19 @@ export function WorkOrderForm({
       {/* Additional */}
       <section className="space-y-4">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-          Additional
+          {t('workOrders.form.additional')}
         </h2>
 
         {mode === 'create' && (
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Initial Comment
+              {t('workOrders.form.initial_comment')}
             </label>
             <textarea
               {...register('initial_comment')}
               rows={3}
               className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-              placeholder="Any additional context for the technician..."
+              placeholder={t('workOrders.form.initial_comment_placeholder')}
             />
           </div>
         )}
@@ -248,7 +251,7 @@ export function WorkOrderForm({
       <div className="flex items-center justify-end gap-3 border-t border-gray-200 pt-4 dark:border-gray-700">
         {onCancel && (
           <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
+            {t('common.actions.cancel')}
           </Button>
         )}
         <Button
@@ -256,7 +259,7 @@ export function WorkOrderForm({
           disabled={isLoading || (mode === 'edit' && !isDirty)}
           loading={isLoading}
         >
-          {mode === 'create' ? 'Create Work Order' : 'Save Changes'}
+          {mode === 'create' ? t('workOrders.form.create') : t('workOrders.form.save')}
         </Button>
       </div>
     </form>

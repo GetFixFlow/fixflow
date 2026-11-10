@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   ArrowLeft,
   ChevronRight,
@@ -36,8 +37,9 @@ import { useWorkOrders } from '@/hooks/useWorkOrders'
 import { useAuthStore } from '@/stores/authStore'
 import { useRealtimeStore } from '@/stores/realtimeStore'
 import { Badge, statusBadge, priorityBadge } from '@/components/ui/Badge'
-import { format, formatDistanceToNow } from 'date-fns'
-import { formatDate } from '@/lib/localeFormat'
+import { formatDate, formatDateTime } from '@/lib/localeFormat'
+import { timeAgo } from '@/lib/timeAgo'
+import { label as word } from '@/i18n'
 
 function InfoCard({
   icon: Icon,
@@ -72,16 +74,18 @@ const WARRANTY_TONE = {
 } as const
 
 function WarrantyNote({ endsOn }: { endsOn: string }) {
+  const { t } = useTranslation()
   const { tone, text } = warrantyStatus(endsOn)
   return (
     <div role="status" className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${WARRANTY_TONE[tone]}`}>
       <ShieldCheck className="h-4 w-4 shrink-0" />
-      <span>Warranty {text} ({formatDate(endsOn)}).</span>
+      <span>{t('assets.warranty.note', { text, date: formatDate(endsOn) })}</span>
     </div>
   )
 }
 
 export function AssetDetailPage() {
+  const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { user } = useAuthStore()
@@ -102,7 +106,7 @@ export function AssetDetailPage() {
   const [activeTab, setActiveTab] = useState('overview')
 
   const handleDelete = async () => {
-    if (!asset || !confirm(`Delete "${asset.name}"? This cannot be undone.`)) return
+    if (!asset || !confirm(t('assets.detail.delete_confirm', { name: asset.name }))) return
     await deleteMutation.mutateAsync(asset.id)
     navigate('/assets')
   }
@@ -131,9 +135,9 @@ export function AssetDetailPage() {
   if (error || !asset) {
     return (
       <div className="py-12 text-center">
-        <p className="text-sm text-gray-500">Asset not found or you don&apos;t have access.</p>
+        <p className="text-sm text-gray-500">{t('assets.detail.not_found')}</p>
         <Button variant="link" asChild className="mt-4">
-          <Link to="/assets">← Back to Assets</Link>
+          <Link to="/assets">{t('assets.detail.back_to_assets')}</Link>
         </Button>
       </div>
     )
@@ -144,7 +148,7 @@ export function AssetDetailPage() {
     id: wo.id,
     type: 'work_order' as const,
     title: `${wo.work_order_number} — ${wo.title}`,
-    description: `${wo.status.replace('_', ' ')} · ${wo.priority} priority`,
+    description: t('assets.detail.timeline_description', { status: word('status', wo.status).toLowerCase(), priority: word('priority', wo.priority).toLowerCase() }),
     date: wo.updated_at,
     meta: wo.actual_hours ? `${wo.actual_hours}h` : undefined,
   }))
@@ -161,7 +165,7 @@ export function AssetDetailPage() {
           <Button variant="ghost" size="sm" asChild className="-ml-2 mb-2">
             <Link to="/assets">
               <ArrowLeft className="h-4 w-4" />
-              Assets
+              {t('assets.detail.assets')}
             </Link>
           </Button>
           <div className="flex flex-wrap items-center gap-2">
@@ -169,7 +173,7 @@ export function AssetDetailPage() {
             <button
               onClick={handleCopyTag}
               className="flex items-center gap-1 rounded-md bg-gray-100 px-2 py-0.5 font-mono text-sm text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-              title="Click to copy"
+              title={t('assets.detail.click_to_copy')}
             >
               {asset.asset_tag}
               <Copy className="h-3 w-3" />
@@ -185,21 +189,21 @@ export function AssetDetailPage() {
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           <Button size="sm" variant="outline" onClick={() => navigate(`/work-orders?asset_id=${assetId}`)}>
             <ClipboardList className="h-4 w-4" />
-            New WO
+            {t('assets.detail.new_wo')}
           </Button>
           <Button size="sm" variant="outline" onClick={() => navigate(`/assets/print-labels?ids=${assetId}`)}>
             <Printer className="h-4 w-4" />
-            Print QR
+            {t('assets.detail.print_qr')}
           </Button>
           {canManage && (
             <Button size="sm" onClick={() => navigate(`/assets/${assetId}/edit`)}>
               <Pencil className="h-4 w-4" />
-              Edit
+              {t('assets.detail.edit')}
             </Button>
           )}
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
-              <Button size="icon" variant="outline" aria-label="More actions">
+              <Button size="icon" variant="outline" aria-label={t('assets.detail.more_actions')}>
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenu.Trigger>
@@ -214,7 +218,7 @@ export function AssetDetailPage() {
                     className="flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
                     onClick={handleDelete}
                   >
-                    Delete asset
+                    {t('assets.detail.delete_asset')}
                   </DropdownMenu.Item>
                 )}
               </DropdownMenu.Content>
@@ -225,7 +229,7 @@ export function AssetDetailPage() {
 
       {/* Info cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <InfoCard icon={MapPin} label="Location">
+        <InfoCard icon={MapPin} label={t('assets.detail.info_location')}>
           <LocationBreadcrumb
             locations={locations}
             locationId={asset.location_id}
@@ -233,15 +237,15 @@ export function AssetDetailPage() {
           />
           {!asset.location_id && <span className="text-gray-400">—</span>}
         </InfoCard>
-        <InfoCard icon={Hash} label="Serial No.">
+        <InfoCard icon={Hash} label={t('assets.detail.info_serial')}>
           {asset.serial_number ?? '—'}
         </InfoCard>
-        <InfoCard icon={ClipboardList} label="Open Work Orders">
+        <InfoCard icon={ClipboardList} label={t('assets.detail.info_open_wos')}>
           {asset.open_work_orders_count ?? 0}
         </InfoCard>
-        <InfoCard icon={Wrench} label="Last Service">
+        <InfoCard icon={Wrench} label={t('assets.detail.info_last_service')}>
           {asset.last_work_order_date
-            ? formatDistanceToNow(new Date(asset.last_work_order_date), { addSuffix: true })
+            ? timeAgo(asset.last_work_order_date)
             : '—'}
         </InfoCard>
       </div>
@@ -257,7 +261,7 @@ export function AssetDetailPage() {
               value={tab}
               className="px-4 py-2 text-sm font-medium capitalize text-gray-500 transition-colors hover:text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-brand-600 data-[state=active]:text-brand-600 dark:text-gray-400 dark:hover:text-gray-200 dark:data-[state=active]:text-brand-400"
             >
-              {tab.replace(/-/g, ' ')}
+              {t(`assets.detail.tab.${tab.replace(/-/g, '_')}`)}
             </Tabs.Trigger>
           ))}
         </Tabs.List>
@@ -268,25 +272,25 @@ export function AssetDetailPage() {
             <div className="lg:col-span-2 space-y-4">
               <Card>
                 <CardContent className="p-4">
-                  <CardTitle className="mb-3">Asset Information</CardTitle>
+                  <CardTitle className="mb-3">{t('assets.detail.asset_information')}</CardTitle>
                   <dl className="grid grid-cols-2 gap-3 text-sm">
                     {[
-                      ['Name', asset.name],
-                      ['Asset Tag', asset.asset_tag],
-                      ['Serial Number', asset.serial_number],
-                      ['Barcode', asset.barcode],
-                      ['Manufacturer', asset.manufacturer],
-                      ['Model', asset.model],
-                      ['Year', asset.year_manufactured],
-                      ['Status', asset.status],
-                      ['Purchase Date', asset.purchase_date ? formatDate(new Date(asset.purchase_date)) : null],
-                      ['Warranty Expiry', asset.warranty_expires_on ? formatDate(asset.warranty_expires_on) : null],
-                    ].map(([label, value]) =>
+                      ['name', asset.name],
+                      ['asset_tag', asset.asset_tag],
+                      ['serial', asset.serial_number],
+                      ['barcode', asset.barcode],
+                      ['manufacturer', asset.manufacturer],
+                      ['model', asset.model],
+                      ['year', asset.year_manufactured],
+                      ['status', asset.status],
+                      ['purchase_date', asset.purchase_date ? formatDate(new Date(asset.purchase_date)) : null],
+                      ['warranty_expiry', asset.warranty_expires_on ? formatDate(asset.warranty_expires_on) : null],
+                    ].map(([field, value]) =>
                       value != null ? (
-                        <div key={label as string}>
-                          <dt className="text-xs text-gray-500 dark:text-gray-400">{label}</dt>
+                        <div key={field as string}>
+                          <dt className="text-xs text-gray-500 dark:text-gray-400">{t(`assets.detail.field.${field}`)}</dt>
                           <dd className="mt-0.5 font-medium text-gray-900 dark:text-gray-100">
-                            {label === 'Status' ? (
+                            {field === 'status' ? (
                               <AssetStatusBadge status={asset.status} />
                             ) : (
                               String(value)
@@ -303,7 +307,7 @@ export function AssetDetailPage() {
               {asset.custom_fields && Object.keys(asset.custom_fields).length > 0 && (
                 <Card>
                   <CardContent className="p-4">
-                    <CardTitle className="mb-3">Custom Fields</CardTitle>
+                    <CardTitle className="mb-3">{t('assets.detail.custom_fields')}</CardTitle>
                     <dl className="grid grid-cols-2 gap-3 text-sm">
                       {Object.entries(asset.custom_fields).map(([key, val]) => (
                         <div key={key}>
@@ -322,7 +326,7 @@ export function AssetDetailPage() {
             <div className="space-y-4">
               <Card>
                 <CardContent className="p-4 flex flex-col items-center">
-                  <CardTitle className="mb-3 w-full">QR Code</CardTitle>
+                  <CardTitle className="mb-3 w-full">{t('assets.detail.qr_code')}</CardTitle>
                   <AssetQRCode
                     assetId={asset.id}
                     assetTag={asset.asset_tag}
@@ -339,22 +343,22 @@ export function AssetDetailPage() {
         {/* Work Orders */}
         <Tabs.Content value="work-orders" className="pt-4">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="font-medium text-gray-900 dark:text-gray-100">Work Orders</h3>
+            <h3 className="font-medium text-gray-900 dark:text-gray-100">{t('assets.detail.work_orders')}</h3>
             <Button size="sm" onClick={() => navigate(`/work-orders/new?asset_id=${assetId}`)}>
               <ClipboardList className="h-4 w-4" />
-              New Work Order
+              {t('assets.detail.new_work_order')}
             </Button>
           </div>
           {workOrders.length === 0 ? (
-            <p className="py-8 text-center text-sm text-gray-400">No work orders for this asset.</p>
+            <p className="py-8 text-center text-sm text-gray-400">{t('assets.detail.no_work_orders')}</p>
           ) : (
             <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 dark:bg-gray-700/50">
                   <tr>
-                    {['WO #', 'Title', 'Status', 'Priority', 'Due Date'].map((h) => (
+                    {['number', 'title', 'status', 'priority', 'due'].map((h) => (
                       <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                        {h}
+                        {t(`assets.detail.wo_col_${h}`)}
                       </th>
                     ))}
                   </tr>
@@ -370,12 +374,12 @@ export function AssetDetailPage() {
                       <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{wo.title}</td>
                       <td className="px-4 py-3">
                         <Badge variant={statusBadge(wo.status)} className="capitalize">
-                          {wo.status.replace('_', ' ')}
+                          {word('status', wo.status)}
                         </Badge>
                       </td>
                       <td className="px-4 py-3">
                         <Badge variant={priorityBadge(wo.priority)} className="capitalize">
-                          {wo.priority}
+                          {word('priority', wo.priority)}
                         </Badge>
                       </td>
                       <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
@@ -413,7 +417,7 @@ export function AssetDetailPage() {
         <Tabs.Content value="iot-data" className="pt-4">
           {latestReadingsArr.length === 0 ? (
             <p className="py-8 text-center text-sm text-gray-400">
-              No IoT sensor data available for this asset.
+              {t('assets.detail.no_iot')}
             </p>
           ) : (
             <div className="space-y-4">
@@ -437,24 +441,24 @@ export function AssetDetailPage() {
         <Tabs.Content value="details" className="pt-4">
           <Card>
             <CardContent className="p-4">
-              <CardTitle className="mb-3">All Details</CardTitle>
+              <CardTitle className="mb-3">{t('assets.detail.all_details')}</CardTitle>
               <dl className="space-y-2 text-sm">
                 {[
-                  ['Asset ID', asset.id],
-                  ['Name', asset.name],
-                  ['Asset Tag', asset.asset_tag],
-                  ['Status', asset.status],
-                  ['Serial Number', asset.serial_number ?? '—'],
-                  ['Barcode', asset.barcode ?? '—'],
-                  ['Manufacturer', asset.manufacturer ?? '—'],
-                  ['Model', asset.model ?? '—'],
-                  ['Year', asset.year_manufactured ?? '—'],
-                  ['Description', asset.description ?? '—'],
-                  ['Created', format(new Date(asset.created_at), 'PPpp')],
-                  ['Last Updated', format(new Date(asset.updated_at), 'PPpp')],
-                ].map(([label, value]) => (
-                  <div key={label as string} className="flex gap-4">
-                    <dt className="w-36 shrink-0 text-gray-500 dark:text-gray-400">{label}</dt>
+                  ['asset_id', asset.id],
+                  ['name', asset.name],
+                  ['asset_tag', asset.asset_tag],
+                  ['status', word('status', asset.status)],
+                  ['serial', asset.serial_number ?? '—'],
+                  ['barcode', asset.barcode ?? '—'],
+                  ['manufacturer', asset.manufacturer ?? '—'],
+                  ['model', asset.model ?? '—'],
+                  ['year', asset.year_manufactured ?? '—'],
+                  ['description', asset.description ?? '—'],
+                  ['created', formatDateTime(asset.created_at)],
+                  ['updated', formatDateTime(asset.updated_at)],
+                ].map(([field, value]) => (
+                  <div key={field as string} className="flex gap-4">
+                    <dt className="w-36 shrink-0 text-gray-500 dark:text-gray-400">{t(`assets.detail.field.${field}`)}</dt>
                     <dd className="flex-1 text-gray-900 dark:text-gray-100">{String(value)}</dd>
                   </div>
                 ))}

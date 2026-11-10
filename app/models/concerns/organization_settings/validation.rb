@@ -30,6 +30,7 @@ module OrganizationSettings
     end
 
     def validate_localization(values)
+      errors.add(:language, "is not one of the available languages") unless Locales.available?(values["language"])
       { date_format: DATE_FORMATS, time_format: TIME_FORMATS, currency: CURRENCIES,
         number_format: NUMBER_FORMATS, first_day_of_week: DAYS_OF_WEEK }.each do |key, allowed|
         errors.add(key, "is not one of the available options") unless allowed.include?(values[key.to_s])

@@ -1,3 +1,5 @@
+import { label } from '@/i18n'
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -14,17 +16,6 @@ const KANBAN_COLUMNS: WorkOrderStatus[] = [
   'on_hold',
   'completed',
 ]
-
-const COLUMN_LABELS: Record<WorkOrderStatus, string> = {
-  open: 'Open',
-  assigned: 'Assigned',
-  in_progress: 'In Progress',
-  on_hold: 'On Hold',
-  pending_parts: 'Pending Parts',
-  completed: 'Completed',
-  verified: 'Verified',
-  cancelled: 'Cancelled',
-}
 
 const TRANSITION_EVENTS: Partial<Record<WorkOrderStatus, string>> = {
   assigned: 'assign',
@@ -43,6 +34,7 @@ interface DragState {
 }
 
 export function WorkOrderKanbanBoard({ workOrders }: WorkOrderKanbanBoardProps) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const transition = useTransitionWorkOrder()
   const [dragOver, setDragOver] = useState<WorkOrderStatus | null>(null)
@@ -70,7 +62,7 @@ export function WorkOrderKanbanBoard({ workOrders }: WorkOrderKanbanBoardProps) 
     <div
       className="flex gap-4 overflow-x-auto pb-4"
       role="region"
-      aria-label="Work orders kanban board"
+      aria-label={t('workOrders.kanban.board')}
     >
       {KANBAN_COLUMNS.map((col) => {
         const cards = byStatus[col] ?? []
@@ -82,7 +74,7 @@ export function WorkOrderKanbanBoard({ workOrders }: WorkOrderKanbanBoardProps) 
               dragOver === col && 'ring-2 ring-brand-400',
             )}
             role="group"
-            aria-label={COLUMN_LABELS[col]}
+            aria-label={label('status', col)}
             onDragOver={(e) => {
               e.preventDefault()
               setDragOver(col)
@@ -95,7 +87,7 @@ export function WorkOrderKanbanBoard({ workOrders }: WorkOrderKanbanBoardProps) 
               <div className="flex items-center gap-2">
                 <WorkOrderStatusBadge status={col} size="sm" showIcon={false} />
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {COLUMN_LABELS[col]}
+                  {label('status', col)}
                 </span>
               </div>
               <span className="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-400">
@@ -122,7 +114,7 @@ export function WorkOrderKanbanBoard({ workOrders }: WorkOrderKanbanBoardProps) 
 
               {cards.length === 0 && (
                 <div className="flex h-20 items-center justify-center rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
-                  <p className="text-xs text-gray-400">Drop here</p>
+                  <p className="text-xs text-gray-400">{t('workOrders.kanban.drop')}</p>
                 </div>
               )}
             </div>
@@ -134,7 +126,7 @@ export function WorkOrderKanbanBoard({ workOrders }: WorkOrderKanbanBoardProps) 
                 className="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-xs text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200"
               >
                 <Plus className="h-3.5 w-3.5" />
-                Add work order
+                {t('workOrders.kanban.add')}
               </button>
             </div>
           </div>

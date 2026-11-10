@@ -1,0 +1,44 @@
+{
+  "schedule": {
+    "title": "Programación",
+    "description": "Arrastra una orden de trabajo a otra persona o día, o usa su botón de mover.",
+    "previous_day": "Día anterior",
+    "previous_week": "Semana anterior",
+    "next_day": "Día siguiente",
+    "next_week": "Semana siguiente",
+    "view": "Vista",
+    "mode_day": "Día",
+    "mode_week": "Semana",
+    "load_failed": "No se pudo cargar la programación.",
+    "truncated": "Hay más trabajo del que se puede mostrar aquí. Filtra la lista de órdenes de trabajo para ver el resto.",
+    "move": {
+      "title": "Mover {{number}}",
+      "who": "Quién lo hace",
+      "due": "Vence el",
+      "submit": "Mover"
+    },
+    "nobody": "Nadie aún",
+    "overload": {
+      "none": "Nadie tiene más de un día de trabajo en este período.",
+      "count_one": "Un día está sobrecargado",
+      "count_other": "{{count}} días están sobrecargados",
+      "item": "{{name}}, {{day}}: {{hours}} de {{capacity}}",
+      "day_off": "un día libre"
+    },
+    "grid": {
+      "priority": "Prioridad {{priority}}: ",
+      "no_estimate": "(sin estimación)",
+      "load": "{{hours}} de {{capacity}}",
+      "day_off_short": "día libre",
+      "over_by": "excede por {{hours}}",
+      "technician": "Técnico",
+      "earlier": "Anteriores o sin fecha",
+      "today": "hoy",
+      "day_off": "Día libre",
+      "earlier_open": "{{count}} abiertas · {{hours}}",
+      "more_not_listed": "+{{count}} más, no mostradas"
+    },
+    "moved": "Movida.",
+    "move_failed": "No se pudo mover la orden de trabajo."
+  }
+}

@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   LayoutDashboard,
   Wrench,
@@ -22,6 +23,7 @@ import { useAuthStore } from '@/stores/authStore'
 import type { Role } from '@/types'
 
 interface NavItem {
+  /** The key of its name in the translations. */
   label: string
   to: string
   icon: React.ElementType
@@ -29,20 +31,21 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
-  { label: 'Work Orders', to: '/work-orders', icon: ClipboardList },
-  { label: 'Schedule', to: '/schedule', icon: CalendarDays, roles: ['admin', 'manager'] },
-  { label: 'Assets', to: '/assets', icon: Package },
-  { label: 'Parts', to: '/parts', icon: Boxes, roles: ['admin', 'manager', 'technician'] },
-  { label: 'Vendors', to: '/vendors', icon: Building2, roles: ['admin', 'manager', 'technician'] },
-  { label: 'Purchasing', to: '/purchasing', icon: ShoppingCart, roles: ['admin', 'manager', 'technician'] },
-  { label: 'Preventive Maintenance', to: '/preventive-maintenance', icon: Wrench },
-  { label: 'IoT Alerts', to: '/iot', icon: Radio, roles: ['admin', 'manager', 'technician'] },
-  { label: 'Reports', to: '/reports', icon: BarChart3, roles: ['admin', 'manager'] },
-  { label: 'Settings', to: '/settings/profile', icon: Settings },
+  { label: 'shell.nav.dashboard', to: '/dashboard', icon: LayoutDashboard },
+  { label: 'shell.nav.work_orders', to: '/work-orders', icon: ClipboardList },
+  { label: 'shell.nav.schedule', to: '/schedule', icon: CalendarDays, roles: ['admin', 'manager'] },
+  { label: 'shell.nav.assets', to: '/assets', icon: Package },
+  { label: 'shell.nav.parts', to: '/parts', icon: Boxes, roles: ['admin', 'manager', 'technician'] },
+  { label: 'shell.nav.vendors', to: '/vendors', icon: Building2, roles: ['admin', 'manager', 'technician'] },
+  { label: 'shell.nav.purchasing', to: '/purchasing', icon: ShoppingCart, roles: ['admin', 'manager', 'technician'] },
+  { label: 'shell.nav.preventive_maintenance', to: '/preventive-maintenance', icon: Wrench },
+  { label: 'shell.nav.iot_alerts', to: '/iot', icon: Radio, roles: ['admin', 'manager', 'technician'] },
+  { label: 'shell.nav.reports', to: '/reports', icon: BarChart3, roles: ['admin', 'manager'] },
+  { label: 'shell.nav.settings', to: '/settings/profile', icon: Settings },
 ]
 
 export function Sidebar() {
+  const { t } = useTranslation()
   const { sidebarCollapsed, toggleSidebar } = useUiStore()
   const { user } = useAuthStore()
   const { data: branding } = useBranding()
@@ -93,10 +96,10 @@ export function Sidebar() {
                       : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-100',
                   )
                 }
-                title={sidebarCollapsed ? item.label : undefined}
+                title={sidebarCollapsed ? t(item.label) : undefined}
               >
                 <item.icon className="h-5 w-5 shrink-0" />
-                {!sidebarCollapsed && <span>{item.label}</span>}
+                {!sidebarCollapsed && <span>{t(item.label)}</span>}
               </NavLink>
             </li>
           ))}
@@ -108,7 +111,7 @@ export function Sidebar() {
         <button
           onClick={toggleSidebar}
           className="flex w-full items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
-          aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label={sidebarCollapsed ? t('shell.sidebar.expand') : t('shell.sidebar.collapse')}
         >
           {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>

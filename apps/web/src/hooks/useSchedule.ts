@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
 import { toast } from 'sonner'
@@ -24,9 +25,9 @@ export function useReschedule() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [SCHEDULE_KEY] })
       qc.invalidateQueries({ queryKey: WO_KEY })
-      toast.success('Moved.')
+      toast.success(t('schedule.moved'))
     },
     onError: (error: AxiosError<{ error?: { message?: string } }>) =>
-      toast.error(error.response?.data?.error?.message ?? 'Could not move the work order.'),
+      toast.error(error.response?.data?.error?.message ?? t('schedule.move_failed')),
   })
 }
