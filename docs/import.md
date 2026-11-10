@@ -11,7 +11,7 @@ Do it in this order: **locations**, then assets and parts, which refer to a loca
 | Import | Columns (the first is required) | Notes |
 | --- | --- | --- |
 | Locations | `name`, `type`, `parent` | Type is site, building, floor, zone, room or outdoor (top level defaults to site, anything below to zone). |
-| Assets | `name`, `asset_tag`, `serial_number`, `status`, `location` | Tags must be new. A blank tag is made up for you. Any other column (manufacturer, year…) is kept as a custom field. |
+| Assets | `name`, `asset_tag`, `serial_number`, `barcode`, `status`, `location` | Tags must be new. A blank tag is made up for you. A barcode (the number on a sticker already on the machine, so that scanning it finds the asset) must not be on another asset or twice in the file. Any other column (manufacturer, year…) is kept as a custom field. |
 | Parts | `name`, `sku`, `quantity_on_hand`, `reorder_point`, `unit`, `unit_cost`, `location` | SKUs must be new. Importing parts does not trigger low-stock emails. |
 
 The file can come straight from Excel: CSV saved by Excel (including the byte order mark, Windows line endings, Windows-1252 accents, and the semicolon separator some countries use with a decimal comma), quoted values with commas or line breaks, tab-separated text, and column headings in any case. It cannot be an `.xlsx` workbook (in Excel use File, Save As, CSV). Up to 5 MB and 5,000 rows at a time.

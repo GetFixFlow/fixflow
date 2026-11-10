@@ -1,7 +1,9 @@
 module Api
   module V1
     class AssetsController < Api::V1::BaseController
-      before_action :require_manager!, only: %i[create update]
+      LABEL_LIMIT = 500
+
+      before_action :require_manager!, only: %i[create update labels]
       before_action :require_admin!,   only: %i[destroy]
       before_action :set_asset,              only: %i[show update destroy work_orders sensor_readings iot_rules iot_alerts qr_code]
       before_action :set_asset_with_history, only: %i[history]
@@ -16,6 +18,24 @@ module Api
         render json: {
           assets: AssetBlueprint.render_as_hash(assets),
           meta:   pagy_metadata_response(pagy)
+        }
+      end
+
+      # GET /api/v1/assets/lookup?code=  Which asset a scanned or typed code belongs to: a list (see AssetLookup).
+      def lookup
+        render json: { matches: AssetLookup.call(current_organization, params[:code]) }
+      end
+
+      # GET /api/v1/assets/labels?ids=1,2&location_id=&status=&search=  What a sheet of labels needs, for up to 500 assets
+      # (the ones chosen, or all that match; a place includes the places inside it). `truncated` says there were more.
+      def labels
+        scope = label_scope
+        total = scope.count
+        assets = scope.includes(:location).order(:name, :id).limit(LABEL_LIMIT)
+        render json: {
+          labels: assets.map { |asset| label_for(asset) },
+          total: total,
+          truncated: total > LABEL_LIMIT
         }
       end
 
@@ -87,6 +107,21 @@ module Api
 
       private
 
+      def label_scope
+        scope = current_organization.assets.kept
+        scope = scope.where(id: params[:ids].to_s.split(",").filter_map { |id| Integer(id, exception: false) }) if params[:ids].present?
+        scope = scope.by_status(params[:status]) if params[:status].present?
+        scope = scope.search_by_name_or_tag(params[:search]) if params[:search].present?
+        return scope if params[:location_id].blank?
+
+        scope.where(location_id: current_organization.locations.find(params[:location_id]).subtree_ids)
+      end
+
+      def label_for(asset)
+        { id: asset.id, name: asset.name, asset_tag: asset.asset_tag, barcode: asset.barcode, public_code: asset.public_code,
+          location_name: asset.location&.name }
+      end
+
       def set_asset
         @asset = current_organization.assets.find(params[:id])
       end
@@ -98,7 +133,7 @@ module Api
 
       def asset_params
         params.require(:asset).permit(:name, :asset_tag, :serial_number, :status,
-          :location_id, :warranty_expires_on, custom_fields: {})
+          :barcode, :location_id, :warranty_expires_on, custom_fields: {})
       end
     end
   end

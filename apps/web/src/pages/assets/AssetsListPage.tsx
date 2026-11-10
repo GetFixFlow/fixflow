@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Package, Plus, LayoutGrid, List, MoreVertical, Eye, Pencil, QrCode, Trash2, Upload } from 'lucide-react'
+import { Package, Plus, LayoutGrid, List, MoreVertical, Eye, Pencil, Printer, QrCode, Trash2, Upload } from 'lucide-react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
@@ -14,6 +14,7 @@ import { AssetStatusChanger } from '@/components/assets/AssetStatusChanger'
 import { LocationBreadcrumb } from '@/components/shared/LocationBreadcrumb'
 import { useAssets, useDeleteAsset } from '@/hooks/useAssets'
 import { useLocations } from '@/hooks/useLocations'
+import { labelQuery } from '@/lib/labelSheet'
 import { useAuthStore } from '@/stores/authStore'
 import type { Asset } from '@/types'
 
@@ -103,6 +104,10 @@ export function AssetsListPage() {
           <div className="flex gap-2">
             {canManage && (
               <>
+                <Button variant="outline" size="sm" onClick={() => navigate(`/assets/print-labels${labelQuery(filters)}`)}>
+                  <Printer className="h-4 w-4" />
+                  Print labels
+                </Button>
                 <Button variant="outline" size="sm" onClick={() => navigate('/import?kind=assets')}>
                   <Upload className="h-4 w-4" />
                   Import CSV
@@ -165,6 +170,12 @@ export function AssetsListPage() {
             {selected.size} asset{selected.size > 1 ? 's' : ''} selected
           </span>
           <div className="flex gap-2 ml-auto">
+            {canManage && (
+              <Button size="sm" variant="outline" onClick={() => navigate(`/assets/print-labels?ids=${[...selected].join(',')}`)}>
+                <Printer className="h-4 w-4" />
+                Print labels
+              </Button>
+            )}
             <Button size="sm" variant="outline" onClick={() => setSelected(new Set())}>
               Deselect all
             </Button>
@@ -252,7 +263,8 @@ export function AssetsListPage() {
                     <input
                       type="checkbox"
                       checked={selected.has(asset.id)}
-                      onChange={() => toggleSelect(asset.id)}
+                      // The cell toggles it (a click on the box reaches the cell too, so toggling here as well would undo it).
+                      onChange={() => undefined}
                       className="rounded border-gray-300"
                       aria-label={`Select ${asset.name}`}
                     />

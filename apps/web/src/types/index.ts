@@ -155,6 +155,8 @@ export interface Asset {
   manufacturer?: string
   model?: string
   serial_number?: string
+  /** The number on a sticker already on the machine, so that scanning it finds the asset. */
+  barcode?: string | null
   purchase_date?: string
   purchase_cost?: number
   location_id?: number | null

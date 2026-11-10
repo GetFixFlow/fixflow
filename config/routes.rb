@@ -83,6 +83,10 @@ Rails.application.routes.draw do
       end
 
       resources :assets do
+        collection do
+          get :lookup
+          get :labels
+        end
         member do
           get  :work_orders
           get  :sensor_readings

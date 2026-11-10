@@ -1,10 +1,11 @@
 module CsvImport
   class Assets < Base
-    COLUMNS  = %w[name asset_tag serial_number status location].freeze
+    COLUMNS  = %w[name asset_tag serial_number barcode status location].freeze
     REQUIRED = %w[name].freeze
-    EXAMPLE  = ["Pump 1", "P-001", "SN-12345", "operational", "Plant > Floor 1"].freeze
-    ALIASES  = { "asset_name" => "name", "tag" => "asset_tag", "serial" => "serial_number", "location_name" => "location",
-                 "state" => "status" }.freeze
+    EXAMPLE  = ["Pump 1", "P-001", "SN-12345", "5012345678900", "operational",
+                "Plant > Floor 1"].freeze
+    ALIASES  = { "asset_name" => "name", "tag" => "asset_tag", "serial" => "serial_number", "bar_code" => "barcode",
+                 "location_name" => "location", "state" => "status" }.freeze
 
     # Any other column is kept with the asset as a custom field (manufacturer, model, year and so on).
     def allow_custom_columns? = true
@@ -15,6 +16,8 @@ module CsvImport
       @locations = LocationLookup.new(organization)
       @tags_in_file = {}
       @existing_tags = organization.assets.where.not(asset_tag: [nil, ""]).pluck(:asset_tag).index_by(&:downcase)
+      @barcodes_in_file = {}
+      @existing_barcodes = organization.assets.kept.where.not(barcode: nil).pluck(:barcode).index_by(&:downcase)
     end
 
     def check(cells, number)
@@ -29,6 +32,7 @@ module CsvImport
       end
 
       check_tag(cells["asset_tag"], number, problems)
+      check_barcode(cells["barcode"], number, problems)
       _, why = @locations.find(cells["location"])
       problems["location"] = why if why
       problems
@@ -47,11 +51,27 @@ module CsvImport
       end
     end
 
+    def check_barcode(barcode, number, problems)
+      return if barcode.blank?
+
+      key = barcode.strip.downcase
+      if barcode.strip.length > 64
+        problems["barcode"] = "The barcode is longer than 64 characters."
+      elsif @existing_barcodes.key?(key)
+        problems["barcode"] = "An asset with the barcode \"#{barcode}\" already exists."
+      elsif @barcodes_in_file.key?(key)
+        problems["barcode"] = "The barcode \"#{barcode}\" is also on row #{@barcodes_in_file[key]}."
+      else
+        @barcodes_in_file[key] = number
+      end
+    end
+
     def build_attributes(cells)
       location, = @locations.find(cells["location"])
       custom = cells.except(*COLUMNS).compact_blank
       {
         name: cells["name"], asset_tag: cells["asset_tag"].presence, serial_number: cells["serial_number"].presence,
+        barcode: cells["barcode"].presence,
         status: cells["status"].presence&.downcase || "operational", location: location, custom_fields: custom
       }
     end

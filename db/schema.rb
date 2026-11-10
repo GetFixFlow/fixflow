@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_121200) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_121300) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -115,6 +115,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_121200) do
     t.string "public_code", null: false
     t.date "warranty_expires_on"
     t.date "warranty_alerted_on"
+    t.string "barcode"
+    t.index "organization_id, lower((barcode)::text)", name: "index_assets_on_org_and_lower_barcode", unique: true, where: "((barcode IS NOT NULL) AND (discarded_at IS NULL))"
     t.index ["asset_tag"], name: "index_assets_on_asset_tag"
     t.index ["custom_fields"], name: "index_assets_on_custom_fields", using: :gin
     t.index ["discarded_at"], name: "index_assets_on_discarded_at"

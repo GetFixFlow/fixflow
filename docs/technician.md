@@ -59,7 +59,7 @@ Open the asset, the **Downtime** tab, and press **It stopped**; when it runs aga
 
 Anyone can scan the QR label on a machine with the phone's camera: it opens a short form that creates a work order, no account needed. If you are signed in, you can also press **New Work Order** under **Work Orders**.
 
-To look a machine up instead, press the **scan** button at the top of the screen (next to the moon) and point the phone at its label: you land on the list of assets showing just that machine; open it for its history and work orders. The phone asks to use the camera the first time, and needs HTTPS to do so.
+To look a machine up instead, press the **scan** button at the top of the screen (next to the moon) and point the phone at its label or at a barcode on it: you land on that machine's page, with its history and work orders. If more than one machine has the code you are asked which, and with a handheld scanner you can scan into the box under the camera. The phone asks to use the camera the first time, and needs HTTPS to do so. [Scanning and labels](scanning-and-labels.md) says what it can read.
 
 ## Stuck?
 
