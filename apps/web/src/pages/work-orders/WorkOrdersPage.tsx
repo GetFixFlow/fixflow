@@ -1,3 +1,5 @@
+import { label } from '@/i18n'
+import { useTranslation } from 'react-i18next'
 import { ClipboardList } from 'lucide-react'
 import { useWorkOrders } from '@/hooks/useWorkOrders'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -9,15 +11,16 @@ import { Button } from '@/components/ui/Button'
 import { formatDate } from '@/lib/localeFormat'
 
 export function WorkOrdersPage() {
+  const { t } = useTranslation()
   const { data, isLoading } = useWorkOrders()
   const workOrders = data?.work_orders ?? []
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Work Orders"
-        description="Track and manage maintenance tasks"
-        actions={<Button>New Work Order</Button>}
+        title={t('workOrders.page.title')}
+        description={t('workOrders.page.description')}
+        actions={<Button>{t('workOrders.page.new')}</Button>}
       />
 
       {isLoading ? (
@@ -34,9 +37,9 @@ export function WorkOrdersPage() {
       ) : workOrders.length === 0 ? (
         <EmptyState
           icon={ClipboardList}
-          title="No work orders"
-          description="Create your first work order to get started."
-          action={{ label: 'New Work Order', onClick: () => {} }}
+          title={t('workOrders.page.empty_title')}
+          description={t('workOrders.page.empty_description')}
+          action={{ label: t('workOrders.page.new'), onClick: () => {} }}
         />
       ) : (
         <div className="space-y-3">
@@ -47,17 +50,17 @@ export function WorkOrdersPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-mono text-gray-400">{wo.work_order_number}</span>
-                      <Badge variant={priorityBadge(wo.priority)}>{wo.priority}</Badge>
+                      <Badge variant={priorityBadge(wo.priority)}>{label('priority', wo.priority)}</Badge>
                     </div>
                     <p className="mt-1 font-medium text-gray-900 dark:text-gray-100">{wo.title}</p>
                     {wo.due_date && (
                       <p className="mt-1 text-xs text-gray-500">
-                        Due {formatDate(new Date(wo.due_date))}
+                        {t('workOrders.page.due', { date: formatDate(new Date(wo.due_date)) })}
                       </p>
                     )}
                   </div>
                   <Badge variant={statusBadge(wo.status)}>
-                    {wo.status.replace('_', ' ')}
+                    {label('status', wo.status)}
                   </Badge>
                 </div>
               </CardContent>

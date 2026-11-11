@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Plus, MapPin, Building2, Package, ClipboardList } from 'lucide-react'
 import * as Tabs from '@radix-ui/react-tabs'
 import { Button } from '@/components/ui/Button'
@@ -15,8 +16,11 @@ import { useAssets } from '@/hooks/useAssets'
 import { useAuthStore } from '@/stores/authStore'
 import type { Location } from '@/types'
 import { formatDate } from '@/lib/localeFormat'
+import { label } from '@/i18n'
 
 export function LocationsPage() {
+  const { t } = useTranslation()
+  const typeText = (type: string) => t(`assets.locations.type.${type}`, { defaultValue: type })
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const canManage = user?.role === 'admin' || user?.role === 'manager'
@@ -60,11 +64,11 @@ export function LocationsPage() {
       {/* Left panel */}
       <div className="flex w-80 shrink-0 flex-col border-r border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Locations</h2>
+          <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">{t('assets.locations.title')}</h2>
           {canManage && (
             <div className="flex gap-1.5">
-              <Button size="sm" variant="outline" onClick={() => navigate('/import?kind=locations')} aria-label="Import locations from a CSV file">
-                Import
+              <Button size="sm" variant="outline" onClick={() => navigate('/import?kind=locations')} aria-label={t('assets.locations.import_aria')}>
+                {t('assets.locations.import')}
               </Button>
               <Button
                 size="sm"
@@ -75,7 +79,7 @@ export function LocationsPage() {
                 }}
               >
                 <Plus className="h-4 w-4" />
-                Add
+                {t('assets.locations.add')}
               </Button>
             </div>
           )}
@@ -106,8 +110,8 @@ export function LocationsPage() {
           <div className="flex h-full items-center justify-center">
             <EmptyState
               icon={MapPin}
-              title="Select a location"
-              description="Choose a location from the tree to view its details."
+              title={t('assets.locations.select_title')}
+              description={t('assets.locations.select_description')}
             />
           </div>
         ) : (
@@ -120,7 +124,7 @@ export function LocationsPage() {
                     {selectedLocation.name}
                   </h1>
                   <Badge variant="secondary" className="capitalize">
-                    {selectedLocation.location_type}
+                    {typeText(selectedLocation.location_type)}
                   </Badge>
                 </div>
                 <LocationBreadcrumb
@@ -136,14 +140,14 @@ export function LocationsPage() {
                     variant="outline"
                     onClick={() => handleEdit(selectedLocation)}
                   >
-                    Edit
+                    {t('assets.locations.edit')}
                   </Button>
                   <Button
                     size="sm"
                     variant="destructive"
                     onClick={() => handleDelete(selectedLocation)}
                   >
-                    Delete
+                    {t('assets.locations.delete')}
                   </Button>
                 </div>
               )}
@@ -159,7 +163,7 @@ export function LocationsPage() {
                       <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                         {childLocations.length}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Sub-locations</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{t('assets.locations.sub_locations')}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -172,7 +176,7 @@ export function LocationsPage() {
                       <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                         {selectedLocation.asset_count ?? locationAssets.length}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Assets</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{t('assets.locations.assets')}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -183,7 +187,7 @@ export function LocationsPage() {
                     <ClipboardList className="h-8 w-8 rounded-lg bg-orange-100 p-1.5 text-orange-600 dark:bg-orange-900/40 dark:text-orange-400" />
                     <div>
                       <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">—</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Open WOs</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{t('assets.locations.open_wos')}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -193,13 +197,13 @@ export function LocationsPage() {
             {/* Tabs */}
             <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
               <Tabs.List className="flex border-b border-gray-200 dark:border-gray-700">
-                {['assets', 'sub-locations', 'details'].map((tab) => (
+                {['assets', 'sub_locations', 'details'].map((tab) => (
                   <Tabs.Trigger
                     key={tab}
                     value={tab}
                     className="px-4 py-2 text-sm font-medium capitalize text-gray-500 transition-colors hover:text-gray-700 data-[state=active]:border-b-2 data-[state=active]:border-brand-600 data-[state=active]:text-brand-600 dark:text-gray-400 dark:hover:text-gray-200 dark:data-[state=active]:text-brand-400"
                   >
-                    {tab.replace('-', ' ')}
+                    {t(`assets.locations.tab.${tab}`)}
                   </Tabs.Trigger>
                 ))}
               </Tabs.List>
@@ -208,11 +212,11 @@ export function LocationsPage() {
                 {locationAssets.length === 0 ? (
                   <EmptyState
                     icon={Package}
-                    title="No assets"
-                    description="No assets are assigned to this location."
+                    title={t('assets.locations.no_assets_title')}
+                    description={t('assets.locations.no_assets_description')}
                     action={
                       canManage
-                        ? { label: 'Add Asset', onClick: () => navigate('/assets/new') }
+                        ? { label: t('assets.locations.add_asset'), onClick: () => navigate('/assets/new') }
                         : undefined
                     }
                   />
@@ -221,12 +225,12 @@ export function LocationsPage() {
                     <table className="w-full text-sm">
                       <thead className="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
-                          {['Name', 'Tag', 'Status', 'Last Maintenance'].map((h) => (
+                          {['name', 'tag', 'status', 'last_maintenance'].map((h) => (
                             <th
                               key={h}
                               className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
                             >
-                              {h}
+                              {t(`assets.locations.col_${h}`)}
                             </th>
                           ))}
                         </tr>
@@ -246,7 +250,7 @@ export function LocationsPage() {
                             </td>
                             <td className="px-4 py-3">
                               <Badge variant={statusBadge(asset.status)} className="capitalize">
-                                {asset.status}
+                                {label('status', asset.status)}
                               </Badge>
                             </td>
                             <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
@@ -266,12 +270,12 @@ export function LocationsPage() {
                 {childLocations.length === 0 ? (
                   <EmptyState
                     icon={Building2}
-                    title="No sub-locations"
-                    description="This location has no children."
+                    title={t('assets.locations.no_sub_title')}
+                    description={t('assets.locations.no_sub_description')}
                     action={
                       canManage
                         ? {
-                            label: 'Add Sub-location',
+                            label: t('assets.locations.add_sub'),
                             onClick: () => handleAddChild(selectedLocation),
                           }
                         : undefined
@@ -291,12 +295,12 @@ export function LocationsPage() {
                               {child.name}
                             </p>
                             <Badge variant="secondary" className="capitalize text-xs">
-                              {child.location_type}
+                              {typeText(child.location_type)}
                             </Badge>
                           </div>
                           {child.asset_count != null && child.asset_count > 0 && (
                             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                              {child.asset_count} assets
+                              {t('assets.locations.asset_count', { count: child.asset_count })}
                             </p>
                           )}
                         </CardContent>
@@ -311,7 +315,7 @@ export function LocationsPage() {
                   <CardContent className="p-4 space-y-3">
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <p className="text-gray-500 dark:text-gray-400">Full path</p>
+                        <p className="text-gray-500 dark:text-gray-400">{t('assets.locations.full_path')}</p>
                         <LocationBreadcrumb
                           locations={locations}
                           locationId={selectedLocation.id}
@@ -319,20 +323,20 @@ export function LocationsPage() {
                         />
                       </div>
                       <div>
-                        <p className="text-gray-500 dark:text-gray-400">Type</p>
+                        <p className="text-gray-500 dark:text-gray-400">{t('assets.locations.type_label')}</p>
                         <p className="mt-0.5 font-medium capitalize text-gray-900 dark:text-gray-100">
-                          {selectedLocation.location_type}
+                          {typeText(selectedLocation.location_type)}
                         </p>
                       </div>
                       <div>
-                        <p className="text-gray-500 dark:text-gray-400">Created</p>
+                        <p className="text-gray-500 dark:text-gray-400">{t('assets.locations.created')}</p>
                         <p className="mt-0.5 font-medium text-gray-900 dark:text-gray-100">
                           {formatDate(selectedLocation.created_at)}
                         </p>
                       </div>
                       {selectedLocation.description && (
                         <div className="col-span-2">
-                          <p className="text-gray-500 dark:text-gray-400">Description</p>
+                          <p className="text-gray-500 dark:text-gray-400">{t('assets.locations.description')}</p>
                           <p className="mt-0.5 text-gray-900 dark:text-gray-100">
                             {selectedLocation.description}
                           </p>

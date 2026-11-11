@@ -1,3 +1,4 @@
+import { label } from '@/i18n'
 import {
   BarChart,
   Bar,
@@ -30,7 +31,7 @@ export function WOByStatusChart({ data, onBarClick }: WOByStatusChartProps) {
   const chartData = Object.entries(data)
     .filter(([, count]) => count > 0)
     .map(([status, count]) => ({
-      status: status.replace('_', ' '),
+      status: label('status', status),
       count,
       key: status,
     }))

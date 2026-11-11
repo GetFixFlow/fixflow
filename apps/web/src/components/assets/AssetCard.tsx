@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { MoreVertical, Eye, Pencil, QrCode, Trash2 } from 'lucide-react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -7,6 +8,7 @@ import { AssetHealthIndicator } from './AssetHealthIndicator'
 import { cn } from '@/lib/utils'
 import type { Asset, Location } from '@/types'
 import { getLocationDisplayPath } from '@/utils/locationUtils'
+import { label } from '@/i18n'
 
 interface AssetCardProps {
   asset: Asset
@@ -16,6 +18,7 @@ interface AssetCardProps {
 }
 
 export function AssetCard({ asset, locations = [], onDelete, className }: AssetCardProps) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const locationPath = getLocationDisplayPath(locations, asset.location_id)
 
@@ -26,7 +29,7 @@ export function AssetCard({ asset, locations = [], onDelete, className }: AssetC
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && navigate(`/assets/${asset.id}`)}
-      aria-label={`View asset ${asset.name}`}
+      aria-label={t('assets.card.view_aria', { name: asset.name })}
     >
       <CardContent className="p-4">
         {/* Three-dot menu */}
@@ -38,7 +41,7 @@ export function AssetCard({ asset, locations = [], onDelete, className }: AssetC
             <DropdownMenu.Trigger asChild>
               <button
                 className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
-                aria-label="Asset options"
+                aria-label={t('assets.card.options')}
               >
                 <MoreVertical className="h-4 w-4 text-gray-500" />
               </button>
@@ -52,19 +55,19 @@ export function AssetCard({ asset, locations = [], onDelete, className }: AssetC
                   className="flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
                   onClick={() => navigate(`/assets/${asset.id}`)}
                 >
-                  <Eye className="h-4 w-4" /> View
+                  <Eye className="h-4 w-4" /> {t('assets.card.view')}
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
                   className="flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
                   onClick={() => navigate(`/assets/${asset.id}/edit`)}
                 >
-                  <Pencil className="h-4 w-4" /> Edit
+                  <Pencil className="h-4 w-4" /> {t('assets.card.edit')}
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
                   className="flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
                   onClick={() => navigate(`/assets/print-labels?ids=${asset.id}`)}
                 >
-                  <QrCode className="h-4 w-4" /> QR Code
+                  <QrCode className="h-4 w-4" /> {t('assets.card.qr_code')}
                 </DropdownMenu.Item>
                 {onDelete && (
                   <>
@@ -73,7 +76,7 @@ export function AssetCard({ asset, locations = [], onDelete, className }: AssetC
                       className="flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
                       onClick={() => onDelete(asset)}
                     >
-                      <Trash2 className="h-4 w-4" /> Delete
+                      <Trash2 className="h-4 w-4" /> {t('assets.card.delete')}
                     </DropdownMenu.Item>
                   </>
                 )}
@@ -85,7 +88,7 @@ export function AssetCard({ asset, locations = [], onDelete, className }: AssetC
         {/* Status dot + label */}
         <div className="mb-3 flex items-center gap-1.5">
           <AssetHealthIndicator status={asset.status} variant="dot" />
-          <span className="text-xs text-gray-500 dark:text-gray-400 capitalize">{asset.status}</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400 capitalize">{label('status', asset.status)}</span>
         </div>
 
         {/* Name + tag */}
@@ -101,15 +104,12 @@ export function AssetCard({ asset, locations = [], onDelete, className }: AssetC
         <div className="mt-3 flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
           {(asset.open_work_orders_count ?? 0) > 0 && (
             <span className="rounded-full bg-orange-100 px-2 py-0.5 font-medium text-orange-700 dark:bg-orange-900/40 dark:text-orange-300">
-              {asset.open_work_orders_count} open WO{(asset.open_work_orders_count ?? 0) > 1 ? 's' : ''}
+              {t('assets.card.open_work_orders', { count: asset.open_work_orders_count ?? 0 })}
             </span>
           )}
           {asset.last_work_order_date && (
             <span>
-              Last:{' '}
-              {Math.floor(
-                (Date.now() - new Date(asset.last_work_order_date).getTime()) / 86400000,
-              )}d ago
+              {t('assets.card.last', { days: Math.floor((Date.now() - new Date(asset.last_work_order_date).getTime()) / 86400000) })}
             </span>
           )}
         </div>

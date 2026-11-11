@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
@@ -17,6 +18,7 @@ const MOCK_TECHNICIANS = [
 ]
 
 export function AssignModal({ workOrderId, open, onClose }: AssignModalProps) {
+  const { t } = useTranslation()
   const [assigneeId, setAssigneeId] = useState<number | null>(null)
   const [note, setNote] = useState('')
   const assign = useAssignWorkOrder()
@@ -30,21 +32,21 @@ export function AssignModal({ workOrderId, open, onClose }: AssignModalProps) {
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Assign Work Order">
+    <Modal open={open} onClose={onClose} title={t('workOrders.assign.title')}>
       <div className="space-y-4">
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Assignee *
+            {t('workOrders.assign.assignee')}
           </label>
           <select
             value={assigneeId ?? ''}
             onChange={(e) => setAssigneeId(Number(e.target.value))}
             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
           >
-            <option value="">Select technician...</option>
-            {MOCK_TECHNICIANS.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.full_name}
+            <option value="">{t('workOrders.assign.select')}</option>
+            {MOCK_TECHNICIANS.map((tech) => (
+              <option key={tech.id} value={tech.id}>
+                {tech.full_name}
               </option>
             ))}
           </select>
@@ -52,27 +54,27 @@ export function AssignModal({ workOrderId, open, onClose }: AssignModalProps) {
 
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Note to assignee
+            {t('workOrders.assign.note')}
           </label>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
             rows={3}
             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-            placeholder="Optional instructions..."
+            placeholder={t('workOrders.assign.note_placeholder')}
           />
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            {t('common.actions.cancel')}
           </Button>
           <Button
             onClick={handleAssign}
             disabled={!assigneeId || assign.isPending || transition.isPending}
             loading={assign.isPending || transition.isPending}
           >
-            Assign
+            {t('workOrders.assign.submit')}
           </Button>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useTranslation } from 'react-i18next'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -11,14 +12,14 @@ import type { Location, LocationType } from '@/types'
 
 const schema = z
   .object({
-    name: z.string().min(2, 'Name must be at least 2 characters').max(100),
+    name: z.string().min(2, 'assets.locations.name_min').max(100),
     location_type: z.enum(['site', 'building', 'floor', 'room', 'zone', 'outdoor'] as const),
     parent_id: z.number().nullable().optional(),
     description: z.string().max(500).optional(),
   })
   .refine(
     (d) => d.location_type === 'site' || d.parent_id != null,
-    { message: 'Parent location is required for non-site locations', path: ['parent_id'] },
+    { message: 'assets.locations.parent_required', path: ['parent_id'] },
   )
 
 type FormValues = z.infer<typeof schema>
@@ -31,14 +32,7 @@ interface LocationFormModalProps {
   defaultParentId?: number | null
 }
 
-const LOCATION_TYPES: { value: LocationType; label: string }[] = [
-  { value: 'site', label: 'Site' },
-  { value: 'building', label: 'Building' },
-  { value: 'floor', label: 'Floor' },
-  { value: 'room', label: 'Room' },
-  { value: 'zone', label: 'Zone' },
-  { value: 'outdoor', label: 'Outdoor' },
-]
+const LOCATION_TYPES: LocationType[] = ['site', 'building', 'floor', 'room', 'zone', 'outdoor']
 
 export function LocationFormModal({
   open,
@@ -47,6 +41,8 @@ export function LocationFormModal({
   location,
   defaultParentId,
 }: LocationFormModalProps) {
+  const { t } = useTranslation()
+  const msg = (message?: string) => (message ? t(message) : undefined)
   const isEdit = !!location
   const createMutation = useCreateLocation()
   const updateMutation = useUpdateLocation(location?.id ?? 0)
@@ -108,15 +104,15 @@ export function LocationFormModal({
     <Modal
       open={open}
       onClose={onClose}
-      title={isEdit ? 'Edit Location' : 'Add Location'}
-      description={isEdit ? 'Update location details.' : 'Create a new location in your hierarchy.'}
+      title={isEdit ? t('assets.locations.edit_title') : t('assets.locations.add_title')}
+      description={isEdit ? t('assets.locations.edit_description') : t('assets.locations.add_description')}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <Input
           id="loc-name"
-          label="Name *"
-          placeholder="e.g. Building A"
-          error={errors.name?.message}
+          label={t('assets.locations.name_label')}
+          placeholder={t('assets.locations.name_placeholder')}
+          error={msg(errors.name?.message)}
           {...register('name')}
         />
 
@@ -125,16 +121,16 @@ export function LocationFormModal({
             htmlFor="loc-type"
             className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"
           >
-            Type *
+            {t('assets.locations.type_field')}
           </label>
           <select
             id="loc-type"
             className="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
             {...register('location_type')}
           >
-            {LOCATION_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
+            {LOCATION_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {t(`assets.locations.type.${type}`)}
               </option>
             ))}
           </select>
@@ -146,28 +142,28 @@ export function LocationFormModal({
         {locationType !== 'site' && (
           <LocationSelect
             id="loc-parent"
-            label="Parent Location *"
+            label={t('assets.locations.parent_label')}
             locations={locations.filter((l) => l.id !== location?.id)}
             value={parentId ?? null}
             onChange={(id) => setValue('parent_id', id)}
-            error={errors.parent_id?.message}
+            error={msg(errors.parent_id?.message)}
           />
         )}
 
         <Input
           id="loc-description"
-          label="Description"
-          placeholder="Optional description"
-          error={errors.description?.message}
+          label={t('assets.locations.description')}
+          placeholder={t('assets.locations.description_placeholder')}
+          error={msg(errors.description?.message)}
           {...register('description')}
         />
 
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="outline" onClick={onClose}>
-            Cancel
+            {t('common.actions.cancel')}
           </Button>
           <Button type="submit" loading={isPending}>
-            {isEdit ? 'Save Changes' : 'Create Location'}
+            {isEdit ? t('assets.locations.save') : t('assets.locations.create')}
           </Button>
         </div>
       </form>

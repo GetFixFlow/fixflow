@@ -18,6 +18,7 @@ vi.mock('@/hooks/useSettings', () => ({
     },
     isLoading: false,
   }),
+  useLocalization: () => ({ data: { language: 'en' } }),
   useUpdateProfile: () => ({ mutate: updateMutate, isPending: false }),
   useChangePassword: () => ({ mutate: vi.fn(), isPending: false }),
   useSessions: () => ({
@@ -74,7 +75,7 @@ describe('ProfilePage', () => {
 
   it('shows role badge', () => {
     render(<ProfilePage />, { wrapper: Wrapper })
-    expect(screen.getByText('admin')).toBeInTheDocument()
+    expect(screen.getByText('Administrator')).toBeInTheDocument()
   })
 
   it('shows sessions table', () => {
@@ -113,7 +114,7 @@ describe('ProfilePage', () => {
 
     await waitFor(() => expect(updateMutate).toHaveBeenCalled())
     expect(updateMutate.mock.calls[0][0]).toEqual({
-      full_name: 'Alice Jones', phone: '', job_title: '', department: '',
+      full_name: 'Alice Jones', phone: '', job_title: '', department: '', locale: '',
     })
   })
 })

@@ -12,6 +12,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import type { Location, LocationTreeNode, LocationType } from '@/types'
 import { buildLocationTree } from '@/utils/locationUtils'
@@ -60,6 +61,7 @@ function LocationNode({
   onEdit?: (location: Location) => void
   onDelete?: (location: Location) => void
 }) {
+  const { t } = useTranslation()
   const [expanded, setExpanded] = useState(defaultExpanded ?? node.depth < 2)
   const hasChildren = node.children.length > 0
   const isSelected = selectedId === node.id
@@ -118,7 +120,7 @@ function LocationNode({
             setExpanded((v) => !v)
           }}
           tabIndex={-1}
-          aria-label={expanded ? 'Collapse' : 'Expand'}
+          aria-label={expanded ? t('shell.locations.collapse') : t('shell.locations.expand')}
         >
           <ChevronRight className="h-3.5 w-3.5" />
         </button>
@@ -146,7 +148,7 @@ function LocationNode({
                 className="invisible ml-1 flex h-5 w-5 items-center justify-center rounded hover:bg-gray-200 group-hover:visible dark:hover:bg-gray-600"
                 onClick={(e) => e.stopPropagation()}
                 tabIndex={-1}
-                aria-label="Location options"
+                aria-label={t('shell.locations.options')}
               >
                 <MoreVertical className="h-3.5 w-3.5" />
               </button>
@@ -161,7 +163,7 @@ function LocationNode({
                     className="flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
                     onClick={(e) => { e.stopPropagation(); onAddChild(node) }}
                   >
-                    <Plus className="h-3.5 w-3.5" /> Add child
+                    <Plus className="h-3.5 w-3.5" /> {t('shell.locations.add_child')}
                   </DropdownMenu.Item>
                 )}
                 {onEdit && (
@@ -169,7 +171,7 @@ function LocationNode({
                     className="flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
                     onClick={(e) => { e.stopPropagation(); onEdit(node) }}
                   >
-                    <Pencil className="h-3.5 w-3.5" /> Edit
+                    <Pencil className="h-3.5 w-3.5" /> {t('common.actions.edit')}
                   </DropdownMenu.Item>
                 )}
                 {onDelete && (
@@ -177,7 +179,7 @@ function LocationNode({
                     className="flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
                     onClick={(e) => { e.stopPropagation(); onDelete(node) }}
                   >
-                    <Trash2 className="h-3.5 w-3.5" /> Delete
+                    <Trash2 className="h-3.5 w-3.5" /> {t('common.actions.delete')}
                   </DropdownMenu.Item>
                 )}
               </DropdownMenu.Content>
@@ -209,8 +211,9 @@ function LocationNode({
 }
 
 function LocationTreeSkeleton() {
+  const { t } = useTranslation()
   return (
-    <div className="space-y-1 p-2" aria-busy="true" aria-label="Loading locations">
+    <div className="space-y-1 p-2" aria-busy="true" aria-label={t('shell.locations.loading')}>
       {[0, 1, 2, 3, 4].map((i) => (
         <div
           key={i}
@@ -235,6 +238,7 @@ export function LocationTree({
   onEdit,
   onDelete,
 }: LocationTreeProps) {
+  const { t } = useTranslation()
   const [search, setSearch] = useState('')
 
   const filtered = search
@@ -249,21 +253,21 @@ export function LocationTree({
         <div className="p-2">
           <input
             type="search"
-            placeholder="Search locations..."
+            placeholder={t('shell.locations.search_placeholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-            aria-label="Search locations"
+            aria-label={t('shell.locations.search')}
           />
         </div>
       )}
 
       {tree.length === 0 ? (
         <p className="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
-          {search ? 'No locations match your search.' : 'No locations yet.'}
+          {search ? t('shell.locations.no_match') : t('shell.locations.none_yet')}
         </p>
       ) : (
-        <div role="tree" aria-label="Location hierarchy" className="p-1">
+        <div role="tree" aria-label={t('shell.locations.hierarchy')} className="p-1">
           {tree.map((node) => (
             <LocationNode
               key={node.id}

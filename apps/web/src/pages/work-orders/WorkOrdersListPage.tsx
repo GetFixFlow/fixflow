@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useState, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Download, LayoutGrid, List, Calendar, Plus as PlusIcon } from 'lucide-react'
@@ -16,13 +17,13 @@ import type { WorkOrder } from '@/types'
 type ViewMode = 'kanban' | 'table' | 'calendar'
 type TabId = 'all' | 'my' | 'overdue' | 'unassigned' | 'pending_verify' | 'needs_approval'
 
-const TABS: { id: TabId; label: string; roles?: string[] }[] = [
-  { id: 'all', label: 'All' },
-  { id: 'my', label: 'My Work Orders' },
-  { id: 'overdue', label: 'Overdue' },
-  { id: 'unassigned', label: 'Unassigned', roles: ['admin', 'manager'] },
-  { id: 'pending_verify', label: 'Pending Verify', roles: ['admin', 'manager'] },
-  { id: 'needs_approval', label: 'Needs Approval', roles: ['admin', 'manager'] },
+const TABS: { id: TabId; roles?: string[] }[] = [
+  { id: 'all' },
+  { id: 'my' },
+  { id: 'overdue' },
+  { id: 'unassigned', roles: ['admin', 'manager'] },
+  { id: 'pending_verify', roles: ['admin', 'manager'] },
+  { id: 'needs_approval', roles: ['admin', 'manager'] },
 ]
 
 function filterWorkOrders(
@@ -84,6 +85,7 @@ function filterWorkOrders(
 }
 
 export function WorkOrdersListPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const isManager = user?.role === 'admin' || user?.role === 'manager'
@@ -136,7 +138,7 @@ export function WorkOrdersListPage() {
   ).length
 
   const visibleTabs = TABS.filter(
-    (t) => !t.roles || (user && t.roles.includes(user.role)),
+    (tabItem) => !tabItem.roles || (user && tabItem.roles.includes(user.role)),
   )
 
   const tabCounts: Record<TabId, number> = {
@@ -164,19 +166,19 @@ export function WorkOrdersListPage() {
   return (
     <div className="space-y-4">
       <PageHeader
-        title="Work Orders"
-        description={`${openCount} open work order${openCount !== 1 ? 's' : ''}`}
+        title={t('workOrders.page.title')}
+        description={t('workOrders.list.open_count', { count: openCount })}
         actions={
           <div className="flex items-center gap-2">
             {isManager && (
               <Button variant="outline" size="sm">
                 <Download className="h-4 w-4" />
-                Export
+                {t('common.actions.export')}
               </Button>
             )}
             <Button onClick={() => navigate('/work-orders/new')}>
               <Plus className="h-4 w-4" />
-              New Work Order
+              {t('workOrders.page.new')}
             </Button>
           </div>
         }
@@ -203,26 +205,26 @@ export function WorkOrdersListPage() {
           className="flex overflow-x-auto border-b border-gray-200 dark:border-gray-700"
           role="tablist"
         >
-          {visibleTabs.map((t) => (
+          {visibleTabs.map((tabItem) => (
             <button
-              key={t.id}
+              key={tabItem.id}
               role="tab"
-              aria-selected={tab === t.id}
+              aria-selected={tab === tabItem.id}
               onClick={() => {
-                setTab(t.id)
+                setTab(tabItem.id)
                 setPage(1)
               }}
               className={cn(
                 'flex shrink-0 items-center gap-1.5 border-b-2 px-4 py-2 text-sm font-medium transition-colors',
-                tab === t.id
+                tab === tabItem.id
                   ? 'border-brand-600 text-brand-600 dark:border-brand-400 dark:text-brand-400'
                   : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-200',
               )}
             >
-              {t.label}
-              {tabCounts[t.id] > 0 && (
+              {t(`workOrders.list.tab_${tabItem.id}`)}
+              {tabCounts[tabItem.id] > 0 && (
                 <span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-xs dark:bg-gray-700">
-                  {tabCounts[t.id]}
+                  {tabCounts[tabItem.id]}
                 </span>
               )}
             </button>
@@ -232,18 +234,18 @@ export function WorkOrdersListPage() {
         <div className="flex items-center gap-1 shrink-0">
           {(
             [
-              { id: 'kanban', Icon: LayoutGrid, label: 'Kanban' },
-              { id: 'table', Icon: List, label: 'Table' },
-              { id: 'calendar', Icon: Calendar, label: 'Calendar' },
+              { id: 'kanban', Icon: LayoutGrid },
+              { id: 'table', Icon: List },
+              { id: 'calendar', Icon: Calendar },
             ] as const
-          ).map(({ id, Icon, label }) => (
+          ).map(({ id, Icon }) => (
             <Button
               key={id}
               variant={view === id ? 'secondary' : 'ghost'}
               size="icon"
               onClick={() => setViewPersisted(id)}
-              aria-label={label}
-              title={label}
+              aria-label={t(`workOrders.list.view_${id}`)}
+              title={t(`workOrders.list.view_${id}`)}
             >
               <Icon className="h-4 w-4" />
             </Button>
@@ -255,29 +257,29 @@ export function WorkOrdersListPage() {
       {selectedIds.size > 0 && (
         <div className="flex items-center gap-3 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2 dark:border-brand-800 dark:bg-brand-900/20">
           <span className="text-sm font-medium text-brand-700 dark:text-brand-300">
-            {selectedIds.size} selected
+            {t('workOrders.list.selected', { count: selectedIds.size })}
           </span>
           {isManager && (
             <>
               <Button variant="outline" size="sm">
-                Assign to...
+                {t('workOrders.list.assign_to')}
               </Button>
               <Button variant="outline" size="sm">
-                Change Priority
+                {t('workOrders.list.change_priority')}
               </Button>
               <Button variant="outline" size="sm" className="text-red-600">
-                Cancel selected
+                {t('workOrders.list.cancel_selected')}
               </Button>
             </>
           )}
           <Button variant="outline" size="sm">
-            Export selected
+            {t('workOrders.list.export_selected')}
           </Button>
           <button
             onClick={() => setSelectedIds(new Set())}
             className="ml-auto text-xs text-gray-500 underline hover:text-gray-700"
           >
-            Clear selection
+            {t('workOrders.list.clear_selection')}
           </button>
         </div>
       )}
@@ -296,13 +298,13 @@ export function WorkOrdersListPage() {
             onSelectChange={setSelectedIds}
             rowActions={[
               {
-                label: 'View Details',
+                label: t('workOrders.list.view_details'),
                 onClick: (wo) => navigate(`/work-orders/${wo.id}`),
               },
               ...(isManager
                 ? [
                     {
-                      label: 'Edit',
+                      label: t('common.actions.edit'),
                       onClick: (wo: WorkOrder) => navigate(`/work-orders/${wo.id}/edit`),
                     },
                   ]
@@ -310,7 +312,7 @@ export function WorkOrdersListPage() {
               ...(user?.role === 'technician'
                 ? [
                     {
-                      label: 'Assign to Me',
+                      label: t('workOrders.list.assign_me'),
                       onClick: () => {},
                       hidden: (wo: WorkOrder) =>
                         !!wo.assignee_id || wo.status !== 'open',
@@ -320,7 +322,7 @@ export function WorkOrdersListPage() {
               ...(isManager
                 ? [
                     {
-                      label: 'Cancel',
+                      label: t('common.actions.cancel'),
                       onClick: () => {},
                       danger: true,
                       hidden: (wo: WorkOrder) =>
@@ -335,8 +337,7 @@ export function WorkOrdersListPage() {
           {totalPages > 1 && (
             <div className="flex items-center justify-between">
               <p className="text-sm text-gray-500">
-                Showing {(page - 1) * PER_PAGE + 1}–
-                {Math.min(page * PER_PAGE, filtered.length)} of {filtered.length}
+                {t('workOrders.list.showing', { from: (page - 1) * PER_PAGE + 1, to: Math.min(page * PER_PAGE, filtered.length), total: filtered.length })}
               </p>
               <div className="flex items-center gap-2">
                 <Button
@@ -345,7 +346,7 @@ export function WorkOrdersListPage() {
                   disabled={page === 1}
                   onClick={() => setPage((p) => p - 1)}
                 >
-                  Previous
+                  {t('common.actions.previous')}
                 </Button>
                 <span className="text-sm text-gray-600">
                   {page} / {totalPages}
@@ -356,7 +357,7 @@ export function WorkOrdersListPage() {
                   disabled={page === totalPages}
                   onClick={() => setPage((p) => p + 1)}
                 >
-                  Next
+                  {t('common.actions.next')}
                 </Button>
               </div>
             </div>
@@ -368,7 +369,7 @@ export function WorkOrdersListPage() {
       <button
         onClick={() => navigate('/work-orders/new')}
         className="fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-brand-600 text-white shadow-lg hover:bg-brand-700 sm:hidden"
-        aria-label="New work order"
+        aria-label={t('workOrders.list.new_fab')}
       >
         <PlusIcon className="h-6 w-6" />
       </button>

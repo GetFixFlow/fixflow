@@ -5,6 +5,6 @@ class PurchaseOrderMailer < ApplicationMailer
     @manager = manager
     @order   = order
     @url     = "#{EmailSetup.base_url}/purchasing"
-    mail(to: manager.email, subject: "[FixFlow] Parts requested: #{order.number}")
+    in_language_of(manager) { mail(to: manager.email, subject: t(".subject", number: order.number)) }
   end
 end

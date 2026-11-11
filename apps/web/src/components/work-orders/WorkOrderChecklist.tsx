@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { CloudOff } from 'lucide-react'
 import { useToggleChecklistStep } from '@/hooks/useWorkOrders'
 import { formatDateTime } from '@/lib/localeFormat'
@@ -11,6 +12,7 @@ interface WorkOrderChecklistProps {
 }
 
 export function WorkOrderChecklist({ workOrderId, items, editable = true }: WorkOrderChecklistProps) {
+  const { t } = useTranslation()
   const toggle = useToggleChecklistStep(workOrderId)
 
   const completedCount = items.filter((i) => i.completed).length
@@ -27,7 +29,7 @@ export function WorkOrderChecklist({ workOrderId, items, editable = true }: Work
             />
           </div>
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            {completedCount}/{items.length} steps completed
+            {t('workOrders.checklist.progress', { done: completedCount, total: items.length })}
           </p>
         </div>
       </div>
@@ -53,15 +55,15 @@ export function WorkOrderChecklist({ workOrderId, items, editable = true }: Work
                 <span className={item.completed ? 'text-gray-400 line-through dark:text-gray-500' : 'text-gray-800 dark:text-gray-200'}>
                   {item.instruction}
                 </span>
-                {item.required !== false && !item.completed && <span className="ml-1.5 text-xs text-red-500">*required</span>}
+                {item.required !== false && !item.completed && <span className="ml-1.5 text-xs text-red-500">{t('workOrders.checklist.required')}</span>}
                 {item.pending && (
                   <span className="ml-2 inline-flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
-                    <CloudOff className="h-3 w-3" /> Waiting to sync
+                    <CloudOff className="h-3 w-3" /> {t('workOrders.checklist.waiting')}
                   </span>
                 )}
                 {item.completed && !item.pending && item.completed_by_name && (
                   <span className="block text-xs text-gray-400 dark:text-gray-500">
-                    Done by {item.completed_by_name}
+                    {t('workOrders.checklist.done_by', { name: item.completed_by_name })}
                     {item.completed_at ? `, ${formatDateTime(item.completed_at)}` : ''}
                   </span>
                 )}
@@ -73,7 +75,7 @@ export function WorkOrderChecklist({ workOrderId, items, editable = true }: Work
 
       {requiredRemaining.length > 0 && (
         <div className="rounded-md bg-yellow-50 p-3 text-sm text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300">
-          <strong>{requiredRemaining.length} required step{requiredRemaining.length !== 1 && 's'} not complete:</strong>
+          <strong>{t('workOrders.checklist.remaining', { count: requiredRemaining.length })}</strong>
           <ul className="mt-1 list-disc pl-4 text-xs">
             {requiredRemaining.map((i) => (
               <li key={i.step}>{i.instruction}</li>

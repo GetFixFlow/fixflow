@@ -1,20 +1,22 @@
-Hi <%= @manager.full_name %>,
+<%= t("mail.greeting", name: @manager.full_name) %>
 
-A new maintenance request has been submitted and requires your attention.
+<%= t(".intro") %>
 
-Work Order: <%= @work_order.work_order_number %>
-Title:      <%= @work_order.title %>
-Priority:   <%= @work_order.priority.upcase %>
-Submitted:  <%= @work_order.created_at.strftime("%Y-%m-%d %H:%M UTC") %>
+<%= mail_fields(
+  t("mail.work_order") => @work_order.work_order_number,
+  t("mail.title") => @work_order.title,
+  t("mail.priority") => mail_priority(@work_order.priority),
+  t("mail.submitted") => @work_order.created_at.strftime("%Y-%m-%d %H:%M UTC")
+) %>
 
 <% if @work_order.requester_name.present? %>
-Submitted By: <%= @work_order.requester_name %> (<%= @work_order.requester_email %>)
+<%= t("mail.submitted_by") %>: <%= @work_order.requester_name %> (<%= @work_order.requester_email %>)
 <% end %>
 <% if @work_order.description.present? %>
-Description:
+<%= t("mail.description") %>:
 <%= @work_order.description %>
 <% end %>
 
-Please log in to FixFlow to review and assign this work order.
+<%= t(".outro") %>
 
-— FixFlow
+<%= t("mail.signature") %>

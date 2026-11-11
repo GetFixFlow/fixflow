@@ -1,3 +1,5 @@
+import { label } from '@/i18n'
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AlertTriangle, ArrowLeftRight } from 'lucide-react'
@@ -29,6 +31,7 @@ function Chip({ order, detailed, onDragStart, onDragEnd, onPick }: {
   onDragEnd: () => void
   onPick: () => void
 }) {
+  const { t } = useTranslation()
   return (
     <div
       draggable
@@ -40,15 +43,15 @@ function Chip({ order, detailed, onDragStart, onDragEnd, onPick }: {
         <span className={cn('mt-1 h-2 w-2 shrink-0 rounded-full', PRIORITY_DOT[order.priority])} aria-hidden />
         <div className="min-w-0 flex-1">
           <Link to={`/work-orders/${order.id}`} className="block truncate text-xs font-medium text-gray-900 hover:underline dark:text-gray-100">
-            <span className="sr-only">{order.priority} priority: </span>{order.work_order_number} {order.title}
+            <span className="sr-only">{t('schedule.grid.priority', { priority: label('priority', order.priority).toLowerCase() })}</span>{order.work_order_number} {order.title}
           </Link>
           <p className="text-[11px] text-gray-500 dark:text-gray-400">
-            {hoursLabel(order.hours)}{order.estimated ? '' : ' (no estimate)'}
-            {detailed && ` · ${order.status.replace('_', ' ')}`}
+            {hoursLabel(order.hours)}{order.estimated ? '' : ` ${t('schedule.grid.no_estimate')}`}
+            {detailed && ` · ${label('status', order.status).toLowerCase()}`}
             {detailed && order.asset && ` · ${order.asset}`}
           </p>
         </div>
-        <button type="button" onClick={onPick} aria-label={`Move ${order.work_order_number}`}
+        <button type="button" onClick={onPick} aria-label={t('schedule.move.title', { number: order.work_order_number })}
           className="rounded p-0.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-600 dark:hover:text-gray-200">
           <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden />
         </button>
@@ -59,6 +62,7 @@ function Chip({ order, detailed, onDragStart, onDragEnd, onPick }: {
 
 /** How full a day is: the hours against what the day holds, and in words when it is too many. */
 function Load({ load, day }: { load: DayLoad; day: ScheduleDay }) {
+  const { t } = useTranslation()
   if (load.count === 0 && !load.overloaded) return null
   const over = load.hours - day.hours
   return (
@@ -69,14 +73,15 @@ function Load({ load, day }: { load: DayLoad; day: ScheduleDay }) {
       </div>
       <p className={cn('mt-0.5 flex items-center gap-1 text-[11px]', load.overloaded ? 'font-medium text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400')}>
         {load.overloaded && <AlertTriangle className="h-3 w-3" aria-hidden />}
-        {hoursLabel(load.hours)} of {hoursLabel(day.hours)}
-        {load.overloaded && (day.hours === 0 ? ' · day off' : ` · over by ${hoursLabel(over)}`)}
+        {t('schedule.grid.load', { hours: hoursLabel(load.hours), capacity: hoursLabel(day.hours) })}
+        {load.overloaded && (day.hours === 0 ? ` · ${t('schedule.grid.day_off_short')}` : ` · ${t('schedule.grid.over_by', { hours: hoursLabel(over) })}`)}
       </p>
     </div>
   )
 }
 
 export function ScheduleGrid({ schedule, mode, onMove, onPick }: ScheduleGridProps) {
+  const { t } = useTranslation()
   const [dragging, setDragging] = useState<ScheduledOrder | null>(null)
   const [over, setOver] = useState<string | null>(null)
   const detailed = mode === 'day'
@@ -106,13 +111,13 @@ export function ScheduleGrid({ schedule, mode, onMove, onPick }: ScheduleGridPro
       <table className="w-full border-collapse text-left">
         <thead>
           <tr className="bg-gray-50 dark:bg-gray-800/60">
-            <th scope="col" className="sticky left-0 z-10 w-40 bg-gray-50 p-2 text-xs font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400">Technician</th>
-            <th scope="col" className="w-36 p-2 text-xs font-medium text-gray-500 dark:text-gray-400">Earlier or no date</th>
+            <th scope="col" className="sticky left-0 z-10 w-40 bg-gray-50 p-2 text-xs font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400">{t('schedule.grid.technician')}</th>
+            <th scope="col" className="w-36 p-2 text-xs font-medium text-gray-500 dark:text-gray-400">{t('schedule.grid.earlier')}</th>
             {schedule.days.map((day) => (
               <th key={day.date} scope="col" className={cn('min-w-36 p-2 text-xs font-medium', day.date === schedule.today ? 'text-brand-700 dark:text-brand-300' : 'text-gray-500 dark:text-gray-400')}>
                 {dayHeading(day.date, detailed)}
-                {day.date === schedule.today && ' · today'}
-                {!day.working && <span className="block font-normal">{day.holiday ?? 'Day off'}</span>}
+                {day.date === schedule.today && ` · ${t('schedule.grid.today')}`}
+                {!day.working && <span className="block font-normal">{day.holiday ?? t('schedule.grid.day_off')}</span>}
               </th>
             ))}
           </tr>
@@ -124,18 +129,18 @@ export function ScheduleGrid({ schedule, mode, onMove, onPick }: ScheduleGridPro
             return (
               <tr key={row.id ?? 'nobody'} className="border-t border-gray-200 align-top dark:border-gray-700">
                 <th scope="row" className="sticky left-0 z-10 bg-white p-2 text-sm font-medium text-gray-900 dark:bg-gray-900 dark:text-gray-100">
-                  {nobody ? 'Nobody yet' : row.name}
-                  {!nobody && row.role !== 'technician' && <span className="block text-xs font-normal capitalize text-gray-500">{row.role}</span>}
+                  {nobody ? t('schedule.nobody') : row.name}
+                  {!nobody && row.role !== 'technician' && <span className="block text-xs font-normal capitalize text-gray-500">{label('role', row.role).toLowerCase()}</span>}
                 </th>
                 <td className={cn('p-1.5', tint(`${row.id}:${EARLIER}`))} data-testid={`cell-${row.id ?? 'nobody'}-${EARLIER}`} {...cell(row, EARLIER)}>
                   {row.earlier.count > 0 && (
                     <p className="mb-1 text-[11px] font-medium text-amber-700 dark:text-amber-400">
-                      {row.earlier.count} open · {hoursLabel(row.earlier.hours)}
+                      {t('schedule.grid.earlier_open', { count: row.earlier.count, hours: hoursLabel(row.earlier.hours) })}
                     </p>
                   )}
                   <div className="space-y-1">{chips(row, EARLIER)}</div>
                   {row.earlier.count > earlierShown && (
-                    <p className="mt-1 text-[11px] text-gray-500">+{row.earlier.count - earlierShown} more, not listed</p>
+                    <p className="mt-1 text-[11px] text-gray-500">{t('schedule.grid.more_not_listed', { count: row.earlier.count - earlierShown })}</p>
                   )}
                 </td>
                 {row.days.map((load, i) => (

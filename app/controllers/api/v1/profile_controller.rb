@@ -36,7 +36,7 @@ module Api
       private
 
       def profile_params
-        params.expect(user: %i[full_name phone job_title department])
+        params.expect(user: %i[full_name phone job_title department locale])
       end
 
       def serialized_user

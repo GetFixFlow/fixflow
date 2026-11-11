@@ -1,3 +1,5 @@
+import { currentLanguage } from '@/i18n'
+import { useTranslation } from 'react-i18next'
 import {
   LineChart,
   Line,
@@ -8,7 +10,6 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
-import { format } from 'date-fns'
 
 interface TrendDataPoint {
   date: string
@@ -21,9 +22,11 @@ interface WOTrendChartProps {
 }
 
 export function WOTrendChart({ data }: WOTrendChartProps) {
+  const { t } = useTranslation()
+  const dayFormat = new Intl.DateTimeFormat(currentLanguage(), { month: 'short', day: 'numeric' })
   const formatted = data.map((d) => ({
     ...d,
-    label: format(new Date(d.date), 'MMM d'),
+    label: dayFormat.format(new Date(d.date)),
   }))
 
   return (
@@ -37,7 +40,7 @@ export function WOTrendChart({ data }: WOTrendChartProps) {
         <Line
           type="monotone"
           dataKey="created"
-          name="Created"
+          name={t('workOrders.charts.created')}
           stroke="#3b82f6"
           strokeWidth={2}
           dot={false}
@@ -45,7 +48,7 @@ export function WOTrendChart({ data }: WOTrendChartProps) {
         <Line
           type="monotone"
           dataKey="completed"
-          name="Completed"
+          name={t('common.status.completed')}
           stroke="#22c55e"
           strokeWidth={2}
           dot={false}

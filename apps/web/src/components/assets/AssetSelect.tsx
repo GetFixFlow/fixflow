@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Search, X, ChevronDown } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { AssetStatusBadge } from './AssetStatusBadge'
 import { AssetHealthIndicator } from './AssetHealthIndicator'
 import { useAssets } from '@/hooks/useAssets'
@@ -19,12 +20,13 @@ interface AssetSelectProps {
 export function AssetSelect({
   value,
   onChange,
-  placeholder = 'Select an asset...',
+  placeholder,
   disabled = false,
   error,
   id,
   label,
 }: AssetSelectProps) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
@@ -86,7 +88,7 @@ export function AssetSelect({
               <span className="font-mono text-xs text-gray-400">{selectedAsset.asset_tag}</span>
             </span>
           ) : (
-            <span className="flex-1 text-left text-gray-400">{placeholder}</span>
+            <span className="flex-1 text-left text-gray-400">{placeholder ?? t('assets.select.placeholder')}</span>
           )}
           <span className="flex items-center gap-1">
             {value != null && (
@@ -96,7 +98,7 @@ export function AssetSelect({
                 onClick={(e) => { e.stopPropagation(); onChange(null) }}
                 onKeyDown={(e) => e.key === 'Enter' && onChange(null)}
                 className="rounded p-0.5 hover:bg-gray-200 dark:hover:bg-gray-600"
-                aria-label="Clear selection"
+                aria-label={t('assets.select.clear')}
               >
                 <X className="h-3.5 w-3.5 text-gray-400" />
               </span>
@@ -112,7 +114,7 @@ export function AssetSelect({
                 <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                 <input
                   type="search"
-                  placeholder="Search assets..."
+                  placeholder={t('assets.select.search')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="h-8 w-full rounded-md border border-gray-200 bg-gray-50 pl-8 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
@@ -122,9 +124,9 @@ export function AssetSelect({
             </div>
             <div className="max-h-52 overflow-auto py-1" role="listbox">
               {isLoading ? (
-                <div className="px-3 py-2 text-sm text-gray-500">Loading...</div>
+                <div className="px-3 py-2 text-sm text-gray-500">{t('assets.select.loading')}</div>
               ) : assets.length === 0 ? (
-                <div className="px-3 py-2 text-sm text-gray-500">No assets found</div>
+                <div className="px-3 py-2 text-sm text-gray-500">{t('assets.select.none_found')}</div>
               ) : (
                 assets.map((asset) => (
                   <button

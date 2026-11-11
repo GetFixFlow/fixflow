@@ -1,3 +1,6 @@
+import { timeAgo } from '@/lib/timeAgo'
+import { currentLanguage } from '@/i18n'
+import { useTranslation } from 'react-i18next'
 import { ApprovalNotice } from '@/components/work-orders/ApprovalNotice'
 import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
@@ -12,7 +15,6 @@ import {
   Calendar,
   CloudOff,
 } from 'lucide-react'
-import { format, formatDistanceToNow } from 'date-fns'
 import * as Tabs from '@radix-ui/react-tabs'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { cn } from '@/lib/utils'
@@ -48,6 +50,7 @@ import type { ActivityEvent } from '@/components/work-orders/WorkOrderActivityLo
 type ModalId = 'assign' | 'complete' | 'reject' | 'hold' | 'cancel' | 'verify' | 'part_log' | null
 
 function CopyId({ text }: { text: string }) {
+  const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
   return (
     <button
@@ -57,7 +60,7 @@ function CopyId({ text }: { text: string }) {
         setTimeout(() => setCopied(false), 1500)
       }}
       className="flex items-center gap-1 font-mono text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-      aria-label={`Copy ${text}`}
+      aria-label={t('workOrders.table.copy', { text })}
     >
       {text}
       {copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
@@ -65,7 +68,13 @@ function CopyId({ text }: { text: string }) {
   )
 }
 
+/** "Oct 13, 14:30", in the language of the screens. */
+const dayAndTime = (value: string) =>
+  new Intl.DateTimeFormat(currentLanguage(), { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(value))
+const dayOnly = (value: string) => new Intl.DateTimeFormat(currentLanguage(), { month: 'short', day: 'numeric' }).format(new Date(value))
+
 export function WorkOrderDetailPage() {
+  const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { user } = useAuthStore()
@@ -85,16 +94,16 @@ export function WorkOrderDetailPage() {
     activityEvents.push({
       id: 0,
       type: 'created',
-      description: 'created this work order',
-      actor_name: wo.requester?.full_name ?? 'Unknown',
+      description: t('workOrders.detail.event_created'),
+      actor_name: wo.requester?.full_name ?? t('common.state.unknown'),
       created_at: wo.created_at,
     })
     if (wo.assignee && wo.status !== 'open') {
       activityEvents.push({
         id: 1,
         type: 'assigned',
-        description: `assigned to ${wo.assignee.full_name}`,
-        actor_name: wo.requester?.full_name ?? 'Manager',
+        description: t('workOrders.detail.event_assigned', { name: wo.assignee.full_name }),
+        actor_name: wo.requester?.full_name ?? t('common.role.manager'),
         created_at: wo.updated_at,
       })
     }
@@ -102,8 +111,8 @@ export function WorkOrderDetailPage() {
       activityEvents.push({
         id: 2,
         type: 'started',
-        description: 'started work',
-        actor_name: wo.assignee?.full_name ?? 'Technician',
+        description: t('workOrders.detail.event_started'),
+        actor_name: wo.assignee?.full_name ?? t('common.role.technician'),
         created_at: wo.started_at,
       })
     }
@@ -111,8 +120,8 @@ export function WorkOrderDetailPage() {
       activityEvents.push({
         id: 3,
         type: 'completed',
-        description: 'marked as complete',
-        actor_name: wo.assignee?.full_name ?? 'Technician',
+        description: t('workOrders.detail.event_completed'),
+        actor_name: wo.assignee?.full_name ?? t('common.role.technician'),
         created_at: wo.completed_at,
       })
     }
@@ -120,8 +129,8 @@ export function WorkOrderDetailPage() {
       activityEvents.push({
         id: 4,
         type: 'verified',
-        description: 'verified and closed',
-        actor_name: wo.verified_by?.full_name ?? 'Manager',
+        description: t('workOrders.detail.event_verified'),
+        actor_name: wo.verified_by?.full_name ?? t('common.role.manager'),
         created_at: wo.verified_at,
       })
     }
@@ -141,10 +150,10 @@ export function WorkOrderDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
-          Work order not found or you don't have access.
+          {t('workOrders.detail.not_found')}
         </p>
         <Button variant="outline" className="mt-4" onClick={() => navigate('/work-orders')}>
-          Back to Work Orders
+          {t('workOrders.detail.back')}
         </Button>
       </div>
     )
@@ -165,7 +174,7 @@ export function WorkOrderDetailPage() {
           className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Work Orders
+          {t('workOrders.detail.back')}
         </Link>
 
         <div className="flex items-center gap-2">
@@ -174,14 +183,14 @@ export function WorkOrderDetailPage() {
           <WorkOrderStatusBadge status={wo.status} />
           {!!wo.pending_sync && (
             <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
-              <CloudOff className="h-3 w-3" /> Waiting to sync
+              <CloudOff className="h-3 w-3" /> {t('workOrders.checklist.waiting')}
             </span>
           )}
           <WorkOrderSourceBadge source={wo.source ?? 'manual'} showLabel={false} />
 
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
-              <Button variant="ghost" size="icon" aria-label="More actions">
+              <Button variant="ghost" size="icon" aria-label={t('workOrders.detail.more')}>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenu.Trigger>
@@ -195,7 +204,7 @@ export function WorkOrderDetailPage() {
                     className="flex cursor-pointer items-center rounded px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                     onSelect={() => navigate(`/work-orders/${wo.id}/edit`)}
                   >
-                    <Edit className="mr-2 h-4 w-4" /> Edit
+                    <Edit className="mr-2 h-4 w-4" /> {t('common.actions.edit')}
                   </DropdownMenu.Item>
                 )}
                 {canManage && !isReadOnly && (
@@ -203,7 +212,7 @@ export function WorkOrderDetailPage() {
                     className="flex cursor-pointer items-center rounded px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                     onSelect={() => setOpenModal('cancel')}
                   >
-                    Cancel
+                    {t('common.actions.cancel')}
                   </DropdownMenu.Item>
                 )}
               </DropdownMenu.Content>
@@ -216,7 +225,7 @@ export function WorkOrderDetailPage() {
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{wo.title}</h1>
         <AIButton size="sm" onClick={() => setAssistOpen(true)}>
-          Ask AI
+          {t('workOrders.detail.ask_ai')}
         </AIButton>
       </div>
 
@@ -232,12 +241,12 @@ export function WorkOrderDetailPage() {
                 transition.mutate({ id: wo.id, event: 'assign_self' })
               }
             >
-              Assign to Me
+              {t('workOrders.list.assign_me')}
             </Button>
           )}
           {wo.status === 'open' && canManage && (
             <Button size="sm" onClick={() => setOpenModal('assign')}>
-              Assign...
+              {t('workOrders.detail.assign')}
             </Button>
           )}
           {wo.status === 'assigned' && isAssignedToMe && (
@@ -246,13 +255,13 @@ export function WorkOrderDetailPage() {
               onClick={() => transition.mutate({ id: wo.id, event: 'start' })}
               loading={transition.isPending}
             >
-              ▶ Start Work
+              ▶ {t('workOrders.my.start')}
             </Button>
           )}
           {wo.status === 'in_progress' && isAssignedToMe && (
             <>
               <Button size="sm" variant="outline" onClick={() => setOpenModal('hold')}>
-                ⏸ Put On Hold
+                ⏸ {t('workOrders.hold.submit')}
               </Button>
               <Button
                 size="sm"
@@ -261,10 +270,10 @@ export function WorkOrderDetailPage() {
                   transition.mutate({ id: wo.id, event: 'pending_parts' })
                 }
               >
-                🔧 Need Parts
+                🔧 {t('workOrders.detail.need_parts')}
               </Button>
               <Button size="sm" onClick={() => setOpenModal('complete')}>
-                ✓ Complete
+                ✓ {t('workOrders.my.complete')}
               </Button>
             </>
           )}
@@ -274,16 +283,16 @@ export function WorkOrderDetailPage() {
               onClick={() => transition.mutate({ id: wo.id, event: 'resume' })}
               loading={transition.isPending}
             >
-              ▶ Resume
+              ▶ {t('workOrders.my.resume')}
             </Button>
           )}
           {wo.status === 'completed' && canManage && wo.assignee_id !== user?.id && (
             <>
               <Button size="sm" onClick={() => setOpenModal('verify')}>
-                ✓ Verify
+                ✓ {t('workOrders.detail.verify')}
               </Button>
               <Button size="sm" variant="outline" onClick={() => setOpenModal('reject')}>
-                ↩ Reject
+                ↩ {t('workOrders.verify.reject')}
               </Button>
             </>
           )}
@@ -294,7 +303,7 @@ export function WorkOrderDetailPage() {
               onClick={() => navigate(`/work-orders/${wo.id}/edit`)}
             >
               <Edit className="h-3.5 w-3.5" />
-              Edit
+              {t('common.actions.edit')}
             </Button>
           )}
         </div>
@@ -307,7 +316,7 @@ export function WorkOrderDetailPage() {
           {/* Timeline */}
           <section className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
             <h2 className="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Progress
+              {t('workOrders.detail.progress')}
             </h2>
             <WorkOrderTimeline status={wo.status} />
           </section>
@@ -316,7 +325,7 @@ export function WorkOrderDetailPage() {
           {wo.description && (
             <section className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
               <h2 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Description
+                {t('workOrders.form.description')}
               </h2>
               <p className="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">
                 {wo.description}
@@ -330,7 +339,7 @@ export function WorkOrderDetailPage() {
           {wo.checklist && wo.checklist.length > 0 && (
             <section className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
               <h2 className="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Checklist
+                {t('workOrders.detail.checklist')}
               </h2>
               <WorkOrderChecklist
                 workOrderId={wo.id}
@@ -353,7 +362,7 @@ export function WorkOrderDetailPage() {
                     'dark:text-gray-400 dark:hover:text-gray-200 dark:data-[state=active]:border-brand-400 dark:data-[state=active]:text-brand-400',
                   )}
                 >
-                  {tab.replace('_', ' ')}
+                  {t(`workOrders.detail.tab_${tab}`)}
                 </Tabs.Trigger>
               ))}
             </Tabs.List>
@@ -384,7 +393,7 @@ export function WorkOrderDetailPage() {
           {wo.asset && (
             <section className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
               <h2 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Asset
+                {t('workOrders.table.asset')}
               </h2>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
@@ -397,7 +406,7 @@ export function WorkOrderDetailPage() {
                   to={`/assets/${wo.asset_id}`}
                   className="text-xs text-brand-600 hover:underline dark:text-brand-400"
                 >
-                  View full asset details →
+                  {t('workOrders.detail.asset_link')}
                 </Link>
               </div>
             </section>
@@ -406,68 +415,67 @@ export function WorkOrderDetailPage() {
           {/* Details */}
           <section className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
             <h2 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Details
+              {t('workOrders.detail.details')}
             </h2>
             <dl className="space-y-2 text-sm">
               <div className="flex items-center justify-between">
-                <dt className="text-gray-500 dark:text-gray-400">Requester</dt>
+                <dt className="text-gray-500 dark:text-gray-400">{t('workOrders.detail.requester')}</dt>
                 <dd className="text-gray-900 dark:text-gray-100">
                   {wo.requester?.full_name ?? '—'}
                 </dd>
               </div>
               <div className="flex items-center justify-between">
-                <dt className="text-gray-500 dark:text-gray-400">Assignee</dt>
+                <dt className="text-gray-500 dark:text-gray-400">{t('workOrders.table.assignee')}</dt>
                 <dd className="text-gray-900 dark:text-gray-100">
                   {wo.assignee?.full_name ?? (
-                    <span className="italic text-gray-400">Unassigned</span>
+                    <span className="italic text-gray-400">{t('common.state.unassigned')}</span>
                   )}
                 </dd>
               </div>
               <div className="flex items-center justify-between">
-                <dt className="text-gray-500 dark:text-gray-400">Created</dt>
+                <dt className="text-gray-500 dark:text-gray-400">{t('workOrders.detail.created')}</dt>
                 <dd className="text-gray-900 dark:text-gray-100">
-                  {formatDistanceToNow(new Date(wo.created_at), { addSuffix: true })}
+                  {timeAgo(wo.created_at)}
                 </dd>
               </div>
               <div className="flex items-center justify-between">
-                <dt className="text-gray-500 dark:text-gray-400">Due Date</dt>
+                <dt className="text-gray-500 dark:text-gray-400">{t('workOrders.table.due_date')}</dt>
                 <dd>
                   <WorkOrderDueDate dueDate={wo.due_date} />
                 </dd>
               </div>
               {wo.started_at && (
                 <div className="flex items-center justify-between">
-                  <dt className="text-gray-500 dark:text-gray-400">Started</dt>
+                  <dt className="text-gray-500 dark:text-gray-400">{t('workOrders.detail.started')}</dt>
                   <dd className="text-gray-900 dark:text-gray-100">
-                    {format(new Date(wo.started_at), 'MMM d, HH:mm')}
+                    {dayAndTime(wo.started_at)}
                   </dd>
                 </div>
               )}
               {wo.completed_at && (
                 <div className="flex items-center justify-between">
-                  <dt className="text-gray-500 dark:text-gray-400">Completed</dt>
+                  <dt className="text-gray-500 dark:text-gray-400">{t('common.status.completed')}</dt>
                   <dd className="text-gray-900 dark:text-gray-100">
-                    {format(new Date(wo.completed_at), 'MMM d, HH:mm')}
+                    {dayAndTime(wo.completed_at)}
                   </dd>
                 </div>
               )}
               {wo.verified_at && (
                 <div className="flex items-center justify-between">
-                  <dt className="text-gray-500 dark:text-gray-400">Verified by</dt>
+                  <dt className="text-gray-500 dark:text-gray-400">{t('workOrders.detail.verified_by')}</dt>
                   <dd className="text-gray-900 dark:text-gray-100">
-                    {wo.verified_by?.full_name} on{' '}
-                    {format(new Date(wo.verified_at), 'MMM d')}
+                    {t('workOrders.detail.verified_on', { name: wo.verified_by?.full_name, date: dayOnly(wo.verified_at) })}
                   </dd>
                 </div>
               )}
               {wo.estimated_hours && (
                 <div className="flex items-center justify-between">
-                  <dt className="text-gray-500 dark:text-gray-400">Est. Hours</dt>
-                  <dd className="text-gray-900 dark:text-gray-100">{wo.estimated_hours} hrs</dd>
+                  <dt className="text-gray-500 dark:text-gray-400">{t('workOrders.detail.est_hours')}</dt>
+                  <dd className="text-gray-900 dark:text-gray-100">{t('workOrders.verify.hrs', { hours: wo.estimated_hours })}</dd>
                 </div>
               )}
               <div className="flex items-center justify-between">
-                <dt className="text-gray-500 dark:text-gray-400">Actual Hours</dt>
+                <dt className="text-gray-500 dark:text-gray-400">{t('workOrders.detail.actual_hours')}</dt>
                 <dd>
                   {isAssignedToMe && wo.status === 'in_progress' ? (
                     <input
@@ -482,7 +490,7 @@ export function WorkOrderDetailPage() {
                     />
                   ) : (
                     <span className="text-gray-900 dark:text-gray-100">
-                      {wo.actual_hours ? `${wo.actual_hours} hrs` : '—'}
+                      {wo.actual_hours ? t('workOrders.verify.hrs', { hours: wo.actual_hours }) : '—'}
                     </span>
                   )}
                 </dd>
@@ -506,7 +514,7 @@ export function WorkOrderDetailPage() {
           {/* Related */}
           <section className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
             <h2 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Related
+              {t('workOrders.detail.related')}
             </h2>
             <WorkOrderRelated workOrder={wo} />
           </section>
@@ -514,7 +522,7 @@ export function WorkOrderDetailPage() {
           {/* Activity log */}
           <section className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
             <h2 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Activity
+              {t('workOrders.detail.activity')}
             </h2>
             <WorkOrderActivityLog events={[...activityEvents].reverse()} compact />
           </section>

@@ -6,9 +6,8 @@ class PartMailer < ApplicationMailer
     @part    = part
     @out     = kind.to_s == "out"
     @url     = "#{EmailSetup.base_url}/parts"
-    mail(
-      to:      manager.email,
-      subject: "[FixFlow] #{@out ? 'Out of stock' : 'Running low'}: #{part.name}"
-    )
+    in_language_of(manager) do
+      mail(to: manager.email, subject: t(@out ? ".subject_out" : ".subject_low", part: part.name))
+    end
   end
 end

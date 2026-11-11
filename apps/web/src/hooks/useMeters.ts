@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { metersApi, type MeterInput } from '@/api/meters'
 import { PM_KEY } from '@/hooks/usePreventiveMaintenance'
 import { WO_KEY } from '@/hooks/useWorkOrders'
+import { t } from '@/i18n'
 
 /** The meters of an asset. */
 export function useAssetMeters(assetId: number | undefined) {
@@ -45,18 +46,18 @@ function useRefreshing<TArgs>(fn: (args: TArgs) => Promise<unknown>, success: st
 }
 
 export const useCreateMeter = (assetId: number) =>
-  useRefreshing((data: MeterInput) => metersApi.create(assetId, data), 'Meter added.', 'Could not add the meter.')
+  useRefreshing((data: MeterInput) => metersApi.create(assetId, data), t('assets.toasts.meter_added'), t('assets.toasts.meter_add_failed'))
 
 export const useUpdateMeter = (id: number) =>
-  useRefreshing((data: Partial<MeterInput>) => metersApi.update(id, data), 'Meter changed.', 'Could not change the meter.')
+  useRefreshing((data: Partial<MeterInput>) => metersApi.update(id, data), t('assets.toasts.meter_changed'), t('assets.toasts.meter_change_failed'))
 
 export const useDeleteMeter = (id: number) =>
-  useRefreshing(() => metersApi.destroy(id), 'Meter deleted.', 'Could not delete the meter.')
+  useRefreshing(() => metersApi.destroy(id), t('assets.toasts.meter_deleted'), t('assets.toasts.meter_delete_failed'))
 
 export const useRecordReading = (id: number) =>
   useRefreshing(
     (data: { value: string; note?: string; reset?: boolean }) => metersApi.record(id, data),
-    'Reading saved.',
-    'Could not save the reading.',
+    t('assets.toasts.reading_saved'),
+    t('assets.toasts.reading_failed'),
     true,
   )

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import { Modal } from '@/components/ui/Modal'
@@ -11,6 +12,7 @@ interface CancelModalProps {
 }
 
 export function CancelModal({ workOrderId, open, onClose }: CancelModalProps) {
+  const { t } = useTranslation()
   const [reason, setReason] = useState('')
   const transition = useTransitionWorkOrder()
 
@@ -27,31 +29,31 @@ export function CancelModal({ workOrderId, open, onClose }: CancelModalProps) {
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Cancel Work Order">
+    <Modal open={open} onClose={onClose} title={t('workOrders.cancel.title')}>
       <div className="space-y-4">
         <div className="flex items-center gap-2 rounded-md bg-red-50 p-3 dark:bg-red-900/20">
           <AlertTriangle className="h-5 w-5 text-red-500 shrink-0" />
           <p className="text-sm text-red-700 dark:text-red-300">
-            This action cannot be undone.
+            {t('workOrders.cancel.warning')}
           </p>
         </div>
 
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Cancellation reason *
+            {t('workOrders.cancel.reason')}
           </label>
           <textarea
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             rows={3}
             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-            placeholder="Why is this work order being cancelled?"
+            placeholder={t('workOrders.cancel.reason_placeholder')}
           />
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
           <Button variant="outline" onClick={onClose}>
-            Keep Open
+            {t('workOrders.cancel.keep')}
           </Button>
           <Button
             variant="destructive"
@@ -59,7 +61,7 @@ export function CancelModal({ workOrderId, open, onClose }: CancelModalProps) {
             disabled={!canSubmit || transition.isPending}
             loading={transition.isPending}
           >
-            Cancel Work Order
+            {t('workOrders.cancel.title')}
           </Button>
         </div>
       </div>

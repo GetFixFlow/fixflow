@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -32,9 +33,9 @@ export function useWorkOrderChannel() {
             qc.invalidateQueries({ queryKey: WO_KEY })
 
             if (data.type === 'work_order_assigned' && data.assignee_id === user.id) {
-              toast.info(`A work order was assigned to you.`, {
+              toast.info(t('workOrders.toast.assigned_to_you'), {
                 action: {
-                  label: 'View',
+                  label: t('common.actions.view'),
                   onClick: () => {
                     window.location.href = `/work-orders/${data.work_order_id}`
                   },

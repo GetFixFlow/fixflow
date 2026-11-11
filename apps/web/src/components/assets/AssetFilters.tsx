@@ -1,8 +1,10 @@
 import { Search, X, SlidersHorizontal } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { LocationSelect } from '@/components/shared/LocationSelect'
 import type { AssetStatus, Location } from '@/types'
+import { label } from '@/i18n'
 
 export interface AssetFilterState {
   search: string
@@ -17,15 +19,10 @@ interface AssetFiltersProps {
   totalCount?: number
 }
 
-const STATUS_OPTIONS: { value: AssetStatus | ''; label: string }[] = [
-  { value: '', label: 'All Statuses' },
-  { value: 'operational', label: 'Operational' },
-  { value: 'degraded', label: 'Degraded' },
-  { value: 'down', label: 'Down' },
-  { value: 'decommissioned', label: 'Decommissioned' },
-]
+const STATUS_VALUES: AssetStatus[] = ['operational', 'degraded', 'down', 'decommissioned']
 
 export function AssetFilters({ filters, onChange, locations, totalCount }: AssetFiltersProps) {
+  const { t } = useTranslation()
   const hasActiveFilters = filters.status !== '' || filters.location_id != null
 
   const clearAll = () =>
@@ -42,11 +39,11 @@ export function AssetFilters({ filters, onChange, locations, totalCount }: Asset
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <input
             type="search"
-            placeholder="Search assets..."
+            placeholder={t('assets.filters.search_placeholder')}
             value={filters.search}
             onChange={(e) => onChange({ ...filters, search: e.target.value })}
             className="h-9 w-full rounded-md border border-gray-300 bg-white pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-            aria-label="Search assets"
+            aria-label={t('assets.filters.search_aria')}
           />
         </div>
 
@@ -55,11 +52,12 @@ export function AssetFilters({ filters, onChange, locations, totalCount }: Asset
           value={filters.status}
           onChange={(e) => onChange({ ...filters, status: e.target.value as AssetStatus | '' })}
           className="h-9 rounded-md border border-gray-300 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-          aria-label="Filter by status"
+          aria-label={t('assets.filters.status_aria')}
         >
-          {STATUS_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
+          <option value="">{t('assets.filters.all_statuses')}</option>
+          {STATUS_VALUES.map((value) => (
+            <option key={value} value={value}>
+              {label('status', value)}
             </option>
           ))}
         </select>
@@ -70,13 +68,13 @@ export function AssetFilters({ filters, onChange, locations, totalCount }: Asset
             locations={locations}
             value={filters.location_id}
             onChange={(id) => onChange({ ...filters, location_id: id })}
-            placeholder="All Locations"
+            placeholder={t('assets.filters.all_locations')}
           />
         </div>
 
         {totalCount != null && (
           <span className="ml-auto text-sm text-gray-500 dark:text-gray-400">
-            {totalCount} asset{totalCount !== 1 ? 's' : ''}
+            {t('assets.filters.count', { count: totalCount })}
           </span>
         )}
       </div>
@@ -90,7 +88,7 @@ export function AssetFilters({ filters, onChange, locations, totalCount }: Asset
               className="flex items-center gap-1 cursor-pointer"
               onClick={() => removeFilter('status')}
             >
-              Status: {filters.status}
+              {t('assets.filters.status_chip', { status: label('status', filters.status) })}
               <X className="h-3 w-3" aria-hidden="true" />
             </Badge>
           )}
@@ -100,7 +98,7 @@ export function AssetFilters({ filters, onChange, locations, totalCount }: Asset
               className="flex items-center gap-1 cursor-pointer"
               onClick={() => removeFilter('location_id')}
             >
-              Location filter
+              {t('assets.filters.location_chip')}
               <X className="h-3 w-3" aria-hidden="true" />
             </Badge>
           )}
@@ -108,7 +106,7 @@ export function AssetFilters({ filters, onChange, locations, totalCount }: Asset
             onClick={clearAll}
             className="text-xs text-brand-600 hover:underline dark:text-brand-400"
           >
-            Clear all
+            {t('assets.filters.clear_all')}
           </button>
         </div>
       )}

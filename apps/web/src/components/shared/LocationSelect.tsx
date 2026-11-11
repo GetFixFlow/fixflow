@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { ChevronDown, X, MapPin } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import type { Location } from '@/types'
 import { LocationTree } from './LocationTree'
@@ -20,12 +21,13 @@ export function LocationSelect({
   locations,
   value,
   onChange,
-  placeholder = 'Select a location...',
+  placeholder,
   disabled = false,
   error,
   id,
   label,
 }: LocationSelectProps) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -69,7 +71,7 @@ export function LocationSelect({
           aria-expanded={open}
         >
           <span className={cn('flex-1 truncate text-left', !displayText && 'text-gray-400')}>
-            {displayText ?? placeholder}
+            {displayText ?? placeholder ?? t('shell.locations.select')}
           </span>
           <span className="flex items-center gap-1">
             {value != null && (
@@ -82,7 +84,7 @@ export function LocationSelect({
                 }}
                 onKeyDown={(e) => e.key === 'Enter' && onChange(null)}
                 className="rounded p-0.5 hover:bg-gray-200 dark:hover:bg-gray-600"
-                aria-label="Clear selection"
+                aria-label={t('shell.locations.clear')}
               >
                 <X className="h-3.5 w-3.5 text-gray-400" />
               </span>
@@ -97,7 +99,7 @@ export function LocationSelect({
               {locations.length === 0 ? (
                 <div className="flex items-center gap-2 px-4 py-6 text-sm text-gray-500">
                   <MapPin className="h-4 w-4" />
-                  No locations available
+                  {t('shell.locations.none_available')}
                 </div>
               ) : (
                 <LocationTree

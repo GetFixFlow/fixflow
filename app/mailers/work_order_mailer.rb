@@ -4,54 +4,46 @@ class WorkOrderMailer < ApplicationMailer
   def assigned(work_order)
     @work_order = work_order
     @assignee   = work_order.assignee
-    mail(
-      to:      @assignee.email,
-      subject: "[FixFlow] Work Order Assigned: #{work_order.work_order_number}"
-    )
+    in_language_of(@assignee) do
+      mail(to: @assignee.email, subject: t(".subject", number: work_order.work_order_number))
+    end
   end
 
   def needs_verification(work_order, manager)
     @work_order = work_order
     @manager    = manager
-    mail(
-      to:      manager.email,
-      subject: "[FixFlow] Ready for Verification: #{work_order.work_order_number}"
-    )
+    in_language_of(manager) do
+      mail(to: manager.email, subject: t(".subject", number: work_order.work_order_number))
+    end
   end
 
   def approval_needed(work_order, manager)
     @work_order = work_order
     @manager    = manager
     @url        = "#{EmailSetup.base_url}/work-orders/#{work_order.id}"
-    mail(
-      to:      manager.email,
-      subject: "[FixFlow] Needs approval: #{work_order.work_order_number}"
-    )
+    in_language_of(manager) do
+      mail(to: manager.email, subject: t(".subject", number: work_order.work_order_number))
+    end
   end
 
   def verified(work_order)
     @work_order = work_order
     @requester  = work_order.requester
-    mail(
-      to:      @requester.email,
-      subject: "[FixFlow] Work Order Completed: #{work_order.work_order_number}"
-    )
+    in_language_of(@requester) do
+      mail(to: @requester.email, subject: t(".subject", number: work_order.work_order_number))
+    end
   end
 
   def verified_public(work_order)
     @work_order = work_order
-    mail(
-      to:      work_order.requester_email,
-      subject: "[FixFlow] Your Maintenance Request Has Been Completed"
-    )
+    in_language_of_organization(work_order.organization) do
+      mail(to: work_order.requester_email, subject: t(".subject"))
+    end
   end
 
   def new_request(work_order, manager)
     @work_order = work_order
     @manager    = manager
-    mail(
-      to:      manager.email,
-      subject: "[FixFlow] New Maintenance Request Submitted"
-    )
+    in_language_of(manager) { mail(to: manager.email, subject: t(".subject")) }
   end
 end

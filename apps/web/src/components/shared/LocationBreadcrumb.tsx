@@ -1,4 +1,5 @@
 import { ChevronRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import type { Location } from '@/types'
 import { getLocationPath } from '@/utils/locationUtils'
@@ -18,15 +19,16 @@ export function LocationBreadcrumb({
   className,
   compact = false,
 }: LocationBreadcrumbProps) {
+  const { t } = useTranslation()
   if (!locationId) return null
 
   const path = getLocationPath(locations, locationId)
-  if (path.length === 0) return <span className="text-sm text-gray-400">Unknown location</span>
+  if (path.length === 0) return <span className="text-sm text-gray-400">{t('shell.locations.unknown')}</span>
 
   const displayPath = compact && path.length > 2 ? [path[0], path[path.length - 1]] : path
 
   return (
-    <nav aria-label="Location path" className={cn('flex items-center gap-1', className)}>
+    <nav aria-label={t('shell.locations.path')} className={cn('flex items-center gap-1', className)}>
       {displayPath.map((loc, index) => {
         const isLast = index === displayPath.length - 1
         const isEllipsis = compact && path.length > 2 && index === 1 && path.length > 2

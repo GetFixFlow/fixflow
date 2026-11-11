@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 import { formatDate } from '@/lib/localeFormat'
 import type { CustomField, CustomValues } from '@/types/customFields'
 
@@ -29,7 +30,7 @@ export function missingRequired(fields: CustomField[], values: CustomInputValues
   for (const field of fields) {
     if (!field.required) continue
     const value = values[field.key]
-    if (typeof value !== 'string' || value.trim() === '') missing[field.key] = `${field.label} is required`
+    if (typeof value !== 'string' || value.trim() === '') missing[field.key] = t('workOrders.custom.required', { label: field.label })
   }
   return missing
 }
@@ -37,7 +38,7 @@ export function missingRequired(fields: CustomField[], values: CustomInputValues
 /** A stored value as a person reads it. */
 export function shownValue(field: CustomField, value: CustomValues[string] | undefined): string {
   if (value === undefined || value === null || value === '') return ''
-  if (field.kind === 'checkbox') return value ? 'Yes' : 'No'
+  if (field.kind === 'checkbox') return value ? t('common.state.yes') : t('common.state.no')
   if (field.kind === 'date') return formatDate(String(value))
   return String(value)
 }

@@ -1,0 +1,136 @@
+es:
+  mail:
+    greeting: "Hola %{name},"
+    hello: "Hola,"
+    signature: "— FixFlow"
+    work_order: "Orden de trabajo"
+    title: "Título"
+    priority: "Prioridad"
+    due_date: "Fecha límite"
+    completed: "Completada"
+    verified: "Verificada"
+    submitted: "Enviada"
+    submitted_by: "Enviada por"
+    description: "Descripción"
+    completion_notes: "Notas de finalización"
+    asset: "Activo"
+    due: "Vence"
+    was_due: "Vencía"
+    days_overdue: "Días de retraso"
+    pm_schedule: "Programa de MP"
+    not_set: "Sin definir"
+    unknown: "Desconocido"
+    not_applicable: "N/D"
+    someone: "Alguien"
+    an_administrator: "Un administrador"
+    log_in_to_view: "Inicia sesión en FixFlow para ver todos los detalles y comenzar el trabajo."
+    priorities:
+      low: "baja"
+      medium: "media"
+      high: "alta"
+      critical: "crítica"
+    roles:
+      admin: "administrador"
+      manager: "gerente"
+      technician: "técnico"
+      requester: "solicitante"
+  password_mailer:
+    reset:
+      subject: "[FixFlow] Restablece tu contraseña"
+      body: "Alguien solicitó restablecer la contraseña de tu cuenta de FixFlow. Para elegir una nueva contraseña, abre:"
+      expiry: "El enlace funciona una sola vez y caduca en %{time}. Si no lo solicitaste, puedes ignorar este correo; tu contraseña no cambiará."
+  system_mailer:
+    test_email:
+      subject: "[FixFlow] Correo de prueba"
+      body: "Este es un correo de prueba de FixFlow. Si lo estás leyendo, la configuración de tu servidor de correo funciona y FixFlow puede enviar correos."
+  backup_mailer:
+    failed:
+      subject: "[FixFlow] Falló la copia de seguridad nocturna"
+      body: "La copia de seguridad nocturna de la base de datos falló en los %{attempts} intentos, por lo que puede que no haya copia de anoche."
+      when: "Cuándo"
+      reason: "Motivo"
+      what_to_do: "Qué hacer: comprueba que el almacenamiento de archivos (MinIO) esté en marcha y tenga espacio, y que la base de datos responda. La próxima copia se intentará a las %{time}."
+      see_backups: "Las copias que existen y la antigüedad de la más reciente: %{url}"
+  invitation_mailer:
+    invite:
+      subject: "[FixFlow] Te han invitado a unirte a %{organization}"
+      body: "%{inviter} te invitó a unirte a %{organization} en FixFlow como %{role}."
+      set_password: "Elige tu contraseña e inicia sesión aquí:"
+      expiry: "Este enlace funciona una sola vez y caduca en %{time}."
+  part_mailer:
+    low_stock:
+      subject_out: "[FixFlow] Sin existencias: %{part}"
+      subject_low: "[FixFlow] Existencias bajas: %{part}"
+      out: "%{part} se ha agotado."
+      low: "%{part} ha llegado a su punto de reposición."
+      part: "Repuesto"
+      on_hand: "En existencia"
+      reorder_at: "Reponer en"
+      once: "No recibirás otro correo sobre este repuesto hasta que se reponga y vuelva a bajar."
+      see: "Consulta los repuestos que hay que reponer: %{url}"
+  pm_mailer:
+    due_soon_summary:
+      subject:
+        one: "[FixFlow] %{count} programa de mantenimiento preventivo vence esta semana"
+        other: "[FixFlow] %{count} programas de mantenimiento preventivo vencen esta semana"
+      intro: "Los siguientes programas de mantenimiento preventivo vencen en los próximos 7 días:"
+      outro: "Inicia sesión en FixFlow para revisar y preparar estas próximas tareas de MP."
+    overdue_summary:
+      subject:
+        one: "[FixFlow] %{count} programa de MP vencido requiere atención"
+        other: "[FixFlow] %{count} programas de MP vencidos requieren atención"
+      intro: "Los siguientes programas de mantenimiento preventivo están vencidos y requieren atención inmediata:"
+      outro: "Inicia sesión en FixFlow para revisar y actuar sobre estos programas de MP vencidos."
+    work_order_generated:
+      subject: "[FixFlow] Orden de trabajo de MP generada automáticamente: %{number}"
+      intro: "Se generó automáticamente una orden de trabajo de mantenimiento preventivo y se te asignó."
+  purchase_order_mailer:
+    requested:
+      subject: "[FixFlow] Solicitud de repuestos: %{number}"
+      intro: "%{person} ha pedido repuestos y necesita tu decisión."
+      request: "Solicitud"
+      why: "Motivo"
+      decide: "Aprobarla o rechazarla: %{url}"
+  report_mailer:
+    scheduled:
+      subject: "[FixFlow] %{name}: del %{from} al %{to}"
+      intro: "Adjunto está «%{name}», el informe de %{report} del %{from} al %{to}."
+      scheduled:
+        one: "%{sender} configuró este informe para enviarse cada %{day} a una persona. Para dejar de recibirlo, desactiva «Se me envía por correo un informe programado» en Configuración, Notificaciones, o pide a %{first_name} que te quite de la lista."
+        other: "%{sender} configuró este informe para enviarse cada %{day} a %{count} personas. Para dejar de recibirlo, desactiva «Se me envía por correo un informe programado» en Configuración, Notificaciones, o pide a %{first_name} que te quite de la lista."
+      manual: "Pediste esta copia tú mismo. Este informe no se envía por correo de forma programada."
+      see: "Consulta y cambia los informes guardados: %{url}"
+  warranty_mailer:
+    expiring:
+      subject:
+        one: "[FixFlow] %{count} garantía termina en menos de 30 días"
+        other: "[FixFlow] %{count} garantías terminan en menos de 30 días"
+      intro:
+        one: "La garantía de este activo termina en menos de 30 días. Lo que cubre es más barato de reparar en garantía, así que informa los problemas antes de esa fecha."
+        other: "Las garantías de estos activos terminan en menos de 30 días. Lo que cubren es más barato de reparar en garantía, así que informa los problemas antes de esa fecha."
+      once: "No recibirás otro correo sobre estas fechas."
+      see: "Consulta los activos: %{url}"
+  work_order_mailer:
+    assigned:
+      subject: "[FixFlow] Orden de trabajo asignada: %{number}"
+      intro: "Se te asignó una orden de trabajo."
+    needs_verification:
+      subject: "[FixFlow] Lista para verificar: %{number}"
+      intro: "Se completó una orden de trabajo y está lista para tu verificación."
+      outro: "Inicia sesión en FixFlow para revisar y verificar esta orden de trabajo."
+    approval_needed:
+      subject: "[FixFlow] Requiere aprobación: %{number}"
+      intro: "Una orden de trabajo cuesta más que el límite de aprobación de la empresa, por lo que no se puede iniciar ni terminar hasta que un gerente la apruebe."
+      review: "Revisarla y aprobarla: %{url}"
+    verified:
+      subject: "[FixFlow] Orden de trabajo completada: %{number}"
+      intro: "¡Buenas noticias! Tu solicitud de mantenimiento se completó y fue verificada."
+      outro: "Gracias por usar FixFlow."
+    verified_public:
+      subject: "[FixFlow] Tu solicitud de mantenimiento se ha completado"
+      intro: "Tu solicitud de mantenimiento se completó y fue verificada."
+      outro: "Gracias por enviar tu solicitud."
+    new_request:
+      subject: "[FixFlow] Nueva solicitud de mantenimiento enviada"
+      intro: "Se envió una nueva solicitud de mantenimiento que requiere tu atención."
+      outro: "Inicia sesión en FixFlow para revisar y asignar esta orden de trabajo."

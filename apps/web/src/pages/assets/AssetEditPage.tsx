@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -13,9 +14,10 @@ import { LocationSelect } from '@/components/shared/LocationSelect'
 import { useAsset, useUpdateAsset } from '@/hooks/useAssets'
 import { useLocations } from '@/hooks/useLocations'
 import type { AssetStatus } from '@/types'
+import { label } from '@/i18n'
 
 const schema = z.object({
-  name: z.string().min(2).max(100),
+  name: z.string().min(2, 'assets.create.name_min').max(100),
   asset_tag: z.string().max(50).optional(),
   serial_number: z.string().max(100).optional(),
   barcode: z.string().max(64).optional(),
@@ -38,6 +40,9 @@ const STATUS_OPTIONS: AssetStatus[] = [
 ]
 
 export function AssetEditPage() {
+  const { t } = useTranslation()
+  /** A message from a form rule is the key of its text. */
+  const msg = (message?: string) => (message ? t(message) : undefined)
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const assetId = parseInt(id ?? '0', 10)
@@ -96,7 +101,7 @@ export function AssetEditPage() {
   if (!asset) {
     return (
       <div className="py-12 text-center">
-        <p className="text-sm text-gray-500">Asset not found.</p>
+        <p className="text-sm text-gray-500">{t('assets.edit.not_found')}</p>
       </div>
     )
   }
@@ -110,46 +115,46 @@ export function AssetEditPage() {
         </Link>
       </Button>
 
-      <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Edit Asset</h1>
+      <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t('assets.edit.title')}</h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <Card>
           <CardContent className="p-6 space-y-4">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-              Basic Information
+              {t('assets.edit.basic')}
             </h2>
             <Input
               id="name"
-              label="Asset Name *"
-              error={errors.name?.message}
+              label={t('assets.create.name_label')}
+              error={msg(errors.name?.message)}
               {...register('name')}
             />
             <div className="grid grid-cols-2 gap-4">
               <Input
                 id="asset-tag"
-                label="Asset Tag"
-                error={errors.asset_tag?.message}
+                label={t('assets.create.tag_label')}
+                error={msg(errors.asset_tag?.message)}
                 {...register('asset_tag')}
               />
               <Input
                 id="serial-number"
-                label="Serial Number"
+                label={t('assets.create.serial_label')}
                 {...register('serial_number')}
               />
             </div>
             <div>
               <Input
                 id="barcode"
-                label="Barcode"
-                placeholder="The number on the sticker already on the machine"
-                error={errors.barcode?.message}
+                label={t('assets.create.barcode_label')}
+                placeholder={t('assets.edit.barcode_placeholder')}
+                error={msg(errors.barcode?.message)}
                 {...register('barcode')}
               />
-              <p className="mt-1 text-xs text-gray-500">Scanning it opens this asset. Leave it empty if there is none.</p>
+              <p className="mt-1 text-xs text-gray-500">{t('assets.edit.barcode_help')}</p>
             </div>
             <div>
               <label htmlFor="status" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Status *
+                {t('assets.create.status_label')}
               </label>
               <select
                 id="status"
@@ -158,14 +163,14 @@ export function AssetEditPage() {
               >
                 {STATUS_OPTIONS.map((s) => (
                   <option key={s} value={s} className="capitalize">
-                    {s.charAt(0).toUpperCase() + s.slice(1)}
+                    {label('status', s)}
                   </option>
                 ))}
               </select>
             </div>
             <Input
               id="description"
-              label="Description"
+              label={t('assets.edit.description')}
               {...register('description')}
             />
           </CardContent>
@@ -174,23 +179,23 @@ export function AssetEditPage() {
         <Card>
           <CardContent className="p-6 space-y-4">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-              Location & Classification
+              {t('assets.edit.location_heading')}
             </h2>
             <LocationSelect
               id="location"
-              label="Location"
+              label={t('assets.edit.location')}
               locations={locations}
               value={watch('location_id') ?? null}
               onChange={(id) => setValue('location_id', id, { shouldDirty: true })}
             />
             <div className="grid grid-cols-2 gap-4">
-              <Input id="manufacturer" label="Manufacturer" {...register('manufacturer')} />
-              <Input id="model" label="Model" {...register('model')} />
+              <Input id="manufacturer" label={t('assets.create.manufacturer')} {...register('manufacturer')} />
+              <Input id="model" label={t('assets.create.model')} {...register('model')} />
             </div>
             <div className="grid grid-cols-3 gap-4">
-              <Input id="year" label="Year" type="number" {...register('year_manufactured')} />
-              <Input id="purchase-date" label="Purchase Date" type="date" {...register('purchase_date')} />
-              <Input id="warranty" label="Warranty Expiry" type="date" {...register('warranty_expires_on')} />
+              <Input id="year" label={t('assets.edit.year')} type="number" {...register('year_manufactured')} />
+              <Input id="purchase-date" label={t('assets.create.purchase_date')} type="date" {...register('purchase_date')} />
+              <Input id="warranty" label={t('assets.create.warranty_expiry')} type="date" {...register('warranty_expires_on')} />
             </div>
           </CardContent>
         </Card>
@@ -206,10 +211,10 @@ export function AssetEditPage() {
 
         <div className="flex items-center justify-between">
           <Button type="button" variant="outline" onClick={() => navigate(`/assets/${assetId}`)}>
-            Cancel
+            {t('common.actions.cancel')}
           </Button>
           <Button type="submit" loading={updateMutation.isPending} disabled={!isDirty}>
-            Save Changes
+            {t('assets.edit.save')}
           </Button>
         </div>
       </form>

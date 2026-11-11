@@ -1,0 +1,36 @@
+{
+  "security": {
+    "two_factor": {
+      "qr_alt": "Código QR para tu aplicación de autenticación",
+      "codes_file": "Códigos de recuperación de FixFlow",
+      "codes_region": "Códigos de recuperación",
+      "save_codes": "Guarda tus códigos de recuperación",
+      "codes_help": "Si pierdes el teléfono, cada uno de estos te permite iniciar sesión una vez en lugar de usar un código de la aplicación. Solo se muestran ahora. Guárdalos en un lugar seguro, aparte del teléfono.",
+      "copied": "Copiado",
+      "copy": "Copiar",
+      "saved_them": "Ya los guardé",
+      "prove": "Para {{action}}, escribe tu contraseña y un código de tu aplicación (o un código de recuperación).",
+      "start_failed": "No se pudo iniciar la configuración. Inténtalo de nuevo.",
+      "code_wrong": "Ese código no es correcto. Revisa la aplicación e inténtalo de nuevo.",
+      "turn_off_failed": "No se pudo desactivar.",
+      "new_codes_failed": "No se pudieron crear códigos nuevos.",
+      "title": "Inicio de sesión en dos pasos",
+      "intro": "Además de tu contraseña, al iniciar sesión se pide un código de 6 dígitos de una aplicación de autenticación en tu teléfono (Google Authenticator, Microsoft Authenticator, Authy, 1Password...).",
+      "load_failed": "No se pudo cargar el estado del inicio de sesión en dos pasos. Recarga la página para intentarlo de nuevo.",
+      "on_one": "Activado · queda {{count}} código de recuperación",
+      "on_other": "Activado · quedan {{count}} códigos de recuperación",
+      "off": "No activado",
+      "required": "Tu empresa lo exige para todos, por lo que no se puede desactivar.",
+      "set_up": "Configurar",
+      "step_scan": "Abre tu aplicación de autenticación y añade una cuenta escaneando este código.",
+      "step_code": "Escribe el código de 6 dígitos que muestra la aplicación para FixFlow.",
+      "cannot_scan": "¿No puedes escanear? Escribe esta clave en la aplicación:",
+      "app_code": "Código de la aplicación",
+      "turn_on": "Activar",
+      "new_codes": "Códigos de recuperación nuevos",
+      "turn_off": "Desactivar",
+      "action_off": "desactivar el inicio de sesión en dos pasos",
+      "action_new_codes": "obtener códigos de recuperación nuevos (los anteriores dejan de funcionar)"
+    }
+  }
+}

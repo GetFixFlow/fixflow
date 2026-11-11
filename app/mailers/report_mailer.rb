@@ -8,7 +8,9 @@ class ReportMailer < ApplicationMailer
     @result = result
     @url    = "#{EmailSetup.base_url}/reports/saved"
     attachments[result.filename] = { mime_type: "application/pdf", content: result.pdf }
-    mail(to: person.email,
-subject: "[FixFlow] #{saved_report.name}: #{result.from.strftime('%-d %b')} to #{result.to.strftime('%-d %b %Y')}")
+    in_language_of(person) do
+      mail(to: person.email,
+           subject: t(".subject", name: saved_report.name, from: mail_day_short(result.from), to: mail_day(result.to)))
+    end
   end
 end

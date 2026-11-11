@@ -8,6 +8,7 @@ module Api
       before_action :set_current_context
       before_action :require_two_factor_when_company_does
       around_action :use_organization_time_zone
+      around_action :use_language
 
       # ── Error handling ────────────────────────────────────────────────────
       #
@@ -72,6 +73,11 @@ module Api
         Current.user       = current_user
         Current.request_ip = request.remote_ip
         ActsAsTenant.current_tenant = current_organization
+      end
+
+      # What the server words for a person (emails sent while they act, messages it writes) comes in their language.
+      def use_language(&)
+        Locales.with_user(current_user, &)
       end
 
       # Dates the client sends without an offset (report ranges, filters) mean the

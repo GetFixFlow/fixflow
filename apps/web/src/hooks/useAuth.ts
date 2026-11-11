@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { authApi } from '@/api'
 import { useAuthStore } from '@/stores/authStore'
 import { queryClient } from '@/lib/queryClient'
+import { t } from '@/i18n'
 import type { LoginPayload, RegisterPayload, User } from '@/types'
 
 export function useCurrentUser() {
@@ -41,11 +42,11 @@ export function useAcceptInvitation(token: string) {
     mutationFn: (payload: { password: string; password_confirmation: string }) =>
       authApi.acceptInvitation(token, payload),
     onSuccess: () => {
-      toast.success('Password set. Please sign in.')
+      toast.success(t('auth.toast.password_set'))
       navigate('/login')
     },
     onError: (error: AxiosError<{ errors?: string[] }>) => {
-      toast.error(error.response?.data?.errors?.[0] ?? 'Could not set your password. Try again.')
+      toast.error(error.response?.data?.errors?.[0] ?? t('auth.toast.password_set_failed'))
     },
   })
 }
@@ -53,7 +54,7 @@ export function useAcceptInvitation(token: string) {
 export function useForgotPassword() {
   return useMutation({
     mutationFn: (email: string) => authApi.forgotPassword(email),
-    onError: () => toast.error('Could not send the request. Try again in a moment.'),
+    onError: () => toast.error(t('auth.toast.request_failed')),
   })
 }
 
@@ -63,11 +64,11 @@ export function useResetPassword() {
   return useMutation({
     mutationFn: (payload: Parameters<typeof authApi.resetPassword>[0]) => authApi.resetPassword(payload),
     onSuccess: () => {
-      toast.success('Password changed. Please sign in.')
+      toast.success(t('auth.toast.password_changed'))
       navigate('/login')
     },
     onError: (error: AxiosError<{ error?: { message?: string } }>) =>
-      toast.error(error.response?.data?.error?.message ?? 'Could not change the password.'),
+      toast.error(error.response?.data?.error?.message ?? t('auth.toast.password_change_failed')),
   })
 }
 
@@ -78,7 +79,7 @@ function useFinishSignIn() {
 
   return ({ token, user }: { token: string; user: User }) => {
     setAuth(user, token)
-    toast.success(`Welcome back, ${user.full_name}!`)
+    toast.success(t('auth.toast.welcome', { name: user.full_name }))
     navigate(user.two_factor_setup_required ? '/two-factor-setup' : '/dashboard')
   }
 }
@@ -91,7 +92,7 @@ export function useLogin({ onChallenge }: { onChallenge?: (challenge: string) =>
     mutationFn: (payload: LoginPayload) => authApi.login(payload),
     onSuccess: (result) => (result.twoFactor ? onChallenge?.(result.challenge) : finish(result)),
     onError: (error: AxiosError<{ error?: string }>) =>
-      toast.error(error.response?.data?.error ?? 'Invalid email or password.'),
+      toast.error(error.response?.data?.error ?? t('auth.toast.invalid_credentials')),
   })
 }
 
@@ -102,7 +103,7 @@ export function useVerifyTwoFactor() {
     mutationFn: ({ challenge, code }: { challenge: string; code: string }) => authApi.verifyTwoFactor(challenge, code),
     onSuccess: finish,
     // The message comes from the server: a wrong code, too many wrong codes, or a challenge that has run out.
-    onError: (error: AxiosError<{ error?: string }>) => toast.error(error.response?.data?.error ?? 'Could not check the code. Try again.'),
+    onError: (error: AxiosError<{ error?: string }>) => toast.error(error.response?.data?.error ?? t('auth.toast.code_failed')),
   })
 }
 
@@ -113,12 +114,12 @@ export function useRegister() {
     mutationFn: (payload: RegisterPayload) => authApi.register(payload),
     onSuccess: () => {
       queryClient.setQueryData(['setup-status'], { setup_required: false })
-      toast.success('Setup complete! Please sign in.')
+      toast.success(t('auth.toast.setup_complete'))
       navigate('/login')
     },
     onError: (error: AxiosError<{ errors?: string[] }>) => {
       const message = error.response?.data?.errors?.[0]
-      toast.error(message ?? 'Setup failed. Please try again.')
+      toast.error(message ?? t('auth.toast.setup_failed'))
       // Someone else finished setup first: the setup screen no longer applies.
       if (error.response?.status === 403) {
         queryClient.setQueryData(['setup-status'], { setup_required: false })

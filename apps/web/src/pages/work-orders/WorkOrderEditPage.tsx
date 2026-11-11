@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { WorkOrderForm, type WorkOrderFormValues } from '@/components/work-orders/WorkOrderForm'
@@ -7,6 +8,7 @@ import { toInputValues } from '@/lib/customFields'
 import { Skeleton } from '@/components/ui/Skeleton'
 
 export function WorkOrderEditPage() {
+  const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { user } = useAuthStore()
@@ -41,7 +43,7 @@ export function WorkOrderEditPage() {
 
   if (!wo) {
     return (
-      <p className="text-center text-gray-500">Work order not found.</p>
+      <p className="text-center text-gray-500">{t('workOrders.edit.not_found')}</p>
     )
   }
 
@@ -49,14 +51,13 @@ export function WorkOrderEditPage() {
     return (
       <div className="mx-auto max-w-2xl rounded-lg border border-gray-200 bg-white p-8 text-center dark:border-gray-700 dark:bg-gray-800">
         <p className="text-gray-600 dark:text-gray-400">
-          This work order cannot be edited{' '}
-          {wo.status === 'verified' ? '(already verified)' : wo.status === 'cancelled' ? '(cancelled)' : '(no permission)'}.
+          {t(wo.status === 'verified' ? 'workOrders.edit.locked_verified' : wo.status === 'cancelled' ? 'workOrders.edit.locked_cancelled' : 'workOrders.edit.locked_permission')}
         </p>
         <Link
           to={`/work-orders/${id}`}
           className="mt-3 inline-block text-sm text-brand-600 hover:underline dark:text-brand-400"
         >
-          Back to work order
+          {t('workOrders.edit.back')}
         </Link>
       </div>
     )
@@ -85,7 +86,7 @@ export function WorkOrderEditPage() {
       </div>
 
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Edit Work Order</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('workOrders.edit.title')}</h1>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{wo.work_order_number}</p>
       </div>
 

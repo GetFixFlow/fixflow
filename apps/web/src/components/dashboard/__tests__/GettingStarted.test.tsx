@@ -7,6 +7,7 @@ import { http, HttpResponse } from 'msw'
 import { toast } from 'sonner'
 import { server } from '@/test/server'
 import { GettingStarted } from '../GettingStarted'
+import { setLanguage } from '@/i18n'
 
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn(), info: vi.fn() } }))
 
@@ -38,6 +39,17 @@ beforeEach(() => {
 })
 
 describe('GettingStarted', () => {
+  it('reads the steps in the language of the screens, though the server words them in English', async () => {
+    setLanguage('es', false)
+    serve()
+    renderCard()
+
+    expect(await screen.findByText('Añade tus equipos')).toBeInTheDocument()
+    expect(screen.getByText('Crea una orden de trabajo')).toBeInTheDocument()
+    expect(screen.getByText('Técnicos, gerentes y solicitantes ven cada uno lo que necesitan.')).toBeInTheDocument()
+    expect(screen.queryByText('Add your equipment')).not.toBeInTheDocument()
+  })
+
   it('lists the three first things, each with where to do it', async () => {
     serve()
     renderCard()

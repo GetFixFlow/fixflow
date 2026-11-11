@@ -5,7 +5,8 @@ import type { User } from '@/types'
 export const settingsApi = {
   profile: {
     get: () => apiClient.get<{ user: User }>('/profile'),
-    update: (data: { full_name?: string; phone?: string; job_title?: string; department?: string }) =>
+    /** `locale` is the person's own language; '' means none, so the company's applies. */
+    update: (data: { full_name?: string; phone?: string; job_title?: string; department?: string; locale?: string }) =>
       apiClient.patch<{ user: User }>('/profile', { user: data }),
     changePassword: (data: { current_password: string; password: string; password_confirmation: string }) =>
       apiClient.patch('/profile/password', { user: data }),

@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { FileQuestion } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 
 export function NotFoundPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   return (
@@ -14,9 +16,9 @@ export function NotFoundPage() {
           </div>
         </div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">404</h1>
-        <p className="mt-2 text-gray-500 dark:text-gray-400">Page not found</p>
+        <p className="mt-2 text-gray-500 dark:text-gray-400">{t('shell.not_found.title')}</p>
         <Button className="mt-6" onClick={() => navigate('/dashboard')}>
-          Back to Dashboard
+          {t('shell.not_found.back')}
         </Button>
       </div>
     </div>

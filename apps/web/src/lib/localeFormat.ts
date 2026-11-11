@@ -1,5 +1,6 @@
 import { format as formatWithPattern } from 'date-fns'
 import { create } from 'zustand'
+import { currentLanguage } from '@/i18n'
 
 /**
  * How this company shows dates, times, numbers and money (Settings, Localization). The functions here
@@ -7,6 +8,8 @@ import { create } from 'zustand'
  * The settings are remembered on the device, so the first screen after opening the app already uses them.
  */
 export interface LocaleSettings {
+  /** The language of the screens and emails for people who have not chosen their own (a code such as "en"). */
+  language: string
   timezone: string
   date_format: string
   time_format: '12h' | '24h'
@@ -16,6 +19,7 @@ export interface LocaleSettings {
 }
 
 export const DEFAULT_LOCALE: LocaleSettings = {
+  language: 'en',
   timezone: 'UTC',
   date_format: 'MMM D, YYYY',
   time_format: '12h',
@@ -94,6 +98,18 @@ function toDate(value: DateInput): Date | null {
   return Number.isNaN(date.getTime()) ? null : date
 }
 
+/** Text for date-fns to print as it is: quoted, so letters in it are not read as pattern letters. */
+const literal = (text: string) => `'${text.replace(/'/g, "''")}'`
+
+/** The month names ("MMM") and AM/PM ("a") of the pattern in the language of the screens; date-fns knows only English. */
+function inLanguage(pattern: string, date: Date): string {
+  const lang = currentLanguage()
+  if (lang.startsWith('en')) return pattern
+  const month = new Intl.DateTimeFormat(lang, { month: 'short' }).format(date).replace(/\.$/, '')
+  const period = new Intl.DateTimeFormat(lang, { hour: 'numeric', hour12: true }).formatToParts(date).find((p) => p.type === 'dayPeriod')?.value
+  return pattern.replace(/MMM/g, literal(month)).replace(/\ba\b/g, period ? literal(period) : 'a')
+}
+
 /**
  * The formatters for a given set of settings. The app uses the ones for the company's settings
  * (below); the Localization screen uses these with the form's values for its live preview.
@@ -101,11 +117,11 @@ function toDate(value: DateInput): Date | null {
 export function formattersFor(locale: LocaleSettings) {
   const dateFormat = (value: DateInput) => {
     const date = toDate(value)
-    return date ? formatWithPattern(date, DATE_PATTERNS[locale.date_format] ?? DATE_PATTERNS[DEFAULT_LOCALE.date_format]) : '—'
+    return date ? formatWithPattern(date, inLanguage(DATE_PATTERNS[locale.date_format] ?? DATE_PATTERNS[DEFAULT_LOCALE.date_format], date)) : '—'
   }
   const timeFormat = (value: DateInput) => {
     const date = toDate(value)
-    return date ? formatWithPattern(date, locale.time_format === '24h' ? 'HH:mm' : 'h:mm a') : '—'
+    return date ? formatWithPattern(date, inLanguage(locale.time_format === '24h' ? 'HH:mm' : 'h:mm a', date)) : '—'
   }
   const numberFormat = (value: number, decimals = 0) => {
     const style = NUMBER_STYLES[locale.number_format] ?? NUMBER_STYLES[DEFAULT_LOCALE.number_format]
@@ -155,6 +171,8 @@ export const weekStartsOn = (): 0 | 1 => (current().first_day_of_week === 'sunda
 
 /** Short weekday names starting with the company's first day of the week, for calendar headers. */
 export const weekdayLabels = (): string[] => {
-  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  // 4 Jan 2026 is a Sunday.
+  const names = new Intl.DateTimeFormat(currentLanguage(), { weekday: 'short' })
+  const days = Array.from({ length: 7 }, (_, day) => names.format(new Date(2026, 0, 4 + day)).replace(/\.$/, ''))
   return weekStartsOn() === 0 ? days : [...days.slice(1), days[0]]
 }

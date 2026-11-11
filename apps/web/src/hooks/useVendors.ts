@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { vendorsApi, type VendorContactInput, type VendorInput, type VendorListParams } from '@/api/vendors'
 import { workOrdersApi } from '@/api/workOrders'
 import { WO_KEY } from '@/hooks/useWorkOrders'
+import { t } from '@/i18n'
 
 /** One page of the vendor list, with the categories in use (for the filter) and the paging details. */
 export function useVendorList(params: VendorListParams) {
@@ -48,18 +49,18 @@ function useRefreshing<TArgs>(fn: (args: TArgs) => Promise<unknown>, success: st
   })
 }
 
-export const useCreateVendor = () => useRefreshing((v: VendorInput) => vendorsApi.create(v), 'Vendor added.', 'Could not add the vendor.')
+export const useCreateVendor = () => useRefreshing((v: VendorInput) => vendorsApi.create(v), t('vendors.toasts.added'), t('vendors.toasts.add_failed'))
 
 export const useUpdateVendor = (id: number) =>
-  useRefreshing((v: Partial<VendorInput>) => vendorsApi.update(id, v), 'Vendor updated.', 'Could not update the vendor.')
+  useRefreshing((v: Partial<VendorInput>) => vendorsApi.update(id, v), t('vendors.toasts.updated'), t('vendors.toasts.update_failed'))
 
-export const useDeleteVendor = () => useRefreshing((id: number) => vendorsApi.remove(id), 'Vendor deleted.', 'Could not delete the vendor.')
+export const useDeleteVendor = () => useRefreshing((id: number) => vendorsApi.remove(id), t('vendors.toasts.deleted'), t('vendors.toasts.delete_failed'))
 
 export const useAddVendorContact = (vendorId: number) =>
-  useRefreshing((c: VendorContactInput) => vendorsApi.addContact(vendorId, c), 'Contact added.', 'Could not add the contact.')
+  useRefreshing((c: VendorContactInput) => vendorsApi.addContact(vendorId, c), t('vendors.toasts.contact_added'), t('vendors.toasts.contact_add_failed'))
 
 export const useRemoveVendorContact = (vendorId: number) =>
-  useRefreshing((contactId: number) => vendorsApi.removeContact(vendorId, contactId), 'Contact removed.', 'Could not remove the contact.')
+  useRefreshing((contactId: number) => vendorsApi.removeContact(vendorId, contactId), t('vendors.toasts.contact_removed'), t('vendors.toasts.contact_remove_failed'))
 
 export interface VendorAssignment {
   vendor_id: number | null
@@ -75,8 +76,8 @@ export function useGiveToVendor(workOrderId: number) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: WO_KEY })
       qc.invalidateQueries({ queryKey: ['vendors'] })
-      toast.success('Vendor saved.')
+      toast.success(t('vendors.toasts.saved'))
     },
-    onError: failure('Could not save the vendor.'),
+    onError: failure(t('vendors.toasts.save_failed')),
   })
 }

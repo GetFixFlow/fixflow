@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useState, useRef, useEffect } from 'react'
 import { Upload, FileText, Download, X, Camera, CloudOff } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -20,6 +21,7 @@ interface AttachmentThumbnailProps {
 }
 
 function AttachmentThumbnail({ attachment, onClick }: AttachmentThumbnailProps) {
+  const { t } = useTranslation()
   const isImage = (attachment.content_type ?? '').startsWith('image/')
   const isPdf = attachment.content_type === 'application/pdf'
 
@@ -28,7 +30,7 @@ function AttachmentThumbnail({ attachment, onClick }: AttachmentThumbnailProps) 
       <button
         onClick={onClick}
         className="block w-full"
-        aria-label={`View ${attachment.filename}`}
+        aria-label={t('workOrders.attachments.view', { name: attachment.filename })}
       >
         {isImage && attachment.url ? (
           <img
@@ -62,7 +64,7 @@ function AttachmentThumbnail({ attachment, onClick }: AttachmentThumbnailProps) 
           href={attachment.url ?? undefined}
           download={attachment.filename ?? undefined}
           className="rounded bg-white/90 p-1 shadow hover:bg-white dark:bg-gray-800/90 dark:hover:bg-gray-800"
-          aria-label="Download"
+          aria-label={t('common.actions.download')}
         >
           <Download className="h-3.5 w-3.5 text-gray-600 dark:text-gray-300" />
         </a>
@@ -73,6 +75,7 @@ function AttachmentThumbnail({ attachment, onClick }: AttachmentThumbnailProps) 
 
 /** A photo taken offline that has not been sent yet, shown from the copy kept on the device. */
 function PendingPhoto({ photo }: { photo: QueuedPhoto }) {
+  const { t } = useTranslation()
   const [url, setUrl] = useState<string>()
   const isImage = photo.contentType.startsWith('image/')
 
@@ -103,7 +106,7 @@ function PendingPhoto({ photo }: { photo: QueuedPhoto }) {
         </div>
       )}
       <span className="absolute left-1 top-1 flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">
-        <CloudOff className="h-2.5 w-2.5" /> Waiting to sync
+        <CloudOff className="h-2.5 w-2.5" /> {t('workOrders.checklist.waiting')}
       </span>
       <p className="truncate p-2 text-xs font-medium text-gray-700 dark:text-gray-300" title={photo.filename}>
         {photo.filename}
@@ -114,6 +117,7 @@ function PendingPhoto({ photo }: { photo: QueuedPhoto }) {
 
 // Lightbox
 function Lightbox({ url, filename, onClose }: { url: string; filename: string; onClose: () => void }) {
+  const { t } = useTranslation()
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
@@ -122,7 +126,7 @@ function Lightbox({ url, filename, onClose }: { url: string; filename: string; o
       <button
         className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
         onClick={onClose}
-        aria-label="Close"
+        aria-label={t('common.actions.close')}
       >
         <X className="h-5 w-5" />
       </button>
@@ -142,6 +146,7 @@ interface WorkOrderAttachmentsProps {
 }
 
 export function WorkOrderAttachments({ workOrderId, editable = true }: WorkOrderAttachmentsProps) {
+  const { t } = useTranslation()
   const { data: attachments = [], isLoading } = useWorkOrderAttachments(workOrderId)
   const upload = useUploadAttachment(workOrderId)
   const pendingPhotos = usePendingActions(workOrderId).filter((a): a is QueuedPhoto => a.type === 'photo')
@@ -219,14 +224,14 @@ export function WorkOrderAttachments({ workOrderId, editable = true }: WorkOrder
           onClick={() => inputRef.current?.click()}
           role="button"
           tabIndex={0}
-          aria-label="Upload files"
+          aria-label={t('workOrders.attachments.upload')}
         >
           <Upload className="mb-2 h-8 w-8 text-gray-400" />
           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-            Drag & drop or click to upload
+            {t('workOrders.attachments.drop')}
           </p>
           <p className="mt-1 text-xs text-gray-400">
-            Images, PDF, documents · max 10 MB · {20 - attachments.length - pendingPhotos.length} remaining
+            {t('workOrders.attachments.limits', { remaining: 20 - attachments.length - pendingPhotos.length })}
           </p>
           <input
             ref={inputRef}
@@ -256,7 +261,7 @@ export function WorkOrderAttachments({ workOrderId, editable = true }: WorkOrder
           }}
         >
           <Camera className="h-4 w-4" />
-          Take Photo
+          {t('workOrders.attachments.photo')}
         </Button>
       )}
 

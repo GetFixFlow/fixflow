@@ -1,7 +1,8 @@
+import { currentLanguage } from '@/i18n'
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Bell, ScanLine, AlertTriangle } from 'lucide-react'
-import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { useWorkOrders, useTransitionWorkOrder } from '@/hooks/useWorkOrders'
 import { useAuthStore } from '@/stores/authStore'
@@ -27,31 +28,32 @@ function QuickActionButton({
   onAction: (event: string) => void
   isLoading: boolean
 }) {
+  const { t } = useTranslation()
   if (wo.status === 'open' && !wo.assignee_id) {
     return (
       <Button size="sm" onClick={() => onAction('assign_self')} loading={isLoading}>
-        Assign to Me
+        {t('workOrders.list.assign_me')}
       </Button>
     )
   }
   if (wo.status === 'assigned') {
     return (
       <Button size="sm" onClick={() => onAction('start')} loading={isLoading}>
-        ▶ Start Work
+        ▶ {t('workOrders.my.start')}
       </Button>
     )
   }
   if (wo.status === 'in_progress') {
     return (
       <Button size="sm" onClick={() => onAction('complete')} loading={isLoading}>
-        ✓ Complete
+        ✓ {t('workOrders.my.complete')}
       </Button>
     )
   }
   if (wo.status === 'on_hold' || wo.status === 'pending_parts') {
     return (
       <Button size="sm" variant="outline" onClick={() => onAction('resume')} loading={isLoading}>
-        ▶ Resume
+        ▶ {t('workOrders.my.resume')}
       </Button>
     )
   }
@@ -59,6 +61,7 @@ function QuickActionButton({
 }
 
 export function MyWorkOrdersPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const transition = useTransitionWorkOrder()
@@ -94,10 +97,10 @@ export function MyWorkOrdersPage() {
       {/* Compact header */}
       <div className="flex items-center justify-between pt-2">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">My Work Orders</h1>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{format(now, 'EEEE, MMMM d')}</p>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t('workOrders.list.tab_my')}</h1>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{new Intl.DateTimeFormat(currentLanguage(), { weekday: 'long', month: 'long', day: 'numeric' }).format(now)}</p>
         </div>
-        <Button variant="ghost" size="icon" aria-label="Notifications">
+        <Button variant="ghost" size="icon" aria-label={t('workOrders.my.notifications')}>
           <Bell className="h-5 w-5" />
         </Button>
       </div>
@@ -105,9 +108,9 @@ export function MyWorkOrdersPage() {
       {/* Quick stats chips */}
       <div className="flex gap-2 overflow-x-auto pb-1">
         {[
-          { key: 'assigned', label: `${stats.assigned} Assigned`, color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' },
-          { key: 'in_progress', label: `${stats.in_progress} In Progress`, color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400' },
-          ...(stats.overdue > 0 ? [{ key: 'overdue', label: `${stats.overdue} Overdue`, color: 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400' }] : []),
+          { key: 'assigned', label: t('workOrders.my.chip_assigned', { count: stats.assigned }), color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' },
+          { key: 'in_progress', label: t('workOrders.my.chip_in_progress', { count: stats.in_progress }), color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400' },
+          ...(stats.overdue > 0 ? [{ key: 'overdue', label: t('workOrders.my.chip_overdue', { count: stats.overdue }), color: 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400' }] : []),
         ].map((chip) => (
           <button
             key={chip.key}
@@ -126,7 +129,7 @@ export function MyWorkOrdersPage() {
             onClick={() => setActiveFilter(null)}
             className="shrink-0 text-xs text-gray-500 underline"
           >
-            Clear
+            {t('common.actions.clear')}
           </button>
         )}
       </div>
@@ -141,7 +144,7 @@ export function MyWorkOrdersPage() {
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 py-16 dark:border-gray-600">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            {activeFilter ? 'No work orders match this filter.' : 'No active work orders. 🎉'}
+            {activeFilter ? t('workOrders.my.no_match') : t('workOrders.my.none')}
           </p>
         </div>
       ) : (
@@ -178,7 +181,7 @@ export function MyWorkOrdersPage() {
                     ⏰ <WorkOrderDueDate dueDate={wo.due_date} />
                     {isOverdue && (
                       <span className="flex items-center gap-0.5 text-xs font-semibold text-red-600">
-                        <AlertTriangle className="h-3 w-3" /> OVERDUE
+                        <AlertTriangle className="h-3 w-3" /> {t('workOrders.my.overdue_flag')}
                       </span>
                     )}
                   </div>
@@ -195,7 +198,7 @@ export function MyWorkOrdersPage() {
                     variant="ghost"
                     onClick={() => navigate(`/work-orders/${wo.id}`)}
                   >
-                    View Details →
+                    {t('workOrders.list.view_details')} →
                   </Button>
                 </div>
               </div>
@@ -208,7 +211,7 @@ export function MyWorkOrdersPage() {
       <button
         onClick={() => navigate('/scan')}
         className="fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-brand-600 text-white shadow-lg hover:bg-brand-700"
-        aria-label="Scan QR code"
+        aria-label={t('workOrders.my.scan')}
       >
         <ScanLine className="h-6 w-6" />
       </button>

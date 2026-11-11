@@ -1,3 +1,4 @@
+import { currentLanguage } from '@/i18n'
 import { addDays, endOfWeek, format, parseISO, startOfWeek } from 'date-fns'
 import type { RescheduleInput, Schedule, ScheduledOrder } from '@/types/schedule'
 
@@ -52,6 +53,12 @@ export function overloads(schedule: Schedule): Overload[] {
 }
 
 /** A date such as 2026-10-14 as "Wed 14", for a column heading. */
-export const dayHeading = (date: string, wide: boolean) => format(parseISO(date), wide ? 'EEEE d MMMM' : 'EEE d')
+export const dayHeading = (date: string, wide: boolean) => {
+  const day = parseISO(date)
+  const lang = currentLanguage()
+  // date-fns words days and months in English; any other language uses the browser's own names.
+  if (lang.startsWith('en')) return format(day, wide ? 'EEEE d MMMM' : 'EEE d')
+  return new Intl.DateTimeFormat(lang, wide ? { weekday: 'long', day: 'numeric', month: 'long' } : { weekday: 'short', day: 'numeric' }).format(day)
+}
 
 export const hoursLabel = (hours: number) => `${Math.round(hours * 10) / 10} h`

@@ -1,14 +1,16 @@
-Hello,
+<%= t("mail.hello") %>
 
-Your maintenance request has been completed and verified.
+<%= t(".intro") %>
 
-Work Order: <%= @work_order.work_order_number %>
-Title:      <%= @work_order.title %>
-Verified:   <%= @work_order.verified_at&.strftime("%Y-%m-%d %H:%M UTC") || "Unknown" %>
+<%= mail_fields(
+  t("mail.work_order") => @work_order.work_order_number,
+  t("mail.title") => @work_order.title,
+  t("mail.verified") => @work_order.verified_at&.strftime("%Y-%m-%d %H:%M UTC") || t("mail.unknown")
+) %>
 
-Completion Notes:
+<%= t("mail.completion_notes") %>:
 <%= @work_order.completion_notes %>
 
-Thank you for submitting your request.
+<%= t(".outro") %>
 
-— FixFlow
+<%= t("mail.signature") %>

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
 import { toast } from 'sonner'
 import { assetDocumentsApi } from '@/api/assetDocuments'
+import { t } from '@/i18n'
 
 const KEY = 'asset-documents'
 
@@ -24,9 +25,9 @@ export function useUploadAssetDocument(assetId: number) {
     mutationFn: ({ file, description }: { file: File; description?: string }) => assetDocumentsApi.upload(assetId, file, description),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [KEY, assetId] })
-      toast.success('Added.')
+      toast.success(t('assets.toasts.doc_added'))
     },
-    onError: failure('Could not add the file.'),
+    onError: failure(t('assets.toasts.doc_add_failed')),
   })
 }
 
@@ -36,8 +37,8 @@ export function useDeleteAssetDocument(assetId: number) {
     mutationFn: (id: number) => assetDocumentsApi.destroy(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [KEY, assetId] })
-      toast.success('Removed.')
+      toast.success(t('assets.toasts.doc_removed'))
     },
-    onError: failure('Could not remove the file.'),
+    onError: failure(t('assets.toasts.doc_remove_failed')),
   })
 }

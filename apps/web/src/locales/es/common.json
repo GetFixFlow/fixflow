@@ -1,0 +1,89 @@
+{
+  "language_name": "Español",
+  "language": {
+    "label": "Idioma",
+    "company": "Predeterminado de la empresa",
+    "use_company": "Usar el idioma de la empresa ({{name}})"
+  },
+  "common": {
+    "actions": {
+      "save": "Guardar",
+      "saving": "Guardando…",
+      "cancel": "Cancelar",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "close": "Cerrar",
+      "back": "Volver",
+      "search": "Buscar",
+      "create": "Crear",
+      "confirm": "Confirmar",
+      "retry": "Intentar de nuevo",
+      "add": "Añadir",
+      "remove": "Quitar",
+      "next": "Siguiente",
+      "previous": "Anterior",
+      "apply": "Aplicar",
+      "clear": "Borrar",
+      "download": "Descargar",
+      "upload": "Subir",
+      "print": "Imprimir",
+      "export": "Exportar",
+      "view": "Ver",
+      "continue": "Continuar",
+      "submit": "Enviar",
+      "reset": "Restablecer",
+      "refresh": "Actualizar"
+    },
+    "state": {
+      "loading": "Cargando…",
+      "none": "Ninguno",
+      "all": "Todos",
+      "any": "Cualquiera",
+      "yes": "Sí",
+      "no": "No",
+      "unknown": "Desconocido",
+      "unassigned": "Sin asignar",
+      "not_set": "Sin definir",
+      "no_results": "Sin resultados",
+      "error": "Algo salió mal",
+      "required": "Obligatorio",
+      "optional": "Opcional",
+      "na": "N/D"
+    },
+    "status": {
+      "open": "Abierta",
+      "assigned": "Asignada",
+      "in_progress": "En curso",
+      "on_hold": "En espera",
+      "pending_parts": "Pendiente de repuestos",
+      "completed": "Completada",
+      "verified": "Verificada",
+      "cancelled": "Cancelada",
+      "operational": "Operativo",
+      "degraded": "Degradado",
+      "down": "Fuera de servicio",
+      "decommissioned": "Dado de baja",
+      "maintenance": "En mantenimiento",
+      "offline": "Sin conexión",
+      "retired": "Retirado"
+    },
+    "priority": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta",
+      "critical": "Crítica"
+    },
+    "type": {
+      "corrective": "Correctivo",
+      "preventive": "Preventivo",
+      "inspection": "Inspección",
+      "emergency": "Emergencia"
+    },
+    "role": {
+      "admin": "Administrador",
+      "manager": "Gerente",
+      "technician": "Técnico",
+      "requester": "Solicitante"
+    }
+  }
+}

@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 import { useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
@@ -47,10 +48,10 @@ export function useCreateWorkOrder() {
     mutationFn: (data: Partial<WorkOrder>) => workOrdersApi.create(data),
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: WO_KEY })
-      toast.success(`Work order ${res.data.data.work_order_number} created.`)
+      toast.success(t('workOrders.toast.created', { number: res.data.data.work_order_number }))
     },
     onError: (error: AxiosError<{ error?: { message?: string } }>) =>
-      toast.error(error.response?.data?.error?.message ?? 'Failed to create work order.'),
+      toast.error(error.response?.data?.error?.message ?? t('workOrders.toast.create_failed')),
   })
 }
 
@@ -60,10 +61,10 @@ export function useUpdateWorkOrder(id: number) {
     mutationFn: (data: Partial<WorkOrder>) => workOrdersApi.update(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: WO_KEY })
-      toast.success('Work order updated.')
+      toast.success(t('workOrders.toast.updated'))
     },
     onError: (error: AxiosError<{ error?: { message?: string } }>) =>
-      toast.error(error.response?.data?.error?.message ?? 'Failed to update work order.'),
+      toast.error(error.response?.data?.error?.message ?? t('workOrders.toast.update_failed')),
   })
 }
 
@@ -73,28 +74,21 @@ export function useDeleteWorkOrder() {
     mutationFn: (id: number) => workOrdersApi.destroy(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: WO_KEY })
-      toast.success('Work order cancelled.')
+      toast.success(t('workOrders.toast.cancelled'))
     },
-    onError: () => toast.error('Failed to cancel work order.'),
+    onError: () => toast.error(t('workOrders.toast.cancel_failed')),
   })
 }
 
-const QUEUED_MESSAGE = 'Saved on this device. It will be sent when you are back online.'
+const queuedMessage = () => t('workOrders.toast.queued')
 
 /** What a queued change is called in messages: "Start work on WO-000012". */
 function describe(qc: QueryClient, id: number, what: string) {
   const number = qc.getQueryData<WorkOrder>([...WO_KEY, id])?.work_order_number
-  return `${what} on ${number ?? `work order ${id}`}`
+  return t('workOrders.toast.what_on', { what, target: number ?? t('workOrders.toast.work_order_n', { id }) })
 }
 
-const EVENT_WORDS: Record<OfflineEvent, string> = {
-  start: 'Start work',
-  hold: 'Put on hold',
-  pending_parts: 'Waiting for parts',
-  need_parts: 'Waiting for parts',
-  resume: 'Resume work',
-  complete: 'Mark complete',
-}
+const eventWord = (event: OfflineEvent) => t(`workOrders.toast.event_${event}`)
 
 /**
  * Sends a status change. A field event (start, hold, need parts, resume, complete) that cannot be
@@ -110,7 +104,7 @@ async function sendTransition(
       workOrderId: id,
       event: event as OfflineEvent,
       payload,
-      label: describe(qc, id, EVENT_WORDS[event as OfflineEvent]),
+      label: describe(qc, id, eventWord(event as OfflineEvent)),
     })
     return { queued: true }
   }
@@ -133,13 +127,13 @@ export function useTransitionWorkOrder() {
     networkMode: 'always',
     mutationFn: (vars: { id: number; event: string; payload?: Record<string, unknown> }) => sendTransition(qc, vars),
     onSuccess: ({ queued }, vars) => {
-      if (queued) return toast.info(QUEUED_MESSAGE)
+      if (queued) return toast.info(queuedMessage())
       qc.invalidateQueries({ queryKey: WO_KEY })
       qc.invalidateQueries({ queryKey: [...WO_KEY, vars.id] })
-      toast.success('Status updated.')
+      toast.success(t('workOrders.toast.status_updated'))
     },
     onError: (error: AxiosError<{ error?: { message?: string } }>) =>
-      toast.error(error.response?.data?.error?.message ?? 'Invalid transition.'),
+      toast.error(error.response?.data?.error?.message ?? t('workOrders.toast.invalid_transition')),
   })
 }
 
@@ -151,16 +145,16 @@ export function useApproval() {
     qc.invalidateQueries({ queryKey: [...WO_KEY, id] })
   }
   const failure = (error: AxiosError<{ error?: { message?: string } }>) =>
-    toast.error(error.response?.data?.error?.message ?? 'Could not do that.')
+    toast.error(error.response?.data?.error?.message ?? t('workOrders.toast.could_not'))
   return {
     approve: useMutation({
       mutationFn: (id: number) => workOrdersApi.approve(id),
-      onSuccess: (_, id) => { refresh(id); toast.success('Approved.') },
+      onSuccess: (_, id) => { refresh(id); toast.success(t('workOrders.toast.approved')) },
       onError: failure,
     }),
     request: useMutation({
       mutationFn: (id: number) => workOrdersApi.requestApproval(id),
-      onSuccess: (_, id) => { refresh(id); toast.success('The managers have been asked.') },
+      onSuccess: (_, id) => { refresh(id); toast.success(t('workOrders.toast.asked')) },
       onError: failure,
     }),
   }
@@ -174,9 +168,9 @@ export function useAssignWorkOrder() {
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: WO_KEY })
       qc.invalidateQueries({ queryKey: [...WO_KEY, vars.id] })
-      toast.success('Work order assigned.')
+      toast.success(t('workOrders.toast.assigned'))
     },
-    onError: () => toast.error('Failed to assign work order.'),
+    onError: () => toast.error(t('workOrders.toast.assign_failed')),
   })
 }
 
@@ -201,13 +195,13 @@ export function useCompleteWorkOrder() {
         payload: { work_order: { completion_notes, actual_hours, resolution_type } },
       }),
     onSuccess: ({ queued }, vars) => {
-      if (queued) return toast.info(QUEUED_MESSAGE)
+      if (queued) return toast.info(queuedMessage())
       qc.invalidateQueries({ queryKey: WO_KEY })
       qc.invalidateQueries({ queryKey: [...WO_KEY, vars.id] })
-      toast.success('Work order marked as complete.')
+      toast.success(t('workOrders.toast.completed'))
     },
     onError: (error: AxiosError<{ error?: { message?: string } }>) =>
-      toast.error(error.response?.data?.error?.message ?? 'Failed to complete work order.'),
+      toast.error(error.response?.data?.error?.message ?? t('workOrders.toast.complete_failed')),
   })
 }
 
@@ -219,9 +213,9 @@ export function useVerifyWorkOrder() {
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: WO_KEY })
       qc.invalidateQueries({ queryKey: [...WO_KEY, vars.id] })
-      toast.success('Work order verified and closed.')
+      toast.success(t('workOrders.toast.verified'))
     },
-    onError: () => toast.error('Failed to verify work order.'),
+    onError: () => toast.error(t('workOrders.toast.verify_failed')),
   })
 }
 
@@ -243,9 +237,9 @@ export function useRejectWorkOrder() {
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: WO_KEY })
       qc.invalidateQueries({ queryKey: [...WO_KEY, vars.id] })
-      toast.success('Work order returned to assignee.')
+      toast.success(t('workOrders.toast.returned'))
     },
-    onError: () => toast.error('Failed to reject work order.'),
+    onError: () => toast.error(t('workOrders.toast.reject_failed')),
   })
 }
 
@@ -293,7 +287,7 @@ export function useCreateComment(workOrderId: number) {
           body,
           internal,
           clientId,
-          label: describe(qc, workOrderId, 'Comment'),
+          label: describe(qc, workOrderId, t('workOrders.toast.comment')),
         })
         return { queued: true }
       }
@@ -307,11 +301,11 @@ export function useCreateComment(workOrderId: number) {
       }
     },
     onSuccess: ({ queued }) => {
-      if (queued) return toast.info(QUEUED_MESSAGE)
+      if (queued) return toast.info(queuedMessage())
       qc.invalidateQueries({ queryKey: WO_COMMENTS_KEY(workOrderId) })
     },
     onError: (error: AxiosError<{ error?: { message?: string } }>) =>
-      toast.error(error.response?.data?.error?.message ?? 'Failed to post comment.'),
+      toast.error(error.response?.data?.error?.message ?? t('workOrders.toast.comment_failed')),
   })
 }
 
@@ -320,7 +314,7 @@ export function useDeleteComment(workOrderId: number) {
   return useMutation({
     mutationFn: (commentId: number) => workOrdersApi.deleteComment(workOrderId, commentId),
     onSuccess: () => qc.invalidateQueries({ queryKey: WO_COMMENTS_KEY(workOrderId) }),
-    onError: () => toast.error('Failed to delete comment.'),
+    onError: () => toast.error(t('workOrders.toast.comment_delete_failed')),
   })
 }
 
@@ -347,7 +341,7 @@ export function useUploadAttachment(workOrderId: number) {
     networkMode: 'always',
     mutationFn: async (original: File): Promise<{ queued: boolean }> => {
       const file = await prepareUpload(original)
-      if (file.size > MAX_UPLOAD_BYTES) throw new Error(`${original.name} is over the 10 MB limit.`)
+      if (file.size > MAX_UPLOAD_BYTES) throw new Error(t('workOrders.toast.too_big', { name: original.name }))
 
       const clientId = newClientId()
       const keep = async () => {
@@ -355,7 +349,7 @@ export function useUploadAttachment(workOrderId: number) {
         try {
           await fileStore.put(fileKey, file)
         } catch {
-          throw new Error('Could not keep the file on this device. Try again when you are online.')
+          throw new Error(t('workOrders.toast.keep_failed'))
         }
         offlineQueue.enqueue({
           type: 'photo',
@@ -365,7 +359,7 @@ export function useUploadAttachment(workOrderId: number) {
           contentType: file.type,
           size: file.size,
           clientId,
-          label: describe(qc, workOrderId, `Photo "${file.name}"`),
+          label: describe(qc, workOrderId, t('workOrders.toast.photo', { name: file.name })),
         })
         return { queued: true }
       }
@@ -380,11 +374,11 @@ export function useUploadAttachment(workOrderId: number) {
       }
     },
     onSuccess: ({ queued }) => {
-      if (queued) return toast.info(QUEUED_MESSAGE)
+      if (queued) return toast.info(queuedMessage())
       qc.invalidateQueries({ queryKey: WO_ATTACHMENTS_KEY(workOrderId) })
     },
     onError: (error: AxiosError<{ error?: { message?: string } }> | Error) =>
-      toast.error(('response' in error && error.response?.data?.error?.message) || error.message || 'Failed to upload the file.'),
+      toast.error(('response' in error && error.response?.data?.error?.message) || error.message || t('workOrders.toast.upload_failed')),
   })
 }
 
@@ -408,10 +402,10 @@ export function useLogPart(workOrderId: number) {
       qc.invalidateQueries({ queryKey: WO_PARTS_KEY(workOrderId) })
       qc.invalidateQueries({ queryKey: [...WO_KEY, workOrderId] })
       qc.invalidateQueries({ queryKey: ['parts'] })
-      toast.success('Parts logged.')
+      toast.success(t('workOrders.toast.parts_logged'))
     },
     onError: (error: AxiosError<{ error?: { message?: string } }>) =>
-      toast.error(error.response?.data?.error?.message ?? 'Failed to log parts.'),
+      toast.error(error.response?.data?.error?.message ?? t('workOrders.toast.parts_failed')),
   })
 }
 
@@ -423,10 +417,10 @@ export function useRemovePart(workOrderId: number) {
       qc.invalidateQueries({ queryKey: WO_PARTS_KEY(workOrderId) })
       qc.invalidateQueries({ queryKey: [...WO_KEY, workOrderId] })
       qc.invalidateQueries({ queryKey: ['parts'] })
-      toast.success('Part removed and put back in stock.')
+      toast.success(t('workOrders.toast.part_removed'))
     },
     onError: (error: AxiosError<{ error?: { message?: string } }>) =>
-      toast.error(error.response?.data?.error?.message ?? 'Failed to remove the part.'),
+      toast.error(error.response?.data?.error?.message ?? t('workOrders.toast.part_remove_failed')),
   })
 }
 
@@ -443,7 +437,7 @@ export function useToggleChecklistStep(workOrderId: number) {
     networkMode: 'always',
     mutationFn: async ({ step, completed }: { step: number; completed: boolean }): Promise<{ queued: boolean }> => {
       const keep = () => {
-        offlineQueue.enqueue({ type: 'checklist', workOrderId, step, completed, label: describe(qc, workOrderId, `Checklist step ${step}`) })
+        offlineQueue.enqueue({ type: 'checklist', workOrderId, step, completed, label: describe(qc, workOrderId, t('workOrders.toast.checklist_step', { step })) })
         return { queued: true }
       }
       if (!navigator.onLine && offlineQueue.canQueue()) return keep()
@@ -470,7 +464,7 @@ export function useToggleChecklistStep(workOrderId: number) {
     },
     onError: (error: AxiosError<{ error?: { message?: string } }>, _vars, context) => {
       if (context?.before) qc.setQueryData(key, context.before)
-      toast.error(error.response?.data?.error?.message ?? 'Could not update the checklist.')
+      toast.error(error.response?.data?.error?.message ?? t('workOrders.toast.checklist_failed'))
     },
   })
 }

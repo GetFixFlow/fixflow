@@ -1,6 +1,8 @@
+import { label } from '@/i18n'
+import { useTranslation } from 'react-i18next'
 import { useState, useRef } from 'react'
 import { CloudOff, Lock, Trash2, Mic } from 'lucide-react'
-import { formatDistanceToNow } from 'date-fns'
+import { timeAgo } from '@/lib/timeAgo'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { useWorkOrderComments, useCreateComment, useDeleteComment } from '@/hooks/useWorkOrders'
@@ -12,6 +14,7 @@ interface WorkOrderCommentsProps {
 }
 
 export function WorkOrderComments({ workOrderId, canViewInternal = false }: WorkOrderCommentsProps) {
+  const { t } = useTranslation()
   const { user } = useAuthStore()
   const { data: comments = [], isLoading } = useWorkOrderComments(workOrderId)
   const createComment = useCreateComment(workOrderId)
@@ -50,13 +53,13 @@ export function WorkOrderComments({ workOrderId, canViewInternal = false }: Work
             onClick={() => {}}
             className="rounded-md px-3 py-1 text-xs font-medium bg-white text-gray-700 shadow-sm dark:bg-gray-700 dark:text-gray-200"
           >
-            Public
+            {t('workOrders.comments.public')}
           </button>
           <button
             onClick={() => {}}
             className="flex items-center gap-1 rounded-md px-3 py-1 text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400"
           >
-            <Lock className="h-3 w-3" /> Internal
+            <Lock className="h-3 w-3" /> {t('workOrders.comments.internal')}
           </button>
         </div>
       )}
@@ -75,7 +78,7 @@ export function WorkOrderComments({ workOrderId, canViewInternal = false }: Work
           ))}
         </div>
       ) : visible.length === 0 ? (
-        <p className="text-sm text-gray-400 dark:text-gray-500 italic">No comments yet.</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500 italic">{t('workOrders.comments.none')}</p>
       ) : (
         <div className="space-y-4">
           {visible.map((comment) => (
@@ -89,19 +92,19 @@ export function WorkOrderComments({ workOrderId, canViewInternal = false }: Work
                     {comment.user.full_name}
                   </span>
                   <span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] text-gray-500 dark:bg-gray-700 dark:text-gray-400">
-                    {comment.user.role}
+                    {label('role', comment.user.role).toLowerCase()}
                   </span>
                   <span className="text-xs text-gray-400">
-                    {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+                    {timeAgo(comment.created_at)}
                   </span>
                   {comment.pending && (
                     <span className="flex items-center gap-0.5 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
-                      <CloudOff className="h-2.5 w-2.5" /> Waiting to sync
+                      <CloudOff className="h-2.5 w-2.5" /> {t('workOrders.checklist.waiting')}
                     </span>
                   )}
                   {comment.internal && (
                     <span className="flex items-center gap-0.5 rounded-full bg-yellow-100 px-2 py-0.5 text-[10px] font-medium text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400">
-                      <Lock className="h-2.5 w-2.5" /> Internal note
+                      <Lock className="h-2.5 w-2.5" /> {t('workOrders.comments.internal_note')}
                     </span>
                   )}
                 </div>
@@ -113,7 +116,7 @@ export function WorkOrderComments({ workOrderId, canViewInternal = false }: Work
                 <button
                   onClick={() => deleteComment.mutate(comment.id)}
                   className="shrink-0 rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
-                  aria-label="Delete comment"
+                  aria-label={t('workOrders.comments.delete')}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -135,7 +138,7 @@ export function WorkOrderComments({ workOrderId, canViewInternal = false }: Work
               e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`
             }}
             onKeyDown={onKeyDown}
-            placeholder="Add a comment... (Cmd+Enter to submit)"
+            placeholder={t('workOrders.comments.placeholder')}
             maxLength={2000}
             rows={2}
             className="w-full resize-none rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
@@ -152,12 +155,12 @@ export function WorkOrderComments({ workOrderId, canViewInternal = false }: Work
                   className="h-3.5 w-3.5 rounded border-gray-300 text-brand-600"
                 />
                 <Lock className="h-3 w-3" />
-                Internal note
+                {t('workOrders.comments.internal_note')}
               </label>
             )}
             <button
               className="rounded p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-              title="Voice to text"
+              title={t('workOrders.comments.voice')}
               type="button"
             >
               <Mic className="h-3.5 w-3.5" />
@@ -171,7 +174,7 @@ export function WorkOrderComments({ workOrderId, canViewInternal = false }: Work
               disabled={!body.trim() || createComment.isPending}
               loading={createComment.isPending}
             >
-              Post Comment
+              {t('workOrders.comments.post')}
             </Button>
           </div>
         </div>

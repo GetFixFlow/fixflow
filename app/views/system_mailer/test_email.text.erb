@@ -1,5 +1,5 @@
-Hi <%= @recipient.full_name %>,
+<%= t("mail.greeting", name: @recipient.full_name) %>
 
-This is a test email from FixFlow. If you are reading it, your mail server settings work and FixFlow can send email.
+<%= t(".body") %>
 
-— FixFlow
+<%= t("mail.signature") %>

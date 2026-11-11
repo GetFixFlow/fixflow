@@ -1,0 +1,36 @@
+{
+  "security": {
+    "two_factor": {
+      "qr_alt": "QR code for your authenticator app",
+      "codes_file": "FixFlow recovery codes",
+      "codes_region": "Recovery codes",
+      "save_codes": "Save your recovery codes",
+      "codes_help": "If you lose your phone, each of these signs you in once instead of a code from the app. They are shown only now. Keep them somewhere safe, apart from your phone.",
+      "copied": "Copied",
+      "copy": "Copy",
+      "saved_them": "I have saved them",
+      "prove": "To {{action}}, enter your password and a code from your app (or a recovery code).",
+      "start_failed": "Could not start the set-up. Try again.",
+      "code_wrong": "That code is not right. Check the app and try again.",
+      "turn_off_failed": "Could not turn it off.",
+      "new_codes_failed": "Could not make new codes.",
+      "title": "Two-factor sign-in",
+      "intro": "Besides your password, signing in asks for a 6-digit code from an authenticator app on your phone (Google Authenticator, Microsoft Authenticator, Authy, 1Password...).",
+      "load_failed": "Could not load the state of two-factor sign-in. Reload the page to try again.",
+      "on_one": "On · {{count}} recovery code left",
+      "on_other": "On · {{count}} recovery codes left",
+      "off": "Not on",
+      "required": "Your company requires it for everyone, so it cannot be turned off.",
+      "set_up": "Set up",
+      "step_scan": "Open your authenticator app and add an account by scanning this code.",
+      "step_code": "Enter the 6-digit code the app shows for FixFlow.",
+      "cannot_scan": "Cannot scan? Type this key into the app instead:",
+      "app_code": "Code from the app",
+      "turn_on": "Turn on",
+      "new_codes": "New recovery codes",
+      "turn_off": "Turn off",
+      "action_off": "turn two-factor sign-in off",
+      "action_new_codes": "get new recovery codes (the old ones stop working)"
+    }
+  }
+}

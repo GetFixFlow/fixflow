@@ -1,3 +1,5 @@
+import { currentLanguage } from '@/i18n'
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -31,6 +33,8 @@ interface WorkOrderCalendarViewProps {
 }
 
 export function WorkOrderCalendarView({ workOrders }: WorkOrderCalendarViewProps) {
+  const { t } = useTranslation()
+  const month = (date: Date, options: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(currentLanguage(), options).format(date)
   const navigate = useNavigate()
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
@@ -60,14 +64,14 @@ export function WorkOrderCalendarView({ workOrders }: WorkOrderCalendarViewProps
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          {format(currentMonth, 'MMMM yyyy')}
+          {month(currentMonth, { month: 'long', year: 'numeric' })}
         </h2>
         <div className="flex items-center gap-1">
           <Button
             variant="outline"
             size="icon"
             onClick={() => setCurrentMonth((m) => subMonths(m, 1))}
-            aria-label="Previous month"
+            aria-label={t('workOrders.calendar.previous')}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -76,13 +80,13 @@ export function WorkOrderCalendarView({ workOrders }: WorkOrderCalendarViewProps
             size="sm"
             onClick={() => setCurrentMonth(new Date())}
           >
-            Today
+            {t('workOrders.due.today')}
           </Button>
           <Button
             variant="outline"
             size="icon"
             onClick={() => setCurrentMonth((m) => addMonths(m, 1))}
-            aria-label="Next month"
+            aria-label={t('workOrders.calendar.next')}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -153,7 +157,7 @@ export function WorkOrderCalendarView({ workOrders }: WorkOrderCalendarViewProps
                   </button>
                 ))}
                 {dayWOs.length > 3 && (
-                  <p className="pl-1 text-xs text-gray-400">+{dayWOs.length - 3} more</p>
+                  <p className="pl-1 text-xs text-gray-400">{t('workOrders.calendar.more', { count: dayWOs.length - 3 })}</p>
                 )}
               </div>
             </div>
@@ -165,8 +169,7 @@ export function WorkOrderCalendarView({ workOrders }: WorkOrderCalendarViewProps
       {selectedDate && selectedDayWOs.length > 0 && (
         <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
           <h3 className="mb-3 font-semibold text-gray-900 dark:text-gray-100">
-            {format(selectedDate, 'EEEE, MMMM d')} — {selectedDayWOs.length} work order
-            {selectedDayWOs.length !== 1 && 's'}
+            {month(selectedDate, { weekday: 'long', month: 'long', day: 'numeric' })} — {t('workOrders.calendar.count', { count: selectedDayWOs.length })}
           </h3>
           <div className="space-y-2">
             {selectedDayWOs.map((wo) => (

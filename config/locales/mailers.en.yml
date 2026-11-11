@@ -1,7 +1,136 @@
 en:
+  mail:
+    greeting: "Hi %{name},"
+    hello: "Hello,"
+    signature: "— FixFlow"
+    work_order: "Work Order"
+    title: "Title"
+    priority: "Priority"
+    due_date: "Due Date"
+    completed: "Completed"
+    verified: "Verified"
+    submitted: "Submitted"
+    submitted_by: "Submitted By"
+    description: "Description"
+    completion_notes: "Completion Notes"
+    asset: "Asset"
+    due: "Due"
+    was_due: "Was Due"
+    days_overdue: "Days Overdue"
+    pm_schedule: "PM Schedule"
+    not_set: "Not set"
+    unknown: "Unknown"
+    not_applicable: "N/A"
+    someone: "Someone"
+    an_administrator: "An administrator"
+    log_in_to_view: "Please log in to FixFlow to view the full details and begin work."
+    priorities:
+      low: "low"
+      medium: "medium"
+      high: "high"
+      critical: "critical"
+    roles:
+      admin: "administrator"
+      manager: "manager"
+      technician: "technician"
+      requester: "requester"
   password_mailer:
     reset:
       subject: "[FixFlow] Reset your password"
+      body: "Someone asked to reset the password for your FixFlow account. To choose a new password, open:"
+      expiry: "The link works once and expires in %{time}. If you did not ask for this, you can ignore this email; your password stays as it is."
   system_mailer:
     test_email:
       subject: "[FixFlow] Test email"
+      body: "This is a test email from FixFlow. If you are reading it, your mail server settings work and FixFlow can send email."
+  backup_mailer:
+    failed:
+      subject: "[FixFlow] The nightly backup failed"
+      body: "The nightly database backup failed on every one of its %{attempts} tries, so there may be no backup from last night."
+      when: "When"
+      reason: "Reason"
+      what_to_do: "What to do: check that the file storage (MinIO) is running and has room, and that the database answers. The next backup is tried at %{time}."
+      see_backups: "The backups that exist, and how old the newest one is: %{url}"
+  invitation_mailer:
+    invite:
+      subject: "[FixFlow] You have been invited to join %{organization}"
+      body: "%{inviter} invited you to join %{organization} on FixFlow as %{role}."
+      set_password: "Set your password and sign in here:"
+      expiry: "This link works once and expires in %{time}."
+  part_mailer:
+    low_stock:
+      subject_out: "[FixFlow] Out of stock: %{part}"
+      subject_low: "[FixFlow] Running low: %{part}"
+      out: "%{part} has run out of stock."
+      low: "%{part} has fallen to its reorder point."
+      part: "Part"
+      on_hand: "On hand"
+      reorder_at: "Reorder at"
+      once: "You will not be emailed again about this part until it has been restocked and falls low again."
+      see: "See the parts that need reordering: %{url}"
+  pm_mailer:
+    due_soon_summary:
+      subject:
+        one: "[FixFlow] %{count} Preventive Maintenance Schedule Due This Week"
+        other: "[FixFlow] %{count} Preventive Maintenance Schedules Due This Week"
+      intro: "The following preventive maintenance schedules are due within the next 7 days:"
+      outro: "Please log in to FixFlow to review and prepare for these upcoming PM tasks."
+    overdue_summary:
+      subject:
+        one: "[FixFlow] %{count} Overdue PM Schedule Requires Attention"
+        other: "[FixFlow] %{count} Overdue PM Schedules Require Attention"
+      intro: "The following preventive maintenance schedules are overdue and require immediate attention:"
+      outro: "Please log in to FixFlow to review and take action on these overdue PM schedules."
+    work_order_generated:
+      subject: "[FixFlow] PM Work Order Auto-Generated: %{number}"
+      intro: "A preventive maintenance work order has been automatically generated and assigned to you."
+  purchase_order_mailer:
+    requested:
+      subject: "[FixFlow] Parts requested: %{number}"
+      intro: "%{person} has asked for parts, and it needs your decision."
+      request: "Request"
+      why: "Why"
+      decide: "Approve or turn it down: %{url}"
+  report_mailer:
+    scheduled:
+      subject: "[FixFlow] %{name}: %{from} to %{to}"
+      intro: "Attached is \"%{name}\", the %{report} report for %{from} to %{to}."
+      scheduled:
+        one: "%{sender} set this up to be emailed every %{day} to one person. To stop getting it, turn off \"A scheduled report is emailed to me\" under Settings, Notifications, or ask %{first_name} to take you off the list."
+        other: "%{sender} set this up to be emailed every %{day} to %{count} people. To stop getting it, turn off \"A scheduled report is emailed to me\" under Settings, Notifications, or ask %{first_name} to take you off the list."
+      manual: "You asked for this copy yourself. This report is not emailed on a schedule."
+      see: "See and change the saved reports: %{url}"
+  warranty_mailer:
+    expiring:
+      subject:
+        one: "[FixFlow] %{count} warranty ending within 30 days"
+        other: "[FixFlow] %{count} warranties ending within 30 days"
+      intro:
+        one: "The warranty on this asset ends within 30 days. Anything covered is cheaper to repair under warranty, so report problems before then."
+        other: "The warranties on these assets end within 30 days. Anything covered is cheaper to repair under warranty, so report problems before then."
+      once: "You will not be emailed again about these dates."
+      see: "See the assets: %{url}"
+  work_order_mailer:
+    assigned:
+      subject: "[FixFlow] Work Order Assigned: %{number}"
+      intro: "A work order has been assigned to you."
+    needs_verification:
+      subject: "[FixFlow] Ready for Verification: %{number}"
+      intro: "A work order has been completed and is ready for your verification."
+      outro: "Please log in to FixFlow to review and verify this work order."
+    approval_needed:
+      subject: "[FixFlow] Needs approval: %{number}"
+      intro: "A work order costs more than the company's approval limit, so it cannot be started or finished until a manager approves it."
+      review: "Review and approve it: %{url}"
+    verified:
+      subject: "[FixFlow] Work Order Completed: %{number}"
+      intro: "Great news! Your maintenance request has been completed and verified."
+      outro: "Thank you for using FixFlow."
+    verified_public:
+      subject: "[FixFlow] Your Maintenance Request Has Been Completed"
+      intro: "Your maintenance request has been completed and verified."
+      outro: "Thank you for submitting your request."
+    new_request:
+      subject: "[FixFlow] New Maintenance Request Submitted"
+      intro: "A new maintenance request has been submitted and requires your attention."
+      outro: "Please log in to FixFlow to review and assign this work order."

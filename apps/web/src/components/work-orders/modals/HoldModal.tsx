@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
@@ -9,21 +10,17 @@ interface HoldModalProps {
   onClose: () => void
 }
 
-const HOLD_REASONS = [
-  'Waiting for parts',
-  'Waiting for access',
-  'Waiting for approval',
-  'Other',
-]
+const HOLD_REASONS = ['parts', 'access', 'approval', 'other'] as const
 
 export function HoldModal({ workOrderId, open, onClose }: HoldModalProps) {
-  const [reason, setReason] = useState(HOLD_REASONS[0])
+  const { t } = useTranslation()
+  const [reason, setReason] = useState<string>(HOLD_REASONS[0])
   const [other, setOther] = useState('')
   const [resumeDate, setResumeDate] = useState('')
   const transition = useTransitionWorkOrder()
 
   const handleHold = async () => {
-    const finalReason = reason === 'Other' ? other.trim() : reason
+    const finalReason = reason === 'other' ? other.trim() : t(`workOrders.hold.reason_${reason}`)
     await transition.mutateAsync({
       id: workOrderId,
       event: 'hold',
@@ -33,11 +30,11 @@ export function HoldModal({ workOrderId, open, onClose }: HoldModalProps) {
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Put Work Order On Hold">
+    <Modal open={open} onClose={onClose} title={t('workOrders.hold.title')}>
       <div className="space-y-4">
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Reason for hold *
+            {t('workOrders.hold.reason')}
           </label>
           <select
             value={reason}
@@ -46,16 +43,16 @@ export function HoldModal({ workOrderId, open, onClose }: HoldModalProps) {
           >
             {HOLD_REASONS.map((r) => (
               <option key={r} value={r}>
-                {r}
+                {t(`workOrders.hold.reason_${r}`)}
               </option>
             ))}
           </select>
         </div>
 
-        {reason === 'Other' && (
+        {reason === 'other' && (
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Specify reason *
+              {t('workOrders.hold.specify')}
             </label>
             <textarea
               value={other}
@@ -68,7 +65,7 @@ export function HoldModal({ workOrderId, open, onClose }: HoldModalProps) {
 
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Expected resume date
+            {t('workOrders.hold.resume')}
           </label>
           <input
             type="date"
@@ -81,16 +78,16 @@ export function HoldModal({ workOrderId, open, onClose }: HoldModalProps) {
 
         <div className="flex justify-end gap-2 pt-2">
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            {t('common.actions.cancel')}
           </Button>
           <Button
             onClick={handleHold}
             disabled={
-              (reason === 'Other' && !other.trim()) || transition.isPending
+              (reason === 'other' && !other.trim()) || transition.isPending
             }
             loading={transition.isPending}
           >
-            Put On Hold
+            {t('workOrders.hold.submit')}
           </Button>
         </div>
       </div>

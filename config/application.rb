@@ -29,6 +29,11 @@ module Fixflow
 
     config.time_zone = "UTC"
 
+    # English is the language everything is first written in; a language with a gap shows the English for it. Another
+    # language is a file in config/locales (see docs/translating.md).
+    config.i18n.default_locale = :en
+    config.i18n.fallbacks = [:en]
+
     config.active_job.queue_adapter = :sidekiq
 
     # Devise's Warden hooks (sign_in/sign_out) write to the session even though

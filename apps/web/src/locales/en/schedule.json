@@ -1,0 +1,44 @@
+{
+  "schedule": {
+    "title": "Schedule",
+    "description": "Drag a work order to another person or day, or use its move button.",
+    "previous_day": "Previous day",
+    "previous_week": "Previous week",
+    "next_day": "Next day",
+    "next_week": "Next week",
+    "view": "View",
+    "mode_day": "Day",
+    "mode_week": "Week",
+    "load_failed": "The schedule could not be loaded.",
+    "truncated": "There is more work than can be listed here. Filter the work orders list to see the rest.",
+    "move": {
+      "title": "Move {{number}}",
+      "who": "Who does it",
+      "due": "Due on",
+      "submit": "Move"
+    },
+    "nobody": "Nobody yet",
+    "overload": {
+      "none": "Nobody has more than a day's work in this period.",
+      "count_one": "One day is overloaded",
+      "count_other": "{{count}} days are overloaded",
+      "item": "{{name}}, {{day}}: {{hours}} of {{capacity}}",
+      "day_off": "a day off"
+    },
+    "grid": {
+      "priority": "{{priority}} priority: ",
+      "no_estimate": "(no estimate)",
+      "load": "{{hours}} of {{capacity}}",
+      "day_off_short": "day off",
+      "over_by": "over by {{hours}}",
+      "technician": "Technician",
+      "earlier": "Earlier or no date",
+      "today": "today",
+      "day_off": "Day off",
+      "earlier_open": "{{count}} open · {{hours}}",
+      "more_not_listed": "+{{count}} more, not listed"
+    },
+    "moved": "Moved.",
+    "move_failed": "Could not move the work order."
+  }
+}

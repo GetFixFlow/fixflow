@@ -1,16 +1,13 @@
-Hi <%= @manager.full_name %>,
+<%= t("mail.greeting", name: @manager.full_name) %>
 
-<%= @order.requested_by&.full_name.presence || "Someone" %> has asked for parts, and it needs your decision.
+<%= t(".intro", person: @order.requested_by&.full_name.presence || t("mail.someone")) %>
 
-Request:  <%= @order.number %>
-<% if @order.reason.present? %>
-Why:      <%= @order.reason %>
-<% end %>
+<%= mail_fields({ t(".request") => @order.number }.merge(@order.reason.present? ? { t(".why") => @order.reason } : {})) %>
 
 <% @order.lines.each do |line| %>
 - <%= line.part.name %>: <%= line.quantity.to_f %> <%= line.part.unit %>
 <% end %>
 
-Approve or turn it down: <%= @url %>
+<%= t(".decide", url: @url) %>
 
-— FixFlow
+<%= t("mail.signature") %>

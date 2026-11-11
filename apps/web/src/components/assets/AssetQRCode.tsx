@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import QRCode from 'qrcode'
+import { useTranslation } from 'react-i18next'
 import { Download, Printer } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
@@ -32,13 +33,14 @@ export function AssetQRCode({
   showActions = true,
   className,
 }: AssetQRCodeProps) {
+  const { t } = useTranslation()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [dataUrl, setDataUrl] = useState<string>('')
   const px = SIZE_MAP[size]
   const qrValue = publicCode
     ? `${window.location.origin}/request?asset=${encodeURIComponent(publicCode)}`
     : `${window.location.origin}/assets/${assetId}`
-  const caption = publicCode ? 'Scan to report a problem' : 'Scan to view asset'
+  const caption = publicCode ? t('assets.qr.caption_report') : t('assets.qr.caption_view')
 
   useEffect(() => {
     if (!canvasRef.current) return
@@ -63,7 +65,7 @@ export function AssetQRCode({
     const win = window.open('', '_blank')
     if (!win || !dataUrl) return
     win.document.write(`
-      <html><head><title>QR Code – ${assetTag}</title>
+      <html><head><title>${t('assets.qr.print_title', { tag: assetTag })}</title>
       <style>
         body { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; font-family:sans-serif; gap:8px; }
         img { display:block; }
@@ -71,7 +73,7 @@ export function AssetQRCode({
         small { color:#6b7280; font-family:monospace; }
         @media print { button { display:none; } }
       </style></head><body>
-      <img src="${dataUrl}" width="${px}" height="${px}" alt="QR code for ${assetTag}" />
+      <img src="${dataUrl}" width="${px}" height="${px}" alt="${t('assets.qr.print_alt', { tag: assetTag })}" />
       ${assetName ? `<p>${assetName}</p>` : ''}
       <small>${assetTag}</small>
       <small style="font-size:11px;color:#9ca3af">${caption}</small>
@@ -89,18 +91,18 @@ export function AssetQRCode({
         width={px}
         height={px}
         className="rounded-lg border border-gray-200 p-2 dark:border-gray-700"
-        aria-label={`QR code for asset ${assetTag}`}
+        aria-label={t('assets.qr.canvas_aria', { tag: assetTag })}
       />
       <p className="text-xs text-gray-500 dark:text-gray-400">{caption}</p>
       {showActions && (
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={handleDownload} disabled={!dataUrl}>
             <Download className="h-4 w-4" />
-            Download
+            {t('common.actions.download')}
           </Button>
           <Button size="sm" variant="outline" onClick={handlePrint} disabled={!dataUrl}>
             <Printer className="h-4 w-4" />
-            Print
+            {t('common.actions.print')}
           </Button>
         </div>
       )}

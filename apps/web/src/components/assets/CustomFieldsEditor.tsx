@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/Button'
 
 const FIELD_SUGGESTIONS = [
@@ -20,6 +21,7 @@ interface CustomFieldsEditorProps {
 }
 
 export function CustomFieldsEditor({ value, onChange }: CustomFieldsEditorProps) {
+  const { t } = useTranslation()
   const [entries, setEntries] = useState<{ key: string; val: string }[]>(() =>
     Object.entries(value).map(([key, val]) => ({ key, val })),
   )
@@ -45,15 +47,15 @@ export function CustomFieldsEditor({ value, onChange }: CustomFieldsEditorProps)
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Custom Fields</span>
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('assets.custom_fields.title')}</span>
         <Button type="button" size="sm" variant="outline" onClick={addField}>
           <Plus className="h-3.5 w-3.5" />
-          Add field
+          {t('assets.custom_fields.add')}
         </Button>
       </div>
 
       {entries.length === 0 && (
-        <p className="text-xs text-gray-400 dark:text-gray-500">No custom fields yet.</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500">{t('assets.custom_fields.empty')}</p>
       )}
 
       <div className="space-y-2">
@@ -64,10 +66,10 @@ export function CustomFieldsEditor({ value, onChange }: CustomFieldsEditorProps)
                 type="text"
                 value={key}
                 onChange={(e) => updateField(index, 'key', e.target.value)}
-                placeholder="Field name"
+                placeholder={t('assets.custom_fields.name_placeholder')}
                 list="field-suggestions"
                 className="h-8 w-full rounded-md border border-gray-300 bg-white px-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-                aria-label={`Custom field ${index + 1} key`}
+                aria-label={t('assets.custom_fields.key_aria', { n: index + 1 })}
               />
               <datalist id="field-suggestions">
                 {FIELD_SUGGESTIONS.map((s) => (
@@ -79,15 +81,15 @@ export function CustomFieldsEditor({ value, onChange }: CustomFieldsEditorProps)
               type="text"
               value={val}
               onChange={(e) => updateField(index, 'val', e.target.value)}
-              placeholder="Value"
+              placeholder={t('assets.custom_fields.value_placeholder')}
               className="h-8 flex-1 rounded-md border border-gray-300 bg-white px-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-              aria-label={`Custom field ${index + 1} value`}
+              aria-label={t('assets.custom_fields.value_aria', { n: index + 1 })}
             />
             <button
               type="button"
               onClick={() => removeField(index)}
               className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
-              aria-label={`Remove field ${index + 1}`}
+              aria-label={t('assets.custom_fields.remove_aria', { n: index + 1 })}
             >
               <Trash2 className="h-4 w-4" />
             </button>

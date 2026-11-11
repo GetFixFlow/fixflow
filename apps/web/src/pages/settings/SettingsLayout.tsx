@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/authStore'
@@ -9,6 +10,7 @@ import {
 
 interface NavItem {
   href: string
+  /** The key of its name in the translations. */
   label: string
   icon: React.ElementType
   roles?: string[]
@@ -16,6 +18,7 @@ interface NavItem {
 }
 
 interface NavSection {
+  /** The key of its name in the translations. */
   title: string
   items: NavItem[]
   roles?: string[]
@@ -23,61 +26,62 @@ interface NavSection {
 
 const NAV_SECTIONS: NavSection[] = [
   {
-    title: 'Account',
+    title: 'settings.sections.account',
     items: [
-      { href: '/settings/profile', label: 'My Profile', icon: User },
-      { href: '/settings/notifications', label: 'Notifications', icon: Bell },
-      { href: '/settings/security', label: 'Security', icon: Lock },
+      { href: '/settings/profile', label: 'settings.nav.profile', icon: User },
+      { href: '/settings/notifications', label: 'settings.nav.notifications', icon: Bell },
+      { href: '/settings/security', label: 'settings.nav.security', icon: Lock },
     ],
   },
   {
-    title: 'Organization',
+    title: 'settings.sections.organization',
     roles: ['admin'],
     items: [
-      { href: '/settings/organization', label: 'Organization', icon: Building2 },
-      { href: '/settings/branding', label: 'Branding', icon: Palette },
-      { href: '/settings/email', label: 'Email Settings', icon: Mail },
-      { href: '/settings/localization', label: 'Localization', icon: Globe },
-      { href: '/settings/custom-fields', label: 'Custom Fields', icon: ListPlus },
+      { href: '/settings/organization', label: 'settings.nav.organization', icon: Building2 },
+      { href: '/settings/branding', label: 'settings.nav.branding', icon: Palette },
+      { href: '/settings/email', label: 'settings.nav.email', icon: Mail },
+      { href: '/settings/localization', label: 'settings.nav.localization', icon: Globe },
+      { href: '/settings/custom-fields', label: 'settings.nav.custom_fields', icon: ListPlus },
     ],
   },
   {
-    title: 'Team',
+    title: 'settings.sections.team',
     roles: ['admin', 'manager'],
     items: [
-      { href: '/settings/users', label: 'Users', icon: Users, roles: ['admin', 'manager'] },
-      { href: '/settings/roles', label: 'Roles & Permissions', icon: Shield, roles: ['admin'] },
+      { href: '/settings/users', label: 'settings.nav.users', icon: Users, roles: ['admin', 'manager'] },
+      { href: '/settings/roles', label: 'settings.nav.roles', icon: Shield, roles: ['admin'] },
     ],
   },
   {
-    title: 'Integrations',
+    title: 'settings.sections.integrations',
     roles: ['admin'],
     items: [
-      { href: '/settings/iot', label: 'IoT & API Keys', icon: Radio },
-      { href: '/settings/chat', label: 'Team Chat', icon: MessageSquare },
-      { href: '/settings/ai', label: 'AI Features', icon: Sparkles },
+      { href: '/settings/iot', label: 'settings.nav.iot', icon: Radio },
+      { href: '/settings/chat', label: 'settings.nav.chat', icon: MessageSquare },
+      { href: '/settings/ai', label: 'settings.nav.ai', icon: Sparkles },
     ],
   },
   {
-    title: 'Data',
+    title: 'settings.sections.data',
     roles: ['admin'],
     items: [
-      { href: '/settings/import-export', label: 'Import / Export', icon: FileArchive },
-      { href: '/settings/data-retention', label: 'Data Retention', icon: Database },
-      { href: '/settings/audit-log', label: 'Audit Log', icon: Search },
-      { href: '/settings/system-health', label: 'System Health', icon: Activity },
+      { href: '/settings/import-export', label: 'settings.nav.import_export', icon: FileArchive },
+      { href: '/settings/data-retention', label: 'settings.nav.data_retention', icon: Database },
+      { href: '/settings/audit-log', label: 'settings.nav.audit_log', icon: Search },
+      { href: '/settings/system-health', label: 'settings.nav.system_health', icon: Activity },
     ],
   },
   {
-    title: 'Advanced',
+    title: 'settings.sections.advanced',
     roles: ['admin'],
     items: [
-      { href: '/settings/advanced', label: 'Advanced Settings', icon: Settings },
+      { href: '/settings/advanced', label: 'settings.nav.advanced', icon: Settings },
     ],
   },
 ]
 
 function SettingsSidebar({ onNav }: { onNav?: () => void }) {
+  const { t } = useTranslation()
   const { user } = useAuthStore()
   const role = user?.role ?? 'technician'
 
@@ -93,14 +97,14 @@ function SettingsSidebar({ onNav }: { onNav?: () => void }) {
       <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-2">
           <Settings className="h-5 w-5 text-gray-400" />
-          <h2 className="font-semibold text-gray-900 dark:text-gray-100">Settings</h2>
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100">{t('shell.nav.settings')}</h2>
         </div>
       </div>
       <div className="flex-1 py-3 px-2 space-y-5">
         {visibleSections.map((section) => (
           <div key={section.title}>
             <p className="px-2 mb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400">
-              {section.title}
+              {t(section.title)}
             </p>
             {section.items.map((item) => (
               <NavLink
@@ -115,7 +119,7 @@ function SettingsSidebar({ onNav }: { onNav?: () => void }) {
                 onClick={onNav}
               >
                 <item.icon className="h-4 w-4 shrink-0" />
-                <span>{item.label}</span>
+                <span>{t(item.label)}</span>
               </NavLink>
             ))}
           </div>
@@ -126,6 +130,7 @@ function SettingsSidebar({ onNav }: { onNav?: () => void }) {
 }
 
 export function SettingsLayout() {
+  const { t } = useTranslation()
   const location = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -146,7 +151,7 @@ export function SettingsLayout() {
           <button onClick={() => setMobileOpen(!mobileOpen)} className="text-gray-500">
             <Settings className="h-5 w-5" />
           </button>
-          <span className="font-medium text-sm">{activeItem?.label ?? 'Settings'}</span>
+          <span className="font-medium text-sm">{activeItem ? t(activeItem.label) : t('shell.nav.settings')}</span>
           <ChevronRight className="h-4 w-4 text-gray-400 ml-auto" />
         </div>
 

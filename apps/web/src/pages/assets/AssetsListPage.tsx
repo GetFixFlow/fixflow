@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Package, Plus, LayoutGrid, List, MoreVertical, Eye, Pencil, Printer, QrCode, Trash2, Upload } from 'lucide-react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -32,6 +33,7 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 export function AssetsListPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   // The QR scanner sends a label's code here as ?search=, so the list shows that asset.
   const [searchParams] = useSearchParams()
@@ -89,7 +91,7 @@ export function AssetsListPage() {
   }, [assets])
 
   const handleDelete = async (asset: Asset) => {
-    if (!confirm(`Delete "${asset.name}"? This cannot be undone.`)) return
+    if (!confirm(t('assets.list.confirm_delete', { name: asset.name }))) return
     await deleteMutation.mutateAsync(asset.id)
   }
 
@@ -98,23 +100,23 @@ export function AssetsListPage() {
   return (
     <div className="space-y-4">
       <PageHeader
-        title="Assets"
-        description={pagination?.count != null ? `${pagination.count} total assets` : 'Manage your equipment'}
+        title={t('assets.list.title')}
+        description={pagination?.count != null ? t('assets.list.total', { count: pagination.count }) : t('assets.list.manage')}
         actions={
           <div className="flex gap-2">
             {canManage && (
               <>
                 <Button variant="outline" size="sm" onClick={() => navigate(`/assets/print-labels${labelQuery(filters)}`)}>
                   <Printer className="h-4 w-4" />
-                  Print labels
+                  {t('assets.list.print_labels')}
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => navigate('/import?kind=assets')}>
                   <Upload className="h-4 w-4" />
-                  Import CSV
+                  {t('assets.list.import_csv')}
                 </Button>
                 <Button size="sm" onClick={() => navigate('/assets/new')}>
                   <Plus className="h-4 w-4" />
-                  New Asset
+                  {t('assets.list.new')}
                 </Button>
               </>
             )}
@@ -143,10 +145,10 @@ export function AssetsListPage() {
                 ? 'bg-brand-600 text-white'
                 : 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
             }`}
-            aria-label="Table view"
+            aria-label={t('assets.list.table_view')}
           >
             <List className="h-4 w-4" />
-            Table
+            {t('assets.list.table')}
           </button>
           <button
             onClick={() => toggleView('grid')}
@@ -155,10 +157,10 @@ export function AssetsListPage() {
                 ? 'bg-brand-600 text-white'
                 : 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
             }`}
-            aria-label="Grid view"
+            aria-label={t('assets.list.grid_view')}
           >
             <LayoutGrid className="h-4 w-4" />
-            Grid
+            {t('assets.list.grid')}
           </button>
         </div>
       </div>
@@ -167,20 +169,20 @@ export function AssetsListPage() {
       {selected.size > 0 && (
         <div className="flex items-center gap-3 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2.5 dark:border-brand-800 dark:bg-brand-900/20">
           <span className="text-sm font-medium text-brand-700 dark:text-brand-300">
-            {selected.size} asset{selected.size > 1 ? 's' : ''} selected
+            {t('assets.list.selected', { count: selected.size })}
           </span>
           <div className="flex gap-2 ml-auto">
             {canManage && (
               <Button size="sm" variant="outline" onClick={() => navigate(`/assets/print-labels?ids=${[...selected].join(',')}`)}>
                 <Printer className="h-4 w-4" />
-                Print labels
+                {t('assets.list.print_labels')}
               </Button>
             )}
             <Button size="sm" variant="outline" onClick={() => setSelected(new Set())}>
-              Deselect all
+              {t('assets.list.deselect_all')}
             </Button>
             <Button size="sm" variant="destructive">
-              Delete selected
+              {t('assets.list.delete_selected')}
             </Button>
           </div>
         </div>
@@ -204,13 +206,13 @@ export function AssetsListPage() {
       ) : assets.length === 0 ? (
         <EmptyState
           icon={Package}
-          title={isFiltered ? 'No assets match your filters' : 'No assets yet'}
-          description={isFiltered ? 'Try adjusting or clearing your filters.' : 'Add your first asset to start tracking maintenance.'}
+          title={isFiltered ? t('assets.list.no_match') : t('assets.list.no_assets')}
+          description={isFiltered ? t('assets.list.try_adjusting') : t('assets.list.add_first')}
           action={
             isFiltered
-              ? { label: 'Clear filters', onClick: () => setFilters({ search: '', status: '', location_id: null }) }
+              ? { label: t('assets.list.clear_filters'), onClick: () => setFilters({ search: '', status: '', location_id: null }) }
               : canManage
-              ? { label: 'Add Asset', onClick: () => navigate('/assets/new') }
+              ? { label: t('assets.list.add_asset'), onClick: () => navigate('/assets/new') }
               : undefined
           }
         />
@@ -236,15 +238,15 @@ export function AssetsListPage() {
                     checked={selected.size === assets.length && assets.length > 0}
                     onChange={toggleAll}
                     className="rounded border-gray-300"
-                    aria-label="Select all assets"
+                    aria-label={t('assets.list.select_all')}
                   />
                 </th>
-                {['Asset Tag', 'Name', 'Status', 'Location', 'Open WOs', 'Actions'].map((h) => (
+                {['tag', 'name', 'status', 'location', 'open_wos', 'actions'].map((h) => (
                   <th
                     key={h}
                     className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
                   >
-                    {h}
+                    {t(`assets.list.col_${h}`)}
                   </th>
                 ))}
               </tr>
@@ -266,7 +268,7 @@ export function AssetsListPage() {
                       // The cell toggles it (a click on the box reaches the cell too, so toggling here as well would undo it).
                       onChange={() => undefined}
                       className="rounded border-gray-300"
-                      aria-label={`Select ${asset.name}`}
+                      aria-label={t('assets.list.select_one', { name: asset.name })}
                     />
                   </td>
                   <td className="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">
@@ -276,7 +278,7 @@ export function AssetsListPage() {
                         navigator.clipboard?.writeText(asset.asset_tag)
                       }}
                       className="hover:text-brand-600"
-                      title="Click to copy"
+                      title={t('assets.list.click_to_copy')}
                     >
                       {asset.asset_tag}
                     </button>
@@ -318,7 +320,7 @@ export function AssetsListPage() {
                       <DropdownMenu.Trigger asChild>
                         <button
                           className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
-                          aria-label="Asset actions"
+                          aria-label={t('assets.list.actions_aria')}
                         >
                           <MoreVertical className="h-4 w-4" />
                         </button>
@@ -333,21 +335,21 @@ export function AssetsListPage() {
                             className="flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
                             onClick={() => navigate(`/assets/${asset.id}`)}
                           >
-                            <Eye className="h-4 w-4" /> View
+                            <Eye className="h-4 w-4" /> {t('assets.list.menu_view')}
                           </DropdownMenu.Item>
                           {canManage && (
                             <DropdownMenu.Item
                               className="flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
                               onClick={() => navigate(`/assets/${asset.id}/edit`)}
                             >
-                              <Pencil className="h-4 w-4" /> Edit
+                              <Pencil className="h-4 w-4" /> {t('assets.list.menu_edit')}
                             </DropdownMenu.Item>
                           )}
                           <DropdownMenu.Item
                             className="flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
                             onClick={() => navigate(`/assets/print-labels?ids=${asset.id}`)}
                           >
-                            <QrCode className="h-4 w-4" /> QR Code
+                            <QrCode className="h-4 w-4" /> {t('assets.list.menu_qr')}
                           </DropdownMenu.Item>
                           {canManage && (
                             <>
@@ -356,7 +358,7 @@ export function AssetsListPage() {
                                 className="flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
                                 onClick={() => handleDelete(asset)}
                               >
-                                <Trash2 className="h-4 w-4" /> Delete
+                                <Trash2 className="h-4 w-4" /> {t('assets.list.menu_delete')}
                               </DropdownMenu.Item>
                             </>
                           )}
@@ -375,7 +377,7 @@ export function AssetsListPage() {
       {pagination && pagination.pages != null && pagination.pages > 1 && (
         <div className="flex items-center justify-between text-sm">
           <p className="text-gray-500 dark:text-gray-400">
-            Page {pagination.page} of {pagination.pages}
+            {t('assets.list.page_of', { page: pagination.page, pages: pagination.pages })}
           </p>
           <div className="flex gap-2">
             <Button
@@ -384,7 +386,7 @@ export function AssetsListPage() {
               disabled={pagination.page === 1}
               onClick={() => setPage((p) => p - 1)}
             >
-              Previous
+              {t('assets.list.previous')}
             </Button>
             <Button
               size="sm"
@@ -392,7 +394,7 @@ export function AssetsListPage() {
               disabled={pagination.page === pagination.pages}
               onClick={() => setPage((p) => p + 1)}
             >
-              Next
+              {t('assets.list.next')}
             </Button>
           </div>
         </div>

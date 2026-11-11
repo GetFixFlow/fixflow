@@ -93,6 +93,7 @@ nav:
       - Sensors and IoT: iot.md
       - Reports and the dashboard: reports.md
       - Notifications: notifications.md
+      - Languages and translating: translating.md
   - Reference:
       - API: api.md
       - API endpoints: api-endpoints.md

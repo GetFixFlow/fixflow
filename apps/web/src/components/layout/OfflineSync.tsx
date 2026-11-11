@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { t } from '@/i18n'
 import { useOfflineState, useOnlineStatus } from '@/hooks/useOfflineQueue'
 import { WO_KEY } from '@/hooks/useWorkOrders'
 import { syncQueue } from '@/lib/offlineSync'
@@ -14,9 +15,9 @@ export function useSyncNow() {
     const { synced, rejected } = await syncQueue()
     if (synced + rejected === 0) return
     qc.invalidateQueries({ queryKey: WO_KEY })
-    if (synced > 0) toast.success(`${synced} change${synced === 1 ? '' : 's'} sent.`)
+    if (synced > 0) toast.success(t('shell.sync.sent', { count: synced }))
     if (rejected > 0) {
-      toast.error(`${rejected} change${rejected === 1 ? ' was' : 's were'} not accepted. Open the sync status at the top to see why.`)
+      toast.error(t('shell.sync.not_accepted', { count: rejected }))
     }
   }, [qc])
 }

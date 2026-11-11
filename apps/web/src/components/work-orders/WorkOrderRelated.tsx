@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { RefreshCw, Zap, ClipboardList } from 'lucide-react'
 import type { WorkOrder } from '@/types'
@@ -7,11 +8,12 @@ interface WorkOrderRelatedProps {
 }
 
 export function WorkOrderRelated({ workOrder }: WorkOrderRelatedProps) {
+  const { t } = useTranslation()
   const hasRelated = workOrder.pm_id || workOrder.iot_alert_id
 
   if (!hasRelated) {
     return (
-      <p className="text-sm italic text-gray-400 dark:text-gray-500">No related records.</p>
+      <p className="text-sm italic text-gray-400 dark:text-gray-500">{t('workOrders.related.none')}</p>
     )
   }
 
@@ -24,8 +26,8 @@ export function WorkOrderRelated({ workOrder }: WorkOrderRelatedProps) {
         >
           <RefreshCw className="h-4 w-4 text-blue-500 shrink-0" />
           <div>
-            <p className="font-medium text-gray-800 dark:text-gray-200">Generated from PM schedule</p>
-            <p className="text-xs text-gray-500">PM #{workOrder.pm_id}</p>
+            <p className="font-medium text-gray-800 dark:text-gray-200">{t('workOrders.related.pm')}</p>
+            <p className="text-xs text-gray-500">{t('workOrders.related.pm_id', { id: workOrder.pm_id })}</p>
           </div>
         </Link>
       )}
@@ -37,8 +39,8 @@ export function WorkOrderRelated({ workOrder }: WorkOrderRelatedProps) {
         >
           <Zap className="h-4 w-4 text-yellow-500 shrink-0" />
           <div>
-            <p className="font-medium text-gray-800 dark:text-gray-200">Triggered by IoT alert</p>
-            <p className="text-xs text-gray-500">Alert #{workOrder.iot_alert_id}</p>
+            <p className="font-medium text-gray-800 dark:text-gray-200">{t('workOrders.related.iot')}</p>
+            <p className="text-xs text-gray-500">{t('workOrders.related.alert_id', { id: workOrder.iot_alert_id })}</p>
           </div>
         </Link>
       )}

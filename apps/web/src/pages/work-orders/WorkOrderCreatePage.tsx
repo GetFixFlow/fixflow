@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -6,6 +7,7 @@ import { useCreateWorkOrder } from '@/hooks/useWorkOrders'
 import { useAuthStore } from '@/stores/authStore'
 
 export function WorkOrderCreatePage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const lockedAssetId = searchParams.get('asset_id')
@@ -38,14 +40,14 @@ export function WorkOrderCreatePage() {
           className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
         >
           <ArrowLeft className="h-4 w-4" />
-          Work Orders
+          {t('workOrders.page.title')}
         </Link>
       </div>
 
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">New Work Order</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('workOrders.page.new')}</h1>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Fill in the details to create a new work order.
+          {t('workOrders.create.intro')}
         </p>
       </div>
 

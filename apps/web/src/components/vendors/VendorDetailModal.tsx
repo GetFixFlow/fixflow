@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Mail, Pencil, Phone, Trash2, UserPlus } from 'lucide-react'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
@@ -27,6 +28,7 @@ function Line({ label, children }: { label: string; children: React.ReactNode })
 }
 
 function AddContact({ vendorId }: { vendorId: number }) {
+  const { t } = useTranslation()
   const add = useAddVendorContact(vendorId)
   const [name, setName] = useState('')
   const [role, setRole] = useState('')
@@ -45,13 +47,13 @@ function AddContact({ vendorId }: { vendorId: number }) {
   return (
     <form onSubmit={submit} className="mt-3 space-y-2 rounded-md border border-dashed border-gray-300 p-3 dark:border-gray-600" noValidate>
       <div className="grid grid-cols-2 gap-2">
-        <Input id="contact-name" label="Name *" value={name} onChange={(e) => setName(e.target.value)} />
-        <Input id="contact-role" label="Role" value={role} onChange={(e) => setRole(e.target.value)} />
-        <Input id="contact-phone" label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
-        <Input id="contact-email" label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <Input id="contact-name" label={t('vendors.detail.name')} value={name} onChange={(e) => setName(e.target.value)} />
+        <Input id="contact-role" label={t('vendors.detail.role')} value={role} onChange={(e) => setRole(e.target.value)} />
+        <Input id="contact-phone" label={t('vendors.detail.phone')} value={phone} onChange={(e) => setPhone(e.target.value)} />
+        <Input id="contact-email" label={t('vendors.detail.email')} type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
       </div>
       <Button type="submit" size="sm" disabled={!name.trim() || add.isPending}>
-        <UserPlus className="h-4 w-4" />{add.isPending ? 'Adding…' : 'Add contact'}
+        <UserPlus className="h-4 w-4" />{add.isPending ? t('vendors.detail.adding') : t('vendors.detail.add_contact')}
       </Button>
     </form>
   )
@@ -59,6 +61,7 @@ function AddContact({ vendorId }: { vendorId: number }) {
 
 /** A vendor's details and the people to call there. Managers add and remove contacts and open the edit form. */
 export function VendorDetailModal({ vendor, canManage, onEdit, onClose }: VendorDetailModalProps) {
+  const { t } = useTranslation()
   const { data } = useVendor(vendor.id)
   const remove = useRemoveVendorContact(vendor.id)
   const current = data ?? vendor
@@ -70,28 +73,28 @@ export function VendorDetailModal({ vendor, canManage, onEdit, onClose }: Vendor
     <Modal open onClose={onClose} title={current.name} description={current.category ?? undefined} className="max-h-[90vh] max-w-xl overflow-y-auto">
       <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant={current.active ? 'success' : 'secondary'}>{current.active ? 'Active' : 'Not in use'}</Badge>
+          <Badge variant={current.active ? 'success' : 'secondary'}>{current.active ? t('vendors.detail.active') : t('vendors.detail.not_in_use')}</Badge>
           <span className="text-sm text-gray-500">
-            {current.work_orders_count === 1 ? '1 work order' : `${current.work_orders_count} work orders`}
+            {t('vendors.detail.work_orders', { count: current.work_orders_count })}
           </span>
         </div>
 
         <dl className="space-y-2">
-          {current.phone && <Line label="Phone">{call ? <a className={linkClass} href={call}>{current.phone}</a> : current.phone}</Line>}
-          {current.email && <Line label="Email"><a className={linkClass} href={`mailto:${current.email}`}>{current.email}</a></Line>}
+          {current.phone && <Line label={t('vendors.detail.phone')}>{call ? <a className={linkClass} href={call}>{current.phone}</a> : current.phone}</Line>}
+          {current.email && <Line label={t('vendors.detail.email')}><a className={linkClass} href={`mailto:${current.email}`}>{current.email}</a></Line>}
           {current.website && (
-            <Line label="Website">
+            <Line label={t('vendors.detail.website')}>
               {site ? <a className={linkClass} href={site} target="_blank" rel="noopener noreferrer">{current.website}</a> : current.website}
             </Line>
           )}
-          {current.address && <Line label="Address">{current.address}</Line>}
-          {current.notes && <Line label="Notes">{current.notes}</Line>}
+          {current.address && <Line label={t('vendors.detail.address')}>{current.address}</Line>}
+          {current.notes && <Line label={t('vendors.detail.notes')}>{current.notes}</Line>}
         </dl>
 
-        <section aria-label="Contacts">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">People to call</h3>
+        <section aria-label={t('vendors.detail.contacts_aria')}>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t('vendors.detail.people_to_call')}</h3>
           {contacts.length === 0 ? (
-            <p className="mt-1 text-sm text-gray-500">No contacts yet.</p>
+            <p className="mt-1 text-sm text-gray-500">{t('vendors.detail.no_contacts')}</p>
           ) : (
             <ul className="mt-2 divide-y divide-gray-200 rounded-md border border-gray-200 dark:divide-gray-700 dark:border-gray-700">
               {contacts.map((contact) => {
@@ -117,9 +120,9 @@ export function VendorDetailModal({ vendor, canManage, onEdit, onClose }: Vendor
                     </div>
                     {canManage && (
                       <Button
-                        variant="ghost" size="icon" aria-label={`Remove ${contact.name}`}
+                        variant="ghost" size="icon" aria-label={t('vendors.detail.remove_aria', { name: contact.name })}
                         disabled={remove.isPending}
-                        onClick={() => { if (confirm(`Remove ${contact.name} from ${current.name}?`)) remove.mutate(contact.id) }}
+                        onClick={() => { if (confirm(t('vendors.detail.confirm_remove', { name: contact.name, vendor: current.name }))) remove.mutate(contact.id) }}
                       >
                         <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>
@@ -133,8 +136,8 @@ export function VendorDetailModal({ vendor, canManage, onEdit, onClose }: Vendor
         </section>
 
         <div className="flex gap-2 pt-1">
-          <Button variant="outline" onClick={onClose} className="flex-1">Close</Button>
-          {canManage && <Button onClick={onEdit} className="flex-1"><Pencil className="h-4 w-4" />Edit details</Button>}
+          <Button variant="outline" onClick={onClose} className="flex-1">{t('vendors.detail.close')}</Button>
+          {canManage && <Button onClick={onEdit} className="flex-1"><Pencil className="h-4 w-4" />{t('vendors.detail.edit_details')}</Button>}
         </div>
       </div>
     </Modal>

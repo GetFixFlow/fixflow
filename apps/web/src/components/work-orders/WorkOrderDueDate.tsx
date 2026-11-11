@@ -1,5 +1,7 @@
+import { currentLanguage } from '@/i18n'
+import { useTranslation } from 'react-i18next'
 import { AlertCircle } from 'lucide-react'
-import { differenceInCalendarDays, format, isToday, isTomorrow } from 'date-fns'
+import { differenceInCalendarDays, isToday, isTomorrow } from 'date-fns'
 import { cn } from '@/lib/utils'
 
 interface WorkOrderDueDateProps {
@@ -8,10 +10,11 @@ interface WorkOrderDueDateProps {
 }
 
 export function WorkOrderDueDate({ dueDate, className }: WorkOrderDueDateProps) {
+  const { t } = useTranslation()
   if (!dueDate) {
     return (
       <span className={cn('text-sm italic text-gray-400 dark:text-gray-500', className)}>
-        No due date
+        {t('workOrders.due.none')}
       </span>
     )
   }
@@ -29,7 +32,7 @@ export function WorkOrderDueDate({ dueDate, className }: WorkOrderDueDateProps) 
         )}
       >
         <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-        {overdueDays === 1 ? '1 day overdue' : `${overdueDays} days overdue`}
+        {t('workOrders.due.overdue', { count: overdueDays })}
       </span>
     )
   }
@@ -37,7 +40,7 @@ export function WorkOrderDueDate({ dueDate, className }: WorkOrderDueDateProps) 
   if (isToday(date)) {
     return (
       <span className={cn('text-sm font-medium text-orange-600 dark:text-orange-400', className)}>
-        Today
+        {t('workOrders.due.today')}
       </span>
     )
   }
@@ -45,7 +48,7 @@ export function WorkOrderDueDate({ dueDate, className }: WorkOrderDueDateProps) 
   if (isTomorrow(date)) {
     return (
       <span className={cn('text-sm font-medium text-yellow-600 dark:text-yellow-400', className)}>
-        Tomorrow
+        {t('workOrders.due.tomorrow')}
       </span>
     )
   }
@@ -53,14 +56,14 @@ export function WorkOrderDueDate({ dueDate, className }: WorkOrderDueDateProps) 
   if (diffDays <= 3) {
     return (
       <span className={cn('text-sm font-medium text-yellow-600 dark:text-yellow-400', className)}>
-        In {diffDays} days
+        {t('workOrders.due.in_days', { count: diffDays })}
       </span>
     )
   }
 
   return (
     <span className={cn('text-sm text-gray-600 dark:text-gray-400', className)}>
-      {format(date, 'MMM d')}
+      {new Intl.DateTimeFormat(currentLanguage(), { month: 'short', day: 'numeric' }).format(date)}
     </span>
   )
 }

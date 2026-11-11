@@ -7,9 +7,8 @@ class InvitationMailer < ApplicationMailer
     @personal_message = personal_message.presence
     @inviter         = user.invited_by
     @organization    = user.organization
-    mail(
-      to:      user.email,
-      subject: "[FixFlow] You have been invited to join #{@organization.name}"
-    )
+    in_language_of(user) do
+      mail(to: user.email, subject: t(".subject", organization: @organization.name))
+    end
   end
 end

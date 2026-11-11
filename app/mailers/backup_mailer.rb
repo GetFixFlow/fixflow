@@ -8,6 +8,6 @@ class BackupMailer < ApplicationMailer
     @reason    = reason
     @failed_at = failed_at
     @url       = "#{EmailSetup.base_url}/settings/data-retention"
-    mail(to: admin.email, subject: "[FixFlow] The nightly backup failed") # rubocop:disable Rails/I18nLocaleTexts
+    in_language_of(admin) { mail(to: admin.email, subject: t(".subject")) }
   end
 end

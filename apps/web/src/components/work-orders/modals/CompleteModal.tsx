@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import { Modal } from '@/components/ui/Modal'
@@ -12,11 +13,7 @@ interface CompleteModalProps {
   onClose: () => void
 }
 
-const RESOLUTION_OPTIONS: { value: ResolutionType; label: string }[] = [
-  { value: 'fully_resolved', label: 'Fully resolved' },
-  { value: 'temporarily_resolved', label: 'Temporarily resolved (follow-up needed)' },
-  { value: 'partially_resolved', label: 'Partially resolved' },
-]
+const RESOLUTION_OPTIONS: ResolutionType[] = ['fully_resolved', 'temporarily_resolved', 'partially_resolved']
 
 export function CompleteModal({
   workOrderId,
@@ -24,6 +21,7 @@ export function CompleteModal({
   open,
   onClose,
 }: CompleteModalProps) {
+  const { t } = useTranslation()
   const [notes, setNotes] = useState('')
   const [hours, setHours] = useState('')
   const [resolution, setResolution] = useState<ResolutionType>('fully_resolved')
@@ -48,14 +46,14 @@ export function CompleteModal({
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Mark as Complete">
+    <Modal open={open} onClose={onClose} title={t('workOrders.complete.title')}>
       <div className="space-y-4">
         {requiredIncomplete.length > 0 && (
           <div className="rounded-md bg-yellow-50 p-3 dark:bg-yellow-900/20">
             <div className="flex items-start gap-2">
               <AlertTriangle className="h-4 w-4 text-yellow-600 shrink-0 mt-0.5" />
               <div className="text-sm text-yellow-800 dark:text-yellow-300">
-                <strong>{requiredIncomplete.length} required step{requiredIncomplete.length !== 1 && 's'} not checked:</strong>
+                <strong>{t('workOrders.complete.unchecked', { count: requiredIncomplete.length })}</strong>
                 <ul className="mt-1 list-disc pl-4 text-xs">
                   {requiredIncomplete.map((i) => (
                     <li key={i.step}>{i.instruction}</li>
@@ -68,21 +66,21 @@ export function CompleteModal({
 
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Completion Notes * <span className="text-xs text-gray-400">(min 20 chars)</span>
+            {t('workOrders.complete.notes')} <span className="text-xs text-gray-400">{t('workOrders.complete.notes_min')}</span>
           </label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={4}
             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-            placeholder="Describe what was done..."
+            placeholder={t('workOrders.complete.notes_placeholder')}
           />
-          <p className="mt-0.5 text-xs text-gray-400">{notes.length} chars</p>
+          <p className="mt-0.5 text-xs text-gray-400">{t('workOrders.complete.chars', { count: notes.length })}</p>
         </div>
 
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Actual Hours *
+            {t('workOrders.complete.hours')}
           </label>
           <input
             type="number"
@@ -91,26 +89,26 @@ export function CompleteModal({
             value={hours}
             onChange={(e) => setHours(e.target.value)}
             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-            placeholder="e.g. 1.5"
+            placeholder={t('workOrders.complete.hours_placeholder')}
           />
         </div>
 
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Resolution Type
+            {t('workOrders.complete.resolution')}
           </label>
           <div className="space-y-2">
             {RESOLUTION_OPTIONS.map((opt) => (
-              <label key={opt.value} className="flex cursor-pointer items-center gap-2 text-sm">
+              <label key={opt} className="flex cursor-pointer items-center gap-2 text-sm">
                 <input
                   type="radio"
                   name="resolution"
-                  value={opt.value}
-                  checked={resolution === opt.value}
-                  onChange={() => setResolution(opt.value)}
+                  value={opt}
+                  checked={resolution === opt}
+                  onChange={() => setResolution(opt)}
                   className="text-brand-600 focus:ring-brand-500"
                 />
-                {opt.label}
+                {t(`workOrders.complete.resolution_${opt}`)}
               </label>
             ))}
           </div>
@@ -118,14 +116,14 @@ export function CompleteModal({
 
         <div className="flex justify-end gap-2 pt-2">
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            {t('common.actions.cancel')}
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={!canSubmit || complete.isPending}
             loading={complete.isPending}
           >
-            Mark Complete
+            {t('workOrders.complete.submit')}
           </Button>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -14,9 +15,10 @@ import { useCreateAsset } from '@/hooks/useAssets'
 import { useLocations } from '@/hooks/useLocations'
 import { cn } from '@/lib/utils'
 import type { AssetStatus } from '@/types'
+import { label } from '@/i18n'
 
 const step1Schema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters').max(100),
+  name: z.string().min(2, 'assets.create.name_min').max(100),
   asset_tag: z.string().max(50).optional(),
   serial_number: z.string().max(100).optional(),
   barcode: z.string().max(64).optional(),
@@ -38,13 +40,12 @@ type Step2Input = z.input<typeof step2Schema>
 
 const STATUS_OPTIONS: AssetStatus[] = ['operational', 'degraded', 'down', 'decommissioned']
 
-const STEPS = [
-  { label: 'Basic Information', description: 'Name, tag, and status' },
-  { label: 'Location & Details', description: 'Where and what it is' },
-  { label: 'Review & Create', description: 'Confirm and save' },
-]
+const STEPS = ['step1', 'step2', 'step3']
 
 export function AssetCreatePage() {
+  const { t } = useTranslation()
+  /** A message from a form rule is the key of its text. */
+  const msg = (message?: string) => (message ? t(message) : undefined)
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [createdId, setCreatedId] = useState<number | null>(null)
@@ -119,14 +120,14 @@ export function AssetCreatePage() {
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link to="/assets">
           <ArrowLeft className="h-4 w-4" />
-          Assets
+          {t('assets.create.back_to_assets')}
         </Link>
       </Button>
 
       <div>
-        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Create Asset</h1>
+        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t('assets.create.title')}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Step {step} of {STEPS.length}: {STEPS[step - 1].description}
+          {t('assets.create.step_of', { step, total: STEPS.length, description: t(`assets.create.${STEPS[step - 1]}_description`) })}
         </p>
       </div>
 
@@ -137,7 +138,7 @@ export function AssetCreatePage() {
           const done = step > num
           const active = step === num
           return (
-            <div key={s.label} className="flex flex-1 items-center gap-2">
+            <div key={s} className="flex flex-1 items-center gap-2">
               <div
                 className={cn(
                   'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold',
@@ -152,7 +153,7 @@ export function AssetCreatePage() {
                 {done ? <Check className="h-3.5 w-3.5" /> : num}
               </div>
               <span className={cn('hidden text-xs sm:block', active ? 'font-medium text-gray-900 dark:text-gray-100' : 'text-gray-400')}>
-                {s.label}
+                {t(`assets.create.${s}_label`)}
               </span>
               {i < STEPS.length - 1 && (
                 <div className={cn('h-px flex-1', step > num ? 'bg-green-400' : 'bg-gray-200 dark:bg-gray-700')} />
@@ -167,34 +168,34 @@ export function AssetCreatePage() {
         <Card>
           <CardContent className="p-6">
             <h2 className="mb-4 text-base font-semibold text-gray-900 dark:text-gray-100">
-              Basic Information
+              {t('assets.create.step1_label')}
             </h2>
             <form onSubmit={handleStep1} className="space-y-4">
               <Input
                 id="asset-name"
-                label="Asset Name *"
-                placeholder="e.g. Pump-01"
-                error={step1Form.formState.errors.name?.message}
+                label={t('assets.create.name_label')}
+                placeholder={t('assets.create.name_placeholder')}
+                error={msg(step1Form.formState.errors.name?.message)}
                 {...step1Form.register('name')}
               />
               <Input
                 id="asset-tag"
-                label="Asset Tag"
-                placeholder="Auto-generated if empty (e.g. FF-000001)"
-                error={step1Form.formState.errors.asset_tag?.message}
+                label={t('assets.create.tag_label')}
+                placeholder={t('assets.create.tag_placeholder')}
+                error={msg(step1Form.formState.errors.asset_tag?.message)}
                 {...step1Form.register('asset_tag')}
               />
               <Input
                 id="serial-number"
-                label="Serial Number"
-                placeholder="e.g. SN-PUMP-001"
+                label={t('assets.create.serial_label')}
+                placeholder={t('assets.create.serial_placeholder')}
                 {...step1Form.register('serial_number')}
               />
               <Input
                 id="barcode"
-                label="Barcode"
-                placeholder="Optional: the number on the sticker already on the machine"
-                error={step1Form.formState.errors.barcode?.message}
+                label={t('assets.create.barcode_label')}
+                placeholder={t('assets.create.barcode_placeholder')}
+                error={msg(step1Form.formState.errors.barcode?.message)}
                 {...step1Form.register('barcode')}
               />
               <div>
@@ -202,7 +203,7 @@ export function AssetCreatePage() {
                   htmlFor="asset-status"
                   className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
-                  Status *
+                  {t('assets.create.status_label')}
                 </label>
                 <select
                   id="asset-status"
@@ -211,7 +212,7 @@ export function AssetCreatePage() {
                 >
                   {STATUS_OPTIONS.map((s) => (
                     <option key={s} value={s} className="capitalize">
-                      {s.charAt(0).toUpperCase() + s.slice(1)}
+                      {label('status', s)}
                     </option>
                   ))}
                 </select>
@@ -221,7 +222,7 @@ export function AssetCreatePage() {
               </div>
               <div className="flex justify-end">
                 <Button type="submit">
-                  Continue →
+                  {t('assets.create.continue')}
                 </Button>
               </div>
             </form>
@@ -234,12 +235,12 @@ export function AssetCreatePage() {
         <Card>
           <CardContent className="p-6">
             <h2 className="mb-4 text-base font-semibold text-gray-900 dark:text-gray-100">
-              Location & Classification
+              {t('assets.create.location_heading')}
             </h2>
             <form onSubmit={handleStep2} className="space-y-4">
               <LocationSelect
                 id="asset-location"
-                label="Location *"
+                label={t('assets.create.location_label')}
                 locations={locations}
                 value={step2Form.watch('location_id') ?? null}
                 onChange={(id) => step2Form.setValue('location_id', id)}
@@ -247,44 +248,44 @@ export function AssetCreatePage() {
               <div className="grid grid-cols-2 gap-4">
                 <Input
                   id="manufacturer"
-                  label="Manufacturer"
-                  placeholder="e.g. Grundfos"
+                  label={t('assets.create.manufacturer')}
+                  placeholder={t('assets.create.manufacturer_placeholder')}
                   {...step2Form.register('manufacturer')}
                 />
                 <Input
                   id="model"
-                  label="Model"
-                  placeholder="e.g. CM5"
+                  label={t('assets.create.model')}
+                  placeholder={t('assets.create.model_placeholder')}
                   {...step2Form.register('model')}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <Input
                   id="year"
-                  label="Year Manufactured"
+                  label={t('assets.create.year')}
                   type="number"
                   placeholder={String(new Date().getFullYear())}
                   {...step2Form.register('year_manufactured')}
                 />
                 <Input
                   id="purchase-date"
-                  label="Purchase Date"
+                  label={t('assets.create.purchase_date')}
                   type="date"
                   {...step2Form.register('purchase_date')}
                 />
               </div>
               <Input
                 id="warranty-expiry"
-                label="Warranty Expiry"
+                label={t('assets.create.warranty_expiry')}
                 type="date"
                 {...step2Form.register('warranty_expires_on')}
               />
               <div className="flex justify-between">
                 <Button type="button" variant="outline" onClick={() => setStep(1)}>
-                  ← Back
+                  {t('assets.create.back')}
                 </Button>
                 <Button type="submit">
-                  Continue →
+                  {t('assets.create.continue')}
                 </Button>
               </div>
             </form>
@@ -298,53 +299,53 @@ export function AssetCreatePage() {
           <Card>
             <CardContent className="p-6">
               <h2 className="mb-4 text-base font-semibold text-gray-900 dark:text-gray-100">
-                Review & Create
+                {t('assets.create.review_heading')}
               </h2>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <dl className="space-y-2 text-sm">
                   <div className="flex gap-3">
-                    <dt className="w-32 shrink-0 text-gray-500">Name</dt>
+                    <dt className="w-32 shrink-0 text-gray-500">{t('assets.create.review_name')}</dt>
                     <dd className="font-medium text-gray-900 dark:text-gray-100">{formData.name}</dd>
                   </div>
                   {formData.asset_tag && (
                     <div className="flex gap-3">
-                      <dt className="w-32 shrink-0 text-gray-500">Asset Tag</dt>
+                      <dt className="w-32 shrink-0 text-gray-500">{t('assets.create.review_tag')}</dt>
                       <dd className="font-mono font-medium text-gray-900 dark:text-gray-100">{formData.asset_tag}</dd>
                     </div>
                   )}
                   {formData.serial_number && (
                     <div className="flex gap-3">
-                      <dt className="w-32 shrink-0 text-gray-500">Serial No.</dt>
+                      <dt className="w-32 shrink-0 text-gray-500">{t('assets.create.review_serial')}</dt>
                       <dd className="font-medium text-gray-900 dark:text-gray-100">{formData.serial_number}</dd>
                     </div>
                   )}
                   <div className="flex gap-3">
-                    <dt className="w-32 shrink-0 text-gray-500">Status</dt>
+                    <dt className="w-32 shrink-0 text-gray-500">{t('assets.create.review_status')}</dt>
                     <dd>
                       <AssetStatusBadge status={formData.status as AssetStatus} />
                     </dd>
                   </div>
                   {formData.manufacturer && (
                     <div className="flex gap-3">
-                      <dt className="w-32 shrink-0 text-gray-500">Manufacturer</dt>
+                      <dt className="w-32 shrink-0 text-gray-500">{t('assets.create.review_manufacturer')}</dt>
                       <dd className="font-medium text-gray-900 dark:text-gray-100">{formData.manufacturer}</dd>
                     </div>
                   )}
                   {formData.model && (
                     <div className="flex gap-3">
-                      <dt className="w-32 shrink-0 text-gray-500">Model</dt>
+                      <dt className="w-32 shrink-0 text-gray-500">{t('assets.create.review_model')}</dt>
                       <dd className="font-medium text-gray-900 dark:text-gray-100">{formData.model}</dd>
                     </div>
                   )}
                 </dl>
                 <div className="flex flex-col items-center">
-                  <p className="mb-2 text-xs text-gray-500">Preview QR Code</p>
+                  <p className="mb-2 text-xs text-gray-500">{t('assets.create.preview_qr')}</p>
                   <div className="rounded-lg border border-dashed border-gray-300 p-4 dark:border-gray-600">
                     <div className="flex h-32 w-32 items-center justify-center rounded-md bg-gray-100 dark:bg-gray-700">
                       <p className="text-center text-xs text-gray-400">
-                        QR generated
+                        {t('assets.create.qr_line1')}
                         <br />
-                        after creation
+                        {t('assets.create.qr_line2')}
                       </p>
                     </div>
                   </div>
@@ -354,13 +355,13 @@ export function AssetCreatePage() {
           </Card>
           <div className="flex justify-between">
             <Button variant="outline" onClick={() => setStep(2)}>
-              ← Back
+              {t('assets.create.back')}
             </Button>
             <Button
               onClick={handleCreate}
               loading={createMutation.isPending}
             >
-              Create Asset
+              {t('assets.create.create')}
             </Button>
           </div>
         </div>

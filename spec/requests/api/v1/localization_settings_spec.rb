@@ -19,7 +19,7 @@ RSpec.describe "Api::V1::LocalizationSettings", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(json_body["localization"]).to eq(
-        "timezone" => "UTC", "date_format" => "MMM D, YYYY", "time_format" => "12h",
+        "language" => "en", "timezone" => "UTC", "date_format" => "MMM D, YYYY", "time_format" => "12h",
         "currency" => "USD", "number_format" => "1,234.56", "first_day_of_week" => "sunday"
       )
     end
@@ -36,7 +36,7 @@ RSpec.describe "Api::V1::LocalizationSettings", type: :request do
 
       expect(response).to have_http_status(:ok)
       get "/api/v1/localization_settings", headers: auth_headers_for(technician)
-      expect(json_body["localization"]).to eq(changes.stringify_keys)
+      expect(json_body["localization"]).to eq(changes.stringify_keys.merge("language" => "en"))
     end
 
     it "shares the time zone with the company settings" do

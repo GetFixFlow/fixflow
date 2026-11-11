@@ -1,4 +1,5 @@
 import { Package } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useAssets } from '@/hooks/useAssets'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Badge, statusBadge } from '@/components/ui/Badge'
@@ -6,17 +7,19 @@ import { Card, CardContent } from '@/components/ui/Card'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Button } from '@/components/ui/Button'
+import { label } from '@/i18n'
 
 export function AssetsPage() {
+  const { t } = useTranslation()
   const { data, isLoading } = useAssets()
   const assets = data?.assets ?? []
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Assets"
-        description="Manage your equipment and facilities"
-        actions={<Button>Add Asset</Button>}
+        title={t('assets.page.title')}
+        description={t('assets.page.description')}
+        actions={<Button>{t('assets.page.add')}</Button>}
       />
 
       {isLoading ? (
@@ -33,9 +36,9 @@ export function AssetsPage() {
       ) : assets.length === 0 ? (
         <EmptyState
           icon={Package}
-          title="No assets yet"
-          description="Add your first asset to start tracking maintenance."
-          action={{ label: 'Add Asset', onClick: () => {} }}
+          title={t('assets.page.empty_title')}
+          description={t('assets.page.empty_description')}
+          action={{ label: t('assets.page.add'), onClick: () => {} }}
         />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -50,7 +53,7 @@ export function AssetsPage() {
                       <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{asset.category}</p>
                     )}
                   </div>
-                  <Badge variant={statusBadge(asset.status)}>{asset.status}</Badge>
+                  <Badge variant={statusBadge(asset.status)}>{label('status', asset.status)}</Badge>
                 </div>
               </CardContent>
             </Card>

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { FileText, Paperclip, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -13,6 +14,7 @@ import type { AssetDocument } from '@/types'
 const MAX_BYTES = 10 * 1024 * 1024
 
 function DocumentRow({ document, canRemove, onRemove }: { document: AssetDocument; canRemove: boolean; onRemove: () => void }) {
+  const { t } = useTranslation()
   const isImage = (document.content_type ?? '').startsWith('image/')
   return (
     <li className="flex items-center gap-3 py-3">
@@ -29,10 +31,10 @@ function DocumentRow({ document, canRemove, onRemove }: { document: AssetDocumen
           {document.filename}
         </a>
         {document.description && <p className="truncate text-sm text-gray-700 dark:text-gray-300">{document.description}</p>}
-        <p className="text-xs text-gray-500">Added by {document.user.full_name} on {formatDate(document.created_at)}</p>
+        <p className="text-xs text-gray-500">{t('assets.documents.added_by', { name: document.user.full_name, date: formatDate(document.created_at) })}</p>
       </div>
       {canRemove && (
-        <Button size="sm" variant="outline" aria-label={`Remove ${document.filename}`} onClick={onRemove}>
+        <Button size="sm" variant="outline" aria-label={t('assets.documents.remove_aria', { name: document.filename })} onClick={onRemove}>
           <Trash2 className="h-4 w-4" />
         </Button>
       )}
@@ -42,6 +44,7 @@ function DocumentRow({ document, canRemove, onRemove }: { document: AssetDocumen
 
 /** The manuals, photos and certificates kept with an asset. Anyone who works on equipment can add one; a manager can remove any. */
 export function AssetDocuments({ assetId, canManage, userId }: { assetId: number; canManage: boolean; userId?: number }) {
+  const { t } = useTranslation()
   const { data: documents, isLoading, isError } = useAssetDocuments(assetId)
   const upload = useUploadAssetDocument(assetId)
   const remove = useDeleteAssetDocument(assetId)
@@ -51,7 +54,7 @@ export function AssetDocuments({ assetId, canManage, userId }: { assetId: number
   const choose = (file: File | undefined) => {
     if (!file) return
     if (file.size > MAX_BYTES) {
-      toast.error('That file is over 10 MB. Choose a smaller one.')
+      toast.error(t('assets.documents.too_big'))
     } else {
       upload.mutate({ file, description: description.trim() || undefined }, { onSuccess: () => setDescription('') })
     }
@@ -59,22 +62,22 @@ export function AssetDocuments({ assetId, canManage, userId }: { assetId: number
   }
 
   if (isLoading) return <Skeleton className="h-24 w-full" />
-  if (isError) return <p className="text-sm text-red-600">The documents could not be loaded.</p>
+  if (isError) return <p className="text-sm text-red-600">{t('assets.documents.load_failed')}</p>
 
   return (
     <div className="space-y-3">
       <p className="text-sm text-gray-500 dark:text-gray-400">
-        Manuals, photos of the nameplate, certificates. A PDF manual is also read by the AI assistant when it helps with a work order on this asset.
+        {t('assets.documents.intro')}
       </p>
       <div className="flex flex-wrap items-end gap-2">
         <div className="min-w-48 flex-1">
-          <label htmlFor="document-note" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Note (optional)</label>
-          <Input id="document-note" value={description} onChange={(e) => setDescription(e.target.value)} maxLength={200} placeholder="Operator manual, 2019 edition" />
+          <label htmlFor="document-note" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t('assets.documents.note')}</label>
+          <Input id="document-note" value={description} onChange={(e) => setDescription(e.target.value)} maxLength={200} placeholder={t('assets.documents.note_placeholder')} />
         </div>
-        <input ref={input} type="file" className="sr-only" aria-label="Choose a file" tabIndex={-1}
+        <input ref={input} type="file" className="sr-only" aria-label={t('assets.documents.choose_file')} tabIndex={-1}
           accept="image/*,application/pdf,.doc,.docx" onChange={(e) => choose(e.target.files?.[0])} />
         <Button onClick={() => input.current?.click()} loading={upload.isPending}>
-          <Paperclip className="mr-1.5 h-4 w-4" />Add a file
+          <Paperclip className="mr-1.5 h-4 w-4" />{t('assets.documents.add_file')}
         </Button>
       </div>
       {documents?.length ? (
@@ -83,13 +86,13 @@ export function AssetDocuments({ assetId, canManage, userId }: { assetId: number
             <ul className="divide-y divide-gray-100 dark:divide-gray-700">
               {documents.map((document) => (
                 <DocumentRow key={document.id} document={document} canRemove={canManage || document.user.id === userId}
-                  onRemove={() => { if (window.confirm(`Remove “${document.filename}” from this asset?`)) remove.mutate(document.id) }} />
+                  onRemove={() => { if (window.confirm(t('assets.documents.confirm_remove', { name: document.filename }))) remove.mutate(document.id) }} />
               ))}
             </ul>
           </CardContent>
         </Card>
       ) : (
-        <EmptyState icon={FileText} title="No documents yet" description="Add the manual or a photo of the nameplate, so it is at hand when the machine needs work." />
+        <EmptyState icon={FileText} title={t('assets.documents.empty_title')} description={t('assets.documents.empty_description')} />
       )}
     </div>
   )

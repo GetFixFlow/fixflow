@@ -1,16 +1,13 @@
-Hi <%= @manager.full_name %>,
+<%= t("mail.greeting", name: @manager.full_name) %>
 
-The following preventive maintenance schedules are overdue and require immediate attention:
+<%= t(".intro") %>
 
 <% @pm_list.each do |pm| %>
   - <%= pm.name %>
-    Asset:       <%= pm.asset&.name || "N/A" %>
-    Priority:    <%= pm.priority.upcase %>
-    Was Due:     <%= pm.next_due_at&.strftime("%Y-%m-%d") || "Unknown" %>
-    Days Overdue: <%= pm.next_due_at ? (Date.today - pm.next_due_at.to_date).to_i : "N/A" %>
+<%= mail_fields(t("mail.asset") => pm.asset&.name || t("mail.not_applicable"), t("mail.priority") => mail_priority(pm.priority), t("mail.was_due") => pm.next_due_at&.strftime("%Y-%m-%d") || t("mail.unknown"), t("mail.days_overdue") => pm.next_due_at ? (Date.today - pm.next_due_at.to_date).to_i : t("mail.not_applicable")).indent(4) %>
 
 <% end %>
 
-Please log in to FixFlow to review and take action on these overdue PM schedules.
+<%= t(".outro") %>
 
-— FixFlow
+<%= t("mail.signature") %>

@@ -21,6 +21,9 @@ class User < ApplicationRecord
   include EmailPreferences
 
   belongs_to :organization
+
+  normalizes :locale, with: ->(code) { code.to_s.strip.presence }
+  validate :locale_is_offered
   belongs_to :invited_by, class_name: "User", optional: true
   has_many :assigned_work_orders,  class_name: "WorkOrder", foreign_key: :assignee_id,   dependent: :nullify
   has_many :requested_work_orders, class_name: "WorkOrder", foreign_key: :requester_id, dependent: :nullify
@@ -166,5 +169,9 @@ class User < ApplicationRecord
     return unless saved_change_to_deactivated_at?
 
     deactivated_at.present? ? "deactivated" : "reactivated"
+  end
+
+  def locale_is_offered
+    errors.add(:locale, "is not one of the available languages") if locale.present? && !Locales.available?(locale)
   end
 end

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Package, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { useRemovePart, useWorkOrderParts } from '@/hooks/useWorkOrders'
@@ -11,6 +12,7 @@ interface WorkOrderPartsLogProps {
 }
 
 export function WorkOrderPartsLog({ workOrderId, editable = false, onAddPart }: WorkOrderPartsLogProps) {
+  const { t } = useTranslation()
   const { data: parts = [], isLoading } = useWorkOrderParts(workOrderId)
   const removePart = useRemovePart(workOrderId)
 
@@ -33,12 +35,12 @@ export function WorkOrderPartsLog({ workOrderId, editable = false, onAddPart }: 
           <table className="w-full text-sm">
             <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
               <tr>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Part</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">SKU</th>
-                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">Qty</th>
-                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">Unit</th>
-                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">Total</th>
-                {editable && <th className="w-10 px-3 py-2"><span className="sr-only">Remove</span></th>}
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">{t('workOrders.parts.part')}</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">{t('workOrders.parts.sku')}</th>
+                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">{t('workOrders.parts.qty')}</th>
+                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">{t('workOrders.parts.unit')}</th>
+                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">{t('workOrders.parts.total')}</th>
+                {editable && <th className="w-10 px-3 py-2"><span className="sr-only">{t('common.actions.remove')}</span></th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
@@ -63,7 +65,7 @@ export function WorkOrderPartsLog({ workOrderId, editable = false, onAddPart }: 
                     <td className="px-3 py-2 text-right">
                       <button
                         type="button"
-                        aria-label={`Remove ${p.name}`}
+                        aria-label={t('workOrders.parts.remove', { name: p.name })}
                         disabled={removePart.isPending}
                         onClick={() => removePart.mutate(p.id)}
                         className="text-gray-300 hover:text-red-500 disabled:opacity-50"
@@ -78,7 +80,7 @@ export function WorkOrderPartsLog({ workOrderId, editable = false, onAddPart }: 
             <tfoot className="border-t border-gray-200 dark:border-gray-700">
               <tr className="bg-gray-50 dark:bg-gray-800">
                 <td colSpan={4} className="px-3 py-2 text-right text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Total parts cost:
+                  {t('workOrders.parts.total_cost')}
                 </td>
                 <td className="px-3 py-2 text-right text-sm font-bold text-gray-900 dark:text-gray-100">
                   {formatMoney(total)}
@@ -89,13 +91,13 @@ export function WorkOrderPartsLog({ workOrderId, editable = false, onAddPart }: 
           </table>
         </div>
       ) : (
-        <p className="text-sm italic text-gray-400 dark:text-gray-500">No parts logged yet.</p>
+        <p className="text-sm italic text-gray-400 dark:text-gray-500">{t('workOrders.parts.none')}</p>
       )}
 
       {editable && (
         <Button variant="outline" size="sm" onClick={onAddPart}>
           <Package className="h-4 w-4" />
-          Log Part Used
+          {t('workOrders.parts.log')}
         </Button>
       )}
     </div>

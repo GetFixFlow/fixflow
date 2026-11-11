@@ -1,0 +1,89 @@
+{
+  "language_name": "English",
+  "language": {
+    "label": "Language",
+    "company": "Company default",
+    "use_company": "Use the company's language ({{name}})"
+  },
+  "common": {
+    "actions": {
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "edit": "Edit",
+      "close": "Close",
+      "back": "Back",
+      "search": "Search",
+      "create": "Create",
+      "confirm": "Confirm",
+      "retry": "Try again",
+      "add": "Add",
+      "remove": "Remove",
+      "next": "Next",
+      "previous": "Previous",
+      "apply": "Apply",
+      "clear": "Clear",
+      "download": "Download",
+      "upload": "Upload",
+      "print": "Print",
+      "export": "Export",
+      "view": "View",
+      "continue": "Continue",
+      "submit": "Submit",
+      "reset": "Reset",
+      "refresh": "Refresh"
+    },
+    "state": {
+      "loading": "Loading…",
+      "none": "None",
+      "all": "All",
+      "any": "Any",
+      "yes": "Yes",
+      "no": "No",
+      "unknown": "Unknown",
+      "unassigned": "Unassigned",
+      "not_set": "Not set",
+      "no_results": "No results",
+      "error": "Something went wrong",
+      "required": "Required",
+      "optional": "Optional",
+      "na": "N/A"
+    },
+    "status": {
+      "open": "Open",
+      "assigned": "Assigned",
+      "in_progress": "In Progress",
+      "on_hold": "On Hold",
+      "pending_parts": "Pending Parts",
+      "completed": "Completed",
+      "verified": "Verified",
+      "cancelled": "Cancelled",
+      "operational": "Operational",
+      "degraded": "Degraded",
+      "down": "Down",
+      "decommissioned": "Decommissioned",
+      "maintenance": "Maintenance",
+      "offline": "Offline",
+      "retired": "Retired"
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    },
+    "type": {
+      "corrective": "Corrective",
+      "preventive": "Preventive",
+      "inspection": "Inspection",
+      "emergency": "Emergency"
+    },
+    "role": {
+      "admin": "Administrator",
+      "manager": "Manager",
+      "technician": "Technician",
+      "requester": "Requester"
+    }
+  }
+}
