@@ -17,6 +17,7 @@ module Api
         key = current_organization.api_keys.create!(
           name:       params.require(:api_key).require(:name),
           key_digest: digest,
+          key_hint:   ApiKey.hint_for(raw_key),
           scopes:     Array(params.dig(:api_key, :scopes)),
           expires_at: params.dig(:api_key, :expires_at)
         )

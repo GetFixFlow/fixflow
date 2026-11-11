@@ -1,0 +1,911 @@
+# The public API (/api/v1/open) described as OpenAPI 3: served at /api/v1/open/openapi, and checked against the routes
+# and the blueprints by spec/services/public_api_spec_spec.rb. Kept by hand, next to the controllers it describes.
+---
+openapi: 3.0.3
+info:
+  title: FixFlow public API
+  version: '1'
+  description: >-
+    Read and change a company's work orders and assets with an API key (Settings, IoT & API Keys). A key with the read scope may use the GET endpoints;
+    write may use all of them. Lists are paged (`page`, `per_page` up to 100) and can be asked for what changed since a time (`updated_since`),
+    which is how a program notices changes without webhooks.
+security:
+- bearerAuth: []
+- apiKeyAuth: []
+paths:
+  "/me":
+    get:
+      summary: Check the key
+      tags:
+      - Me
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/Me"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '429':
+          "$ref": "#/components/responses/RateLimited"
+      description: Which key this is, its scopes and its company
+  "/work_orders":
+    get:
+      summary: List work orders
+      tags:
+      - WorkOrders
+      parameters:
+      - "$ref": "#/components/parameters/Page"
+      - "$ref": "#/components/parameters/PerPage"
+      - "$ref": "#/components/parameters/UpdatedSince"
+      - "$ref": "#/components/parameters/Sort"
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: priority
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: asset_id
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: assignee_id
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: q
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: created_since
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/WorkOrder"
+                  meta:
+                    "$ref": "#/components/schemas/ListMeta"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '429':
+          "$ref": "#/components/responses/RateLimited"
+      description: Filter by status, priority, asset, assignee, text or time
+    post:
+      summary: Create a work order
+      tags:
+      - WorkOrders
+      parameters: []
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/WorkOrder"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '422':
+          "$ref": "#/components/responses/Invalid"
+        '429':
+          "$ref": "#/components/responses/RateLimited"
+      description: 'Made by the key: the requester is the key''s name unless requester_name is given'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/WorkOrderInput"
+  "/work_orders/{id}":
+    get:
+      summary: Get a work order
+      tags:
+      - WorkOrders
+      parameters:
+      - "$ref": "#/components/parameters/Id"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/WorkOrder"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+        '429':
+          "$ref": "#/components/responses/RateLimited"
+    patch:
+      summary: Change a work order
+      tags:
+      - WorkOrders
+      parameters:
+      - "$ref": "#/components/parameters/Id"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/WorkOrder"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+        '422':
+          "$ref": "#/components/responses/Invalid"
+        '429':
+          "$ref": "#/components/responses/RateLimited"
+      description: Title, description, priority, due date, asset, assignee, estimate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/WorkOrderInput"
+  "/work_orders/{id}/transitions":
+    post:
+      summary: Move a work order along
+      tags:
+      - WorkOrders
+      parameters:
+      - "$ref": "#/components/parameters/Id"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/WorkOrder"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+        '422':
+          "$ref": "#/components/responses/Invalid"
+        '429':
+          "$ref": "#/components/responses/RateLimited"
+      description: assign, start, hold, need_parts, resume, complete or cancel; the same rules as on screen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/Transition"
+  "/assets":
+    get:
+      summary: List assets
+      tags:
+      - Assets
+      parameters:
+      - "$ref": "#/components/parameters/Page"
+      - "$ref": "#/components/parameters/PerPage"
+      - "$ref": "#/components/parameters/UpdatedSince"
+      - "$ref": "#/components/parameters/Sort"
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: location_id
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: q
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/Asset"
+                  meta:
+                    "$ref": "#/components/schemas/ListMeta"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '429':
+          "$ref": "#/components/responses/RateLimited"
+      description: Filter by status, location or text
+    post:
+      summary: Create an asset
+      tags:
+      - Assets
+      parameters: []
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/Asset"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '422':
+          "$ref": "#/components/responses/Invalid"
+        '429':
+          "$ref": "#/components/responses/RateLimited"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/AssetInput"
+  "/assets/{id}":
+    get:
+      summary: Get an asset
+      tags:
+      - Assets
+      parameters:
+      - "$ref": "#/components/parameters/Id"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/Asset"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+        '429':
+          "$ref": "#/components/responses/RateLimited"
+    patch:
+      summary: Change an asset
+      tags:
+      - Assets
+      parameters:
+      - "$ref": "#/components/parameters/Id"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/Asset"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+        '422':
+          "$ref": "#/components/responses/Invalid"
+        '429':
+          "$ref": "#/components/responses/RateLimited"
+      description: A status of down starts a downtime, as on screen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/AssetInput"
+  "/locations":
+    get:
+      summary: List locations
+      tags:
+      - Locations
+      parameters:
+      - "$ref": "#/components/parameters/Page"
+      - "$ref": "#/components/parameters/PerPage"
+      - "$ref": "#/components/parameters/UpdatedSince"
+      - "$ref": "#/components/parameters/Sort"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/Location"
+                  meta:
+                    "$ref": "#/components/schemas/ListMeta"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '429':
+          "$ref": "#/components/responses/RateLimited"
+  "/locations/{id}":
+    get:
+      summary: Get a location
+      tags:
+      - Locations
+      parameters:
+      - "$ref": "#/components/parameters/Id"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/Location"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+        '429':
+          "$ref": "#/components/responses/RateLimited"
+  "/parts":
+    get:
+      summary: List parts
+      tags:
+      - Parts
+      parameters:
+      - "$ref": "#/components/parameters/Page"
+      - "$ref": "#/components/parameters/PerPage"
+      - "$ref": "#/components/parameters/UpdatedSince"
+      - "$ref": "#/components/parameters/Sort"
+      - name: low_stock
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: q
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/Part"
+                  meta:
+                    "$ref": "#/components/schemas/ListMeta"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '429':
+          "$ref": "#/components/responses/RateLimited"
+      description: low_stock=true lists the parts at or under their reorder point
+  "/parts/{id}":
+    get:
+      summary: Get a part
+      tags:
+      - Parts
+      parameters:
+      - "$ref": "#/components/parameters/Id"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/Part"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '403':
+          "$ref": "#/components/responses/Forbidden"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+        '429':
+          "$ref": "#/components/responses/RateLimited"
+  "/openapi":
+    get:
+      summary: This document
+      tags:
+      - OpenAPI
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+      description: Needs no key
+      security: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Authorization: Bearer fxk_...'
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: The same key, in a header of its own
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+    PerPage:
+      name: per_page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 25
+    UpdatedSince:
+      name: updated_since
+      in: query
+      description: Only what changed at or after this time
+      schema:
+        type: string
+        format: date-time
+    Sort:
+      name: sort
+      in: query
+      description: created_at, updated_at or id; a leading - is newest first
+      schema:
+        type: string
+  schemas:
+    WorkOrder:
+      type: object
+      properties:
+        id:
+          type: integer
+        number:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum:
+          - open
+          - assigned
+          - in_progress
+          - on_hold
+          - pending_parts
+          - completed
+          - verified
+          - cancelled
+        priority:
+          type: string
+          enum:
+          - critical
+          - high
+          - medium
+          - low
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+        estimated_hours:
+          type: number
+          nullable: true
+        actual_hours:
+          type: number
+          nullable: true
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        verified_at:
+          type: string
+          format: date-time
+          nullable: true
+        completion_notes:
+          type: string
+          nullable: true
+        cancellation_reason:
+          type: string
+          nullable: true
+        custom_values:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        asset:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            asset_tag:
+              type: string
+          nullable: true
+        assignee:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            email:
+              type: string
+          nullable: true
+        requester:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            email:
+              type: string
+          nullable: true
+        url:
+          type: string
+    WorkOrderInput:
+      type: object
+      required:
+      - work_order
+      properties:
+        work_order:
+          type: object
+          properties:
+            title:
+              type: string
+            description:
+              type: string
+            priority:
+              type: string
+              enum:
+              - critical
+              - high
+              - medium
+              - low
+            due_date:
+              type: string
+              format: date-time
+            estimated_hours:
+              type: number
+            asset_id:
+              type: integer
+            assignee_id:
+              type: integer
+            requester_name:
+              type: string
+            requester_email:
+              type: string
+            custom_values:
+              type: object
+    Transition:
+      type: object
+      properties:
+        event:
+          type: string
+          enum:
+          - assign
+          - start
+          - hold
+          - need_parts
+          - resume
+          - complete
+          - cancel
+        assignee_id:
+          type: integer
+        completion_notes:
+          type: string
+        actual_hours:
+          type: number
+        cancellation_reason:
+          type: string
+    Asset:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        asset_tag:
+          type: string
+        serial_number:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum:
+          - operational
+          - degraded
+          - down
+          - decommissioned
+        barcode:
+          type: string
+          nullable: true
+        warranty_expires_on:
+          type: string
+          format: date
+          nullable: true
+        custom_fields:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        location:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+          nullable: true
+        url:
+          type: string
+    AssetInput:
+      type: object
+      required:
+      - asset
+      properties:
+        asset:
+          type: object
+          properties:
+            name:
+              type: string
+            asset_tag:
+              type: string
+            serial_number:
+              type: string
+            status:
+              type: string
+              enum:
+              - operational
+              - degraded
+              - down
+              - decommissioned
+            barcode:
+              type: string
+            location_id:
+              type: integer
+            warranty_expires_on:
+              type: string
+              format: date
+            custom_fields:
+              type: object
+    Location:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        location_type:
+          type: string
+        parent_id:
+          type: integer
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    Part:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        sku:
+          type: string
+          nullable: true
+        unit:
+          type: string
+          nullable: true
+        quantity_on_hand:
+          type: number
+        reorder_point:
+          type: number
+        unit_cost:
+          type: number
+          nullable: true
+        low_stock:
+          type: boolean
+        custom_values:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        location:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+          nullable: true
+    Me:
+      type: object
+      properties:
+        key:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            scopes:
+              type: array
+              items:
+                type: string
+            expires_at:
+              type: string
+              format: date-time
+              nullable: true
+        organization:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+    ListMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total_count:
+          type: integer
+        total_pages:
+          type: integer
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+        meta:
+          type: object
+          properties:
+            request_id:
+              type: string
+            timestamp:
+              type: string
+              format: date-time
+  responses:
+    Unauthorized:
+      description: The key is missing, wrong, revoked or expired (INVALID_API_KEY)
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/Error"
+    Forbidden:
+      description: The key's scopes do not allow this (INSUFFICIENT_SCOPE)
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/Error"
+    NotFound:
+      description: No such record in this company (RESOURCE_NOT_FOUND)
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/Error"
+    Invalid:
+      description: The record is not valid (VALIDATION_ERROR, INVALID_TRANSITION, APPROVAL_REQUIRED, CHECKLIST_INCOMPLETE)
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/Error"
+    RateLimited:
+      description: Too many requests; Retry-After says how many seconds to wait
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/Error"

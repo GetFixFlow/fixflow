@@ -1,6 +1,7 @@
 class Asset < ApplicationRecord
   include Discard::Model
   include Auditable
+  include SameCompanyReferences
   acts_as_tenant :organization
   audited ignore: %w[public_code]
 
@@ -22,6 +23,7 @@ class Asset < ApplicationRecord
 
   validates :name, presence: true
   validates :status, inclusion: { in: STATUSES }
+  same_company_only :location
   validates :barcode, length: { maximum: 64 }
   validates :barcode, uniqueness: { scope: :organization_id, case_sensitive: false, conditions: -> { kept },
                                     message: "is already on another asset" }, # rubocop:disable Rails/I18nLocaleTexts
@@ -32,6 +34,11 @@ class Asset < ApplicationRecord
 
   before_create :generate_asset_tag
   after_save :track_downtime, if: :saved_change_to_status?
+  # What the company's other systems are told (see Webhooks), after the change is saved for good.
+  after_create_commit { Webhooks.asset(self, "asset.created") }
+  after_update_commit(if: :saved_change_to_status?) {
+    Webhooks.asset(self, "asset.status_changed", changes: { status: saved_change_to_status })
+  }
 
   scope :by_status,             ->(status)      { where(status: status) }
   scope :by_location,           ->(location_id) { where(location_id: location_id) }

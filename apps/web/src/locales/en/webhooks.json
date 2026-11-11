@@ -1,0 +1,108 @@
+{
+  "webhooks": {
+    "page": {
+      "title": "Webhooks",
+      "description": "Send a message to another system (n8n, Zapier, your own program) when something happens here.",
+      "note": "Each message is signed with a secret that only this webhook and the receiver know, so the receiver can check it came from FixFlow. The documentation page for the public API explains how to check the signature.",
+      "load_failed": "The webhooks could not be loaded.",
+      "try_again": "Try again",
+      "add": "Add webhook",
+      "empty_title": "No webhooks yet",
+      "empty_text": "Add one to be told when a work order is completed, an asset goes down, or a sensor alert is raised."
+    },
+    "status": {
+      "active": "Active",
+      "off_by_you": "Switched off",
+      "off_by_fixflow": "Switched off by FixFlow"
+    },
+    "row": {
+      "address": "Address",
+      "events": "Sent when",
+      "last_message": "Last message {{when}}",
+      "no_message_yet": "No message sent yet",
+      "failures": "{{count}} messages in a row could not be delivered",
+      "switch_on": "Switch on again",
+      "edit": "Edit",
+      "edit_aria": "Edit {{name}}",
+      "test": "Send a test message",
+      "test_aria": "Send a test message to {{name}}",
+      "testing": "Sending…",
+      "rotate": "Renew secret",
+      "rotate_aria": "Renew secret of {{name}}",
+      "delete": "Delete",
+      "delete_aria": "Delete {{name}}",
+      "messages": "Recent messages",
+      "messages_aria": "Recent messages of {{name}}"
+    },
+    "test": {
+      "delivered": "Delivered: the receiver answered {{code}}.",
+      "failed": "Not delivered. {{error}}",
+      "answer": "It said: {{excerpt}}",
+      "request_failed": "The test message could not be sent."
+    },
+    "form": {
+      "add_title": "Add webhook",
+      "edit_title": "Edit webhook",
+      "name": "Name",
+      "name_help": "For you to recognise it, for example \"n8n production\".",
+      "url": "Address to send to",
+      "url_help": "Where the messages are posted. Use https, or http for a receiver on your own network. FixFlow refuses addresses that point at the FixFlow server itself.",
+      "events": "Send a message when",
+      "select_all": "Select all",
+      "select_none": "Select none",
+      "active": "Switched on",
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "pick_one": "Choose at least one event.",
+      "save_failed": "The webhook could not be saved."
+    },
+    "secret": {
+      "title_created": "Signing secret",
+      "title_renewed": "New signing secret",
+      "description": "{{name}}: the receiver needs this secret to check the signature of each message.",
+      "warning": "Copy it now. It is shown only once and cannot be shown again; if you lose it, renew it.",
+      "label": "Secret",
+      "copy": "Copy",
+      "copied": "Copied",
+      "done": "I have copied it"
+    },
+    "log": {
+      "title": "Recent messages",
+      "loading": "Loading messages…",
+      "empty": "Nothing has been sent to this webhook yet.",
+      "time": "Time",
+      "event": "Event",
+      "status": "Status",
+      "attempts": "Attempts",
+      "answer": "Answer",
+      "next": "Next attempt",
+      "status_delivered": "Delivered",
+      "status_pending": "Waiting",
+      "status_failed": "Gave up",
+      "send_again": "Send again",
+      "send_again_aria": "Send again: {{event}}",
+      "no_answer": "No answer"
+    },
+    "example": {
+      "title": "What a message looks like",
+      "intro": "Each message is a POST with a JSON body, and these headers: X-FixFlow-Event (what happened), X-FixFlow-Delivery (an id that is the same if the message is sent again, so you can ignore repeats) and X-FixFlow-Signature (t=time,v1=signature: the HMAC-SHA256 of the time, a full stop and the body, made with the secret). Any answer from 200 to 299 counts as received; anything else is tried again later.",
+      "body": "A message for \"Work is finished\":"
+    },
+    "toast": {
+      "saved": "Webhook saved.",
+      "save_failed": "The webhook could not be saved.",
+      "removed": "Webhook deleted.",
+      "remove_failed": "The webhook could not be deleted.",
+      "rotate_failed": "The secret could not be renewed.",
+      "enabled": "Webhook switched on again.",
+      "enable_failed": "The webhook could not be switched on.",
+      "redelivered": "The message is queued to be sent again.",
+      "redeliver_failed": "The message could not be sent again."
+    },
+    "confirm": {
+      "rotate": "Renew the secret? The old one stops working at once, so update the receiver with the new one.",
+      "delete": "Delete this webhook and the record of its messages?"
+    }
+  }
+}

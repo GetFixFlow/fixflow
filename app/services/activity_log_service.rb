@@ -3,6 +3,8 @@ class ActivityLogService
     org_id = org_id_for(resource)
     return unless org_id
 
+    metadata = metadata.merge(api_key: Current.api_key_name) if Current.api_key_name
+
     ActivityLog.create!(
       organization_id: org_id,
       user:            user,

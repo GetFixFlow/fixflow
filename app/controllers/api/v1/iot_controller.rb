@@ -104,7 +104,9 @@ module Api
         raw_key = request.headers["X-API-Key"].to_s
         api_key = ApiKey.authenticate(raw_key)
 
-        if api_key
+        if api_key && !api_key.scope?(:iot)
+          render json: { error: "This key may not send sensor readings" }, status: :forbidden
+        elsif api_key
           @api_organization = api_key.organization
           ActsAsTenant.current_tenant = @api_organization
           api_key.touch_last_used

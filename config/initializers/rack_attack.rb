@@ -3,7 +3,20 @@ class Rack::Attack
 
   # All API requests: 300 req / 5 min per IP
   throttle("api/ip", limit: 300, period: 5.minutes) do |req|
-    req.ip if req.path.start_with?("/api/")
+    req.ip if req.path.start_with?("/api/") && !req.path.start_with?("/api/v1/open/")
+  end
+
+  # The public API (programs with an API key): 600 requests / min for each key, and 1200 / min for each address (which
+  # also bounds guessing keys). A program polling every few seconds, or several started together, stay well inside.
+  throttle("api/open/key", limit: 600, period: 1.minute) do |req|
+    if req.path.start_with?("/api/v1/open/")
+      key = req.get_header("HTTP_X_API_KEY").presence || req.get_header("HTTP_AUTHORIZATION").to_s[/\ABearer\s+(fxk_\S+)/i, 1]
+      ApiKey.hint_for(key) if key.present?
+    end
+  end
+
+  throttle("api/open/ip", limit: 1200, period: 1.minute) do |req|
+    req.ip if req.path.start_with?("/api/v1/open/")
   end
 
   # Sign-in: 10 attempts / 1 min per IP

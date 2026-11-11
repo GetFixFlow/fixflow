@@ -14,6 +14,7 @@
       "roles": "Roles y permisos",
       "iot": "IoT y claves de API",
       "chat": "Chat del equipo",
+      "webhooks": "Webhooks",
       "ai": "Funciones de IA",
       "import_export": "Importar / Exportar",
       "data_retention": "Conservación de datos",

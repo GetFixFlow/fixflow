@@ -1,0 +1,108 @@
+{
+  "webhooks": {
+    "page": {
+      "title": "Webhooks",
+      "description": "Envía un mensaje a otro sistema (n8n, Zapier, un programa propio) cuando ocurre algo aquí.",
+      "note": "Cada mensaje se firma con un secreto que solo conocen este webhook y quien lo recibe, para que el receptor pueda comprobar que viene de FixFlow. La página de documentación de la API pública explica cómo comprobar la firma.",
+      "load_failed": "No se pudieron cargar los webhooks.",
+      "try_again": "Intentar de nuevo",
+      "add": "Añadir webhook",
+      "empty_title": "Todavía no hay webhooks",
+      "empty_text": "Añade uno para enterarte cuando se complete una orden de trabajo, un activo deje de funcionar o salte una alerta de sensor."
+    },
+    "status": {
+      "active": "Activo",
+      "off_by_you": "Desactivado",
+      "off_by_fixflow": "Desactivado por FixFlow"
+    },
+    "row": {
+      "address": "Dirección",
+      "events": "Se envía cuando",
+      "last_message": "Último mensaje {{when}}",
+      "no_message_yet": "Todavía no se ha enviado ningún mensaje",
+      "failures": "{{count}} mensajes seguidos no se pudieron entregar",
+      "switch_on": "Volver a activar",
+      "edit": "Editar",
+      "edit_aria": "Editar {{name}}",
+      "test": "Enviar un mensaje de prueba",
+      "test_aria": "Enviar un mensaje de prueba a {{name}}",
+      "testing": "Enviando…",
+      "rotate": "Renovar secreto",
+      "rotate_aria": "Renovar secreto de {{name}}",
+      "delete": "Eliminar",
+      "delete_aria": "Eliminar {{name}}",
+      "messages": "Mensajes recientes",
+      "messages_aria": "Mensajes recientes de {{name}}"
+    },
+    "test": {
+      "delivered": "Entregado: el receptor respondió {{code}}.",
+      "failed": "No se entregó. {{error}}",
+      "answer": "Respondió: {{excerpt}}",
+      "request_failed": "No se pudo enviar el mensaje de prueba."
+    },
+    "form": {
+      "add_title": "Añadir webhook",
+      "edit_title": "Editar webhook",
+      "name": "Nombre",
+      "name_help": "Para que lo reconozcas, por ejemplo \"n8n producción\".",
+      "url": "Dirección a la que enviar",
+      "url_help": "Donde se envían los mensajes. Usa https, o http para un receptor en tu propia red. FixFlow rechaza las direcciones que apuntan al propio servidor de FixFlow.",
+      "events": "Enviar un mensaje cuando",
+      "select_all": "Marcar todo",
+      "select_none": "Desmarcar todo",
+      "active": "Activado",
+      "save": "Guardar",
+      "saving": "Guardando…",
+      "cancel": "Cancelar",
+      "pick_one": "Elige al menos un evento.",
+      "save_failed": "No se pudo guardar el webhook."
+    },
+    "secret": {
+      "title_created": "Secreto de firma",
+      "title_renewed": "Nuevo secreto de firma",
+      "description": "{{name}}: el receptor necesita este secreto para comprobar la firma de cada mensaje.",
+      "warning": "Cópialo ahora. Se muestra una sola vez y no se podrá volver a mostrar; si lo pierdes, renuévalo.",
+      "label": "Secreto",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "done": "Ya lo he copiado"
+    },
+    "log": {
+      "title": "Mensajes recientes",
+      "loading": "Cargando mensajes…",
+      "empty": "Todavía no se ha enviado nada a este webhook.",
+      "time": "Hora",
+      "event": "Evento",
+      "status": "Estado",
+      "attempts": "Intentos",
+      "answer": "Respuesta",
+      "next": "Próximo intento",
+      "status_delivered": "Entregado",
+      "status_pending": "En espera",
+      "status_failed": "Se dio por vencido",
+      "send_again": "Enviar de nuevo",
+      "send_again_aria": "Enviar de nuevo {{event}}",
+      "no_answer": "Sin respuesta"
+    },
+    "example": {
+      "title": "Cómo es un mensaje",
+      "intro": "Cada mensaje es un POST con un cuerpo JSON y estas cabeceras: X-FixFlow-Event (qué ocurrió), X-FixFlow-Delivery (un identificador que es el mismo si el mensaje se envía de nuevo, para que puedas ignorar repeticiones) y X-FixFlow-Signature (t=hora,v1=firma: el HMAC-SHA256 de la hora, un punto y el cuerpo, hecho con el secreto). Cualquier respuesta de 200 a 299 cuenta como recibida; cualquier otra se reintenta más tarde.",
+      "body": "Un mensaje para \"Se termina el trabajo\":"
+    },
+    "toast": {
+      "saved": "Webhook guardado.",
+      "save_failed": "No se pudo guardar el webhook.",
+      "removed": "Webhook eliminado.",
+      "remove_failed": "No se pudo eliminar el webhook.",
+      "rotate_failed": "No se pudo renovar el secreto.",
+      "enabled": "Webhook activado de nuevo.",
+      "enable_failed": "No se pudo activar el webhook.",
+      "redelivered": "El mensaje está en cola para enviarse de nuevo.",
+      "redeliver_failed": "No se pudo enviar el mensaje de nuevo."
+    },
+    "confirm": {
+      "rotate": "¿Renovar el secreto? El anterior deja de funcionar al instante, así que actualiza el receptor con el nuevo.",
+      "delete": "¿Eliminar este webhook y el registro de sus mensajes?"
+    }
+  }
+}

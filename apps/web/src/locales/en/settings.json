@@ -14,6 +14,7 @@
       "directory": "Company sign-in",
       "iot": "IoT & API Keys",
       "chat": "Team Chat",
+      "webhooks": "Webhooks",
       "ai": "AI Features",
       "import_export": "Import / Export",
       "data_retention": "Data Retention",

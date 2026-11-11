@@ -11,6 +11,9 @@ class IotAlert < ApplicationRecord
   belongs_to :work_order,       optional: true
   belongs_to :acknowledged_by,  class_name: "User", optional: true
 
+  # The company's other systems are told about a new alert (see Webhooks), after it is saved for good.
+  after_create_commit { Webhooks.iot_alert(self) }
+
   # ─── Validations ───────────────────────────────────────────────────────────
 
   validates :metric_name,     presence: true

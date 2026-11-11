@@ -14,7 +14,8 @@ AllCops:
     - "db/schema.rb"
     - "db/migrate/**/*"
     - "bin/**/*"
-    - "script/directory_live/**/*" # a stand-alone check that talks to real servers, run by hand
+    - "script/directory_live/**/*" # stand-alone checks that talk to real servers, run by hand
+    - "script/public_api_live/**/*"
     - "vendor/**/*"
 
 Style/Documentation:

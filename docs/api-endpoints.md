@@ -6,7 +6,7 @@ the like stand for a value, and `:format` is left out. Live updates are a WebSoc
 holds the standard routes of the sign-in library that nothing uses (`sign_up/edit` and the like): the ones to use are
 `sign_in`, `sign_out`, `two_factor`, `password` and `me`; `sign_up` works only until the first company exists.
 
-There are 250 endpoints in 46 groups: [activity_logs](#activity-logs), [ai](#ai), [api_keys](#api-keys), [asset_documents](#asset-documents), [assets](#assets), [auth](#auth), [backups](#backups), [branding](#branding), [chat_settings](#chat-settings), [custom_fields](#custom-fields), [dashboard](#dashboard), [data_usage](#data-usage), [directory_settings](#directory-settings), [downtimes](#downtimes), [email_settings](#email-settings), [getting_started](#getting-started), [health](#health), [imports](#imports), [invitations](#invitations), [iot](#iot), [iot_alerts](#iot-alerts), [iot_rules](#iot-rules), [localization_settings](#localization-settings), [locations](#locations), [meters](#meters), [notification_preferences](#notification-preferences), [organization_settings](#organization-settings), [parts](#parts), [preventive_maintenances](#preventive-maintenances), [profile](#profile), [public_assets](#public-assets), [public_request_form](#public-request-form), [purchase_orders](#purchase-orders), [push_subscriptions](#push-subscriptions), [reports](#reports), [sample_data](#sample-data), [saved_reports](#saved-reports), [schedule](#schedule), [sessions](#sessions), [setup](#setup), [storage](#storage), [system_health](#system-health), [users](#users), [vendors](#vendors), [work_orders](#work-orders), [work_requests](#work-requests).
+There are 274 endpoints in 48 groups: [activity_logs](#activity-logs), [ai](#ai), [api_keys](#api-keys), [asset_documents](#asset-documents), [assets](#assets), [auth](#auth), [backups](#backups), [branding](#branding), [chat_settings](#chat-settings), [custom_fields](#custom-fields), [dashboard](#dashboard), [data_usage](#data-usage), [directory_settings](#directory-settings), [downtimes](#downtimes), [email_settings](#email-settings), [getting_started](#getting-started), [health](#health), [imports](#imports), [invitations](#invitations), [iot](#iot), [iot_alerts](#iot-alerts), [iot_rules](#iot-rules), [localization_settings](#localization-settings), [locations](#locations), [meters](#meters), [notification_preferences](#notification-preferences), [open](#open), [organization_settings](#organization-settings), [parts](#parts), [preventive_maintenances](#preventive-maintenances), [profile](#profile), [public_assets](#public-assets), [public_request_form](#public-request-form), [purchase_orders](#purchase-orders), [push_subscriptions](#push-subscriptions), [reports](#reports), [sample_data](#sample-data), [saved_reports](#saved-reports), [schedule](#schedule), [sessions](#sessions), [setup](#setup), [storage](#storage), [system_health](#system-health), [users](#users), [vendors](#vendors), [webhooks](#webhooks), [work_orders](#work-orders), [work_requests](#work-requests).
 
 ## activity-logs
 
@@ -249,6 +249,26 @@ There are 250 endpoints in 46 groups: [activity_logs](#activity-logs), [ai](#ai)
 | GET | `/api/v1/notification_preferences` | `api/v1/notification_preferences#show` |
 | PATCH, PUT | `/api/v1/notification_preferences` | `api/v1/notification_preferences#update` |
 
+## open
+
+| Method | Path | Handled by |
+| --- | --- | --- |
+| GET | `/api/v1/open/assets` | `api/v1/open/assets#index` |
+| POST | `/api/v1/open/assets` | `api/v1/open/assets#create` |
+| GET | `/api/v1/open/assets/:id` | `api/v1/open/assets#show` |
+| PATCH, PUT | `/api/v1/open/assets/:id` | `api/v1/open/assets#update` |
+| GET | `/api/v1/open/locations` | `api/v1/open/locations#index` |
+| GET | `/api/v1/open/locations/:id` | `api/v1/open/locations#show` |
+| GET | `/api/v1/open/me` | `api/v1/open/me#show` |
+| GET | `/api/v1/open/openapi` | `api/v1/open/openapi#show` |
+| GET | `/api/v1/open/parts` | `api/v1/open/parts#index` |
+| GET | `/api/v1/open/parts/:id` | `api/v1/open/parts#show` |
+| GET | `/api/v1/open/work_orders` | `api/v1/open/work_orders#index` |
+| POST | `/api/v1/open/work_orders` | `api/v1/open/work_orders#create` |
+| GET | `/api/v1/open/work_orders/:id` | `api/v1/open/work_orders#show` |
+| PATCH, PUT | `/api/v1/open/work_orders/:id` | `api/v1/open/work_orders#update` |
+| POST | `/api/v1/open/work_orders/:id/transitions` | `api/v1/open/work_orders#transitions` |
+
 ## organization-settings
 
 | Method | Path | Handled by |
@@ -448,6 +468,20 @@ There are 250 endpoints in 46 groups: [activity_logs](#activity-logs), [ai](#ai)
 | POST | `/api/v1/vendors/:vendor_id/contacts` | `api/v1/vendor_contacts#create` |
 | DELETE | `/api/v1/vendors/:vendor_id/contacts/:id` | `api/v1/vendor_contacts#destroy` |
 | PATCH, PUT | `/api/v1/vendors/:vendor_id/contacts/:id` | `api/v1/vendor_contacts#update` |
+
+## webhooks
+
+| Method | Path | Handled by |
+| --- | --- | --- |
+| GET | `/api/v1/webhooks` | `api/v1/webhooks#index` |
+| POST | `/api/v1/webhooks` | `api/v1/webhooks#create` |
+| DELETE | `/api/v1/webhooks/:id` | `api/v1/webhooks#destroy` |
+| GET | `/api/v1/webhooks/:id` | `api/v1/webhooks#show` |
+| PATCH, PUT | `/api/v1/webhooks/:id` | `api/v1/webhooks#update` |
+| POST | `/api/v1/webhooks/:id/enable` | `api/v1/webhooks#enable` |
+| POST | `/api/v1/webhooks/:id/rotate_secret` | `api/v1/webhooks#rotate_secret` |
+| POST | `/api/v1/webhooks/:id/test` | `api/v1/webhooks#test` |
+| POST | `/api/v1/webhooks/deliveries/:id/redeliver` | `api/v1/webhooks#redeliver` |
 
 ## work-orders
 

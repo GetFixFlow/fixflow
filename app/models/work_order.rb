@@ -7,6 +7,8 @@ class WorkOrder < ApplicationRecord
   include VendorWork
   include WorkOrderApproval
   include HasCustomValues
+  include WorkOrderWebhooks
+  include SameCompanyReferences
 
   # Moving a work order through its states is logged by the transition itself (log_activity); an update is only an
   # edit of what the work is.
@@ -40,7 +42,7 @@ class WorkOrder < ApplicationRecord
   validates :priority, inclusion: { in: PRIORITIES }
   validates :status,   inclusion: { in: STATUSES }
   validates :completion_notes, presence: true, if: -> { completed? || verified? }
-  validate  :assignee_belongs_to_same_org, if: :assignee_id
+  same_company_only :asset, :assignee
   validate  :assignee_is_active, if: :will_save_change_to_assignee_id?
   validate  :verifier_is_not_assignee,     if: :verified_by_id
 
@@ -192,11 +194,6 @@ class WorkOrder < ApplicationRecord
 
   def assignee_is_active
     errors.add(:assignee, "is deactivated and cannot be assigned work") if assignee && !assignee.active?
-  end
-
-  def assignee_belongs_to_same_org
-    return unless assignee
-    errors.add(:assignee, "must belong to the same organization") unless assignee.organization_id == organization_id
   end
 
   def verifier_is_not_assignee

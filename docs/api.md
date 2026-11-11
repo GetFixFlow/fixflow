@@ -27,7 +27,7 @@ curl https://fixflow.example.com/api/v1/work_orders -H 'Authorization: Bearer ey
 - Everything you can reach is **your company's**: a token sees only the data of the company it belongs to, and the person's role decides what it may do (see [People and roles](users.md#roles-and-permissions)).
 - A missing, ended or invalid token answers `401` with a short plain-text message, not JSON.
 
-For a program that only sends sensor readings, use an **API key** instead of a person's account: see [Sensors and IoT](iot.md).
+For a program, use an **API key** instead of a person's account: the [public API](public-api.md) (`/api/v1/open`) is made for that and is the part to depend on, and a key with the `iot` scope sends sensor readings (see [Sensors and IoT](iot.md)). FixFlow can also call your systems when things happen: see [webhooks](public-api.md#webhooks).
 
 ## Answers
 

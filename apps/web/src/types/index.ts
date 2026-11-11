@@ -603,6 +603,9 @@ export interface ApiKeyCreateRequest {
   scopes: string[]
 }
 
+/** What a key may do: `iot` sends sensor readings, `read` reads through the public API, `write` also changes (and includes read). */
+export type ApiKeyScope = 'iot' | 'read' | 'write'
+
 export interface ApiKeyWithSecret extends ApiKey {
   key: string // shown once only
   description?: string
@@ -792,7 +795,10 @@ export interface AssetHealthReport {
 export interface ApiKey {
   id: number
   name: string
-  key_prefix: string
+  /** The old name of `prefix`: the server now answers `prefix`. */
+  key_prefix?: string
+  /** The first characters of the key, to tell keys apart on screen. */
+  prefix?: string
   last_used_at?: string
   expires_at?: string
   active: boolean

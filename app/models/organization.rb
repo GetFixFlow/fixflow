@@ -17,6 +17,8 @@ class Organization < ApplicationRecord
   has_many :iot_rules,         dependent: :destroy
   has_many :sensor_readings,   dependent: :destroy
   has_many :api_keys,          dependent: :destroy
+  has_many :webhook_deliveries, dependent: :delete_all # before the webhooks they belong to
+  has_many :webhooks,          dependent: :destroy
   has_many :activity_logs,     dependent: :delete_all
 
   validates :name, presence: true

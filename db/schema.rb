@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_123100) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_124100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -69,6 +69,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_123100) do
     t.bigint "organization_id", null: false
     t.string "scopes", default: [], array: true
     t.datetime "updated_at", null: false
+    t.string "key_hint"
+    t.index ["key_hint"], name: "index_api_keys_on_key_hint"
     t.index ["organization_id", "active"], name: "index_api_keys_on_organization_id_and_active"
     t.index ["organization_id"], name: "index_api_keys_on_organization_id"
   end
@@ -573,6 +575,45 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_123100) do
     t.index ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id"
   end
 
+  create_table "webhook_deliveries", force: :cascade do |t|
+    t.bigint "webhook_id", null: false
+    t.bigint "organization_id", null: false
+    t.string "event_id", null: false
+    t.string "event", null: false
+    t.jsonb "payload", default: {}, null: false
+    t.string "status", default: "pending", null: false
+    t.integer "attempts", default: 0, null: false
+    t.integer "response_code"
+    t.string "response_excerpt"
+    t.string "error"
+    t.datetime "next_attempt_at"
+    t.datetime "delivered_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_id"], name: "index_webhook_deliveries_on_event_id"
+    t.index ["organization_id"], name: "index_webhook_deliveries_on_organization_id"
+    t.index ["webhook_id", "created_at"], name: "index_webhook_deliveries_on_webhook_id_and_created_at"
+    t.index ["webhook_id"], name: "index_webhook_deliveries_on_webhook_id"
+  end
+
+  create_table "webhooks", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "created_by_id"
+    t.string "name", null: false
+    t.string "url", null: false
+    t.text "secret_ciphertext"
+    t.string "events", default: [], null: false, array: true
+    t.boolean "active", default: true, null: false
+    t.integer "consecutive_failures", default: 0, null: false
+    t.datetime "disabled_at"
+    t.string "disabled_reason"
+    t.datetime "last_delivery_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_webhooks_on_created_by_id"
+    t.index ["organization_id"], name: "index_webhooks_on_organization_id"
+  end
+
   create_table "work_order_parts", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "part_id", null: false
@@ -704,6 +745,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_123100) do
   add_foreign_key "users", "users", column: "invited_by_id"
   add_foreign_key "vendor_contacts", "vendors"
   add_foreign_key "vendors", "organizations"
+  add_foreign_key "webhook_deliveries", "organizations"
+  add_foreign_key "webhook_deliveries", "webhooks"
+  add_foreign_key "webhooks", "organizations"
+  add_foreign_key "webhooks", "users", column: "created_by_id", on_delete: :nullify
   add_foreign_key "work_order_parts", "parts"
   add_foreign_key "work_order_parts", "work_orders"
   add_foreign_key "work_orders", "assets"

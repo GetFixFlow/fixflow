@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Check, Copy, AlertTriangle } from 'lucide-react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { Button } from '@/components/ui/Button'
@@ -18,10 +19,21 @@ const REST_EXAMPLE = (key: string) =>
   -H "Content-Type: application/json" \\
   -d '{"asset_id": "FF-000001", "metric": "temperature", "value": 72.4, "unit": "celsius"}'`
 
+// A first call that shows the key works: it answers with the key's name and scopes (any valid key may ask).
+const PUBLIC_API_EXAMPLE = (key: string, origin: string) =>
+  `curl ${origin}/api/v1/open/me \\
+  -H "Authorization: Bearer ${key}"`
+
 const MQTT_TOPIC = (key: string) => `fixflow/YOUR_ORG_TOKEN/assets/FF-000001/telemetry\n\n# Authenticate using your API key: ${key}`
 
 export function ApiKeyRevealModal({ open, apiKey, onClose }: ApiKeyRevealModalProps) {
+  const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
+  // A key made before scopes existed (none listed), or with the old sensor names, is a sensor key.
+  const scopes = apiKey?.scopes ?? []
+  const sendsReadings = scopes.length === 0 || scopes.some((scope) => scope === 'iot' || scope.startsWith('iot'))
+  const usesPublicApi = scopes.includes('read') || scopes.includes('write')
+  const keyText = apiKey?.key ?? 'YOUR_API_KEY_HERE'
 
   const handleCopy = () => {
     if (!apiKey?.key) return
@@ -90,23 +102,39 @@ export function ApiKeyRevealModal({ open, apiKey, onClose }: ApiKeyRevealModalPr
             <div className="space-y-3">
               <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Quick Setup Guide</p>
 
-              <div>
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-2">REST API</p>
-                <CodeSnippet
-                  code={REST_EXAMPLE(apiKey?.key ?? 'YOUR_API_KEY_HERE')}
-                  language="bash"
-                  filename="POST /api/v1/iot/ingest"
-                />
-              </div>
+              {usesPublicApi && (
+                <div>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-2">{t('apiKeys.reveal.public_api')}</p>
+                  <CodeSnippet
+                    code={PUBLIC_API_EXAMPLE(keyText, window.location.origin)}
+                    language="bash"
+                    filename="GET /api/v1/open/me"
+                  />
+                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">{t('apiKeys.reveal.check_hint')} {t('apiKeys.reveal.send_hint')}</p>
+                </div>
+              )}
 
-              <div>
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-2">MQTT</p>
-                <CodeSnippet
-                  code={MQTT_TOPIC(apiKey?.key ?? 'YOUR_API_KEY_HERE')}
-                  language="text"
-                  filename="MQTT Topic Format"
-                />
-              </div>
+              {sendsReadings && (
+                <>
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-2">REST API</p>
+                    <CodeSnippet
+                      code={REST_EXAMPLE(keyText)}
+                      language="bash"
+                      filename="POST /api/v1/iot/ingest"
+                    />
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-2">MQTT</p>
+                    <CodeSnippet
+                      code={MQTT_TOPIC(keyText)}
+                      language="text"
+                      filename="MQTT Topic Format"
+                    />
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Actions */}
