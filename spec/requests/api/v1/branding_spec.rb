@@ -34,11 +34,11 @@ RSpec.describe "Api::V1::Branding", type: :request do
 
   describe "PATCH /api/v1/branding" do
     it "saves the colour and the sign-in text, and they survive a reload" do
-      patch_branding(primary_color: "#16A34A", login_headline: "Acme Maintenance", login_subtitle: "Sign in with your work email")
+      patch_branding(primary_color: "#15803D", login_headline: "Acme Maintenance", login_subtitle: "Sign in with your work email")
 
       expect(response).to have_http_status(:ok)
       get "/api/v1/branding"
-      expect(json_body["branding"]).to include("primary_color" => "#16a34a", "login_headline" => "Acme Maintenance",
+      expect(json_body["branding"]).to include("primary_color" => "#15803d", "login_headline" => "Acme Maintenance",
 "login_subtitle" => "Sign in with your work email")
     end
 
@@ -88,8 +88,15 @@ RSpec.describe "Api::V1::Branding", type: :request do
       expect(json_body.dig("error", "message")).to include("too light")
     end
 
+    it "holds the colour to the 4.5 to 1 that normal-size text needs, not only the 3 to 1 of large text" do
+      patch_branding(primary_color: "#16a34a") # 3.3 to 1: fine for a headline, too faint for a button's label or a link
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(json_body.dig("error", "message")).to include("too light")
+    end
+
     it "accepts the colours of the presets the page offers" do
-      %w[#2563eb #16a34a #475569 #1e3a5f #7c3aed].each do |hex|
+      %w[#2563eb #15803d #475569 #1e3a5f #7c3aed #be123c].each do |hex|
         patch_branding(primary_color: hex)
         expect(response).to have_http_status(:ok), "#{hex} was refused"
       end
@@ -136,19 +143,19 @@ RSpec.describe "Api::V1::Branding", type: :request do
     end
 
     it "is for administrators only" do
-      patch_branding(as: manager, primary_color: "#16a34a")
+      patch_branding(as: manager, primary_color: "#15803d")
 
       expect(response).to have_http_status(:forbidden)
       expect(org.reload.branding["primary_color"]).to eq("#2563eb")
     end
 
     it "requires signing in" do
-      patch "/api/v1/branding", params: { branding: { primary_color: "#16a34a" } }
+      patch "/api/v1/branding", params: { branding: { primary_color: "#15803d" } }
       expect(response).to have_http_status(:unauthorized)
     end
 
     it "keeps a record of who changed it" do
-      patch_branding(primary_color: "#16a34a")
+      patch_branding(primary_color: "#15803d")
 
       expect(ActivityLog.where(action: "branding.updated").last.user_id).to eq(admin.id)
     end

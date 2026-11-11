@@ -11,7 +11,7 @@ module OrganizationBranding
   }.freeze
   COLOR_FORMAT = /\A#[0-9a-f]{6}\z/
   # White text goes on this colour (buttons, active items), so it must not be too light to read.
-  MIN_CONTRAST_WITH_WHITE = 3.0
+  MIN_CONTRAST_WITH_WHITE = 4.5 # WCAG AA for normal-size text: buttons and links are drawn in this colour
   LOGO_TYPES = %w[image/png image/jpeg image/webp].freeze
   FAVICON_TYPES = %w[image/png image/x-icon image/vnd.microsoft.icon image/webp].freeze
   LOGO_MAX_BYTES = 2.megabytes

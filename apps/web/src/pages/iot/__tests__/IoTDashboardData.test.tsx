@@ -62,7 +62,8 @@ describe('IoT dashboard', () => {
     renderPage()
 
     await screen.findByText('24')
-    const tab = (name: RegExp) => screen.getByRole('button', { name })
+    // The tabs come before the alert rows, which are buttons too (and also say "Critical").
+    const tab = (name: RegExp) => screen.getAllByRole('button', { name })[0]
     expect(tab(/Critical/)).toHaveTextContent('1')
     expect(tab(/High/)).toHaveTextContent('2')
     expect(tab(/All/)).toHaveTextContent('3')

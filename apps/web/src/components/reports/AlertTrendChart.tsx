@@ -8,7 +8,7 @@ export function AlertTrendChart({ data }: { data: AlertTrendPoint[] }) {
   return (
     <div className="space-y-3">
       <div className="flex justify-end">
-        <button onClick={() => setStacked(!stacked)} className="text-xs text-gray-500 underline">
+        <button onClick={() => setStacked(!stacked)} className="text-xs text-gray-500 dark:text-gray-400 underline">
           {stacked ? 'Unstacked' : 'Stacked'}
         </button>
       </div>

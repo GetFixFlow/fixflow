@@ -267,7 +267,7 @@ export function WorkOrdersListPage() {
               <Button variant="outline" size="sm">
                 {t('workOrders.list.change_priority')}
               </Button>
-              <Button variant="outline" size="sm" className="text-red-600">
+              <Button variant="outline" size="sm" className="text-red-600 dark:text-red-400">
                 {t('workOrders.list.cancel_selected')}
               </Button>
             </>
@@ -277,7 +277,7 @@ export function WorkOrdersListPage() {
           </Button>
           <button
             onClick={() => setSelectedIds(new Set())}
-            className="ml-auto text-xs text-gray-500 underline hover:text-gray-700"
+            className="ml-auto text-xs text-gray-500 dark:text-gray-400 underline hover:text-gray-700"
           >
             {t('workOrders.list.clear_selection')}
           </button>
@@ -336,7 +336,7 @@ export function WorkOrdersListPage() {
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {t('workOrders.list.showing', { from: (page - 1) * PER_PAGE + 1, to: Math.min(page * PER_PAGE, filtered.length), total: filtered.length })}
               </p>
               <div className="flex items-center gap-2">
@@ -348,7 +348,7 @@ export function WorkOrdersListPage() {
                 >
                   {t('common.actions.previous')}
                 </Button>
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-gray-600 dark:text-gray-300">
                   {page} / {totalPages}
                 </span>
                 <Button

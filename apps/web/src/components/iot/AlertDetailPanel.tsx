@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { X, ExternalLink } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { formatDistanceToNow, format } from 'date-fns'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
+import { useDialogA11y } from '@/hooks/useDialogA11y'
 import { Button } from '@/components/ui/Button'
 import { AlertSeverityBadge } from './AlertSeverityBadge'
 import type { IotAlertExtended } from '@/types'
@@ -15,10 +17,12 @@ interface AlertDetailPanelProps {
 }
 
 export function AlertDetailPanel({ alert, onClose, onAcknowledge, onResolve }: AlertDetailPanelProps) {
+  const { t } = useTranslation()
   const [ackNote, setAckNote] = useState('')
   const [resolveNote, setResolveNote] = useState('')
 
   const isOpen = !!alert
+  const panel = useDialogA11y<HTMLDivElement>(isOpen, onClose)
   const sev = (
     alert?.severity === 'warning' ? 'high' :
     alert?.severity === 'info' ? 'low' :
@@ -32,25 +36,33 @@ export function AlertDetailPanel({ alert, onClose, onAcknowledge, onResolve }: A
         <div
           className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
           onClick={onClose}
+          aria-hidden="true"
         />
       )}
 
       {/* Slide-over panel */}
+      {/* Closed, it is off to the side and hidden from the keyboard and screen readers (the fade is what lets it slide out). */}
       <div
+        ref={panel}
+        role={isOpen ? 'dialog' : undefined}
+        aria-modal={isOpen ? true : undefined}
+        aria-label={isOpen ? (alert?.rule_name ?? alert?.message ?? undefined) : undefined}
+        aria-hidden={isOpen ? undefined : true}
         className={cn(
-          'fixed right-0 top-0 z-50 h-full w-96 bg-white shadow-2xl dark:bg-gray-900 transition-transform duration-300 flex flex-col',
-          isOpen ? 'translate-x-0' : 'translate-x-full',
+          'fixed right-0 top-0 z-50 h-full w-96 bg-white shadow-2xl dark:bg-gray-900 transition-all duration-300 flex flex-col',
+          isOpen ? 'translate-x-0' : 'invisible translate-x-full',
         )}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-4 py-3">
           <div className="flex items-center gap-2">
             {alert && <AlertSeverityBadge severity={sev} />}
-            <span className="text-xs text-gray-400">#{alert?.id}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">#{alert?.id}</span>
           </div>
           <button
             onClick={onClose}
-            className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
+            aria-label={t('common.actions.close')}
+            className="rounded-full p-1 text-gray-500 dark:text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
           >
             <X className="h-4 w-4" />
           </button>
@@ -65,18 +77,18 @@ export function AlertDetailPanel({ alert, onClose, onAcknowledge, onResolve }: A
                 {alert.rule_name ?? alert.message}
               </h2>
               {alert.message && alert.rule_name && alert.message !== alert.rule_name && (
-                <p className="text-sm text-gray-500 mt-0.5">{alert.message}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{alert.message}</p>
               )}
             </div>
 
             {/* Asset info */}
             {alert.asset ? (
               <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-3">
-                <p className="text-xs font-medium text-gray-500 uppercase mb-1">Asset</p>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-1">Asset</p>
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{alert.asset.name}</p>
-                    <p className="text-xs text-gray-500">{alert.asset.asset_tag}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{alert.asset.asset_tag}</p>
                   </div>
                   <Link to={`/assets/${alert.asset_id}`} onClick={onClose}>
                     <Button size="sm" variant="ghost"><ExternalLink className="h-3.5 w-3.5" /></Button>
@@ -85,8 +97,8 @@ export function AlertDetailPanel({ alert, onClose, onAcknowledge, onResolve }: A
               </div>
             ) : (
               <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-3">
-                <p className="text-xs font-medium text-gray-500 uppercase mb-1">Asset</p>
-                <Link to={`/assets/${alert.asset_id}`} onClick={onClose} className="text-sm text-brand-600 hover:underline">
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-1">Asset</p>
+                <Link to={`/assets/${alert.asset_id}`} onClick={onClose} className="text-sm text-brand-600 dark:text-brand-400 hover:underline">
                   Asset #{alert.asset_id}
                 </Link>
               </div>
@@ -94,21 +106,21 @@ export function AlertDetailPanel({ alert, onClose, onAcknowledge, onResolve }: A
 
             {/* Trigger details */}
             <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-3 space-y-2">
-              <p className="text-xs font-medium text-gray-500 uppercase">Trigger Details</p>
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Trigger Details</p>
               <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                <span className="text-gray-500">Metric</span>
+                <span className="text-gray-500 dark:text-gray-400">Metric</span>
                 <span className="font-mono font-medium text-gray-900 dark:text-gray-100">{alert.metric_name}</span>
-                <span className="text-gray-500">Reading</span>
-                <span className="font-mono font-medium text-red-600">{alert.sensor_value} {alert.metric_unit}</span>
-                <span className="text-gray-500">Threshold</span>
+                <span className="text-gray-500 dark:text-gray-400">Reading</span>
+                <span className="font-mono font-medium text-red-600 dark:text-red-400">{alert.sensor_value} {alert.metric_unit}</span>
+                <span className="text-gray-500 dark:text-gray-400">Threshold</span>
                 <span className="font-mono text-gray-900 dark:text-gray-100">{alert.threshold_value} {alert.metric_unit}</span>
                 {alert.duration_minutes != null && (
                   <>
-                    <span className="text-gray-500">Duration</span>
+                    <span className="text-gray-500 dark:text-gray-400">Duration</span>
                     <span className="text-gray-900 dark:text-gray-100">{alert.duration_minutes} min</span>
                   </>
                 )}
-                <span className="text-gray-500">Triggered</span>
+                <span className="text-gray-500 dark:text-gray-400">Triggered</span>
                 <span className="text-gray-900 dark:text-gray-100 text-xs">
                   {formatDistanceToNow(new Date(alert.created_at), { addSuffix: true })}
                 </span>
@@ -117,10 +129,10 @@ export function AlertDetailPanel({ alert, onClose, onAcknowledge, onResolve }: A
 
             {/* Work order */}
             <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-3">
-              <p className="text-xs font-medium text-gray-500 uppercase mb-2">Work Order</p>
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-2">Work Order</p>
               {alert.work_order_id ? (
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-green-600">
+                  <span className="text-sm font-medium text-green-700 dark:text-green-400">
                     {alert.work_order_number ?? `WO #${alert.work_order_id}`}
                   </span>
                   <Link to={`/work-orders/${alert.work_order_id}`} onClick={onClose}>
@@ -137,7 +149,7 @@ export function AlertDetailPanel({ alert, onClose, onAcknowledge, onResolve }: A
             {/* Resolution actions */}
             {(alert.status === 'open' || alert.status === 'acknowledged') && (
               <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-3 space-y-3">
-                <p className="text-xs font-medium text-gray-500 uppercase">Actions</p>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Actions</p>
 
                 {alert.status === 'open' && onAcknowledge && (
                   <div className="space-y-2">
@@ -187,7 +199,7 @@ export function AlertDetailPanel({ alert, onClose, onAcknowledge, onResolve }: A
                   Resolved {format(new Date(alert.resolved_at), 'MMM d, h:mm a')}
                 </p>
                 {alert.resolved_note && (
-                  <p className="text-xs text-green-600 dark:text-green-400 mt-1">{alert.resolved_note}</p>
+                  <p className="text-xs text-green-700 dark:text-green-400 mt-1">{alert.resolved_note}</p>
                 )}
               </div>
             )}

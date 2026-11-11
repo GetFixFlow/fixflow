@@ -15,31 +15,31 @@ export function PMScheduleInfo({ pm }: { pm: PreventiveMaintenance }) {
     <Card>
       <CardContent className="p-4 space-y-3">
         <div className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
-          <RefreshCw className="h-4 w-4 text-blue-500" />
+          <RefreshCw className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           {frequencyLabel}
         </div>
         <dl className="space-y-2 text-sm">
           <div className="flex justify-between">
-            <dt className="text-gray-500">Started</dt>
+            <dt className="text-gray-500 dark:text-gray-400">Started</dt>
             <dd className="text-gray-900 dark:text-gray-100">{pm.start_date ? formatDate(new Date(pm.start_date)) : '—'}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-gray-500">Next Due</dt>
+            <dt className="text-gray-500 dark:text-gray-400">Next Due</dt>
             <dd className="text-right">{meterDueText(pm) ?? <PMDueDateDisplay dueDate={dueAt} showIcon={false} />}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-gray-500">Last Run</dt>
+            <dt className="text-gray-500 dark:text-gray-400">Last Run</dt>
             <dd className="text-gray-900 dark:text-gray-100">
               {pm.last_run_at ? formatDistanceToNow(new Date(pm.last_run_at), { addSuffix: true }) : 'Never'}
             </dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-gray-500">End Date</dt>
+            <dt className="text-gray-500 dark:text-gray-400">End Date</dt>
             <dd className="text-gray-900 dark:text-gray-100">{pm.end_date ? formatDate(new Date(pm.end_date)) : 'No end date'}</dd>
           </div>
           {pm.estimated_hours && (
             <div className="flex justify-between">
-              <dt className="text-gray-500">Est. Hours</dt>
+              <dt className="text-gray-500 dark:text-gray-400">Est. Hours</dt>
               <dd className="text-gray-900 dark:text-gray-100">{pm.estimated_hours} hrs / occurrence</dd>
             </div>
           )}

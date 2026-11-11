@@ -58,7 +58,7 @@ export function ApiKeyRevealModal({ open, apiKey, onClose }: ApiKeyRevealModalPr
 
             {/* Warning */}
             <div className="flex items-start gap-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 p-3">
-              <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+              <AlertTriangle className="h-4 w-4 text-amber-700 dark:text-amber-400 shrink-0 mt-0.5" />
               <p className="text-sm text-amber-700 dark:text-amber-300 font-medium">
                 IMPORTANT: Copy this key now. It will not be shown again.
               </p>
@@ -67,17 +67,17 @@ export function ApiKeyRevealModal({ open, apiKey, onClose }: ApiKeyRevealModalPr
             {/* Key value */}
             {apiKey && (
               <div className="space-y-2">
-                <p className="text-xs font-medium text-gray-500 uppercase">Your API Key</p>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Your API Key</p>
                 <div className="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-3">
                   <code className="flex-1 font-mono text-sm text-gray-900 dark:text-gray-100 break-all select-all">
                     {apiKey.key}
                   </code>
                   <button
                     onClick={handleCopy}
-                    className="shrink-0 rounded p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    className="shrink-0 rounded p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                     aria-label="Copy to clipboard"
                   >
-                    {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                    {copied ? <Check className="h-4 w-4 text-green-700 dark:text-green-400" /> : <Copy className="h-4 w-4" />}
                   </button>
                 </div>
                 <Button variant="outline" className="w-full" onClick={handleCopy} aria-label="Copy">
@@ -91,7 +91,7 @@ export function ApiKeyRevealModal({ open, apiKey, onClose }: ApiKeyRevealModalPr
               <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Quick Setup Guide</p>
 
               <div>
-                <p className="text-xs font-medium text-gray-500 uppercase mb-2">REST API</p>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-2">REST API</p>
                 <CodeSnippet
                   code={REST_EXAMPLE(apiKey?.key ?? 'YOUR_API_KEY_HERE')}
                   language="bash"
@@ -100,7 +100,7 @@ export function ApiKeyRevealModal({ open, apiKey, onClose }: ApiKeyRevealModalPr
               </div>
 
               <div>
-                <p className="text-xs font-medium text-gray-500 uppercase mb-2">MQTT</p>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-2">MQTT</p>
                 <CodeSnippet
                   code={MQTT_TOPIC(apiKey?.key ?? 'YOUR_API_KEY_HERE')}
                   language="text"

@@ -25,23 +25,23 @@ export function TechnicianDashboard({ data, name }: { data: TechnicianDashboardS
         <StatCard title={t('dashboard.tech.completed_today')} value={mine.completed_today} icon={CheckCircle} />
       </div>
 
-      <Link to="/work-orders" className="inline-block text-sm text-brand-600 hover:underline">{t('dashboard.tech.see')}</Link>
+      <Link to="/work-orders" className="inline-block text-sm text-brand-600 dark:text-brand-400 hover:underline">{t('dashboard.tech.see')}</Link>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader><CardTitle>{t('dashboard.tech.upcoming')}</CardTitle></CardHeader>
           <CardContent>
             {data.upcoming_pms.length === 0 ? (
-              <p className="text-sm text-gray-500">{t('dashboard.tech.nothing')}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t('dashboard.tech.nothing')}</p>
             ) : (
               <ul className="space-y-3">
                 {data.upcoming_pms.map((pm) => (
                   <li key={pm.id} className="flex items-center justify-between text-sm">
                     <div>
                       <Link to={`/preventive-maintenance/${pm.id}`} className="font-medium text-gray-900 hover:underline dark:text-gray-100">{pm.name}</Link>
-                      <span className="ml-2 text-gray-500">{pm.asset}</span>
+                      <span className="ml-2 text-gray-500 dark:text-gray-400">{pm.asset}</span>
                     </div>
-                    <span className="text-xs text-gray-400">{pm.due_date ? formatDate(pm.due_date) : t('dashboard.tech.no_date')}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{pm.due_date ? formatDate(pm.due_date) : t('dashboard.tech.no_date')}</span>
                   </li>
                 ))}
               </ul>
@@ -53,16 +53,16 @@ export function TechnicianDashboard({ data, name }: { data: TechnicianDashboardS
           <CardHeader><CardTitle>{t('dashboard.tech.recent')}</CardTitle></CardHeader>
           <CardContent>
             {data.recent_activity.length === 0 ? (
-              <p className="text-sm text-gray-500">{t('dashboard.no_activity')}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t('dashboard.no_activity')}</p>
             ) : (
               <ul className="space-y-3">
                 {data.recent_activity.map((activity, index) => (
                   <li key={index} className="flex items-center justify-between text-sm">
                     <div>
                       <span className="font-medium text-gray-900 dark:text-gray-100">{activity.description}</span>
-                      <span className="ml-2 text-gray-500">{activity.type.replace(/[_.]/g, ' ')}</span>
+                      <span className="ml-2 text-gray-500 dark:text-gray-400">{activity.type.replace(/[_.]/g, ' ')}</span>
                     </div>
-                    <span className="text-xs text-gray-400">{formatDateTime(activity.timestamp)}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{formatDateTime(activity.timestamp)}</span>
                   </li>
                 ))}
               </ul>
@@ -85,7 +85,7 @@ export function RequesterDashboard({ data, name }: { data: RequesterDashboardSta
         <StatCard title={t('dashboard.req.open')} value={mine.open} subtitle={t('dashboard.req.not_finished')} icon={Wrench} />
         <StatCard title={t('common.status.completed')} value={mine.completed} icon={CheckCircle} />
       </div>
-      <Link to="/work-orders" className="inline-block text-sm text-brand-600 hover:underline">{t('dashboard.req.see')}</Link>
+      <Link to="/work-orders" className="inline-block text-sm text-brand-600 dark:text-brand-400 hover:underline">{t('dashboard.req.see')}</Link>
     </div>
   )
 }

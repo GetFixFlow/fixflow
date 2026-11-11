@@ -25,7 +25,7 @@ export function ApprovalNotice({ wo, userId, isManager }: ApprovalNoticeProps) {
     if (!wo.approved_by || !wo.approved_at) return null
     return (
       <p className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-        <ShieldCheck className="h-4 w-4 text-green-600" aria-hidden />
+        <ShieldCheck className="h-4 w-4 text-green-700 dark:text-green-400" aria-hidden />
         {wo.approved_cost != null
           ? t('workOrders.approval.approved_cost', { name: wo.approved_by.full_name, date: formatDate(wo.approved_at), cost: formatMoney(wo.approved_cost) })
           : t('workOrders.approval.approved', { name: wo.approved_by.full_name, date: formatDate(wo.approved_at) })}

@@ -40,7 +40,7 @@
       "col_actions": "Actions",
       "adjust_aria": "Adjust stock of {{name}}",
       "adjust": "Adjust",
-      "order_aria": "Ask for more {{name}}",
+      "order_aria": "Order more {{name}}",
       "order": "Order",
       "edit_aria": "Edit {{name}}",
       "delete_aria": "Delete {{name}}",

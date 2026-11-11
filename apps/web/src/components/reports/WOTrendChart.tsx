@@ -31,17 +31,17 @@ export function WOTrendChart({ data, className }: WOTrendChartProps) {
           {(['day', 'week', 'month'] as const).map((g) => (
             <button key={g} onClick={() => setGroupBy(g)}
               className={cn('px-2 py-1 text-xs rounded capitalize transition-colors',
-                groupBy === g ? 'bg-brand-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 hover:bg-gray-200')}>
+                groupBy === g ? 'bg-brand-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200')}>
               {g}
             </button>
           ))}
         </div>
         <div className="flex gap-3 text-xs">
           {([['created', 'Created', '#3b82f6'], ['completed', 'Completed', '#22c55e'], ['resolution', 'Resolution', '#f59e0b']] as const).map(([key, label, color]) => (
-            <label key={key} className="flex items-center gap-1 cursor-pointer">
+            <label key={key} className="flex items-center gap-1 cursor-pointer text-gray-700 dark:text-gray-300">
               <input type="checkbox" checked={show[key as keyof typeof show]} onChange={() => toggleOption(key as keyof typeof show)} className="sr-only" />
               <span className={cn('h-3 w-3 rounded-sm', !show[key as keyof typeof show] && 'opacity-30')} style={{ background: color }} />
-              <span className={cn(!show[key as keyof typeof show] && 'line-through text-gray-400')}>{label}</span>
+              <span className={cn(!show[key as keyof typeof show] && 'line-through text-gray-500 dark:text-gray-400')}>{label}</span>
             </label>
           ))}
         </div>

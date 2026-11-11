@@ -39,24 +39,24 @@ export function RejectModal({ workOrderId, currentAssigneeId, open, onClose }: R
     <Modal open={open} onClose={onClose} title={t('workOrders.reject.title')}>
       <div className="space-y-4">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            {t('workOrders.reject.reason')} <span className="text-xs text-gray-400">{t('workOrders.complete.notes_min')}</span>
+          <label htmlFor="reject-1" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t('workOrders.reject.reason')} <span className="text-xs text-gray-500 dark:text-gray-400">{t('workOrders.complete.notes_min')}</span>
           </label>
-          <textarea
+          <textarea id="reject-1"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             rows={4}
             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
             placeholder={t('workOrders.reject.placeholder')}
           />
-          <p className="mt-0.5 text-xs text-gray-400">{t('workOrders.complete.chars', { count: reason.length })}</p>
+          <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{t('workOrders.complete.chars', { count: reason.length })}</p>
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label htmlFor="reject-2" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
             {t('workOrders.reject.reassign')}
           </label>
-          <select
+          <select id="reject-2"
             value={reassignTo ?? ''}
             onChange={(e) => setReassignTo(e.target.value ? Number(e.target.value) : null)}
             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"

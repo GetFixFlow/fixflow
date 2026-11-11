@@ -36,7 +36,7 @@ export function RequiredPartsEditor({ value, onChange }: RequiredPartsEditorProp
       <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Required Parts</p>
 
       {value.length === 0 && !showSearch && (
-        <div className="rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 py-4 text-center text-sm text-gray-400">
+        <div className="rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
           No required parts added
         </div>
       )}
@@ -51,19 +51,20 @@ export function RequiredPartsEditor({ value, onChange }: RequiredPartsEditorProp
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                     {item.part?.name ?? `Part #${item.part_id}`}
                   </p>
-                  {item.part?.sku && <p className="text-xs text-gray-400">{item.part.sku}</p>}
+                  {item.part?.sku && <p className="text-xs text-gray-500 dark:text-gray-400">{item.part.sku}</p>}
                   {overstocked && (
-                    <p className="text-xs text-orange-500 flex items-center gap-1">
+                    <p className="text-xs text-orange-700 dark:text-orange-400 flex items-center gap-1">
                       <AlertTriangle className="h-3 w-3" />
                       Only {item.part?.quantity_on_hand} in stock (need {item.quantity})
                     </p>
                   )}
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs text-gray-400">Qty:</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Qty:</span>
                   <input
                     type="number"
                     min={1}
+                    aria-label={`Quantity of ${item.part?.name ?? 'part'}`}
                     value={item.quantity}
                     onChange={(e) => updateQty(idx, parseInt(e.target.value) || 1)}
                     className={cn('w-14 rounded border px-1.5 py-0.5 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500',
@@ -86,6 +87,7 @@ export function RequiredPartsEditor({ value, onChange }: RequiredPartsEditorProp
             autoFocus
             type="text"
             placeholder="Search parts..."
+            aria-label="Search parts"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded border border-gray-200 dark:border-gray-700 bg-transparent px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500"
@@ -98,11 +100,11 @@ export function RequiredPartsEditor({ value, onChange }: RequiredPartsEditorProp
                 onClick={() => addPart(p)}
                 className="w-full flex items-center justify-between px-2 py-1.5 text-sm rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-left"
               >
-                <span className="text-gray-900 dark:text-gray-100">{p.name} <span className="text-xs text-gray-400 ml-1">{p.sku}</span></span>
-                <span className="text-xs text-gray-400">{p.quantity_on_hand} in stock</span>
+                <span className="text-gray-900 dark:text-gray-100">{p.name} <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">{p.sku}</span></span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">{p.quantity_on_hand} in stock</span>
               </button>
             ))}
-            {!isLoading && filtered.length === 0 && <p className="text-xs text-gray-400 px-2 py-1">{search ? 'No matching parts' : 'No parts have been added yet'}</p>}
+            {!isLoading && filtered.length === 0 && <p className="text-xs text-gray-500 dark:text-gray-400 px-2 py-1">{search ? 'No matching parts' : 'No parts have been added yet'}</p>}
           </div>
           <Button type="button" variant="ghost" size="sm" onClick={() => { setShowSearch(false); setSearch('') }} className="w-full">Cancel</Button>
         </div>

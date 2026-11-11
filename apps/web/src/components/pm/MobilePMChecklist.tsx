@@ -27,7 +27,7 @@ export function MobilePMChecklist({ steps, completedStepNums, onStepComplete, on
       <div>
         <div className="flex justify-between text-sm mb-1">
           <span className="font-medium text-gray-700 dark:text-gray-300">{totalCompleted} of {steps.length} steps complete</span>
-          <span className="text-gray-500">{progress}%</span>
+          <span className="text-gray-500 dark:text-gray-400">{progress}%</span>
         </div>
         <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
           <div className="h-full rounded-full bg-green-500 transition-all" style={{ width: `${progress}%` }} />
@@ -48,14 +48,10 @@ export function MobilePMChecklist({ steps, completedStepNums, onStepComplete, on
                 isCompleted ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' : 'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900',
               )}
             >
-              <div
-                className="flex items-start gap-3 p-4 cursor-pointer min-h-[56px]"
-                onClick={() => setExpandedStep(isExpanded ? null : step.step)}
-              >
+              <div className="flex items-start gap-3 p-4 min-h-[56px]">
                 <button
                   className="shrink-0 mt-0.5"
-                  onClick={(e) => {
-                    e.stopPropagation()
+                  onClick={() => {
                     if (!step.photo_required || isCompleted) {
                       onStepComplete(step.step, !isCompleted)
                     }
@@ -63,22 +59,28 @@ export function MobilePMChecklist({ steps, completedStepNums, onStepComplete, on
                   aria-label={isCompleted ? 'Mark incomplete' : 'Mark complete'}
                 >
                   {isCompleted
-                    ? <CheckCircle className="h-6 w-6 text-green-500" />
+                    ? <CheckCircle className="h-6 w-6 text-green-700 dark:text-green-400" />
                     : <Circle className={cn('h-6 w-6', step.required ? 'text-red-400' : 'text-gray-300')} />}
                 </button>
-                <div className="flex-1 min-w-0">
-                  <p className={cn('text-sm font-medium leading-snug', isCompleted && 'line-through text-gray-400 dark:text-gray-500', !isCompleted && 'text-gray-900 dark:text-gray-100')}>
+                {/* The step's words open its notes: a button of their own, beside the one that ticks it. */}
+                <button
+                  type="button"
+                  aria-expanded={isExpanded}
+                  onClick={() => setExpandedStep(isExpanded ? null : step.step)}
+                  className="flex-1 min-w-0 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+                >
+                  <span className={cn('block text-sm font-medium leading-snug', isCompleted && 'line-through text-gray-500 dark:text-gray-400', !isCompleted && 'text-gray-900 dark:text-gray-100')}>
                     {step.step}. {step.instruction}
-                  </p>
+                  </span>
                   {step.required && !isCompleted && (
-                    <span className="inline-flex items-center gap-0.5 text-xs text-red-500 mt-0.5">
+                    <span className="inline-flex items-center gap-0.5 text-xs text-red-600 dark:text-red-400 mt-0.5">
                       <AlertCircle className="h-3 w-3" />Required
                     </span>
                   )}
                   {step.estimated_minutes && (
-                    <span className="text-xs text-gray-400 ml-1">~{step.estimated_minutes} min</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">~{step.estimated_minutes} min</span>
                   )}
-                </div>
+                </button>
                 {step.photo_required && (
                   <Camera className={cn('h-5 w-5 shrink-0', isCompleted ? 'text-green-400' : 'text-orange-400')} />
                 )}

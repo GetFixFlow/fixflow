@@ -35,10 +35,10 @@ export function AssignModal({ workOrderId, open, onClose }: AssignModalProps) {
     <Modal open={open} onClose={onClose} title={t('workOrders.assign.title')}>
       <div className="space-y-4">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label htmlFor="assign-1" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
             {t('workOrders.assign.assignee')}
           </label>
-          <select
+          <select id="assign-1"
             value={assigneeId ?? ''}
             onChange={(e) => setAssigneeId(Number(e.target.value))}
             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
@@ -53,10 +53,10 @@ export function AssignModal({ workOrderId, open, onClose }: AssignModalProps) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label htmlFor="assign-2" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
             {t('workOrders.assign.note')}
           </label>
-          <textarea
+          <textarea id="assign-2"
             value={note}
             onChange={(e) => setNote(e.target.value)}
             rows={3}

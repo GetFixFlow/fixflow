@@ -44,12 +44,12 @@ function AddMeterModal({ assetId, open, onClose }: { assetId: number; open: bool
         <div>
           <label htmlFor="meter-reading" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t('assets.meters.reading_today')}</label>
           <Input id="meter-reading" type="number" min={0} step="any" value={reading} onChange={(e) => setReading(e.target.value)} placeholder="0" />
-          <p className="mt-1 text-xs text-gray-500">{t('assets.meters.reading_today_help')}</p>
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{t('assets.meters.reading_today_help')}</p>
         </div>
         <div>
           <label htmlFor="meter-sensor" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t('assets.meters.sensor')}</label>
           <Input id="meter-sensor" value={sensor} onChange={(e) => setSensor(e.target.value)} placeholder="running_hours" />
-          <p className="mt-1 text-xs text-gray-500">{t('assets.meters.sensor_help')}</p>
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{t('assets.meters.sensor_help')}</p>
         </div>
         <div className="flex justify-end gap-2 pt-2">
           <Button variant="outline" onClick={onClose}>{t('common.actions.cancel')}</Button>
@@ -104,11 +104,11 @@ function ReadingHistory({ meter }: { meter: Meter }) {
   const { t } = useTranslation()
   const { data, isLoading } = useMeterReadings(meter.id, true)
   if (isLoading) return <Skeleton className="mt-3 h-16 w-full" />
-  if (!data?.length) return <p className="mt-3 text-sm text-gray-500">{t('assets.meters.no_readings')}</p>
+  if (!data?.length) return <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">{t('assets.meters.no_readings')}</p>
   return (
     <table className="mt-3 w-full text-sm">
       <thead>
-        <tr className="text-left text-xs text-gray-500"><th className="py-1">{t('assets.meters.col_when')}</th><th>{t('assets.meters.col_reading')}</th><th>{t('assets.meters.col_by')}</th><th>{t('assets.meters.col_note')}</th></tr>
+        <tr className="text-left text-xs text-gray-500 dark:text-gray-400"><th className="py-1">{t('assets.meters.col_when')}</th><th>{t('assets.meters.col_reading')}</th><th>{t('assets.meters.col_by')}</th><th>{t('assets.meters.col_note')}</th></tr>
       </thead>
       <tbody>
         {data.map((line) => (
@@ -116,7 +116,7 @@ function ReadingHistory({ meter }: { meter: Meter }) {
             <td className="py-1.5">{formatDate(new Date(line.recorded_at))}</td>
             <td>{number(line.value)} {meter.unit}{line.reset ? t('assets.meters.reset_suffix') : ''}</td>
             <td>{line.source === 'sensor' ? t('assets.meters.sensor_source') : line.recorded_by ?? '—'}</td>
-            <td className="text-gray-500">{line.note ?? ''}</td>
+            <td className="text-gray-500 dark:text-gray-400">{line.note ?? ''}</td>
           </tr>
         ))}
       </tbody>
@@ -137,9 +137,9 @@ function MeterCard({ meter, canManage }: { meter: Meter; canManage: boolean }) {
           <div>
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{meter.name}</p>
             <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              {number(meter.reading)} <span className="text-base font-medium text-gray-500">{meter.unit}</span>
+              {number(meter.reading)} <span className="text-base font-medium text-gray-500 dark:text-gray-400">{meter.unit}</span>
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               {meter.last_reading_at ? t('assets.meters.read_ago', { when: timeAgo(meter.last_reading_at) }) : t('assets.meters.not_read')}
               {meter.sensor_metric && t('assets.meters.fed_by', { metric: meter.sensor_metric })}
             </p>
@@ -169,7 +169,7 @@ export function AssetMeters({ assetId, canManage }: { assetId: number; canManage
   const [adding, setAdding] = useState(false)
 
   if (isLoading) return <Skeleton className="h-24 w-full" />
-  if (isError) return <p className="text-sm text-red-600">{t('assets.meters.load_failed')}</p>
+  if (isError) return <p className="text-sm text-red-600 dark:text-red-400">{t('assets.meters.load_failed')}</p>
 
   return (
     <div className="space-y-3">

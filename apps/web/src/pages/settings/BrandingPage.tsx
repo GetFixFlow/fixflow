@@ -94,12 +94,12 @@ function BrandingForm({ saved }: { saved: BrandingSettings }) {
             onClick={() => inputs[kind].current?.click()}
             className="flex h-16 w-28 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 hover:border-brand-400 dark:border-gray-600"
           >
-            {url ? <img src={url} alt={title} className="max-h-12 max-w-24 object-contain" /> : <Upload className="h-5 w-5 text-gray-400" />}
+            {url ? <img src={url} alt={title} className="max-h-12 max-w-24 object-contain" /> : <Upload className="h-5 w-5 text-gray-500 dark:text-gray-400" />}
           </button>
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-500 dark:text-gray-400">
             <p>{IMAGE_LIMITS[kind].hint}</p>
             {url && (
-              <button type="button" onClick={() => clear(kind)} className="mt-1 flex items-center gap-1 text-red-600 hover:underline">
+              <button type="button" onClick={() => clear(kind)} className="mt-1 flex items-center gap-1 text-red-600 dark:text-red-400 hover:underline">
                 <Trash2 className="h-3 w-3" /> Remove
               </button>
             )}
@@ -127,16 +127,16 @@ function BrandingForm({ saved }: { saved: BrandingSettings }) {
         <div className="space-y-6">
           <Card>
             <CardContent className="space-y-5 p-5">
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Logo and favicon</h3>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100">Logo and favicon</h2>
               {picker('logo', 'Logo')}
               {picker('favicon', 'Favicon (the small icon in the browser tab)')}
-              {error && <p role="alert" className="text-xs text-red-600">{error}</p>}
+              {error && <p role="alert" className="text-xs text-red-600 dark:text-red-400">{error}</p>}
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="space-y-4 p-5">
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Colour</h3>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100">Colour</h2>
               <div className="flex flex-wrap gap-2">
                 {PRESETS.map((p) => (
                   <button
@@ -164,9 +164,9 @@ function BrandingForm({ saved }: { saved: BrandingSettings }) {
                 <Input aria-label="Colour" value={color} onChange={(e) => setColor(e.target.value)} className="flex-1 font-mono" />
               </div>
               {colorProblem ? (
-                <p role="alert" className="flex items-start gap-1.5 text-xs text-red-600"><AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />{colorProblem}</p>
+                <p role="alert" className="flex items-start gap-1.5 text-xs text-red-600 dark:text-red-400"><AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />{colorProblem}</p>
               ) : (
-                <p className="text-xs text-gray-500">Used for buttons, links and highlights across the app. White text on it has a contrast of {contrast.toFixed(1)}:1.</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Used for buttons, links and highlights across the app. White text on it has a contrast of {contrast.toFixed(1)}:1.</p>
               )}
               {ramp && (
                 <div className="flex overflow-hidden rounded-md" aria-hidden>
@@ -178,7 +178,7 @@ function BrandingForm({ saved }: { saved: BrandingSettings }) {
 
           <Card>
             <CardContent className="space-y-4 p-5">
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Sign-in page</h3>
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100">Sign-in page</h2>
               <Input id="login-headline" label="Headline" value={headline} onChange={(e) => setHeadline(e.target.value)} maxLength={80} />
               <Input id="login-subtitle" label="Subtitle" value={subtitle} onChange={(e) => setSubtitle(e.target.value)} maxLength={160} />
             </CardContent>
@@ -188,7 +188,7 @@ function BrandingForm({ saved }: { saved: BrandingSettings }) {
         <div className="space-y-4">
           <Card className="overflow-hidden">
             <div className="border-b border-gray-200 bg-gray-100 px-4 py-2 dark:border-gray-600 dark:bg-gray-700">
-              <p className="text-xs font-medium text-gray-500">Sign-in page preview</p>
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Sign-in page preview</p>
             </div>
             <div className="flex flex-col items-center bg-gray-50 p-6 text-center dark:bg-gray-800">
               {shown('logo') ? (
@@ -197,18 +197,18 @@ function BrandingForm({ saved }: { saved: BrandingSettings }) {
                 <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600"><Zap className="h-5 w-5 text-white" /></div>
               )}
               <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">{headline || ' '}</h2>
-              <p className="mt-1 text-xs text-gray-500">{subtitle}</p>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{subtitle}</p>
               <div className="mt-4 rounded-md bg-brand-600 px-6 py-2 text-sm font-medium text-white">Sign in</div>
             </div>
           </Card>
-          <p className="text-xs text-gray-500">The colour is also shown on this page as you pick it. Leave without saving and it goes back.</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">The colour is also shown on this page as you pick it. Leave without saving and it goes back.</p>
         </div>
       </div>
 
       <Button onClick={save} disabled={update.isPending || !!problem}>
         {update.isPending ? 'Saving…' : 'Save branding'}
       </Button>
-      {problem && <p className="text-xs text-red-600">{problem}</p>}
+      {problem && <p className="text-xs text-red-600 dark:text-red-400">{problem}</p>}
     </div>
   )
 }
@@ -221,7 +221,7 @@ export function BrandingPage() {
     return (
       <div className="max-w-2xl space-y-6">
         <PageHeader title="Branding" description="Customize your organization branding" />
-        <Card><CardContent className="p-8 text-center"><p className="text-gray-500">Access Denied. Only administrators can manage branding.</p></CardContent></Card>
+        <Card><CardContent className="p-8 text-center"><p className="text-gray-500 dark:text-gray-400">Access Denied. Only administrators can manage branding.</p></CardContent></Card>
       </div>
     )
   }

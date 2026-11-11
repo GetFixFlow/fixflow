@@ -39,12 +39,13 @@ function SortableStep({ step, onUpdate, onDelete, onEnterOnInstruction }: Sortab
       <button {...attributes} {...listeners} className="mt-1 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500" aria-label="Drag to reorder">
         <GripVertical className="h-4 w-4" />
       </button>
-      <span className="mt-1 text-xs text-gray-400 w-5 shrink-0">{step.step}</span>
+      <span className="mt-1 text-xs text-gray-500 dark:text-gray-400 w-5 shrink-0">{step.step}</span>
       <div className="flex-1 space-y-1.5">
         <textarea
           className="w-full resize-none rounded border border-gray-200 dark:border-gray-700 bg-transparent px-2 py-1 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-brand-500"
           rows={2}
           placeholder="Step instruction..."
+          aria-label={`Instruction for step ${step.step}`}
           value={step.instruction}
           onChange={(e) => onUpdate({ ...step, instruction: e.target.value })}
           onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onEnterOnInstruction() } }}
@@ -55,6 +56,7 @@ function SortableStep({ step, onUpdate, onDelete, onEnterOnInstruction }: Sortab
               className="w-full resize-none rounded border border-gray-200 dark:border-gray-700 bg-transparent px-2 py-1 text-xs text-gray-600 dark:text-gray-400 focus:outline-none focus:ring-1 focus:ring-brand-500"
               rows={2}
               placeholder="Notes for technician (optional)..."
+              aria-label={`Notes for step ${step.step}`}
               value={step.notes ?? ''}
               onChange={(e) => onUpdate({ ...step, notes: e.target.value || undefined })}
             />
@@ -76,11 +78,11 @@ function SortableStep({ step, onUpdate, onDelete, onEnterOnInstruction }: Sortab
         <button
           type="button"
           onClick={() => onUpdate({ ...step, required: !step.required })}
-          className={cn('rounded-full px-2 py-0.5 text-xs font-medium transition-colors', step.required ? 'bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400')}
+          className={cn('rounded-full px-2 py-0.5 text-xs font-medium transition-colors', step.required ? 'bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300')}
         >
           {step.required ? 'Required*' : 'Optional'}
         </button>
-        <button type="button" onClick={() => setExpanded((e) => !e)} className="text-gray-400 hover:text-gray-600 p-1" aria-label="Expand step">
+        <button type="button" onClick={() => setExpanded((e) => !e)} className="text-gray-500 dark:text-gray-400 hover:text-gray-600 p-1" aria-label="Expand step">
           {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
         </button>
         <button
@@ -134,11 +136,11 @@ export function ChecklistTemplateBuilder({ value, onChange }: ChecklistTemplateB
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Checklist Steps</p>
-        <span className="text-xs text-gray-400">{value.length}/{MAX_STEPS}</span>
+        <span className="text-xs text-gray-500 dark:text-gray-400">{value.length}/{MAX_STEPS}</span>
       </div>
 
       {value.length === 0 && (
-        <div className="rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 py-6 text-center text-sm text-gray-400">
+        <div className="rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
           No steps yet. Add your first checklist step.
         </div>
       )}

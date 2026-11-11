@@ -16,32 +16,32 @@ export function AssetDetailReport({ asset, stats, history, onClose }: AssetDetai
       <div className="flex items-start justify-between">
         <div>
           <h3 className="font-bold text-gray-900 dark:text-gray-100 text-base">{asset.name}</h3>
-          <p className="text-sm text-gray-500">{asset.asset_tag}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{asset.asset_tag}</p>
         </div>
-        {onClose && <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>}
+        {onClose && <button onClick={onClose} className="text-gray-500 dark:text-gray-400 hover:text-gray-600 text-lg">✕</button>}
       </div>
 
       <dl className="grid grid-cols-2 gap-2 text-sm">
         <div className="rounded-lg bg-gray-50 dark:bg-gray-700 p-2">
-          <dt className="text-xs text-gray-400">Total WOs</dt>
+          <dt className="text-xs text-gray-500 dark:text-gray-400">Total WOs</dt>
           <dd className="font-bold text-gray-900 dark:text-gray-100">{stats.total_wos}</dd>
         </div>
         <div className="rounded-lg bg-gray-50 dark:bg-gray-700 p-2">
-          <dt className="text-xs text-gray-400">Total Cost</dt>
+          <dt className="text-xs text-gray-500 dark:text-gray-400">Total Cost</dt>
           <dd className="font-bold text-gray-900 dark:text-gray-100">{formatCurrency(stats.total_cost)}</dd>
         </div>
         <div className="rounded-lg bg-gray-50 dark:bg-gray-700 p-2">
-          <dt className="text-xs text-gray-400">Avg Resolution</dt>
+          <dt className="text-xs text-gray-500 dark:text-gray-400">Avg Resolution</dt>
           <dd className="font-bold text-gray-900 dark:text-gray-100">{formatHours(stats.avg_resolution_hours)}</dd>
         </div>
         <div className="rounded-lg bg-gray-50 dark:bg-gray-700 p-2">
-          <dt className="text-xs text-gray-400">PM Compliance</dt>
+          <dt className="text-xs text-gray-500 dark:text-gray-400">PM Compliance</dt>
           <dd className="font-bold text-gray-900 dark:text-gray-100">{stats.pm_compliance}%</dd>
         </div>
       </dl>
 
       <div>
-        <p className="text-xs font-medium text-gray-500 mb-2">Maintenance History (12 months)</p>
+        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Maintenance History (12 months)</p>
         <ResponsiveContainer width="100%" height={120}>
           <BarChart data={history} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
             <XAxis dataKey="month" tick={{ fontSize: 9 }} />
@@ -54,7 +54,7 @@ export function AssetDetailReport({ asset, stats, history, onClose }: AssetDetai
         </ResponsiveContainer>
       </div>
 
-      <Link to={`/assets/${asset.id}`} className="block text-center text-sm text-brand-600 hover:underline">
+      <Link to={`/assets/${asset.id}`} className="block text-center text-sm text-brand-600 dark:text-brand-400 hover:underline">
         View Full Asset Page →
       </Link>
     </div>

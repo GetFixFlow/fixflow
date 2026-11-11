@@ -36,7 +36,7 @@ const ROLE_STYLES: Record<string, string> = {
 const STATUS_STYLES: Record<string, string> = {
   active: 'bg-green-100 text-green-700',
   invited: 'bg-amber-100 text-amber-700',
-  deactivated: 'bg-gray-100 text-gray-500',
+  deactivated: 'bg-gray-100 text-gray-600',
 }
 
 function getUserStatus(user: User & { active?: boolean; invitation_accepted_at?: string }): 'active' | 'invited' | 'deactivated' {
@@ -46,7 +46,7 @@ function getUserStatus(user: User & { active?: boolean; invitation_accepted_at?:
 }
 
 function NameAvatar({ name }: { name: string }) {
-  const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-orange-500', 'bg-teal-500', 'bg-pink-500']
+  const colors = ['bg-blue-700', 'bg-green-700', 'bg-purple-700', 'bg-orange-700', 'bg-teal-700', 'bg-pink-700']
   let hash = 0
   for (const c of name) hash = c.charCodeAt(0) + ((hash << 5) - hash)
   const color = colors[Math.abs(hash) % colors.length]
@@ -113,7 +113,7 @@ export function UsersPage() {
         <PageHeader title="Team Members" description="Manage your organization's users" />
         <Card>
           <CardContent className="p-8 text-center">
-            <p className="text-gray-500">You don't have permission to manage users.</p>
+            <p className="text-gray-500 dark:text-gray-400">You don't have permission to manage users.</p>
           </CardContent>
         </Card>
       </div>
@@ -186,7 +186,7 @@ export function UsersPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-red-600 border-red-300 hover:bg-red-50"
+                  className="text-red-600 dark:text-red-400 border-red-300 hover:bg-red-50"
                   onClick={() => {
                     if (confirm(`Deactivate ${selectedIds.length} users? They are signed out and cannot sign in until reactivated.`)) {
                       bulkDeactivate.mutate(selectedIds, { onSuccess: clearSelection })
@@ -224,12 +224,12 @@ export function UsersPage() {
                         className="rounded"
                       />
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">Joined</th>
-                    <th className="px-4 py-3 w-12" />
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Name</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Email</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Role</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden lg:table-cell">Joined</th>
+                    <th className="px-4 py-3 w-12"><span className="sr-only">Actions</span></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -248,6 +248,7 @@ export function UsersPage() {
                         <td className="px-4 py-3">
                           <input
                             type="checkbox"
+                            aria-label={`Select ${u.full_name}`}
                             checked={selectedIds.includes(u.id)}
                             onChange={() => toggleSelect(u.id)}
                             className="rounded"
@@ -269,7 +270,7 @@ export function UsersPage() {
                             )}
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-gray-500">{u.email}</td>
+                        <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{u.email}</td>
                         <td className="px-4 py-3">
                           <span className={cn(
                             'inline-flex rounded-full px-2 py-0.5 text-xs font-medium capitalize',
@@ -286,14 +287,17 @@ export function UsersPage() {
                             {status}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-xs text-gray-400 hidden lg:table-cell">
+                        <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 hidden lg:table-cell">
                           {u.created_at ? formatDate(new Date(u.created_at)) : '—'}
                         </td>
                         <td className="px-4 py-3">
                           <div className="relative">
                             <button
                               onClick={() => setOpenMenuId(openMenuId === u.id ? null : u.id)}
-                              className="rounded p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                              aria-label={`Actions for ${u.full_name}`}
+                              aria-haspopup="menu"
+                              aria-expanded={openMenuId === u.id}
+                              className="rounded p-1 text-gray-500 dark:text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                             >
                               <MoreVertical className="h-4 w-4" />
                             </button>
@@ -362,14 +366,14 @@ export function UsersPage() {
                                   isDeactivated ? (
                                     <button
                                       onClick={() => { reactivate.mutate(u.id); setOpenMenuId(null) }}
-                                      className="flex items-center gap-2 w-full px-3 py-1.5 text-left text-sm text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
+                                      className="flex items-center gap-2 w-full px-3 py-1.5 text-left text-sm text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20"
                                     >
                                       <UserCheck className="h-3.5 w-3.5" /> Reactivate
                                     </button>
                                   ) : (
                                     <button
                                       onClick={() => { deactivate.mutate(u.id); setOpenMenuId(null) }}
-                                      className="flex items-center gap-2 w-full px-3 py-1.5 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                      className="flex items-center gap-2 w-full px-3 py-1.5 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                                     >
                                       <UserX className="h-3.5 w-3.5" /> Deactivate
                                     </button>

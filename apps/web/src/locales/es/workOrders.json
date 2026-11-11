@@ -181,7 +181,8 @@
       "assignee": "Asignado a",
       "due_date": "Fecha de vencimiento",
       "select": "Seleccionar {{number}}",
-      "row_actions": "Acciones de la fila"
+      "row_actions": "Acciones de la fila",
+      "actions": "Acciones"
     },
     "calendar": {
       "previous": "Mes anterior",

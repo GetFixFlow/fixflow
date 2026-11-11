@@ -104,10 +104,10 @@ export function DashboardPage() {
         <Card>
           <CardContent className="flex items-center gap-4 p-4">
             <div className="rounded-lg bg-green-50 p-3 dark:bg-green-900/20">
-              <CheckCircle className="h-5 w-5 text-green-600" />
+              <CheckCircle className="h-5 w-5 text-green-700 dark:text-green-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">{t('dashboard.completed_week')}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t('dashboard.completed_week')}</p>
               <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 {data.work_orders.completed_this_week}
               </p>
@@ -117,10 +117,10 @@ export function DashboardPage() {
         <Card>
           <CardContent className="flex items-center gap-4 p-4">
             <div className="rounded-lg bg-yellow-50 p-3 dark:bg-yellow-900/20">
-              <Clock className="h-5 w-5 text-yellow-600" />
+              <Clock className="h-5 w-5 text-yellow-700 dark:text-yellow-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">{t('dashboard.due_week')}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t('dashboard.due_week')}</p>
               <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 {data.preventive_maintenance.due_this_week}
               </p>
@@ -130,10 +130,10 @@ export function DashboardPage() {
         <Card>
           <CardContent className="flex items-center gap-4 p-4">
             <div className="rounded-lg bg-red-50 p-3 dark:bg-red-900/20">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
+              <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">{t('dashboard.in_progress')}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t('dashboard.in_progress')}</p>
               <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 {data.work_orders.in_progress}
               </p>
@@ -168,7 +168,7 @@ export function DashboardPage() {
             </CardHeader>
             <CardContent>
               {data.recent_activity.length === 0 ? (
-                <p className="text-sm text-gray-500">{t('dashboard.no_activity')}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t('dashboard.no_activity')}</p>
               ) : (
                 <ul className="space-y-3">
                   {data.recent_activity.map((activity, index) => (
@@ -177,9 +177,9 @@ export function DashboardPage() {
                         <span className="font-medium text-gray-900 dark:text-gray-100">
                           {activity.description}
                         </span>
-                        <span className="ml-2 text-gray-500">{activity.type.replace(/_/g, ' ')}</span>
+                        <span className="ml-2 text-gray-500 dark:text-gray-400">{activity.type.replace(/_/g, ' ')}</span>
                       </div>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
                         {formatDateTime(activity.timestamp)}
                       </span>
                     </li>

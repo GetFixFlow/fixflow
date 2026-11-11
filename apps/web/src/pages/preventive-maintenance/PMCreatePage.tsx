@@ -129,7 +129,7 @@ export function PMCreatePage() {
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Link to="/preventive-maintenance" className="text-gray-400 hover:text-gray-600"><ArrowLeft className="h-5 w-5" /></Link>
+        <Link to="/preventive-maintenance" aria-label="Back to preventive maintenance" className="text-gray-500 dark:text-gray-400 hover:text-gray-600"><ArrowLeft className="h-5 w-5" /></Link>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">New PM Schedule</h1>
       </div>
 
@@ -138,10 +138,10 @@ export function PMCreatePage() {
         {STEPS.map((s, i) => (
           <div key={s} className="flex items-center gap-2">
             <div className={cn('flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-colors',
-              i < step ? 'bg-green-500 text-white' : i === step ? 'bg-brand-600 text-white' : 'bg-gray-200 text-gray-500 dark:bg-gray-700')}>
+              i < step ? 'bg-green-700 text-white' : i === step ? 'bg-brand-600 text-white' : 'bg-gray-200 text-gray-600 dark:bg-gray-700')}>
               {i < step ? <Check className="h-3.5 w-3.5" /> : i + 1}
             </div>
-            <span className={cn('text-sm', i === step ? 'font-medium text-gray-900 dark:text-gray-100' : 'text-gray-400')}>{s}</span>
+            <span className={cn('text-sm', i === step ? 'font-medium text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400')}>{s}</span>
             {i < STEPS.length - 1 && <span className="text-gray-300 mx-1">─</span>}
           </div>
         ))}
@@ -154,29 +154,29 @@ export function PMCreatePage() {
             <div className="space-y-4">
               <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Basic Information</h2>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">PM Schedule Name*</label>
-                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Monthly Pump Oil Change" />
-                <p className="text-xs text-gray-400 mt-1">This will appear in generated work order titles</p>
+                <label htmlFor="pm-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">PM Schedule Name*</label>
+                <Input id="pm-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Monthly Pump Oil Change" />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">This will appear in generated work order titles</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Asset*</label>
-                <AssetSelect value={assetId} onChange={(v) => setAssetId(v ?? undefined)} disabled={!!lockedAssetId} />
+                <label htmlFor="pm-asset" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Asset*</label>
+                <AssetSelect id="pm-asset" value={assetId} onChange={(v) => setAssetId(v ?? undefined)} disabled={!!lockedAssetId} />
                 {asset && <div className="mt-2"><AssetMiniCard asset={asset} /></div>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority*</label>
-                <div className="flex gap-2 flex-wrap">
+                <p id="pm-priority-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority*</p>
+                <div role="group" aria-labelledby="pm-priority-label" className="flex gap-2 flex-wrap">
                   {PRIORITY_OPTIONS.map((p) => (
-                    <button key={p} type="button" onClick={() => setPriority(p)}
-                      className={cn('rounded-md border px-3 py-1.5 text-sm font-medium capitalize transition-all', priority === p ? PRIORITY_COLORS[p] : 'border-gray-200 text-gray-500 hover:border-gray-300 dark:border-gray-700')}>
+                    <button key={p} type="button" aria-pressed={priority === p} onClick={() => setPriority(p)}
+                      className={cn('rounded-md border px-3 py-1.5 text-sm font-medium capitalize transition-all', priority === p ? PRIORITY_COLORS[p] : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:text-gray-300')}>
                       {p}
                     </button>
                   ))}
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3}
+                <label htmlFor="pm-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                <textarea id="pm-description" value={description} onChange={(e) => setDescription(e.target.value)} rows={3}
                   className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none" />
               </div>
             </div>
@@ -188,11 +188,11 @@ export function PMCreatePage() {
               <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Schedule & Frequency</h2>
               <div className="grid grid-cols-2 gap-3">
                 {FREQ_TYPE_CARDS.map((ft) => (
-                  <button key={ft.id} type="button" onClick={() => setFreqType(ft.id)}
+                  <button key={ft.id} type="button" aria-pressed={freqType === ft.id} onClick={() => setFreqType(ft.id)}
                     className={cn('rounded-lg border p-3 text-left transition-all', freqType === ft.id ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300')}>
                     <div className="text-xl mb-1">{ft.icon}</div>
                     <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{ft.label}</div>
-                    <div className="text-xs text-gray-500">{ft.desc}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">{ft.desc}</div>
                   </button>
                 ))}
               </div>
@@ -205,12 +205,12 @@ export function PMCreatePage() {
               {freqType === 'time_based' && (
                 <div className="flex gap-3 items-end">
                   <div className="flex-1">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Every</label>
-                    <Input type="number" min={1} value={freqValue} onChange={(e) => setFreqValue(parseInt(e.target.value) || 1)} />
+                    <label htmlFor="pm-every" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Every</label>
+                    <Input id="pm-every" type="number" min={1} value={freqValue} onChange={(e) => setFreqValue(parseInt(e.target.value) || 1)} />
                   </div>
                   <div className="flex-1">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Unit</label>
-                    <select value={freqUnit} onChange={(e) => setFreqUnit(e.target.value as PmFrequencyUnit)}
+                    <label htmlFor="pm-unit" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Unit</label>
+                    <select id="pm-unit" value={freqUnit} onChange={(e) => setFreqUnit(e.target.value as PmFrequencyUnit)}
                       className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
                       {['days','weeks','months'].map((u) => <option key={u} value={u}>{u}</option>)}
                     </select>
@@ -220,12 +220,12 @@ export function PMCreatePage() {
 
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Start Date*</label>
-                  <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                  <label htmlFor="pm-start" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Start Date*</label>
+                  <Input id="pm-start" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
                 </div>
                 <div className="flex-1">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">End Date</label>
-                  <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} disabled={noEndDate} />
+                  <label htmlFor="pm-end" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">End Date</label>
+                  <Input id="pm-end" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} disabled={noEndDate} />
                   <label className="flex items-center gap-1.5 mt-1 text-xs cursor-pointer">
                     <input type="checkbox" checked={noEndDate} onChange={(e) => setNoEndDate(e.target.checked)} />No end date
                   </label>
@@ -233,8 +233,8 @@ export function PMCreatePage() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Estimated Hours</label>
-                <Input type="number" min={0} step={0.5} value={estimatedHours} onChange={(e) => setEstimatedHours(e.target.value)} placeholder="e.g. 1.5" className="w-32" />
+                <label htmlFor="pm-hours" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Estimated Hours</label>
+                <Input id="pm-hours" type="number" min={0} step={0.5} value={estimatedHours} onChange={(e) => setEstimatedHours(e.target.value)} placeholder="e.g. 1.5" className="w-32" />
               </div>
 
               {/* Schedule preview (dates; a schedule by meter has the reading it falls due at, above) */}
@@ -247,8 +247,8 @@ export function PMCreatePage() {
                       <li key={i} className="flex gap-2 text-sm">
                         <span className="text-blue-600 dark:text-blue-400 w-4">{i + 1}.</span>
                         <span className="text-gray-700 dark:text-gray-300">{formatDate(d)}</span>
-                        <span className="text-gray-400 text-xs">(in {diff} days)</span>
-                        {i === 0 && <span className="text-xs text-blue-500">← first</span>}
+                        <span className="text-gray-500 dark:text-gray-400 text-xs">(in {diff} days)</span>
+                        {i === 0 && <span className="text-xs text-blue-600 dark:text-blue-400">← first</span>}
                       </li>
                     )
                   })}
@@ -262,24 +262,24 @@ export function PMCreatePage() {
             <div className="space-y-5">
               <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Work Order Template</h2>
               <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Title Template*</label>
-                <Input value={titleTemplate || name} onChange={(e) => setTitleTemplate(e.target.value)}
+                <label htmlFor="pm-title-template" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Title Template*</label>
+                <Input id="pm-title-template" value={titleTemplate || name} onChange={(e) => setTitleTemplate(e.target.value)}
                   placeholder={`{asset_name} - ${name || 'PM Schedule'}`} />
                 <div className="flex gap-1 mt-1 flex-wrap">
                   {['{asset_name}', '{asset_tag}', '{location}', '{frequency}'].map((v) => (
                     <button key={v} type="button" onClick={() => setTitleTemplate((t) => (t || name) + ' ' + v)}
-                      className="rounded bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-200">
+                      className="rounded bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-200">
                       {v}
                     </button>
                   ))}
                 </div>
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Preview: <span className="font-mono">{(titleTemplate || name).replace('{asset_name}', asset?.name ?? '[asset]').replace('{asset_tag}', asset?.asset_tag ?? '[tag]')}</span>
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Description Template</label>
-                <textarea value={descTemplate} onChange={(e) => setDescTemplate(e.target.value)} rows={3}
+                <label htmlFor="pm-desc-template" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Description Template</label>
+                <textarea id="pm-desc-template" value={descTemplate} onChange={(e) => setDescTemplate(e.target.value)} rows={3}
                   className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none" />
               </div>
               <ChecklistTemplateBuilder value={checklistSteps} onChange={setChecklistSteps} />
@@ -294,18 +294,18 @@ export function PMCreatePage() {
               <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-4 space-y-3 text-sm">
                 <p className="font-semibold text-gray-900 dark:text-gray-100 text-base">📋 {name}</p>
                 <dl className="space-y-2 text-sm">
-                  <div className="flex justify-between"><dt className="text-gray-500">Asset</dt><dd>{asset?.name} ({asset?.asset_tag})</dd></div>
-                  <div className="flex justify-between"><dt className="text-gray-500">Priority</dt><dd className="capitalize">{priority}</dd></div>
-                  <div className="flex justify-between"><dt className="text-gray-500">Schedule</dt>
+                  <div className="flex justify-between"><dt className="text-gray-500 dark:text-gray-400">Asset</dt><dd>{asset?.name} ({asset?.asset_tag})</dd></div>
+                  <div className="flex justify-between"><dt className="text-gray-500 dark:text-gray-400">Priority</dt><dd className="capitalize">{priority}</dd></div>
+                  <div className="flex justify-between"><dt className="text-gray-500 dark:text-gray-400">Schedule</dt>
                     <dd><PMFrequencyBadge frequencyType={freqType} frequencyValue={freqValue} frequencyUnit={byMeter ? meter?.unit : freqUnit} /></dd>
                   </div>
-                  <div className="flex justify-between"><dt className="text-gray-500">Starts</dt><dd>{formatDate(new Date(startDate))}</dd></div>
-                  <div className="flex justify-between"><dt className="text-gray-500">First due</dt>
+                  <div className="flex justify-between"><dt className="text-gray-500 dark:text-gray-400">Starts</dt><dd>{formatDate(new Date(startDate))}</dd></div>
+                  <div className="flex justify-between"><dt className="text-gray-500 dark:text-gray-400">First due</dt>
                     <dd>{byMeter ? (meter ? `At ${((lastService.trim() !== '' && !Number.isNaN(Number(lastService)) ? Number(lastService) : meter.reading) + freqValue).toLocaleString()} ${meter.unit}` : '—') : formatDate(previewDates[0])}</dd></div>
-                  <div className="flex justify-between"><dt className="text-gray-500">Template</dt><dd className="truncate max-w-[60%]">{titleTemplate || name}</dd></div>
-                  {checklistSteps.length > 0 && <div className="flex justify-between"><dt className="text-gray-500">Checklist</dt><dd>{checklistSteps.length} steps ({checklistSteps.filter((s) => s.required).length} required)</dd></div>}
-                  {requiredParts.length > 0 && <div className="flex justify-between"><dt className="text-gray-500">Parts</dt><dd>{requiredParts.map((p) => `${p.part?.name} ×${p.quantity}`).join(', ')}</dd></div>}
-                  {estimatedHours && <div className="flex justify-between"><dt className="text-gray-500">Est. Hours</dt><dd>{estimatedHours} hrs / occurrence</dd></div>}
+                  <div className="flex justify-between"><dt className="text-gray-500 dark:text-gray-400">Template</dt><dd className="truncate max-w-[60%]">{titleTemplate || name}</dd></div>
+                  {checklistSteps.length > 0 && <div className="flex justify-between"><dt className="text-gray-500 dark:text-gray-400">Checklist</dt><dd>{checklistSteps.length} steps ({checklistSteps.filter((s) => s.required).length} required)</dd></div>}
+                  {requiredParts.length > 0 && <div className="flex justify-between"><dt className="text-gray-500 dark:text-gray-400">Parts</dt><dd>{requiredParts.map((p) => `${p.part?.name} ×${p.quantity}`).join(', ')}</dd></div>}
+                  {estimatedHours && <div className="flex justify-between"><dt className="text-gray-500 dark:text-gray-400">Est. Hours</dt><dd>{estimatedHours} hrs / occurrence</dd></div>}
                 </dl>
               </div>
             </div>

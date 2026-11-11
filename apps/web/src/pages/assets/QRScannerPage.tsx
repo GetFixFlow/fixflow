@@ -141,7 +141,8 @@ export function QRScannerPage() {
     <div className="flex min-h-screen flex-col items-center bg-gray-900 text-white">
       {/* Header */}
       <div className="w-full flex items-center justify-center py-4">
-        <h1 className="text-lg font-bold tracking-wide">FixFlow</h1>
+        <p className="text-lg font-bold tracking-wide">FixFlow</p>
+        <h1 className="sr-only">{t('assets.scanner.page_title')}</h1>
       </div>
 
       <div className="flex w-full max-w-sm flex-1 flex-col items-center gap-5 px-4 pt-4 pb-8">
@@ -165,7 +166,7 @@ export function QRScannerPage() {
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl bg-gray-800 p-6 text-center">
               <AlertCircle className="h-10 w-10 text-red-400" />
               <p className="text-sm text-gray-300">{t('assets.scanner.denied')}</p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-400">
                 {t('assets.scanner.denied_help')}
               </p>
             </div>
@@ -174,14 +175,14 @@ export function QRScannerPage() {
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl bg-gray-800 p-6 text-center">
               <AlertCircle className="h-10 w-10 text-yellow-400" />
               <p className="text-sm text-gray-300">{t('assets.scanner.no_camera')}</p>
-              <p className="text-xs text-gray-500">{t('assets.scanner.no_camera_help')}</p>
+              <p className="text-xs text-gray-400">{t('assets.scanner.no_camera_help')}</p>
             </div>
           )}
           {state === 'error' && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl bg-gray-800 p-6 text-center">
               <AlertCircle className="h-10 w-10 text-red-400" />
               <p className="text-sm text-gray-300">{t('assets.scanner.error')}</p>
-              <p className="text-xs text-gray-500">{errorMsg}</p>
+              <p className="text-xs text-gray-400">{errorMsg}</p>
               <Button size="sm" onClick={startScanner}>{t('assets.scanner.try_again')}</Button>
             </div>
           )}
@@ -251,7 +252,7 @@ export function QRScannerPage() {
             placeholder={t('assets.scanner.type_placeholder')}
             autoFocus={hasPointer}
             autoComplete="off"
-            className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-500"
+            className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400"
           />
           <Button type="submit" className="w-full" disabled={!typed.trim() || state === 'looking'}>
             {t('assets.scanner.look_up')}

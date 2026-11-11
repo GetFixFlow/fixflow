@@ -13,7 +13,7 @@ export function WorkOrderDueDate({ dueDate, className }: WorkOrderDueDateProps) 
   const { t } = useTranslation()
   if (!dueDate) {
     return (
-      <span className={cn('text-sm italic text-gray-400 dark:text-gray-500', className)}>
+      <span className={cn('text-sm italic text-gray-500 dark:text-gray-400', className)}>
         {t('workOrders.due.none')}
       </span>
     )
@@ -39,7 +39,7 @@ export function WorkOrderDueDate({ dueDate, className }: WorkOrderDueDateProps) 
 
   if (isToday(date)) {
     return (
-      <span className={cn('text-sm font-medium text-orange-600 dark:text-orange-400', className)}>
+      <span className={cn('text-sm font-medium text-orange-700 dark:text-orange-400', className)}>
         {t('workOrders.due.today')}
       </span>
     )
@@ -47,7 +47,7 @@ export function WorkOrderDueDate({ dueDate, className }: WorkOrderDueDateProps) 
 
   if (isTomorrow(date)) {
     return (
-      <span className={cn('text-sm font-medium text-yellow-600 dark:text-yellow-400', className)}>
+      <span className={cn('text-sm font-medium text-yellow-700 dark:text-yellow-400', className)}>
         {t('workOrders.due.tomorrow')}
       </span>
     )
@@ -55,7 +55,7 @@ export function WorkOrderDueDate({ dueDate, className }: WorkOrderDueDateProps) 
 
   if (diffDays <= 3) {
     return (
-      <span className={cn('text-sm font-medium text-yellow-600 dark:text-yellow-400', className)}>
+      <span className={cn('text-sm font-medium text-yellow-700 dark:text-yellow-400', className)}>
         {t('workOrders.due.in_days', { count: diffDays })}
       </span>
     )

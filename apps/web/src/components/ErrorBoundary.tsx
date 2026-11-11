@@ -23,7 +23,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <div className="text-center">
             <div className="mb-4 flex justify-center">
               <div className="rounded-full bg-red-100 p-4 dark:bg-red-900/30">
-                <AlertTriangle className="h-10 w-10 text-red-600" />
+                <AlertTriangle className="h-10 w-10 text-red-600 dark:text-red-400" />
               </div>
             </div>
             <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t('shell.error.title')}</h1>

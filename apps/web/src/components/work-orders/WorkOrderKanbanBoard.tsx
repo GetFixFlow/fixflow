@@ -90,7 +90,7 @@ export function WorkOrderKanbanBoard({ workOrders }: WorkOrderKanbanBoardProps) 
                   {label('status', col)}
                 </span>
               </div>
-              <span className="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-400">
+              <span className="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">
                 {cards.length}
               </span>
             </div>
@@ -114,7 +114,7 @@ export function WorkOrderKanbanBoard({ workOrders }: WorkOrderKanbanBoardProps) 
 
               {cards.length === 0 && (
                 <div className="flex h-20 items-center justify-center rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
-                  <p className="text-xs text-gray-400">{t('workOrders.kanban.drop')}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{t('workOrders.kanban.drop')}</p>
                 </div>
               )}
             </div>

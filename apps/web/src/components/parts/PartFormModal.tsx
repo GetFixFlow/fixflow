@@ -135,7 +135,7 @@ export function PartFormModal({ open, onClose, part }: PartFormModalProps) {
         {customFields.length > 0 && (
           <CustomFieldInputs fields={customFields} values={customValues} onChange={setCustomValues} errors={customErrors} idPrefix="part-cf" />
         )}
-        <p className="text-xs text-gray-500">{t('parts.form.low_help')}</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">{t('parts.form.low_help')}</p>
         <div className="flex gap-2 pt-2">
           <Button type="button" variant="outline" onClick={onClose} className="flex-1">{t('common.actions.cancel')}</Button>
           <Button type="submit" disabled={pending} className="flex-1">

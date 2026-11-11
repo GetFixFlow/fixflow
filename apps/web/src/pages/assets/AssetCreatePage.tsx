@@ -143,16 +143,16 @@ export function AssetCreatePage() {
                 className={cn(
                   'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold',
                   done
-                    ? 'bg-green-500 text-white'
+                    ? 'bg-green-700 text-white'
                     : active
                     ? 'bg-brand-600 text-white'
-                    : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400',
+                    : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300',
                 )}
                 aria-current={active ? 'step' : undefined}
               >
                 {done ? <Check className="h-3.5 w-3.5" /> : num}
               </div>
-              <span className={cn('hidden text-xs sm:block', active ? 'font-medium text-gray-900 dark:text-gray-100' : 'text-gray-400')}>
+              <span className={cn('hidden text-xs sm:block', active ? 'font-medium text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400')}>
                 {t(`assets.create.${s}_label`)}
               </span>
               {i < STEPS.length - 1 && (
@@ -217,7 +217,7 @@ export function AssetCreatePage() {
                   ))}
                 </select>
                 {step1Form.formState.errors.status && (
-                  <p className="mt-1 text-xs text-red-600">{step1Form.formState.errors.status.message}</p>
+                  <p className="mt-1 text-xs text-red-600 dark:text-red-400">{step1Form.formState.errors.status.message}</p>
                 )}
               </div>
               <div className="flex justify-end">
@@ -304,45 +304,45 @@ export function AssetCreatePage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <dl className="space-y-2 text-sm">
                   <div className="flex gap-3">
-                    <dt className="w-32 shrink-0 text-gray-500">{t('assets.create.review_name')}</dt>
+                    <dt className="w-32 shrink-0 text-gray-500 dark:text-gray-400">{t('assets.create.review_name')}</dt>
                     <dd className="font-medium text-gray-900 dark:text-gray-100">{formData.name}</dd>
                   </div>
                   {formData.asset_tag && (
                     <div className="flex gap-3">
-                      <dt className="w-32 shrink-0 text-gray-500">{t('assets.create.review_tag')}</dt>
+                      <dt className="w-32 shrink-0 text-gray-500 dark:text-gray-400">{t('assets.create.review_tag')}</dt>
                       <dd className="font-mono font-medium text-gray-900 dark:text-gray-100">{formData.asset_tag}</dd>
                     </div>
                   )}
                   {formData.serial_number && (
                     <div className="flex gap-3">
-                      <dt className="w-32 shrink-0 text-gray-500">{t('assets.create.review_serial')}</dt>
+                      <dt className="w-32 shrink-0 text-gray-500 dark:text-gray-400">{t('assets.create.review_serial')}</dt>
                       <dd className="font-medium text-gray-900 dark:text-gray-100">{formData.serial_number}</dd>
                     </div>
                   )}
                   <div className="flex gap-3">
-                    <dt className="w-32 shrink-0 text-gray-500">{t('assets.create.review_status')}</dt>
+                    <dt className="w-32 shrink-0 text-gray-500 dark:text-gray-400">{t('assets.create.review_status')}</dt>
                     <dd>
                       <AssetStatusBadge status={formData.status as AssetStatus} />
                     </dd>
                   </div>
                   {formData.manufacturer && (
                     <div className="flex gap-3">
-                      <dt className="w-32 shrink-0 text-gray-500">{t('assets.create.review_manufacturer')}</dt>
+                      <dt className="w-32 shrink-0 text-gray-500 dark:text-gray-400">{t('assets.create.review_manufacturer')}</dt>
                       <dd className="font-medium text-gray-900 dark:text-gray-100">{formData.manufacturer}</dd>
                     </div>
                   )}
                   {formData.model && (
                     <div className="flex gap-3">
-                      <dt className="w-32 shrink-0 text-gray-500">{t('assets.create.review_model')}</dt>
+                      <dt className="w-32 shrink-0 text-gray-500 dark:text-gray-400">{t('assets.create.review_model')}</dt>
                       <dd className="font-medium text-gray-900 dark:text-gray-100">{formData.model}</dd>
                     </div>
                   )}
                 </dl>
                 <div className="flex flex-col items-center">
-                  <p className="mb-2 text-xs text-gray-500">{t('assets.create.preview_qr')}</p>
+                  <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">{t('assets.create.preview_qr')}</p>
                   <div className="rounded-lg border border-dashed border-gray-300 p-4 dark:border-gray-600">
                     <div className="flex h-32 w-32 items-center justify-center rounded-md bg-gray-100 dark:bg-gray-700">
-                      <p className="text-center text-xs text-gray-400">
+                      <p className="text-center text-xs text-gray-500 dark:text-gray-400">
                         {t('assets.create.qr_line1')}
                         <br />
                         {t('assets.create.qr_line2')}

@@ -26,8 +26,8 @@ function SampleDataSection() {
   return (
     <Card>
       <CardContent className="p-5 space-y-3">
-        <h3 className="font-semibold text-gray-900 dark:text-gray-100">Sample data</h3>
-        <p className="text-sm text-gray-500">
+        <h2 className="font-semibold text-gray-900 dark:text-gray-100">Sample data</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           Fills your company with a few places, assets, parts, a PM schedule and work orders (all named &ldquo;Sample: …&rdquo;) so you can see what FixFlow looks like with something in it.
           It creates no accounts and sends no email, and you can remove it again at any time without touching what you have added yourself.
         </p>
@@ -63,7 +63,7 @@ export function ImportExportPage() {
         <PageHeader title="Import / Export" description="Import and export organization data" />
         <Card>
           <CardContent className="p-8 text-center">
-            <p className="text-gray-500">Access Denied. Only administrators can manage data import/export.</p>
+            <p className="text-gray-500 dark:text-gray-400">Access Denied. Only administrators can manage data import/export.</p>
           </CardContent>
         </Card>
       </div>
@@ -82,8 +82,8 @@ export function ImportExportPage() {
       {/* Export Section */}
       <Card>
         <CardContent className="p-5 space-y-4">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Export Data</h3>
-          <p className="text-sm text-gray-500">
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100">Export Data</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Download your organization's data as CSV or JSON format.
           </p>
 
@@ -91,10 +91,10 @@ export function ImportExportPage() {
             {/* Full Export */}
             <div className="flex items-start justify-between gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
               <div className="flex items-start gap-3">
-                <Database className="h-5 w-5 text-brand-500 mt-0.5" />
+                <Database className="h-5 w-5 text-brand-600 dark:text-brand-400 mt-0.5" />
                 <div>
                   <p className="font-medium text-sm text-gray-900 dark:text-gray-100">Export All Data</p>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                     All work orders, assets, PM schedules, IoT rules, and users in JSON format.
                   </p>
                 </div>
@@ -113,10 +113,10 @@ export function ImportExportPage() {
             {/* Migration Export */}
             <div className="flex items-start justify-between gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
               <div className="flex items-start gap-3">
-                <FileText className="h-5 w-5 text-green-500 mt-0.5" />
+                <FileText className="h-5 w-5 text-green-700 dark:text-green-400 mt-0.5" />
                 <div>
                   <p className="font-medium text-sm text-gray-900 dark:text-gray-100">Export for Migration</p>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                     Structured export for migrating to another FixFlow instance.
                   </p>
                 </div>
@@ -134,7 +134,7 @@ export function ImportExportPage() {
 
             {/* Individual exports */}
             <div className="pt-2">
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Individual Data Types</p>
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Individual Data Types</p>
               <div className="grid grid-cols-2 gap-2">
                 {['Assets (CSV)', 'Work Orders (CSV)', 'PM Schedules (CSV)', 'Users (CSV)'].map((item) => (
                   <button
@@ -159,16 +159,16 @@ export function ImportExportPage() {
       {/* Import Section */}
       <Card>
         <CardContent className="p-5 space-y-4">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Import Data</h3>
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100">Import Data</h2>
 
           <div className="space-y-3">
             {/* Asset Import */}
             <div className="flex items-start justify-between gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
               <div className="flex items-start gap-3">
-                <Upload className="h-5 w-5 text-brand-500 mt-0.5" />
+                <Upload className="h-5 w-5 text-brand-600 dark:text-brand-400 mt-0.5" />
                 <div>
                   <p className="font-medium text-sm text-gray-900 dark:text-gray-100">Import locations, assets and parts</p>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                     Upload a CSV file to bulk-import locations, assets or parts. The import page has a template for each, and checks your file before anything is imported.
                   </p>
                 </div>
@@ -187,10 +187,10 @@ export function ImportExportPage() {
             {/* WO Import — Coming Soon */}
             <div className="flex items-start gap-4 p-4 rounded-lg border border-dashed border-gray-200 dark:border-gray-700 opacity-60">
               <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-gray-400 mt-0.5" />
+                <AlertCircle className="h-5 w-5 text-gray-500 dark:text-gray-400 mt-0.5" />
                 <div>
                   <p className="font-medium text-sm text-gray-600 dark:text-gray-400">Work Order Import</p>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                     Bulk import of historical work orders — coming in a future update.
                   </p>
                 </div>
@@ -200,10 +200,10 @@ export function ImportExportPage() {
             {/* Restore from Backup */}
             <div className="flex items-start justify-between gap-4 p-4 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/10">
               <div className="flex items-start gap-3">
-                <Database className="h-5 w-5 text-amber-500 mt-0.5" />
+                <Database className="h-5 w-5 text-amber-700 dark:text-amber-400 mt-0.5" />
                 <div>
                   <p className="font-medium text-sm text-gray-900 dark:text-gray-100">Restore from Backup</p>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                     Restore your database from a previous backup. This will overwrite all current data.
                   </p>
                 </div>
@@ -211,7 +211,7 @@ export function ImportExportPage() {
               <Button
                 size="sm"
                 variant="outline"
-                className="border-amber-300 text-amber-700 hover:bg-amber-50 shrink-0"
+                className="border-amber-300 text-amber-700 dark:text-amber-400 hover:bg-amber-50 shrink-0"
                 disabled
               >
                 Restore

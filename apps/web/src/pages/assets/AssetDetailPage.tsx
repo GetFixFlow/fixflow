@@ -70,7 +70,7 @@ function InfoCard({
 const WARRANTY_TONE = {
   ok: 'border-gray-200 bg-gray-50 text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300',
   soon: 'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-300',
-  ended: 'border-gray-200 bg-gray-100 text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400',
+  ended: 'border-gray-200 bg-gray-100 text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400',
 } as const
 
 function WarrantyNote({ endsOn }: { endsOn: string }) {
@@ -135,7 +135,7 @@ export function AssetDetailPage() {
   if (error || !asset) {
     return (
       <div className="py-12 text-center">
-        <p className="text-sm text-gray-500">{t('assets.detail.not_found')}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{t('assets.detail.not_found')}</p>
         <Button variant="link" asChild className="mt-4">
           <Link to="/assets">{t('assets.detail.back_to_assets')}</Link>
         </Button>
@@ -235,7 +235,7 @@ export function AssetDetailPage() {
             locationId={asset.location_id}
             compact
           />
-          {!asset.location_id && <span className="text-gray-400">—</span>}
+          {!asset.location_id && <span className="text-gray-500 dark:text-gray-400">—</span>}
         </InfoCard>
         <InfoCard icon={Hash} label={t('assets.detail.info_serial')}>
           {asset.serial_number ?? '—'}
@@ -350,7 +350,7 @@ export function AssetDetailPage() {
             </Button>
           </div>
           {workOrders.length === 0 ? (
-            <p className="py-8 text-center text-sm text-gray-400">{t('assets.detail.no_work_orders')}</p>
+            <p className="py-8 text-center text-sm text-gray-500 dark:text-gray-400">{t('assets.detail.no_work_orders')}</p>
           ) : (
             <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
               <table className="w-full text-sm">
@@ -370,7 +370,7 @@ export function AssetDetailPage() {
                       className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50"
                       onClick={() => navigate(`/work-orders/${wo.id}`)}
                     >
-                      <td className="px-4 py-3 font-mono text-xs text-gray-500">{wo.work_order_number}</td>
+                      <td className="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">{wo.work_order_number}</td>
                       <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{wo.title}</td>
                       <td className="px-4 py-3">
                         <Badge variant={statusBadge(wo.status)} className="capitalize">
@@ -416,7 +416,7 @@ export function AssetDetailPage() {
         {/* IoT Data */}
         <Tabs.Content value="iot-data" className="pt-4">
           {latestReadingsArr.length === 0 ? (
-            <p className="py-8 text-center text-sm text-gray-400">
+            <p className="py-8 text-center text-sm text-gray-500 dark:text-gray-400">
               {t('assets.detail.no_iot')}
             </p>
           ) : (

@@ -125,13 +125,13 @@ export function IoTRuleForm({ defaultValues, onSubmit, isLoading, mode }: IoTRul
             <div className={cn(
               'flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold border-2 transition-colors',
               i < step ? 'bg-brand-600 border-brand-600 text-white' :
-              i === step ? 'border-brand-600 text-brand-600 bg-white dark:bg-gray-800' :
-              'border-gray-300 text-gray-400 bg-white dark:bg-gray-800',
+              i === step ? 'border-brand-600 text-brand-600 dark:text-brand-400 bg-white dark:bg-gray-800' :
+              'border-gray-300 text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800',
             )}>
               {i < step ? '✓' : i + 1}
             </div>
             <span className={cn('ml-2 text-xs font-medium hidden sm:block',
-              i === step ? 'text-brand-600' : 'text-gray-400')}>{label}</span>
+              i === step ? 'text-brand-600 dark:text-brand-400' : 'text-gray-500 dark:text-gray-400')}>{label}</span>
             {i < STEPS.length - 1 && (
               <div className={cn('flex-1 h-0.5 mx-2', i < step ? 'bg-brand-600' : 'bg-gray-200 dark:bg-gray-700')} />
             )}
@@ -145,11 +145,11 @@ export function IoTRuleForm({ defaultValues, onSubmit, isLoading, mode }: IoTRul
         {/* Step 0: Asset */}
         {step === 0 && (
           <div className="space-y-4">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Step 1: Select Asset</h3>
-            <p className="text-sm text-gray-500">Which asset do you want to monitor?</p>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Step 1: Select Asset</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Which asset do you want to monitor?</p>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Asset</label>
-              <select
+              <label htmlFor="rule-asset" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Asset</label>
+              <select id="rule-asset"
                 className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                 value={form.asset_id ?? ''}
                 onChange={(e) => {
@@ -166,7 +166,7 @@ export function IoTRuleForm({ defaultValues, onSubmit, isLoading, mode }: IoTRul
                   <option key={a.id} value={a.id}>{a.name} ({a.asset_tag})</option>
                 ))}
               </select>
-              {errors.asset_id && <p className="text-xs text-red-600 mt-1">{errors.asset_id}</p>}
+              {errors.asset_id && <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.asset_id}</p>}
             </div>
           </div>
         )}
@@ -174,10 +174,10 @@ export function IoTRuleForm({ defaultValues, onSubmit, isLoading, mode }: IoTRul
         {/* Step 1: Metric */}
         {step === 1 && (
           <div className="space-y-4">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Step 2: What to Watch</h3>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Step 2: What to Watch</h2>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Rule Name</label>
-              <Input
+              <label htmlFor="rule-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Rule Name</label>
+              <Input id="rule-name"
                 value={form.name ?? ''}
                 onChange={(e) => set({ name: e.target.value })}
                 placeholder="e.g. Pump-01 High Vibration"
@@ -185,12 +185,13 @@ export function IoTRuleForm({ defaultValues, onSubmit, isLoading, mode }: IoTRul
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Metric</label>
-              <div className="flex flex-wrap gap-2 mb-2">
+              <p id="rule-metric-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Metric</p>
+              <div role="group" aria-labelledby="rule-metric-label" className="flex flex-wrap gap-2 mb-2">
                 {COMMON_METRICS.map((m) => (
                   <button
                     key={m}
                     type="button"
+                    aria-pressed={form.metric_name === m}
                     onClick={() => set({ metric_name: m })}
                     className={cn(
                       'rounded-full px-3 py-1 text-xs font-medium border transition-colors capitalize',
@@ -205,6 +206,7 @@ export function IoTRuleForm({ defaultValues, onSubmit, isLoading, mode }: IoTRul
               </div>
               <div className="flex gap-2">
                 <Input
+                  aria-label="Custom metric"
                   placeholder="Or type custom metric..."
                   value={customMetric}
                   onChange={(e) => setCustomMetric(e.target.value)}
@@ -223,11 +225,11 @@ export function IoTRuleForm({ defaultValues, onSubmit, isLoading, mode }: IoTRul
                   Add
                 </Button>
               </div>
-              {errors.metric_name && <p className="text-xs text-red-600 mt-1">{errors.metric_name}</p>}
+              {errors.metric_name && <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.metric_name}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Unit (optional)</label>
-              <Input
+              <label htmlFor="rule-unit" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Unit (optional)</label>
+              <Input id="rule-unit"
                 value={form.metric_unit ?? ''}
                 onChange={(e) => set({ metric_unit: e.target.value })}
                 placeholder="e.g. °C, mm/s, bar"
@@ -239,14 +241,15 @@ export function IoTRuleForm({ defaultValues, onSubmit, isLoading, mode }: IoTRul
         {/* Step 2: Trigger */}
         {step === 2 && (
           <div className="space-y-4">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Step 3: When to Trigger</h3>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Step 3: When to Trigger</h2>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Condition</label>
-              <div className="grid grid-cols-3 gap-2">
+              <p id="rule-condition-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Condition</p>
+              <div role="group" aria-labelledby="rule-condition-label" className="grid grid-cols-3 gap-2">
                 {OPERATORS.map((op) => (
                   <button
                     key={op.value}
                     type="button"
+                    aria-pressed={form.operator === op.value}
                     onClick={() => set({ operator: op.value })}
                     className={cn(
                       'rounded-lg border p-3 text-center transition-colors',
@@ -256,7 +259,7 @@ export function IoTRuleForm({ defaultValues, onSubmit, isLoading, mode }: IoTRul
                     )}
                   >
                     <div className="text-xl font-bold text-gray-900 dark:text-gray-100">{op.label}</div>
-                    <div className="text-xs text-gray-500 mt-0.5">{op.sublabel}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{op.sublabel}</div>
                   </button>
                 ))}
               </div>
@@ -265,8 +268,8 @@ export function IoTRuleForm({ defaultValues, onSubmit, isLoading, mode }: IoTRul
             {form.operator === 'outside_range' ? (
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Min Value</label>
-                  <Input
+                  <label htmlFor="rule-min" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Min Value</label>
+                  <Input id="rule-min"
                     type="number"
                     value={form.threshold_min ?? ''}
                     onChange={(e) => set({ threshold_min: Number(e.target.value) })}
@@ -274,8 +277,8 @@ export function IoTRuleForm({ defaultValues, onSubmit, isLoading, mode }: IoTRul
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Max Value</label>
-                  <Input
+                  <label htmlFor="rule-max" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Max Value</label>
+                  <Input id="rule-max"
                     type="number"
                     value={form.threshold_max ?? ''}
                     onChange={(e) => set({ threshold_max: Number(e.target.value) })}
@@ -285,10 +288,10 @@ export function IoTRuleForm({ defaultValues, onSubmit, isLoading, mode }: IoTRul
               </div>
             ) : (
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                <label htmlFor="rule-threshold" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   Threshold Value {form.metric_unit ? `(${form.metric_unit})` : ''}
                 </label>
-                <Input
+                <Input id="rule-threshold"
                   type="number"
                   value={form.threshold_value ?? ''}
                   onChange={(e) => set({ threshold_value: Number(e.target.value) })}
@@ -298,10 +301,10 @@ export function IoTRuleForm({ defaultValues, onSubmit, isLoading, mode }: IoTRul
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label htmlFor="rule-sustained" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 Sustained for (minutes, optional)
               </label>
-              <Input
+              <Input id="rule-sustained"
                 type="number"
                 value={form.sustained_minutes ?? ''}
                 onChange={(e) => set({ sustained_minutes: e.target.value ? Number(e.target.value) : undefined })}
@@ -311,7 +314,7 @@ export function IoTRuleForm({ defaultValues, onSubmit, isLoading, mode }: IoTRul
 
             {/* Live preview */}
             <div className="rounded-lg bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 p-3">
-              <p className="text-xs font-medium text-gray-500 uppercase mb-1">Rule Preview</p>
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-1">Rule Preview</p>
               <p className="text-sm text-gray-800 dark:text-gray-200 font-medium">
                 {formatPreview(form, selectedAsset?.name)}
               </p>
@@ -322,16 +325,17 @@ export function IoTRuleForm({ defaultValues, onSubmit, isLoading, mode }: IoTRul
         {/* Step 3: Action */}
         {step === 3 && (
           <div className="space-y-4">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Step 4: What to Do</h3>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Step 4: What to Do</h2>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <p id="rule-auto-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Auto-create Work Order on trigger?
-              </label>
-              <div className="flex gap-3">
+              </p>
+              <div role="group" aria-labelledby="rule-auto-label" className="flex gap-3">
                 {['Yes', 'No'].map((opt) => (
                   <button
                     key={opt}
                     type="button"
+                    aria-pressed={(opt === 'Yes') === form.auto_create_wo}
                     onClick={() => set({ auto_create_wo: opt === 'Yes' })}
                     className={cn(
                       'flex-1 rounded-lg border py-2 text-sm font-medium transition-colors',
@@ -349,12 +353,13 @@ export function IoTRuleForm({ defaultValues, onSubmit, isLoading, mode }: IoTRul
             {form.auto_create_wo && (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">WO Priority</label>
-                  <div className="flex gap-2">
+                  <p id="rule-priority-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">WO Priority</p>
+                  <div role="group" aria-labelledby="rule-priority-label" className="flex gap-2">
                     {WO_PRIORITIES.map((p) => (
                       <button
                         key={p}
                         type="button"
+                        aria-pressed={form.wo_priority === p}
                         onClick={() => set({ wo_priority: p })}
                         className={cn(
                           'flex-1 rounded-md border py-1.5 text-xs font-medium capitalize transition-colors',
@@ -369,21 +374,21 @@ export function IoTRuleForm({ defaultValues, onSubmit, isLoading, mode }: IoTRul
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  <label htmlFor="rule-wo-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                     WO Title Template
                   </label>
-                  <Input
+                  <Input id="rule-wo-title"
                     value={form.wo_title_template ?? ''}
                     onChange={(e) => set({ wo_title_template: e.target.value })}
                     placeholder="e.g. High vibration on {{asset_name}}"
                   />
-                  <p className="text-xs text-gray-400 mt-1">Variables: {'{{asset_name}}'}, {'{{metric}}'}, {'{{value}}'}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Variables: {'{{asset_name}}'}, {'{{metric}}'}, {'{{value}}'}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  <label htmlFor="rule-wo-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                     WO Description Template
                   </label>
-                  <textarea
+                  <textarea id="rule-wo-description"
                     className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-brand-500"
                     rows={3}
                     value={form.wo_description_template ?? ''}
@@ -395,16 +400,16 @@ export function IoTRuleForm({ defaultValues, onSubmit, isLoading, mode }: IoTRul
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label htmlFor="rule-cooldown" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 Cooldown (minutes)
               </label>
-              <Input
+              <Input id="rule-cooldown"
                 type="number"
                 value={form.cooldown_minutes ?? ''}
                 onChange={(e) => set({ cooldown_minutes: Number(e.target.value) })}
                 placeholder="60"
               />
-              <p className="text-xs text-gray-400 mt-1">Minimum time between repeated alerts for this rule</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Minimum time between repeated alerts for this rule</p>
             </div>
           </div>
         )}
@@ -412,7 +417,7 @@ export function IoTRuleForm({ defaultValues, onSubmit, isLoading, mode }: IoTRul
         {/* Step 4: Review */}
         {step === 4 && (
           <div className="space-y-4">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Step 5: Review</h3>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Step 5: Review</h2>
             <div className="rounded-lg border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700">
               {[
                 { label: 'Asset', value: selectedAsset ? `${selectedAsset.name} (${selectedAsset.asset_tag})` : `#${form.asset_id}` },
@@ -424,7 +429,7 @@ export function IoTRuleForm({ defaultValues, onSubmit, isLoading, mode }: IoTRul
                 { label: 'Cooldown', value: `${form.cooldown_minutes ?? 60} min` },
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-start px-4 py-2.5 gap-4">
-                  <span className="text-xs font-medium text-gray-500 w-28 shrink-0 pt-0.5">{label}</span>
+                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400 w-28 shrink-0 pt-0.5">{label}</span>
                   <span className="text-sm text-gray-900 dark:text-gray-100">{value ?? '—'}</span>
                 </div>
               ))}
@@ -438,7 +443,7 @@ export function IoTRuleForm({ defaultValues, onSubmit, isLoading, mode }: IoTRul
         <Button type="button" variant="outline" onClick={prev} disabled={step === 0}>
           Back
         </Button>
-        <span className="text-xs text-gray-400">Step {step + 1} of {STEPS.length}</span>
+        <span className="text-xs text-gray-500 dark:text-gray-400">Step {step + 1} of {STEPS.length}</span>
         {step < STEPS.length - 1 ? (
           <Button type="button" onClick={next}>Next</Button>
         ) : (

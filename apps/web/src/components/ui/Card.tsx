@@ -18,7 +18,9 @@ export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDiv
 
 export function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <h3
+    // The heading's words come in as children from the caller.
+    // eslint-disable-next-line jsx-a11y/heading-has-content
+    <h2
       className={cn('text-base font-semibold leading-none tracking-tight text-gray-900 dark:text-gray-100', className)}
       {...props}
     />

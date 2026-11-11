@@ -118,3 +118,32 @@ describe('ProfilePage', () => {
     })
   })
 })
+
+describe('ProfilePage: what a screen reader announces for each control', () => {
+  it('names the personal fields, including the read-only email', () => {
+    render(<ProfilePage />, { wrapper: Wrapper })
+
+    expect(screen.getByLabelText(/full name/i)).toHaveValue('Alice Smith')
+    expect(screen.getByLabelText('Email')).toBeDisabled()
+    expect(screen.getByLabelText('Email')).toHaveValue('alice@test.com')
+    expect(screen.getByLabelText('Phone')).toBeInTheDocument()
+    expect(screen.getByLabelText('Job Title')).toBeInTheDocument()
+    expect(screen.getByLabelText('Department')).toBeInTheDocument()
+  })
+
+  it('names the password fields and the button that shows or hides what was typed', async () => {
+    render(<ProfilePage />, { wrapper: Wrapper })
+    await userEvent.click(screen.getByRole('button', { name: /change password/i }))
+
+    const current = screen.getByLabelText(/current password/i)
+    expect(current).toHaveAttribute('type', 'password')
+    expect(screen.getByLabelText(/^new password/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument()
+
+    const show = screen.getAllByRole('button', { name: 'Show password' })
+    expect(show).toHaveLength(3)
+    await userEvent.click(show[0])
+    expect(current).toHaveAttribute('type', 'text')
+    expect(screen.getByRole('button', { name: 'Hide password' })).toBeInTheDocument()
+  })
+})

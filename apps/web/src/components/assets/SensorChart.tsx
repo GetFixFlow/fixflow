@@ -77,7 +77,7 @@ export function SensorChart({
                   'rounded px-2.5 py-1 text-xs font-medium transition-colors',
                   range === r
                     ? 'bg-brand-600 text-white'
-                    : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700',
+                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700',
                 )}
               >
                 {r}
@@ -87,7 +87,7 @@ export function SensorChart({
         </div>
 
         {data.length === 0 ? (
-          <div className="flex h-40 items-center justify-center text-sm text-gray-400">
+          <div className="flex h-40 items-center justify-center text-sm text-gray-500 dark:text-gray-400">
             {t('assets.sensor.empty')}
           </div>
         ) : (

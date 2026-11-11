@@ -88,8 +88,8 @@ export function CustomFieldsPage() {
             {list.map((field, index) => (
               <li key={field.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
                 <div className="min-w-[200px] flex-1">
-                  <p className={field.active ? 'font-medium text-gray-900 dark:text-gray-100' : 'font-medium text-gray-400 line-through'}>{field.label}</p>
-                  <p className="text-xs text-gray-500">
+                  <p className={field.active ? 'font-medium text-gray-900 dark:text-gray-100' : 'font-medium text-gray-500 dark:text-gray-400 line-through'}>{field.label}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     {KIND_LABELS[field.kind]}
                     {field.kind === 'select' && `: ${field.options.join(', ')}`}
                   </p>
@@ -119,13 +119,13 @@ export function CustomFieldsPage() {
                     {field.active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                   <Button variant="ghost" size="icon" onClick={() => confirmDelete(field)} aria-label={`Delete ${field.label}`}>
-                    <Trash2 className="h-4 w-4 text-red-500" />
+                    <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
                   </Button>
                 </div>
               </li>
             ))}
           </ul>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             {list.length} of {MAX_FIELDS} fields. Turning a field off hides it and keeps what was filled in; deleting it deletes that too.
           </p>
         </>

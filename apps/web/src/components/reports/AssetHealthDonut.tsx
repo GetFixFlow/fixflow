@@ -6,7 +6,7 @@ interface AssetStatus { status: string; count: number }
 interface AssetHealthDonutProps { data: AssetStatus[]; healthScore: number; onSegmentClick?: (status: string) => void }
 
 export function AssetHealthDonut({ data, healthScore, onSegmentClick }: AssetHealthDonutProps) {
-  const color = healthScore >= 95 ? 'text-green-600' : healthScore >= 80 ? 'text-yellow-600' : 'text-red-500'
+  const color = healthScore >= 95 ? 'text-green-700 dark:text-green-400' : healthScore >= 80 ? 'text-yellow-700 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'
   return (
     <div className="relative">
       <ResponsiveContainer width="100%" height={250}>
@@ -23,7 +23,7 @@ export function AssetHealthDonut({ data, healthScore, onSegmentClick }: AssetHea
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="text-center">
           <p className={cn('text-3xl font-bold', color)}>{healthScore}%</p>
-          <p className="text-xs text-gray-400">health score</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">health score</p>
         </div>
       </div>
     </div>

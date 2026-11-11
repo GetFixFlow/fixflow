@@ -53,9 +53,9 @@ export function AssetSensorTile({ assetId, assetName, assetTag, locationPath, me
           <div className="flex items-center gap-1.5">
             <span>{STATUS_ICONS[status]}</span>
             <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{assetName}</span>
-            <span className="text-xs text-gray-400 font-mono">{assetTag}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">{assetTag}</span>
           </div>
-          {locationPath && <p className="text-xs text-gray-400 mt-0.5">{locationPath}</p>}
+          {locationPath && <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{locationPath}</p>}
         </div>
       </div>
 
@@ -63,12 +63,12 @@ export function AssetSensorTile({ assetId, assetName, assetTag, locationPath, me
       <div className="space-y-1.5">
         {metrics.slice(0, 4).map((m) => {
           const metricColor = m.is_breached ? 'text-red-600 dark:text-red-400 font-bold' :
-            (m.pct_of_threshold ?? 0) >= 80 ? 'text-yellow-600 dark:text-yellow-400' :
-            m.latest_value != null ? 'text-green-600 dark:text-green-400' : 'text-gray-400'
+            (m.pct_of_threshold ?? 0) >= 80 ? 'text-yellow-700 dark:text-yellow-400' :
+            m.latest_value != null ? 'text-green-700 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'
 
           return (
             <div key={m.metric_name} className="flex items-center justify-between text-xs">
-              <span className="text-gray-500 flex items-center gap-1">
+              <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1">
                 <span>{METRIC_ICONS[m.metric_name.toLowerCase()] ?? '📡'}</span>
                 <span className="capitalize">{m.metric_name.replace(/_/g, ' ')}</span>
               </span>
@@ -79,9 +79,9 @@ export function AssetSensorTile({ assetId, assetName, assetTag, locationPath, me
                     {m.is_breached && ' ⚠️'}
                   </span>
                 ) : (
-                  <span className="text-gray-400">—</span>
+                  <span className="text-gray-500 dark:text-gray-400">—</span>
                 )}
-                <span className={cn('text-xs', m.is_breached ? 'text-red-500' : m.is_stale ? 'text-orange-400' : 'text-green-500')}>
+                <span className={cn('text-xs', m.is_breached ? 'text-red-600 dark:text-red-400' : m.is_stale ? 'text-orange-400' : 'text-green-700 dark:text-green-400')}>
                   {m.is_breached ? '🔴' : m.is_stale ? '⚪' : '✓'}
                 </span>
               </div>
@@ -89,7 +89,7 @@ export function AssetSensorTile({ assetId, assetName, assetTag, locationPath, me
           )
         })}
         {metrics.length === 0 && (
-          <p className="text-xs text-gray-400 text-center py-2">No readings yet</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-2">No readings yet</p>
         )}
       </div>
 

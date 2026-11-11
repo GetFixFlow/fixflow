@@ -19,7 +19,7 @@ export function AIButton({ className, children, ...props }: ButtonProps) {
       title="AI feature — requires API key in settings"
       {...props}
     >
-      <Sparkles className="h-4 w-4 text-blue-500 dark:text-blue-400" />
+      <Sparkles className="h-4 w-4 text-blue-600 dark:text-blue-400" />
       {children}
     </Button>
   )

@@ -32,17 +32,17 @@ export function CancelModal({ workOrderId, open, onClose }: CancelModalProps) {
     <Modal open={open} onClose={onClose} title={t('workOrders.cancel.title')}>
       <div className="space-y-4">
         <div className="flex items-center gap-2 rounded-md bg-red-50 p-3 dark:bg-red-900/20">
-          <AlertTriangle className="h-5 w-5 text-red-500 shrink-0" />
+          <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 shrink-0" />
           <p className="text-sm text-red-700 dark:text-red-300">
             {t('workOrders.cancel.warning')}
           </p>
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label htmlFor="cancel-1" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
             {t('workOrders.cancel.reason')}
           </label>
-          <textarea
+          <textarea id="cancel-1"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             rows={3}

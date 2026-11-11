@@ -91,7 +91,7 @@ export function ApiKeysPage() {
             <div className="text-center py-16">
               <Key className="h-8 w-8 text-gray-300 mx-auto mb-3" />
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">No API keys yet</p>
-              <p className="text-xs text-gray-400 mt-1">Create one to connect your IoT devices.</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Create one to connect your IoT devices.</p>
               <Button className="mt-3" onClick={() => setShowCreate(true)}>Create First Key</Button>
             </div>
           ) : (
@@ -99,13 +99,13 @@ export function ApiKeysPage() {
               <table className="w-full text-sm">
                 <thead className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Key Preview</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Used</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expires</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th className="px-4 py-3" />
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Name</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Key Preview</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Created</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Last Used</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Expires</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                    <th className="px-4 py-3"><span className="sr-only">Actions</span></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -114,16 +114,16 @@ export function ApiKeysPage() {
                     return (
                       <tr key={key.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                         <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{key.name}</td>
-                        <td className="px-4 py-3 font-mono text-xs text-gray-500">{key.key_prefix}...</td>
-                        <td className="px-4 py-3 text-xs text-gray-500">
+                        <td className="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">{key.key_prefix}...</td>
+                        <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
                           {formatDate(new Date(key.created_at))}
                         </td>
-                        <td className="px-4 py-3 text-xs text-gray-500">
+                        <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
                           {key.last_used_at
                             ? formatDistanceToNow(new Date(key.last_used_at), { addSuffix: true })
                             : 'Never'}
                         </td>
-                        <td className="px-4 py-3 text-xs text-gray-500">
+                        <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
                           {key.expires_at ? formatDate(new Date(key.expires_at)) : 'No expiry'}
                         </td>
                         <td className="px-4 py-3">
@@ -140,7 +140,7 @@ export function ApiKeysPage() {
                           <div className="relative">
                             <button
                               onClick={() => setOpenMenuId(openMenuId === key.id ? null : key.id)}
-                              className="rounded p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                              className="rounded p-1 text-gray-500 dark:text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                             >
                               <MoreVertical className="h-4 w-4" />
                             </button>
@@ -159,7 +159,7 @@ export function ApiKeysPage() {
                                 {status === 'active' && (
                                   <button
                                     onClick={() => { setRevokeTarget(key.id); setOpenMenuId(null) }}
-                                    className="block w-full px-3 py-1.5 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                    className="block w-full px-3 py-1.5 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                                   >
                                     Revoke
                                   </button>

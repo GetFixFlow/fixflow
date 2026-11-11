@@ -139,8 +139,8 @@ function PreferencesForm({ saved }: { saved: NotificationPreferences }) {
         <CardContent className="space-y-4 p-5">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Email</h3>
-              <p className="mt-0.5 text-xs text-gray-400">
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100">Email</h2>
+              <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                 Turn this off to get none of the emails below. Your choices are kept for when you turn it back on.
               </p>
             </div>
@@ -154,8 +154,8 @@ function PreferencesForm({ saved }: { saved: NotificationPreferences }) {
 
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Push</h3>
-              <p className="mt-0.5 text-xs text-gray-400">
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100">Push</h2>
+              <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                 Turn this off to get no push notifications on any of your devices. Each device is turned on separately, above.
               </p>
             </div>
@@ -170,7 +170,7 @@ function PreferencesForm({ saved }: { saved: NotificationPreferences }) {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-gray-400">
+                <tr className="text-xs text-gray-500 dark:text-gray-400">
                   <th className="text-left font-normal">
                     <span className="sr-only">Tell me when</span>
                   </th>
@@ -192,7 +192,7 @@ function PreferencesForm({ saved }: { saved: NotificationPreferences }) {
             </table>
           </div>
 
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             Invitations and password reset links are always sent, because you could not use the app without them.
             The summaries of maintenance due and overdue are email only. Emails about overdue work orders and sensor alerts, and digests,
             are not available yet.
@@ -211,13 +211,13 @@ function PreferencesForm({ saved }: { saved: NotificationPreferences }) {
         <CardContent className="space-y-3 p-5">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Alert sound on this device</h3>
-              <p className="mt-0.5 text-xs text-gray-400">
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100">Alert sound on this device</h2>
+              <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                 Play a sound when a critical sensor alert arrives while FixFlow is open. Applies to this browser only.
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={playSampleSound} className="text-xs text-gray-500">
+              <Button variant="ghost" size="sm" onClick={playSampleSound} className="text-xs text-gray-500 dark:text-gray-400">
                 Test
               </Button>
               <Toggle id="alert-sound" label="Alert sound" checked={sound} onChange={setSoundEnabled} />
@@ -239,8 +239,8 @@ function PushDeviceCard() {
       <CardContent className="space-y-3 p-5">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100">Push notifications on this device</h3>
-            <p className="mt-0.5 text-xs text-gray-400">
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100">Push notifications on this device</h2>
+            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
               A message on this phone or computer when work is assigned to you, even while FixFlow is closed. Turn it on in each browser or phone you want it on.
             </p>
           </div>
@@ -288,7 +288,7 @@ function PushDeviceCard() {
               Send a test
             </Button>
             {note && (
-              <span role="status" className="text-xs text-gray-500">
+              <span role="status" className="text-xs text-gray-500 dark:text-gray-400">
                 {note}
               </span>
             )}
@@ -314,7 +314,7 @@ function GroupRows({
     <>
       <tr>
         <td colSpan={3} className="pb-1 pt-4">
-          <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">{group}</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{group}</span>
         </td>
       </tr>
       {events.map((event) => (
@@ -322,7 +322,7 @@ function GroupRows({
           <td className="py-2 pr-3">
             <label htmlFor={`rule-${event.key}`} className="block cursor-pointer text-gray-700 dark:text-gray-300">
               {event.label}
-              <span className="block text-xs text-gray-400">{event.hint}</span>
+              <span className="block text-xs text-gray-500 dark:text-gray-400">{event.hint}</span>
             </label>
           </td>
           <td className="w-16 py-2 text-center">

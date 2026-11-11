@@ -21,7 +21,7 @@ const Row = ({ label, value, bold, note }: { label: string; value: string; bold?
       <span className="text-sm text-gray-600 dark:text-gray-400">{label}</span>
       <span className="text-sm text-gray-900 dark:text-gray-100">{value}</span>
     </div>
-    {note && <p className="pb-1.5 text-xs font-normal text-amber-600 dark:text-amber-400">{note}</p>}
+    {note && <p className="pb-1.5 text-xs font-normal text-amber-700 dark:text-amber-400">{note}</p>}
   </div>
 )
 
@@ -46,7 +46,7 @@ export function WorkOrderCosts({ workOrderId, actualHours, laborCost, laborRate,
   return (
     <div className="space-y-1">
       <div className="flex items-center gap-2 mb-2">
-        <DollarSign className="h-4 w-4 text-gray-400" />
+        <DollarSign className="h-4 w-4 text-gray-500 dark:text-gray-400" />
         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('workOrders.costs.summary')}</span>
       </div>
       <div className="divide-y divide-gray-100 dark:divide-gray-700">

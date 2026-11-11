@@ -25,7 +25,7 @@ export function AISettingsPage() {
         <PageHeader title="AI Features" description="Configure FixFlow's AI capabilities" />
         <Card>
           <CardContent className="p-8 text-center">
-            <p className="text-gray-500">Access Denied. Only administrators can manage AI settings.</p>
+            <p className="text-gray-500 dark:text-gray-400">Access Denied. Only administrators can manage AI settings.</p>
           </CardContent>
         </Card>
       </div>
@@ -42,7 +42,7 @@ export function AISettingsPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
+              <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600 dark:text-red-400" />
               <div>
                 <p className="font-medium text-gray-900 dark:text-gray-100">AI features are disabled</p>
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -58,7 +58,7 @@ export function AISettingsPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-green-500" />
+              <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-green-700 dark:text-green-400" />
               <div>
                 <p className="font-medium text-gray-900 dark:text-gray-100">AI features are enabled</p>
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -74,16 +74,16 @@ export function AISettingsPage() {
       <Card>
         <CardContent className="p-4">
           <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
-            <Sparkles className="h-4 w-4 text-brand-500" />
+            <Sparkles className="h-4 w-4 text-brand-600 dark:text-brand-400" />
             AI Features
           </h3>
           <ul className="space-y-2">
             {FEATURES.map((f) => (
               <li key={f} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                 {enabled ? (
-                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <CheckCircle className="h-4 w-4 text-green-700 dark:text-green-400" />
                 ) : (
-                  <XCircle className="h-4 w-4 text-gray-300 dark:text-gray-600" />
+                  <XCircle className="h-4 w-4 text-gray-300 dark:text-gray-400" />
                 )}
                 {f}
               </li>

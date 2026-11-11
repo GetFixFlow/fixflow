@@ -40,7 +40,7 @@ export function Header() {
       >
         <Search className="h-4 w-4" />
         <span>{t('shell.header.search')}</span>
-        <kbd className="ml-2 rounded bg-gray-100 px-1.5 py-0.5 text-xs dark:bg-gray-700">⌘K</kbd>
+        <kbd className="ml-2 rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600 dark:bg-gray-700 dark:text-gray-300">⌘K</kbd>
       </button>
 
       <div className="flex items-center gap-2">
@@ -102,7 +102,7 @@ export function Header() {
                 <a href={env.docsUrl} target="_blank" rel="noopener noreferrer">{t('shell.header.help')}</a>
               </DropdownMenu.Item>
               <DropdownMenu.Item
-                className="flex cursor-pointer rounded-sm px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none"
+                className="flex cursor-pointer rounded-sm px-2 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none"
                 onSelect={() => logout()}
               >
                 {t('shell.header.sign_out')}

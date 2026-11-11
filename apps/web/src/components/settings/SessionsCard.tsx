@@ -16,8 +16,8 @@ export function SessionsCard() {
     <Card>
       <CardContent className="space-y-3 p-5">
         <div>
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t('settings.sessions.title')}</h3>
-          <p className="mt-0.5 text-xs text-gray-400">
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100">{t('settings.sessions.title')}</h2>
+          <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
             {t('settings.sessions.help')}
           </p>
         </div>

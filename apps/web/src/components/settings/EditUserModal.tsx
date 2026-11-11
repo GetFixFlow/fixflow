@@ -71,44 +71,44 @@ export function EditUserModal({ open, onClose, user: targetUser }: EditUserModal
             <Dialog.Title className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               Edit User
             </Dialog.Title>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <button onClick={onClose} aria-label="Close" className="text-gray-500 dark:text-gray-400 hover:text-gray-600">
               <X className="h-5 w-5" />
             </button>
           </div>
 
           <form onSubmit={onSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+              <label htmlFor="edit-user-name" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                 Full Name *
               </label>
-              <Input {...form.register('full_name')} />
+              <Input id="edit-user-name" {...form.register('full_name')} />
               {form.formState.errors.full_name && (
-                <p className="text-xs text-red-500 mt-1">{form.formState.errors.full_name.message}</p>
+                <p className="text-xs text-red-600 dark:text-red-400 mt-1">{form.formState.errors.full_name.message}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+              <label htmlFor="edit-user-email" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                 Email *
               </label>
-              <Input {...form.register('email')} type="email" disabled />
+              <Input id="edit-user-email" {...form.register('email')} type="email" disabled />
               {form.formState.errors.email && (
-                <p className="text-xs text-red-500 mt-1">{form.formState.errors.email.message}</p>
+                <p className="text-xs text-red-600 dark:text-red-400 mt-1">{form.formState.errors.email.message}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+              <label htmlFor="edit-user-phone" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                 Phone
               </label>
-              <Input {...form.register('phone')} type="tel" />
+              <Input id="edit-user-phone" {...form.register('phone')} type="tel" />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+              <label htmlFor="edit-user-title" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                 Job Title
               </label>
-              <Input {...form.register('job_title')} />
+              <Input id="edit-user-title" {...form.register('job_title')} />
             </div>
 
             {isAdmin && (
@@ -117,19 +117,19 @@ export function EditUserModal({ open, onClose, user: targetUser }: EditUserModal
                   Hourly rate
                 </label>
                 <Input id="hourly-rate" {...form.register('hourly_rate')} type="number" min={0} step="0.01" placeholder="Company default" />
-                <p className="text-xs text-gray-500 mt-1">Used to cost the hours this person records on work orders. Leave empty to use the company default rate. Only administrators see this.</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Used to cost the hours this person records on work orders. Leave empty to use the company default rate. Only administrators see this.</p>
                 {form.formState.errors.hourly_rate && (
-                  <p className="text-xs text-red-500 mt-1">{form.formState.errors.hourly_rate.message}</p>
+                  <p className="text-xs text-red-600 dark:text-red-400 mt-1">{form.formState.errors.hourly_rate.message}</p>
                 )}
               </div>
             )}
 
             {isAdmin && (
               <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                <label htmlFor="edit-user-role" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                   Role
                 </label>
-                <select
+                <select id="edit-user-role"
                   {...form.register('role')}
                   className="h-9 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-sm"
                 >

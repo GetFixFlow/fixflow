@@ -56,7 +56,7 @@ export function SchedulePage() {
         </div>
       </div>
 
-      {isError && !schedule && <p role="alert" className="text-sm text-red-600">{t('schedule.load_failed')}</p>}
+      {isError && !schedule && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{t('schedule.load_failed')}</p>}
       {isLoading && <Skeleton className="h-64 w-full" />}
       {schedule && (
         <>

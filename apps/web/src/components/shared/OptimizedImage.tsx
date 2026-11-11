@@ -13,7 +13,7 @@ export function OptimizedImage({ src, alt, className, fallbackClassName }: Props
   if (error) {
     return (
       <div className={fallbackClassName ?? 'flex items-center justify-center bg-gray-100 rounded'}>
-        <ImageOff className="h-5 w-5 text-gray-400" />
+        <ImageOff className="h-5 w-5 text-gray-500 dark:text-gray-400" />
       </div>
     )
   }

@@ -165,7 +165,7 @@ export function WorkRequestPortalPage() {
           <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('workOrders.portal.title')}</h1>
             <p role="status" className="mt-3 text-gray-600 dark:text-gray-400">{formOff()}</p>
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-500">
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
               {t('workOrders.portal.emergency_short')}
             </p>
           </div>
@@ -181,7 +181,7 @@ export function WorkRequestPortalPage() {
         <div className="absolute right-4 top-4 z-10"><LanguageSelect /></div>
         <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-xl dark:bg-gray-800">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
-            <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+            <CheckCircle className="h-8 w-8 text-green-700 dark:text-green-400" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('workOrders.portal.submitted')}</h1>
           <p className="mt-2 text-gray-500 dark:text-gray-400">
@@ -226,7 +226,7 @@ export function WorkRequestPortalPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-start justify-center bg-gray-50 p-4 dark:bg-gray-900">
+    <main className="flex min-h-screen items-start justify-center bg-gray-50 p-4 dark:bg-gray-900">
       <div className="absolute right-4 top-4 z-10"><LanguageSelect /></div>
       <div className="w-full max-w-lg space-y-6 py-12">
         <div className="text-center">
@@ -272,7 +272,7 @@ export function WorkRequestPortalPage() {
                   placeholder={t('workOrders.portal.name_placeholder')}
                   className={errors.requester_name ? 'border-red-400' : ''}
                 />
-                {errors.requester_name && <p className="mt-1 text-xs text-red-500">{t(errors.requester_name.message ?? '')}</p>}
+                {errors.requester_name && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{t(errors.requester_name.message ?? '')}</p>}
               </div>
               <div>
                 <label htmlFor="requester_email" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -286,7 +286,7 @@ export function WorkRequestPortalPage() {
                   placeholder={t('workOrders.portal.email_placeholder')}
                   className={errors.requester_email ? 'border-red-400' : ''}
                 />
-                {errors.requester_email && <p className="mt-1 text-xs text-red-500">{t(errors.requester_email.message ?? '')}</p>}
+                {errors.requester_email && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{t(errors.requester_email.message ?? '')}</p>}
               </div>
             </div>
 
@@ -303,7 +303,7 @@ export function WorkRequestPortalPage() {
                     className={errors.location_description ? 'border-red-400' : ''}
                   />
                   {errors.location_description && (
-                    <p className="mt-1 text-xs text-red-500">{t(errors.location_description.message ?? '')}</p>
+                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">{t(errors.location_description.message ?? '')}</p>
                   )}
                 </div>
                 <div>
@@ -330,7 +330,7 @@ export function WorkRequestPortalPage() {
                 placeholder={t('workOrders.portal.problem_placeholder')}
                 className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
               />
-              {errors.description && <p className="mt-1 text-xs text-red-500">{t(errors.description.message ?? '')}</p>}
+              {errors.description && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{t(errors.description.message ?? '')}</p>}
             </div>
 
             {/* A trap for scripts: people cannot see it or reach it with the keyboard. */}
@@ -357,6 +357,6 @@ export function WorkRequestPortalPage() {
 
         {recentRequests}
       </div>
-    </div>
+    </main>
   )
 }

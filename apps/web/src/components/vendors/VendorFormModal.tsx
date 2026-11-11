@@ -103,7 +103,7 @@ export function VendorFormModal({ open, onClose, vendor }: VendorFormModalProps)
             <input type="checkbox" className="mt-0.5 rounded border-gray-300" {...form.register('active')} />
             <span>
               {t('vendors.form.active')}
-              <span className="block text-xs text-gray-500">
+              <span className="block text-xs text-gray-500 dark:text-gray-400">
                 {t('vendors.form.active_help')}
               </span>
             </span>

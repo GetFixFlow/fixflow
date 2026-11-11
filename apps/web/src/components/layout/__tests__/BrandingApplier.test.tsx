@@ -24,10 +24,10 @@ const mount = () => render(
 
 describe('BrandingApplier', () => {
   it("puts the company's colour on the whole app", async () => {
-    server.use(http.get('/api/v1/branding', () => HttpResponse.json({ branding: branding({ primary_color: '#16a34a' }) })))
+    server.use(http.get('/api/v1/branding', () => HttpResponse.json({ branding: branding({ primary_color: '#15803d' }) })))
     mount()
 
-    await waitFor(() => expect(document.documentElement.style.getPropertyValue('--brand-600')).toBe('22 163 74'))
+    await waitFor(() => expect(document.documentElement.style.getPropertyValue('--brand-600')).toBe('21 128 61'))
   })
 
   it("uses the company's favicon, keeping the original to go back to", async () => {

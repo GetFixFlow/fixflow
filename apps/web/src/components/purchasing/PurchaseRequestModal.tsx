@@ -101,7 +101,7 @@ export function PurchaseRequestModal({ onClose, order, part, canPrice = false }:
         <div className="space-y-2">
           <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('purchasing.request.parts')}</p>
           {rows.length === 0 && !adding && (
-            <p className="rounded-lg border-2 border-dashed border-gray-200 py-4 text-center text-sm text-gray-400 dark:border-gray-700">
+            <p className="rounded-lg border-2 border-dashed border-gray-200 py-4 text-center text-sm text-gray-500 dark:text-gray-400 dark:border-gray-700">
               {t('purchasing.request.no_parts')}
             </p>
           )}
@@ -109,9 +109,9 @@ export function PurchaseRequestModal({ onClose, order, part, canPrice = false }:
             <div key={row.part_id} className="flex items-end gap-2 rounded-lg border border-gray-200 p-2 dark:border-gray-700">
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">{row.name}</p>
-                {row.sku && <p className="text-xs text-gray-400">{row.sku}</p>}
+                {row.sku && <p className="text-xs text-gray-500 dark:text-gray-400">{row.sku}</p>}
               </div>
-              <label className="text-xs text-gray-500">
+              <label className="text-xs text-gray-500 dark:text-gray-400">
                 {t('purchasing.request.how_many', { unit: row.unit })}
                 <input
                   type="number" min="0" step="any" value={row.quantity} aria-label={t('purchasing.request.how_many_aria', { name: row.name })}
@@ -120,7 +120,7 @@ export function PurchaseRequestModal({ onClose, order, part, canPrice = false }:
                 />
               </label>
               {canPrice && (
-                <label className="text-xs text-gray-500">
+                <label className="text-xs text-gray-500 dark:text-gray-400">
                   {t('purchasing.request.each')}
                   <input
                     type="number" min="0" step="any" value={row.unit_cost} aria-label={t('purchasing.request.cost_aria', { name: row.name })}
@@ -130,7 +130,7 @@ export function PurchaseRequestModal({ onClose, order, part, canPrice = false }:
                 </label>
               )}
               <Button type="button" variant="ghost" size="icon" aria-label={t('purchasing.request.remove_aria', { name: row.name })} onClick={() => setRows((all) => all.filter((_, i) => i !== index))}>
-                <Trash2 className="h-4 w-4 text-red-500" />
+                <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
               </Button>
             </div>
           ))}
@@ -148,12 +148,12 @@ export function PurchaseRequestModal({ onClose, order, part, canPrice = false }:
                     onClick={() => { setRows((all) => [...all, rowFor(p, String(suggestedQuantity(p)))]); setAdding(false); setSearch('') }}
                     className="flex w-full items-center justify-between rounded px-2 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
-                    <span className="text-gray-900 dark:text-gray-100">{p.name} <span className="ml-1 text-xs text-gray-400">{p.sku}</span></span>
-                    <span className="text-xs text-gray-400">{t('purchasing.request.in_stock', { quantity: p.quantity_on_hand })}</span>
+                    <span className="text-gray-900 dark:text-gray-100">{p.name} <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">{p.sku}</span></span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{t('purchasing.request.in_stock', { quantity: p.quantity_on_hand })}</span>
                   </button>
                 ))}
                 {!isLoading && choices.length === 0 && (
-                  <p className="px-2 py-1 text-xs text-gray-400">{search ? t('purchasing.request.no_matching') : t('purchasing.request.no_other')}</p>
+                  <p className="px-2 py-1 text-xs text-gray-500 dark:text-gray-400">{search ? t('purchasing.request.no_matching') : t('purchasing.request.no_other')}</p>
                 )}
               </div>
               <Button type="button" variant="ghost" size="sm" className="w-full" onClick={() => { setAdding(false); setSearch('') }}>{t('common.actions.cancel')}</Button>
@@ -163,7 +163,7 @@ export function PurchaseRequestModal({ onClose, order, part, canPrice = false }:
               <Plus className="mr-1 h-4 w-4" />{t('purchasing.request.add_part')}
             </Button>
           )}
-          {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+          {error && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{error}</p>}
         </div>
 
         <div>

@@ -309,7 +309,7 @@ export function AssetsListPage() {
                         {asset.open_work_orders_count}
                       </span>
                     ) : (
-                      <span className="text-gray-400">—</span>
+                      <span className="text-gray-500 dark:text-gray-400">—</span>
                     )}
                   </td>
                   <td
@@ -319,7 +319,7 @@ export function AssetsListPage() {
                     <DropdownMenu.Root>
                       <DropdownMenu.Trigger asChild>
                         <button
-                          className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                          className="flex h-8 w-8 items-center justify-center rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
                           aria-label={t('assets.list.actions_aria')}
                         >
                           <MoreVertical className="h-4 w-4" />

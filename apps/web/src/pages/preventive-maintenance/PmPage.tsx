@@ -46,7 +46,7 @@ export function PmPage() {
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="font-medium text-gray-900 dark:text-gray-100">{pm.name}</p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       {pm.frequency_type.replace(/_/g, ' ')} · Next due: {meterDueText(pm) ?? (pm.next_due_at ? formatDate(new Date(pm.next_due_at)) : '—')}
                     </p>
                   </div>

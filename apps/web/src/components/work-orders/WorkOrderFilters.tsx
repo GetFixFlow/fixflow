@@ -97,7 +97,7 @@ function MultiSelectDropdown({ label, options, selected, onChange }: MultiSelect
               type="checkbox"
               checked={selected.includes(opt.value)}
               onChange={() => toggle(opt.value)}
-              className="h-4 w-4 rounded border-gray-300 text-brand-600"
+              className="h-4 w-4 rounded border-gray-300 text-brand-600 dark:text-brand-400"
             />
             {opt.label}
           </label>
@@ -148,7 +148,7 @@ export function WorkOrderFilters({ filters, onChange, showAssigneeFilter = false
       {/* Row 1: search + dropdowns */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-48">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
           <Input
             className="pl-9"
             placeholder={t('workOrders.filters.search')}
@@ -179,7 +179,7 @@ export function WorkOrderFilters({ filters, onChange, showAssigneeFilter = false
             type="checkbox"
             checked={filters.overdue_only ?? false}
             onChange={(e) => update({ overdue_only: e.target.checked })}
-            className="h-4 w-4 rounded border-gray-300 text-brand-600"
+            className="h-4 w-4 rounded border-gray-300 text-brand-600 dark:text-brand-400"
           />
           <Filter className="h-3.5 w-3.5" />
           {t('workOrders.filters.overdue')}

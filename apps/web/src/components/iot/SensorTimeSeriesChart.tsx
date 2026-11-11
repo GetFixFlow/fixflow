@@ -73,7 +73,7 @@ export function SensorTimeSeriesChart({ metrics, className }: SensorTimeSeriesCh
           {metrics.map((m, i) => (
             <button key={m.name} onClick={() => toggleMetric(m.name)}
               className={cn('flex items-center gap-1.5 rounded-full px-3 py-1 text-xs border transition-all',
-                activeMetrics.has(m.name) ? 'text-white border-transparent' : 'border-gray-300 text-gray-500')}
+                activeMetrics.has(m.name) ? 'text-white border-transparent' : 'border-gray-300 text-gray-500 dark:text-gray-400')}
               style={activeMetrics.has(m.name) ? { background: COLORS[i % COLORS.length] } : {}}>
               <span className="h-2 w-2 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
               <span className="capitalize">{m.name}</span>
@@ -84,7 +84,7 @@ export function SensorTimeSeriesChart({ metrics, className }: SensorTimeSeriesCh
           {RANGES.map((r) => (
             <button key={r.key} onClick={() => setRange(r.key)}
               className={cn('px-2 py-1 text-xs rounded transition-colors',
-                range === r.key ? 'bg-brand-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 hover:bg-gray-200')}>
+                range === r.key ? 'bg-brand-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200')}>
               {r.label}
             </button>
           ))}

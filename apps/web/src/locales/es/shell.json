@@ -89,6 +89,9 @@
       "none_available": "No hay ubicaciones disponibles",
       "unknown": "Ubicación desconocida",
       "path": "Ruta de la ubicación"
-    }
+    },
+    "skip_to_content": "Saltar al contenido principal",
+    "main_menu": "Principal",
+    "settings_menu": "Configuración"
   }
 }

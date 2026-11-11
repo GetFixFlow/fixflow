@@ -99,24 +99,24 @@ export function WorkOrderForm({
         </h2>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label htmlFor="wo-title" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
             {t('workOrders.form.title')}
           </label>
-          <Input
+          <Input id="wo-title"
             {...register('title')}
             placeholder={t('workOrders.form.title_placeholder')}
             className={errors.title ? 'border-red-400' : ''}
           />
           {errors.title && (
-            <p className="mt-1 text-xs text-red-500">{t(errors.title.message ?? '')}</p>
+            <p className="mt-1 text-xs text-red-600 dark:text-red-400">{t(errors.title.message ?? '')}</p>
           )}
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label htmlFor="wo-description" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
             {t('workOrders.form.description')}
           </label>
-          <textarea
+          <textarea id="wo-description"
             {...register('description')}
             rows={4}
             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
@@ -125,14 +125,15 @@ export function WorkOrderForm({
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <p id="wo-priority-label" className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
             {t('workOrders.form.priority')}
-          </label>
-          <div className="flex flex-wrap gap-2">
+          </p>
+          <div role="group" aria-labelledby="wo-priority-label" className="flex flex-wrap gap-2">
             {PRIORITY_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
                 type="button"
+                aria-pressed={priority === opt.value}
                 onClick={() => setValue('priority', opt.value, { shouldDirty: true })}
                 className={cn(
                   'rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all',
@@ -155,7 +156,7 @@ export function WorkOrderForm({
         </h2>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label htmlFor="wo-asset" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
             {t('workOrders.form.asset')}
           </label>
           {lockedAssetId ? (
@@ -168,6 +169,7 @@ export function WorkOrderForm({
               control={control}
               render={({ field }) => (
                 <AssetSelect
+                  id="wo-asset"
                   value={field.value ?? null}
                   onChange={(id) => field.onChange(id)}
                 />
@@ -175,7 +177,7 @@ export function WorkOrderForm({
             />
           )}
           {errors.asset_id && (
-            <p className="mt-1 text-xs text-red-500">{t(errors.asset_id.message ?? '')}</p>
+            <p className="mt-1 text-xs text-red-600 dark:text-red-400">{t(errors.asset_id.message ?? '')}</p>
           )}
         </div>
       </section>
@@ -188,19 +190,19 @@ export function WorkOrderForm({
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label htmlFor="wo-due-date" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               {t('workOrders.form.due_date')}
             </label>
-            <Input
+            <Input id="wo-due-date"
               type="datetime-local"
               {...register('due_date')}
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label htmlFor="wo-estimated-hours" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               {t('workOrders.form.estimated_hours')}
             </label>
-            <Input
+            <Input id="wo-estimated-hours"
               type="number"
               step="0.5"
               min="0.5"
@@ -234,10 +236,10 @@ export function WorkOrderForm({
 
         {mode === 'create' && (
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label htmlFor="wo-initial-comment" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               {t('workOrders.form.initial_comment')}
             </label>
-            <textarea
+            <textarea id="wo-initial-comment"
               {...register('initial_comment')}
               rows={3}
               className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"

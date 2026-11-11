@@ -18,7 +18,7 @@ export function SessionsTable({ sessions, onRevoke, onRevokeAll, isRevoking }: S
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-100 dark:border-gray-700 text-xs text-gray-400 uppercase">
+            <tr className="border-b border-gray-100 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400 uppercase">
               <th className="text-left py-2">{t('settings.sessions.device')}</th>
               <th className="text-left py-2">{t('settings.sessions.address')}</th>
               <th className="text-left py-2">{t('settings.sessions.last_active')}</th>
@@ -31,8 +31,8 @@ export function SessionsTable({ sessions, onRevoke, onRevokeAll, isRevoking }: S
                 <td className="py-2.5">
                   <div className="flex items-center gap-2">
                     {/iOS|Android/.test(s.device)
-                      ? <Smartphone className="h-4 w-4 text-gray-400" />
-                      : <Monitor className="h-4 w-4 text-gray-400" />}
+                      ? <Smartphone className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                      : <Monitor className="h-4 w-4 text-gray-500 dark:text-gray-400" />}
                     <span className="font-medium">{s.device}</span>
                     {s.current && (
                       <span className="text-[10px] rounded-full bg-green-100 text-green-700 px-1.5 py-0.5">
@@ -41,8 +41,8 @@ export function SessionsTable({ sessions, onRevoke, onRevokeAll, isRevoking }: S
                     )}
                   </div>
                 </td>
-                <td className="py-2.5 font-mono text-xs text-gray-500">{s.ip_address ?? t('common.state.unknown')}</td>
-                <td className="py-2.5 text-gray-500">
+                <td className="py-2.5 font-mono text-xs text-gray-500 dark:text-gray-400">{s.ip_address ?? t('common.state.unknown')}</td>
+                <td className="py-2.5 text-gray-500 dark:text-gray-400">
                   {s.current
                     ? t('settings.sessions.now')
                     : timeAgo(s.last_active_at)}
@@ -54,7 +54,7 @@ export function SessionsTable({ sessions, onRevoke, onRevokeAll, isRevoking }: S
                       size="sm"
                       onClick={() => onRevoke(s.id)}
                       disabled={isRevoking}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs"
+                      className="text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50 text-xs"
                     >
                       {t('shell.header.sign_out')}
                     </Button>
@@ -69,7 +69,7 @@ export function SessionsTable({ sessions, onRevoke, onRevokeAll, isRevoking }: S
         variant="outline"
         onClick={onRevokeAll}
         disabled={isRevoking || sessions.every((s) => s.current)}
-        className="text-red-600 border-red-300 hover:bg-red-50 w-full sm:w-auto"
+        className="text-red-600 dark:text-red-400 border-red-300 hover:bg-red-50 w-full sm:w-auto"
       >
         {t('settings.sessions.sign_out_others')}
       </Button>

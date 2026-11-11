@@ -98,7 +98,7 @@ export function WorkOrderCalendarView({ workOrders }: WorkOrderCalendarViewProps
         {weekdayLabels().map((d) => (
           <div
             key={d}
-            className="py-2 text-xs font-medium uppercase text-gray-400 dark:text-gray-500"
+            className="py-2 text-xs font-medium uppercase text-gray-500 dark:text-gray-400"
           >
             {d}
           </div>
@@ -116,36 +116,37 @@ export function WorkOrderCalendarView({ workOrders }: WorkOrderCalendarViewProps
           return (
             <div
               key={key}
-              onClick={() => setSelectedDate(isSameDay(day, selectedDate ?? new Date(0)) ? null : day)}
               className={cn(
-                'min-h-[90px] cursor-pointer bg-white p-2 dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800',
+                'relative min-h-[90px] bg-white p-2 dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800',
                 !inMonth && 'bg-gray-50 dark:bg-gray-900/50',
                 isToday(day) && 'ring-2 ring-inset ring-brand-400',
                 isSelected && 'bg-brand-50 dark:bg-brand-900/20',
               )}
             >
-              <div
+              {/* The day is a button (its hit area stretched over the whole cell), so the keyboard can pick a day; the work orders in it are their own buttons above it. */}
+              <button
+                type="button"
+                aria-pressed={!!isSelected}
+                aria-label={new Intl.DateTimeFormat(currentLanguage(), { dateStyle: 'full' }).format(day)}
+                onClick={() => setSelectedDate(isSameDay(day, selectedDate ?? new Date(0)) ? null : day)}
                 className={cn(
-                  'mb-1 flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium',
+                  'mb-1 flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium after:absolute after:inset-0 after:content-[\'\'] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500',
                   isToday(day)
                     ? 'bg-brand-600 text-white'
                     : inMonth
                     ? 'text-gray-700 dark:text-gray-300'
-                    : 'text-gray-400 dark:text-gray-600',
+                    : 'text-gray-500 dark:text-gray-400',
                 )}
               >
                 {format(day, 'd')}
-              </div>
+              </button>
 
               <div className="space-y-0.5">
                 {dayWOs.slice(0, 3).map((wo) => (
                   <button
                     key={wo.id}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      navigate(`/work-orders/${wo.id}`)
-                    }}
-                    className="flex w-full items-center gap-1 rounded px-1 py-0.5 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
+                    onClick={() => navigate(`/work-orders/${wo.id}`)}
+                    className="relative z-10 flex w-full items-center gap-1 rounded px-1 py-0.5 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     <span
                       className={cn(
@@ -157,7 +158,7 @@ export function WorkOrderCalendarView({ workOrders }: WorkOrderCalendarViewProps
                   </button>
                 ))}
                 {dayWOs.length > 3 && (
-                  <p className="pl-1 text-xs text-gray-400">{t('workOrders.calendar.more', { count: dayWOs.length - 3 })}</p>
+                  <p className="pl-1 text-xs text-gray-500 dark:text-gray-400">{t('workOrders.calendar.more', { count: dayWOs.length - 3 })}</p>
                 )}
               </div>
             </div>
@@ -184,7 +185,7 @@ export function WorkOrderCalendarView({ workOrders }: WorkOrderCalendarViewProps
                 <span className="flex-1 text-sm font-medium text-gray-900 dark:text-gray-100">
                   {wo.title}
                 </span>
-                <span className="font-mono text-xs text-gray-400">{wo.work_order_number}</span>
+                <span className="font-mono text-xs text-gray-500 dark:text-gray-400">{wo.work_order_number}</span>
               </button>
             ))}
           </div>

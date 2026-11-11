@@ -23,15 +23,15 @@ const REFRESH_MS = 60_000
 function Notice({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation()
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900">
+    <main className="flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900">
       <div className="absolute right-4 top-4 z-10"><LanguageSelect /></div>
       <div className="text-center">
         {children}
-        <Link to="/request" className="mt-3 block text-sm text-brand-600 hover:underline">
+        <Link to="/request" className="mt-3 block text-sm text-brand-600 dark:text-brand-400 hover:underline">
           {t('workOrders.status.new')}
         </Link>
       </div>
-    </div>
+    </main>
   )
 }
 
@@ -96,7 +96,7 @@ export function WorkRequestStatusPage() {
   const currentIdx = STATUS_STEPS.findIndex((s) => s.key === data.status)
 
   return (
-    <div className="flex min-h-screen items-start justify-center bg-gray-50 p-4 dark:bg-gray-900">
+    <main className="flex min-h-screen items-start justify-center bg-gray-50 p-4 dark:bg-gray-900">
       <div className="absolute right-4 top-4 z-10"><LanguageSelect /></div>
       <div className="w-full max-w-lg space-y-6 py-12">
         <div className="text-center">
@@ -128,7 +128,7 @@ export function WorkRequestStatusPage() {
 
           {cancelled ? (
             <div className="flex items-start gap-3">
-              <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-gray-400" />
+              <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-gray-500 dark:text-gray-400" />
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 {t('workOrders.status.closed')}
               </p>
@@ -157,7 +157,7 @@ export function WorkRequestStatusPage() {
                       <p
                         className={cn(
                           'text-sm font-medium',
-                          done ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400 dark:text-gray-500',
+                          done ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400',
                         )}
                       >
                         {t(`workOrders.status.step_${step.key}`)}
@@ -187,6 +187,6 @@ export function WorkRequestStatusPage() {
           </Link>
         </div>
       </div>
-    </div>
+    </main>
   )
 }

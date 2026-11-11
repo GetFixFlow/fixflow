@@ -237,3 +237,15 @@ describe('UsersPage', () => {
     })
   })
 })
+
+describe('UsersPage: what a screen reader announces for each control', () => {
+  it('names each row\'s checkbox and menu button after the person, and the empty column header', () => {
+    render(<UsersPage />, { wrapper: Wrapper })
+
+    expect(screen.getByRole('checkbox', { name: 'Select Bob Jones' })).toBeInTheDocument()
+    const menu = screen.getByRole('button', { name: 'Actions for Bob Jones' })
+    expect(menu).toHaveAttribute('aria-haspopup', 'menu')
+    expect(menu).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.getByRole('columnheader', { name: 'Actions' })).toBeInTheDocument()
+  })
+})

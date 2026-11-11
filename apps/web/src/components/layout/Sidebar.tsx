@@ -82,7 +82,7 @@ export function Sidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-4">
+      <nav aria-label={t('shell.main_menu')} className="flex-1 overflow-y-auto py-4">
         <ul className="space-y-1 px-2">
           {visibleItems.map((item) => (
             <li key={item.to}>
@@ -110,7 +110,7 @@ export function Sidebar() {
       <div className="border-t border-gray-200 p-2 dark:border-gray-700">
         <button
           onClick={toggleSidebar}
-          className="flex w-full items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+          className="flex w-full items-center justify-center rounded-md p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
           aria-label={sidebarCollapsed ? t('shell.sidebar.expand') : t('shell.sidebar.collapse')}
         >
           {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}

@@ -17,7 +17,7 @@ export function WorkOrderTimeline({ status }: WorkOrderTimelineProps) {
   const effectiveIdx = currentIdx === -1 ? 0 : currentIdx
 
   return (
-    <div className="flex items-center gap-0" aria-label={t('workOrders.timeline.progress')}>
+    <div role="group" className="flex items-center gap-0" aria-label={t('workOrders.timeline.progress')}>
       {STAGE_ORDER.map((stage, idx) => {
         const done = idx < effectiveIdx
         const active = idx === effectiveIdx
@@ -33,8 +33,9 @@ export function WorkOrderTimeline({ status }: WorkOrderTimelineProps) {
                     ? 'border-brand-600 bg-brand-600 text-white'
                     : active
                     ? 'border-brand-600 bg-white text-brand-600 dark:bg-gray-900'
-                    : 'border-gray-300 bg-white text-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-600',
+                    : 'border-gray-400 bg-white text-gray-500 dark:border-gray-500 dark:bg-gray-900 dark:text-gray-400',
                 )}
+                role="img"
                 aria-label={t('workOrders.timeline.stage', { stage: label('status', stage), state: t(`workOrders.timeline.${done ? 'completed' : active ? 'current' : 'pending'}`) })}
               >
                 {done ? (
@@ -48,7 +49,7 @@ export function WorkOrderTimeline({ status }: WorkOrderTimelineProps) {
                   'mt-1 hidden text-[10px] font-medium sm:block',
                   done || active
                     ? 'text-brand-600 dark:text-brand-400'
-                    : 'text-gray-400 dark:text-gray-500',
+                    : 'text-gray-500 dark:text-gray-400',
                 )}
               >
                 {label('status', stage)}

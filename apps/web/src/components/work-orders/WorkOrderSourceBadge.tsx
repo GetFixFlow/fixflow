@@ -20,7 +20,7 @@ const SOURCE_CONFIG: Record<
   iot_rule: {
     labelKey: 'workOrders.source.iot_rule',
     Icon: Zap,
-    className: 'text-yellow-600 dark:text-yellow-400',
+    className: 'text-yellow-700 dark:text-yellow-400',
   },
 }
 

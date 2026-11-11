@@ -64,7 +64,7 @@ export function LocationsPage() {
       {/* Left panel */}
       <div className="flex w-80 shrink-0 flex-col border-r border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">{t('assets.locations.title')}</h2>
+          <h1 className="text-base font-semibold text-gray-900 dark:text-gray-100">{t('assets.locations.title')}</h1>
           {canManage && (
             <div className="flex gap-1.5">
               <Button size="sm" variant="outline" onClick={() => navigate('/import?kind=locations')} aria-label={t('assets.locations.import_aria')}>
@@ -120,9 +120,9 @@ export function LocationsPage() {
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                     {selectedLocation.name}
-                  </h1>
+                  </h2>
                   <Badge variant="secondary" className="capitalize">
                     {typeText(selectedLocation.location_type)}
                   </Badge>
@@ -171,7 +171,7 @@ export function LocationsPage() {
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <Package className="h-8 w-8 rounded-lg bg-green-100 p-1.5 text-green-600 dark:bg-green-900/40 dark:text-green-400" />
+                    <Package className="h-8 w-8 rounded-lg bg-green-100 p-1.5 text-green-700 dark:bg-green-900/40 dark:text-green-400" />
                     <div>
                       <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                         {selectedLocation.asset_count ?? locationAssets.length}
@@ -184,7 +184,7 @@ export function LocationsPage() {
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <ClipboardList className="h-8 w-8 rounded-lg bg-orange-100 p-1.5 text-orange-600 dark:bg-orange-900/40 dark:text-orange-400" />
+                    <ClipboardList className="h-8 w-8 rounded-lg bg-orange-100 p-1.5 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400" />
                     <div>
                       <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">—</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">{t('assets.locations.open_wos')}</p>

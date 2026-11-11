@@ -19,7 +19,7 @@ export function WOByPriorityChart({ data }: { data: PriorityData[] }) {
       </ResponsiveContainer>
       <table className="w-full text-xs">
         <thead>
-          <tr className="text-gray-400 border-b border-gray-100 dark:border-gray-700">
+          <tr className="text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
             <th className="text-left py-1">Priority</th>
             <th className="text-right py-1">Created</th>
             <th className="text-right py-1">Completed</th>

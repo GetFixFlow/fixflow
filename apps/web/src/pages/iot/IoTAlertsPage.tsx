@@ -144,14 +144,14 @@ export function IoTAlertsPage() {
             className={cn(
               'px-4 py-2 text-sm font-medium border-b-2 transition-colors',
               statusTab === tab.id
-                ? 'border-brand-600 text-brand-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300',
+                ? 'border-brand-600 text-brand-600 dark:text-brand-400'
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
             )}
           >
             {tab.label}
             {tab.count > 0 && (
               <span className={cn('ml-1.5 rounded-full px-1.5 py-0.5 text-xs',
-                statusTab === tab.id ? 'bg-brand-100 text-brand-700 dark:bg-brand-900/30' : 'bg-gray-100 dark:bg-gray-700 text-gray-500')}>
+                statusTab === tab.id ? 'bg-brand-100 text-brand-700 dark:bg-brand-900/30' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300')}>
                 {tab.count}
               </span>
             )}
@@ -169,7 +169,7 @@ export function IoTAlertsPage() {
           <Button size="sm" variant="outline" onClick={() => bulkResolve.mutate([...selectedIds])}>
             Resolve All
           </Button>
-          <button onClick={() => setSelectedIds(new Set())} className="ml-auto text-xs text-gray-400 hover:text-gray-600">Clear</button>
+          <button onClick={() => setSelectedIds(new Set())} className="ml-auto text-xs text-gray-500 dark:text-gray-400 hover:text-gray-600">Clear</button>
         </div>
       )}
 
@@ -183,8 +183,8 @@ export function IoTAlertsPage() {
           ) : filtered.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-4xl mb-2">✅</p>
-              <p className="text-sm font-medium text-green-600">No alerts</p>
-              <p className="text-xs text-gray-400 mt-1">All clear!</p>
+              <p className="text-sm font-medium text-green-700 dark:text-green-400">No alerts</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">All clear!</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -192,16 +192,16 @@ export function IoTAlertsPage() {
                 <thead className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
                   <tr>
                     <th className="w-10 px-4 py-3">
-                      <input type="checkbox" checked={selectedIds.size === filtered.length && filtered.length > 0} onChange={toggleAll} className="rounded" />
+                      <input type="checkbox" aria-label="Select all alerts" checked={selectedIds.size === filtered.length && filtered.length > 0} onChange={toggleAll} className="rounded" />
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Severity</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Alert</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Metric</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Value</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Threshold</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Triggered</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Severity</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Alert</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Metric</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Value</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Threshold</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Triggered</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -220,6 +220,7 @@ export function IoTAlertsPage() {
                         <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                           <input
                             type="checkbox"
+                            aria-label={`Select alert ${alert.rule_name ?? alert.message ?? alert.id}`}
                             checked={selectedIds.has(alert.id)}
                             onChange={() => toggleSelect(alert.id)}
                             className="rounded"
@@ -231,13 +232,13 @@ export function IoTAlertsPage() {
                             {alert.rule_name ?? alert.message}
                           </p>
                           {alert.asset_id && (
-                            <p className="text-xs text-gray-400">Asset #{alert.asset_id}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Asset #{alert.asset_id}</p>
                           )}
                         </td>
                         <td className="px-4 py-3 font-mono text-xs">{alert.metric_name}</td>
-                        <td className="px-4 py-3 font-mono text-xs font-medium text-red-600">{alert.sensor_value} {alert.metric_unit}</td>
+                        <td className="px-4 py-3 font-mono text-xs font-medium text-red-600 dark:text-red-400">{alert.sensor_value} {alert.metric_unit}</td>
                         <td className="px-4 py-3 font-mono text-xs">{alert.threshold_value} {alert.metric_unit}</td>
-                        <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
+                        <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
                           {formatDistanceToNow(new Date(alert.created_at), { addSuffix: true })}
                         </td>
                         <td className="px-4 py-3">
@@ -254,7 +255,7 @@ export function IoTAlertsPage() {
                           <div className="relative">
                             <button
                               onClick={() => setOpenMenuId(openMenuId === alert.id ? null : alert.id)}
-                              className="rounded p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                              className="rounded p-1 text-gray-500 dark:text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                             >
                               <MoreVertical className="h-4 w-4" />
                             </button>

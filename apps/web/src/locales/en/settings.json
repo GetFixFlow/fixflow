@@ -60,7 +60,9 @@
       "errors": {
         "name_required": "Name is required",
         "password_min": "At least 10 characters"
-      }
+      },
+      "show_password": "Show password",
+      "hide_password": "Hide password"
     },
     "sessions": {
       "title": "Where you are signed in",

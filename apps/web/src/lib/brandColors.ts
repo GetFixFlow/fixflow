@@ -2,7 +2,7 @@
 export const DEFAULT_PRIMARY = '#2563eb'
 
 /** White text goes on the primary colour, so it has to be dark enough to read. Matches the server. */
-export const MIN_CONTRAST_WITH_WHITE = 3
+export const MIN_CONTRAST_WITH_WHITE = 4.5
 
 const STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const
 

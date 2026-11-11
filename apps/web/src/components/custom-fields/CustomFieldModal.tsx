@@ -82,7 +82,7 @@ export function CustomFieldModal({ entity, field, onClose }: CustomFieldModalPro
               placeholder={'One to a line\nLow\nMedium\nHigh'}
               className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
             />
-            {field && <p className="mt-1 text-xs text-gray-500">Work already filled in with a choice you remove keeps it.</p>}
+            {field && <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Work already filled in with a choice you remove keeps it.</p>}
           </div>
         )}
 
@@ -99,7 +99,7 @@ export function CustomFieldModal({ entity, field, onClose }: CustomFieldModalPro
           </label>
         </div>
 
-        {problem && <p role="alert" className="text-sm text-red-600">{problem}</p>}
+        {problem && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{problem}</p>}
 
         <div className="flex gap-2 pt-2">
           <Button type="button" variant="outline" onClick={onClose} className="flex-1">Cancel</Button>

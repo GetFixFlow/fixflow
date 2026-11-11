@@ -2,6 +2,8 @@ import { useTranslation } from 'react-i18next'
 import { useState, useRef, useEffect } from 'react'
 import { Upload, FileText, Download, X, Camera, CloudOff } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useDialogA11y } from '@/hooks/useDialogA11y'
+import { onActivate } from '@/lib/a11y'
 import { Button } from '@/components/ui/Button'
 import { useWorkOrderAttachments, useUploadAttachment } from '@/hooks/useWorkOrders'
 import { usePendingActions } from '@/hooks/useOfflineQueue'
@@ -44,7 +46,7 @@ function AttachmentThumbnail({ attachment, onClick }: AttachmentThumbnailProps) 
             {isPdf ? (
               <FileText className="h-12 w-12 text-red-400" />
             ) : (
-              <FileText className="h-12 w-12 text-gray-400" />
+              <FileText className="h-12 w-12 text-gray-500 dark:text-gray-400" />
             )}
           </div>
         )}
@@ -102,7 +104,7 @@ function PendingPhoto({ photo }: { photo: QueuedPhoto }) {
         <img src={url} alt={photo.filename} className="h-32 w-full object-cover opacity-80" />
       ) : (
         <div className="flex h-32 items-center justify-center">
-          <FileText className="h-12 w-12 text-gray-400" />
+          <FileText className="h-12 w-12 text-gray-500 dark:text-gray-400" />
         </div>
       )}
       <span className="absolute left-1 top-1 flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">
@@ -118,13 +120,19 @@ function PendingPhoto({ photo }: { photo: QueuedPhoto }) {
 // Lightbox
 function Lightbox({ url, filename, onClose }: { url: string; filename: string; onClose: () => void }) {
   const { t } = useTranslation()
+  const box = useDialogA11y<HTMLDivElement>(true, onClose)
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
-      onClick={onClose}
+      ref={box}
+      role="dialog"
+      aria-modal="true"
+      aria-label={filename}
+      className="fixed inset-0 z-50 flex items-center justify-center"
     >
+      {/* The dimmed backdrop: a click on it closes, as the keyboard does with Escape or the button. */}
+      <div className="absolute inset-0 bg-black/80" onClick={onClose} aria-hidden="true" />
       <button
-        className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+        className="absolute right-4 top-4 z-10 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
         onClick={onClose}
         aria-label={t('common.actions.close')}
       >
@@ -133,8 +141,7 @@ function Lightbox({ url, filename, onClose }: { url: string; filename: string; o
       <img
         src={url}
         alt={filename}
-        className="max-h-[90vh] max-w-[90vw] rounded-lg object-contain"
-        onClick={(e) => e.stopPropagation()}
+        className="relative max-h-[90vh] max-w-[90vw] rounded-lg object-contain"
       />
     </div>
   )
@@ -202,7 +209,7 @@ export function WorkOrderAttachments({ workOrderId, editable = true }: WorkOrder
           <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
             <div className="h-2 w-1/2 animate-pulse rounded-full bg-brand-500" />
           </div>
-          <span className="text-xs text-gray-500 truncate max-w-32">{name}</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-32">{name}</span>
         </div>
       ))}
 
@@ -222,15 +229,16 @@ export function WorkOrderAttachments({ workOrderId, editable = true }: WorkOrder
           onDragLeave={() => setDragOver(false)}
           onDrop={onDrop}
           onClick={() => inputRef.current?.click()}
+          onKeyDown={onActivate(() => inputRef.current?.click())}
           role="button"
           tabIndex={0}
           aria-label={t('workOrders.attachments.upload')}
         >
-          <Upload className="mb-2 h-8 w-8 text-gray-400" />
+          <Upload className="mb-2 h-8 w-8 text-gray-500 dark:text-gray-400" />
           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
             {t('workOrders.attachments.drop')}
           </p>
-          <p className="mt-1 text-xs text-gray-400">
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
             {t('workOrders.attachments.limits', { remaining: 20 - attachments.length - pendingPhotos.length })}
           </p>
           <input

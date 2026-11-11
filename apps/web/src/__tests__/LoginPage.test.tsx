@@ -80,7 +80,7 @@ describe('LoginPage', () => {
   it("shows the company's logo, headline and subtitle from Settings, Branding", async () => {
     server.use(http.get('/api/v1/branding', () => HttpResponse.json({
       branding: {
-        name: 'Acme Corp', logo_url: '/api/v1/storage/x/logo.png', favicon_url: null, primary_color: '#16a34a',
+        name: 'Acme Corp', logo_url: '/api/v1/storage/x/logo.png', favicon_url: null, primary_color: '#15803d',
         login_headline: 'Acme Maintenance', login_subtitle: 'Sign in with your work email',
       },
     })))

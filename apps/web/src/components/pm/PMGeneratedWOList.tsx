@@ -16,7 +16,7 @@ export function PMGeneratedWOList({ pmId, limit = 5 }: PMGeneratedWOListProps) {
       {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-8 w-full" />)}
     </div>
   )
-  if (wos.length === 0) return <p className="text-sm text-gray-400 italic">No work orders yet</p>
+  if (wos.length === 0) return <p className="text-sm text-gray-500 dark:text-gray-400 italic">No work orders yet</p>
 
   return (
     <div className="space-y-1">
@@ -27,7 +27,7 @@ export function PMGeneratedWOList({ pmId, limit = 5 }: PMGeneratedWOListProps) {
           </Link>
           <div className="flex items-center gap-2">
             <Badge variant={statusBadge(wo.status)}>{wo.status.replace('_', ' ')}</Badge>
-            <span className="text-xs text-gray-400">{formatDistanceToNow(new Date(wo.created_at), { addSuffix: true })}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">{formatDistanceToNow(new Date(wo.created_at), { addSuffix: true })}</span>
           </div>
         </div>
       ))}

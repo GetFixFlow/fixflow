@@ -58,7 +58,7 @@ export function VendorsPage() {
 
       <div className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
         <div className="relative min-w-[220px] flex-1">
-          <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+          <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
           <input
             type="search"
             value={search}
@@ -132,7 +132,7 @@ export function VendorsPage() {
                       )}
                       {canDelete && (
                         <Button variant="ghost" size="icon" onClick={() => remove(vendor)} aria-label={t('vendors.page.delete_aria', { name: vendor.name })}>
-                          <Trash2 className="h-4 w-4 text-red-500" />
+                          <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
                         </Button>
                       )}
                     </div>
@@ -146,7 +146,7 @@ export function VendorsPage() {
 
       {meta && meta.total_pages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">{t('vendors.page.page_of', { page: meta.current_page, pages: meta.total_pages })}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t('vendors.page.page_of', { page: meta.current_page, pages: meta.total_pages })}</p>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>{t('assets.list.previous')}</Button>
             <Button variant="outline" size="sm" disabled={page >= meta.total_pages} onClick={() => setPage((p) => p + 1)}>{t('assets.list.next')}</Button>

@@ -28,20 +28,20 @@ describe('AssetStatusChanger', () => {
 
   it('opens popover on click showing status options', async () => {
     render(<AssetStatusChanger asset={mockAsset} />, { wrapper })
-    await userEvent.click(screen.getByLabelText('Change asset status'))
+    await userEvent.click(screen.getByRole('button', { name: /change asset status/i }))
     expect(screen.getByText('Degraded')).toBeInTheDocument()
     expect(screen.getByText('Down')).toBeInTheDocument()
   })
 
   it('marks current status as current', async () => {
     render(<AssetStatusChanger asset={mockAsset} />, { wrapper })
-    await userEvent.click(screen.getByLabelText('Change asset status'))
+    await userEvent.click(screen.getByRole('button', { name: /change asset status/i }))
     expect(screen.getByText('current')).toBeInTheDocument()
   })
 
   it('shows confirmation for destructive status change (down)', async () => {
     render(<AssetStatusChanger asset={mockAsset} />, { wrapper })
-    await userEvent.click(screen.getByLabelText('Change asset status'))
+    await userEvent.click(screen.getByRole('button', { name: /change asset status/i }))
     // Click "down" - should show confirmation
     const downBtn = screen.getAllByText('Down')[0]
     await userEvent.click(downBtn)
@@ -50,7 +50,7 @@ describe('AssetStatusChanger', () => {
 
   it('shows confirmation for decommissioned', async () => {
     render(<AssetStatusChanger asset={mockAsset} />, { wrapper })
-    await userEvent.click(screen.getByLabelText('Change asset status'))
+    await userEvent.click(screen.getByRole('button', { name: /change asset status/i }))
     const decommBtn = screen.getByText('Decommissioned')
     await userEvent.click(decommBtn)
     expect(screen.getByText(/confirm/i)).toBeInTheDocument()
@@ -58,7 +58,7 @@ describe('AssetStatusChanger', () => {
 
   it('can cancel destructive status change', async () => {
     render(<AssetStatusChanger asset={mockAsset} />, { wrapper })
-    await userEvent.click(screen.getByLabelText('Change asset status'))
+    await userEvent.click(screen.getByRole('button', { name: /change asset status/i }))
     const downBtn = screen.getAllByText('Down')[0]
     await userEvent.click(downBtn)
     await userEvent.click(screen.getByText('Cancel'))

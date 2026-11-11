@@ -41,7 +41,7 @@ export function AdvancedSettingsPage() {
         <PageHeader title="Advanced Settings" />
         <Card>
           <CardContent className="p-8 text-center">
-            <p className="text-gray-500">Only administrators can change advanced settings.</p>
+            <p className="text-gray-500 dark:text-gray-400">Only administrators can change advanced settings.</p>
           </CardContent>
         </Card>
       </div>
@@ -69,8 +69,8 @@ export function AdvancedSettingsPage() {
         <CardContent className="space-y-4 p-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Public request form</h3>
-              <p className="mt-0.5 text-xs text-gray-500">
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100">Public request form</h2>
+              <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                 Anyone with the address, or who scans an asset&apos;s QR label, can report a problem without an account. Each request
                 becomes a work order and your managers are told.
               </p>
@@ -84,7 +84,7 @@ export function AdvancedSettingsPage() {
           </div>
 
           {isError ? (
-            <p role="alert" className="text-sm text-red-600">Could not load this setting, so it cannot be changed now. Reload the page to try again.</p>
+            <p role="alert" className="text-sm text-red-600 dark:text-red-400">Could not load this setting, so it cannot be changed now. Reload the page to try again.</p>
           ) : (
             <p role="status" className={cn('text-sm', formOpen ? 'text-green-700 dark:text-green-400' : 'text-amber-700 dark:text-amber-400')}>
               {formOpen
@@ -97,11 +97,11 @@ export function AdvancedSettingsPage() {
             <p className="mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Address of the form</p>
             <div className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-800">
               <code className="flex-1 truncate font-mono text-xs text-gray-600 dark:text-gray-400">{formAddress}</code>
-              <button type="button" onClick={copyAddress} aria-label="Copy the address" className="shrink-0 text-gray-400 hover:text-gray-600">
-                {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+              <button type="button" onClick={copyAddress} aria-label="Copy the address" className="shrink-0 text-gray-500 dark:text-gray-400 hover:text-gray-600">
+                {copied ? <Check className="h-4 w-4 text-green-700 dark:text-green-400" /> : <Copy className="h-4 w-4" />}
               </button>
             </div>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               An asset&apos;s own QR label (Assets, then the QR Code action on its row) opens this form with that asset already chosen.
             </p>
           </div>
@@ -112,8 +112,8 @@ export function AdvancedSettingsPage() {
         <CardContent className="space-y-3 p-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Two-factor sign-in</h3>
-              <p className="mt-0.5 text-xs text-gray-500">
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100">Two-factor sign-in</h2>
+              <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                 When this is on, everyone in the company must sign in with an authenticator app as well as their password. A person
                 who has not set it up is taken to do so first, and can do nothing else until they have. Anyone can already set it up
                 for themselves under Settings, Security.
@@ -139,12 +139,12 @@ export function AdvancedSettingsPage() {
       <Card>
         <CardContent className="flex items-center justify-between gap-4 p-5">
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100">System health</h3>
-            <p className="mt-0.5 text-xs text-gray-500">
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100">System health</h2>
+            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
               The version, the database, Redis, the background worker, email, IoT and storage, checked live, and whether a newer release exists.
             </p>
           </div>
-          <Link to="/settings/system-health" className="shrink-0 text-sm text-brand-600 hover:underline">Open System Health →</Link>
+          <Link to="/settings/system-health" className="shrink-0 text-sm text-brand-600 dark:text-brand-400 hover:underline">Open System Health →</Link>
         </CardContent>
       </Card>
     </div>

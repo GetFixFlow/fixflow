@@ -89,6 +89,9 @@
       "none_available": "No locations available",
       "unknown": "Unknown location",
       "path": "Location path"
-    }
+    },
+    "skip_to_content": "Skip to main content",
+    "main_menu": "Main",
+    "settings_menu": "Settings"
   }
 }

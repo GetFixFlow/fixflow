@@ -35,7 +35,7 @@ export function MTTRChart({ data, overall_avg }: { data: Record<GroupBy, MTTRDat
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr className="text-gray-400 border-b border-gray-100 dark:border-gray-700">
+            <tr className="text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
               <th className="text-left py-1 capitalize">{groupBy}</th>
               <th className="text-right py-1">WOs</th>
               <th className="text-right py-1">Avg Hrs</th>

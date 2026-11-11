@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/Input'
 import { cn } from '@/lib/utils'
 import { useReportStore } from '@/stores/reportStore'
 import { format } from 'date-fns'
+import { useTranslation } from 'react-i18next'
+import { useDialogA11y } from '@/hooks/useDialogA11y'
 
 const PRIORITIES = ['critical', 'high', 'medium', 'low']
 const SOURCES = ['manual', 'pm', 'iot']
@@ -30,6 +32,7 @@ interface ReportFiltersSidebarProps {
 }
 
 export function ReportFiltersSidebar({ open, onClose, onApply }: ReportFiltersSidebarProps) {
+  const { t } = useTranslation()
   const { dateFrom, dateTo, compareMode, filters, setDateRange, setFilter, resetFilters, toggleCompare } = useReportStore()
 
   const activeFilterCount = [
@@ -37,18 +40,20 @@ export function ReportFiltersSidebar({ open, onClose, onApply }: ReportFiltersSi
     filters.priorities.length, filters.sources.length,
   ].filter((n) => n > 0).length
 
+  const panel = useDialogA11y<HTMLDivElement>(open, onClose)
+
   if (!open) return null
 
   return (
     <div className="fixed inset-y-0 right-0 z-40 flex">
-      <div className="fixed inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative w-80 bg-white dark:bg-gray-900 shadow-xl flex flex-col h-full">
+      <div className="fixed inset-0 bg-black/30" onClick={onClose} aria-hidden="true" />
+      <div ref={panel} role="dialog" aria-modal="true" aria-labelledby="report-filters-title" className="relative w-80 bg-white dark:bg-gray-900 shadow-xl flex flex-col h-full">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="font-semibold text-gray-900 dark:text-gray-100">
+          <h2 id="report-filters-title" className="font-semibold text-gray-900 dark:text-gray-100">
             Filters {activeFilterCount > 0 && <span className="ml-1 rounded-full bg-brand-600 text-white text-xs px-1.5 py-0.5">{activeFilterCount}</span>}
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X className="h-5 w-5" /></button>
+          <button onClick={onClose} aria-label={t('common.actions.close')} className="rounded p-1 text-gray-500 hover:text-gray-600 dark:text-gray-400"><X className="h-5 w-5" /></button>
         </div>
 
         {/* Body */}
@@ -91,7 +96,7 @@ export function ReportFiltersSidebar({ open, onClose, onApply }: ReportFiltersSi
                   setFilter('priorities', current.includes(p) ? current.filter((x: string) => x !== p) : [...current, p])
                 }}
                   className={cn('rounded-full border px-2.5 py-1 text-xs capitalize transition-all',
-                    filters.priorities.includes(p) ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-gray-300 text-gray-500')}>
+                    filters.priorities.includes(p) ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-gray-300 text-gray-500 dark:text-gray-400')}>
                   {p}
                 </button>
               ))}
@@ -106,7 +111,7 @@ export function ReportFiltersSidebar({ open, onClose, onApply }: ReportFiltersSi
                   setFilter('sources', current.includes(s) ? current.filter((x: string) => x !== s) : [...current, s])
                 }}
                   className={cn('rounded-full border px-2.5 py-1 text-xs capitalize transition-all',
-                    filters.sources.includes(s) ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-gray-300 text-gray-500')}>
+                    filters.sources.includes(s) ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-gray-300 text-gray-500 dark:text-gray-400')}>
                   {s === 'pm' ? 'Preventive' : s === 'iot' ? 'IoT' : 'Manual'}
                 </button>
               ))}
@@ -117,7 +122,7 @@ export function ReportFiltersSidebar({ open, onClose, onApply }: ReportFiltersSi
         {/* Footer */}
         <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
           <Button className="w-full" onClick={() => { onApply?.(); onClose() }}>Apply Filters</Button>
-          <button onClick={resetFilters} className="w-full text-sm text-gray-500 hover:text-gray-700 text-center">Reset All Filters</button>
+          <button onClick={resetFilters} className="w-full text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 text-center">Reset All Filters</button>
         </div>
       </div>
     </div>

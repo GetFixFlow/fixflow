@@ -181,7 +181,8 @@
       "assignee": "Assignee",
       "due_date": "Due Date",
       "select": "Select {{number}}",
-      "row_actions": "Row actions"
+      "row_actions": "Row actions",
+      "actions": "Actions"
     },
     "calendar": {
       "previous": "Previous month",

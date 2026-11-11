@@ -135,7 +135,7 @@ export function ImportPage() {
         <CardContent className="space-y-3 p-5">
           <h2 className="font-semibold text-gray-900 dark:text-gray-100">1. Get the template</h2>
           <p className="text-sm text-gray-600 dark:text-gray-300">Columns: <span className="font-mono text-xs">{info.columns}</span></p>
-          <p className="text-sm text-gray-500">{info.note}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{info.note}</p>
           <Button variant="outline" size="sm" onClick={downloadTemplate}>
             <Download className="h-4 w-4" /> Download the {info.singular} template
           </Button>
@@ -154,12 +154,12 @@ export function ImportPage() {
               )}
             >
               <input {...getInputProps()} aria-label="CSV file" />
-              {file ? <FileText className="mb-2 h-8 w-8 text-brand-500" /> : <Upload className="mb-2 h-8 w-8 text-gray-400" />}
+              {file ? <FileText className="mb-2 h-8 w-8 text-brand-600 dark:text-brand-400" /> : <Upload className="mb-2 h-8 w-8 text-gray-500 dark:text-gray-400" />}
               <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{file ? file.name : 'Drag your CSV here, or click to choose it'}</p>
-              <p className="mt-1 text-xs text-gray-400">Up to 5 MB and 5,000 rows. Nothing is imported until you confirm.</p>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Up to 5 MB and 5,000 rows. Nothing is imported until you confirm.</p>
             </div>
 
-            {check.isPending && <p className="text-sm text-gray-500">Checking the file…</p>}
+            {check.isPending && <p className="text-sm text-gray-500 dark:text-gray-400">Checking the file…</p>}
             {problem && (
               <p role="alert" className="flex items-start gap-2 rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /> {problem}
@@ -180,7 +180,7 @@ export function ImportPage() {
             </p>
             <div className="max-h-96 overflow-auto rounded-md border border-gray-200 dark:border-gray-700">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500 dark:bg-gray-700/50">
+                <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500 dark:text-gray-400 dark:bg-gray-700/50">
                   <tr><th className="px-3 py-2">Row</th><th className="px-3 py-2">Column</th><th className="px-3 py-2">Problem</th></tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
@@ -190,7 +190,7 @@ export function ImportPage() {
                 </tbody>
               </table>
             </div>
-            {report.errors_truncated && <p className="text-xs text-gray-500">Showing the first {report.errors.length} of {report.error_count}. Fix these and check again to see the rest.</p>}
+            {report.errors_truncated && <p className="text-xs text-gray-500 dark:text-gray-400">Showing the first {report.errors.length} of {report.error_count}. Fix these and check again to see the rest.</p>}
             <Button variant="outline" size="sm" onClick={() => download(problemsCsv(report), `${kind}_problems.csv`)}>
               <Download className="h-4 w-4" /> Download this list
             </Button>
@@ -211,7 +211,7 @@ export function ImportPage() {
             )}
             <div className="overflow-auto rounded-md border border-gray-200 dark:border-gray-700">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500 dark:bg-gray-700/50">
+                <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500 dark:text-gray-400 dark:bg-gray-700/50">
                   <tr>{columns.map((c) => <th key={c} className="px-3 py-2">{c}</th>)}</tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
@@ -221,7 +221,7 @@ export function ImportPage() {
                 </tbody>
               </table>
             </div>
-            {report.total_rows > report.preview.length && <p className="text-xs text-gray-500">Showing the first {report.preview.length} rows.</p>}
+            {report.total_rows > report.preview.length && <p className="text-xs text-gray-500 dark:text-gray-400">Showing the first {report.preview.length} rows.</p>}
             <div className="flex gap-2">
               <Button onClick={() => run.mutate(file)} disabled={run.isPending}>
                 {run.isPending ? 'Importing…' : `Import ${report.total_rows} ${report.total_rows === 1 ? info.singular : `${info.singular}s`}`}

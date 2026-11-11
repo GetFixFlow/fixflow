@@ -82,7 +82,7 @@ export function InviteUserModal({ open, onClose }: InviteUserModalProps) {
             <Dialog.Title className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {result ? 'Invitation ready' : 'Invite Team Member'}
             </Dialog.Title>
-            <button onClick={close} aria-label="Close" className="text-gray-400 hover:text-gray-600">
+            <button onClick={close} aria-label="Close" className="text-gray-500 dark:text-gray-400 hover:text-gray-600">
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -106,7 +106,7 @@ export function InviteUserModal({ open, onClose }: InviteUserModalProps) {
                   <span className="ml-1.5">{copied ? 'Copied' : 'Copy'}</span>
                 </Button>
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 The link works once and expires in 7 days. You can create a new one from the Users list.
               </p>
               <Button type="button" onClick={close} className="w-full">
@@ -122,7 +122,7 @@ export function InviteUserModal({ open, onClose }: InviteUserModalProps) {
                 </label>
                 <Input id="invite_first_name" {...form.register('first_name')} placeholder="Jane" />
                 {form.formState.errors.first_name && (
-                  <p className="text-xs text-red-500 mt-1">{form.formState.errors.first_name.message}</p>
+                  <p className="text-xs text-red-600 dark:text-red-400 mt-1">{form.formState.errors.first_name.message}</p>
                 )}
               </div>
               <div>
@@ -131,7 +131,7 @@ export function InviteUserModal({ open, onClose }: InviteUserModalProps) {
                 </label>
                 <Input id="invite_last_name" {...form.register('last_name')} placeholder="Smith" />
                 {form.formState.errors.last_name && (
-                  <p className="text-xs text-red-500 mt-1">{form.formState.errors.last_name.message}</p>
+                  <p className="text-xs text-red-600 dark:text-red-400 mt-1">{form.formState.errors.last_name.message}</p>
                 )}
               </div>
             </div>
@@ -142,36 +142,35 @@ export function InviteUserModal({ open, onClose }: InviteUserModalProps) {
               </label>
               <Input id="invite_email" {...form.register('email')} type="email" placeholder="jane@company.com" />
               {form.formState.errors.email && (
-                <p className="text-xs text-red-500 mt-1">{form.formState.errors.email.message}</p>
+                <p className="text-xs text-red-600 dark:text-red-400 mt-1">{form.formState.errors.email.message}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              <p id="invite-role-label" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
                 Role *
-              </label>
+              </p>
               <Controller
                 name="role"
                 control={form.control}
                 render={({ field }) => (
-                  <div className="space-y-2">
+                  <div role="radiogroup" aria-labelledby="invite-role-label" className="space-y-2">
                     {ROLE_OPTIONS.map((opt) => (
                       <label
                         key={opt.value}
-                        className="flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+                        className="grid grid-cols-[auto_1fr] items-start gap-x-3 p-3 rounded-lg border cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                         style={{ borderColor: field.value === opt.value ? '#2563eb' : undefined }}
                       >
                         <input
                           type="radio"
+                          name="invite-role"
                           value={opt.value}
                           checked={field.value === opt.value}
                           onChange={() => field.onChange(opt.value)}
-                          className="mt-0.5"
+                          className="mt-0.5 row-span-2"
                         />
-                        <div>
-                          <p className="font-medium text-sm text-gray-900 dark:text-gray-100">{opt.label}</p>
-                          <p className="text-xs text-gray-500 mt-0.5">{opt.desc}</p>
-                        </div>
+                        <span className="font-medium text-sm text-gray-900 dark:text-gray-100">{opt.label}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{opt.desc}</span>
                       </label>
                     ))}
                   </div>
@@ -192,10 +191,11 @@ export function InviteUserModal({ open, onClose }: InviteUserModalProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+              <label htmlFor="invite_message" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                 Personal Message (optional)
               </label>
               <textarea
+                id="invite_message"
                 {...form.register('message')}
                 rows={2}
                 className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm bg-white dark:bg-gray-800 resize-none focus:outline-none focus:ring-2 focus:ring-brand-500"

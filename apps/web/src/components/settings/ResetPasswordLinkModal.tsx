@@ -43,7 +43,7 @@ export function ResetPasswordLinkModal({ open, onClose, person, email, resetUrl,
             <span className="ml-1.5">{copied ? 'Copied' : 'Copy'}</span>
           </Button>
         </div>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-gray-500 dark:text-gray-400">
           The link works once and expires in 6 hours. {person}'s current password keeps working until they use it.
         </p>
         <Button type="button" onClick={onClose} className="w-full">

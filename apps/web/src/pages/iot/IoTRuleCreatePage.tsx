@@ -12,7 +12,7 @@ export function IoTRuleCreatePage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
-        <Link to="/iot/rules" className="text-gray-400 hover:text-gray-600"><ArrowLeft className="h-5 w-5" /></Link>
+        <Link to="/iot/rules" className="text-gray-500 dark:text-gray-400 hover:text-gray-600"><ArrowLeft className="h-5 w-5" /></Link>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">New IoT Rule</h1>
       </div>
       <IoTRuleForm

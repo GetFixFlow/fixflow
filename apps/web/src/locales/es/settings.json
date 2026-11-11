@@ -60,7 +60,9 @@
       "errors": {
         "name_required": "El nombre es obligatorio",
         "password_min": "Al menos 10 caracteres"
-      }
+      },
+      "show_password": "Mostrar contraseña",
+      "hide_password": "Ocultar contraseña"
     },
     "sessions": {
       "title": "Dónde has iniciado sesión",

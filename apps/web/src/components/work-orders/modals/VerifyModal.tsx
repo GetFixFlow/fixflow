@@ -41,14 +41,14 @@ export function VerifyModal({ workOrder, open, onClose, onReject }: VerifyModalP
         {/* Summary */}
         <div className="rounded-lg bg-gray-50 p-3 text-sm space-y-1.5 dark:bg-gray-800">
           <div className="flex justify-between">
-            <span className="text-gray-500">{t('workOrders.verify.completed_by')}</span>
+            <span className="text-gray-500 dark:text-gray-400">{t('workOrders.verify.completed_by')}</span>
             <span className="font-medium text-gray-900 dark:text-gray-100">
               {workOrder.assignee?.full_name ?? '—'}
             </span>
           </div>
           {workOrder.completed_at && (
             <div className="flex justify-between">
-              <span className="text-gray-500">{t('workOrders.verify.completed_at')}</span>
+              <span className="text-gray-500 dark:text-gray-400">{t('workOrders.verify.completed_at')}</span>
               <span className="font-medium text-gray-900 dark:text-gray-100">
                 {formatDateTime(new Date(workOrder.completed_at))}
               </span>
@@ -56,7 +56,7 @@ export function VerifyModal({ workOrder, open, onClose, onReject }: VerifyModalP
           )}
           {workOrder.actual_hours && (
             <div className="flex justify-between">
-              <span className="text-gray-500">{t('workOrders.verify.hours')}</span>
+              <span className="text-gray-500 dark:text-gray-400">{t('workOrders.verify.hours')}</span>
               <span className="font-medium text-gray-900 dark:text-gray-100">
                 {t('workOrders.verify.hrs', { hours: workOrder.actual_hours })}
               </span>
@@ -64,7 +64,7 @@ export function VerifyModal({ workOrder, open, onClose, onReject }: VerifyModalP
           )}
           {parts.length > 0 && (
             <div className="flex justify-between">
-              <span className="text-gray-500">{t('workOrders.verify.parts')}</span>
+              <span className="text-gray-500 dark:text-gray-400">{t('workOrders.verify.parts')}</span>
               <span className="font-medium text-gray-900 dark:text-gray-100">
                 {t('workOrders.verify.parts_used', { count: parts.length, cost: formatMoney(partsCost) })}
               </span>
@@ -72,7 +72,7 @@ export function VerifyModal({ workOrder, open, onClose, onReject }: VerifyModalP
           )}
           {workOrder.completion_notes && (
             <div>
-              <span className="text-gray-500 block">{t('workOrders.verify.notes')}</span>
+              <span className="text-gray-500 dark:text-gray-400 block">{t('workOrders.verify.notes')}</span>
               <p className="mt-1 text-gray-700 dark:text-gray-300 text-xs italic">
                 "{workOrder.completion_notes}"
               </p>
@@ -95,7 +95,7 @@ export function VerifyModal({ workOrder, open, onClose, onReject }: VerifyModalP
                   type="checkbox"
                   checked={checked[item] ?? false}
                   onChange={() => toggleCheck(item)}
-                  className="h-4 w-4 rounded border-gray-300 text-brand-600"
+                  className="h-4 w-4 rounded border-gray-300 text-brand-600 dark:text-brand-400"
                 />
                 {t(`workOrders.verify.item_${item}`)}
               </label>
@@ -105,10 +105,10 @@ export function VerifyModal({ workOrder, open, onClose, onReject }: VerifyModalP
 
         {/* Note */}
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label htmlFor="verify-1" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
             {t('workOrders.verify.note')}
           </label>
-          <textarea
+          <textarea id="verify-1"
             value={note}
             onChange={(e) => setNote(e.target.value)}
             rows={3}
@@ -118,7 +118,7 @@ export function VerifyModal({ workOrder, open, onClose, onReject }: VerifyModalP
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
-          <Button variant="outline" onClick={onReject} className="text-red-600">
+          <Button variant="outline" onClick={onReject} className="text-red-600 dark:text-red-400">
             {t('workOrders.verify.reject')}
           </Button>
           <Button

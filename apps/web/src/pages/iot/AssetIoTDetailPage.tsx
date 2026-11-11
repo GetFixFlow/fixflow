@@ -93,14 +93,14 @@ export function AssetIoTDetailPage() {
   }
 
   if (!asset) {
-    return <div className="text-center py-20 text-gray-500">Asset not found</div>
+    return <div className="text-center py-20 text-gray-500 dark:text-gray-400">Asset not found</div>
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="text-gray-400 hover:text-gray-600">
+        <button onClick={() => navigate(-1)} className="text-gray-500 dark:text-gray-400 hover:text-gray-600">
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div className="flex-1">
@@ -108,7 +108,7 @@ export function AssetIoTDetailPage() {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{asset.name}</h1>
             <Badge variant={STATUS_BADGE[asset.status] as 'default' | 'warning' | 'destructive'}>{asset.status}</Badge>
           </div>
-          <p className="text-sm text-gray-500">{asset.asset_tag}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{asset.asset_tag}</p>
         </div>
         <Link to={`/iot/rules/new?asset_id=${assetId}`}>
           <Button><Plus className="h-4 w-4 mr-1.5" />Add IoT Rule</Button>
@@ -174,7 +174,7 @@ export function AssetIoTDetailPage() {
                   {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16" />)}
                 </div>
               ) : rules.length === 0 ? (
-                <div className="text-center py-8 text-gray-400">
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                   <p className="text-sm">No rules yet</p>
                   <Link to={`/iot/rules/new?asset_id=${assetId}`}>
                     <Button size="sm" variant="outline" className="mt-2">Add First Rule</Button>
@@ -193,17 +193,17 @@ export function AssetIoTDetailPage() {
                           </div>
                           <div className="flex gap-1">
                             <Link to={`/iot/rules/${rule.id}/edit`}>
-                              <button className="text-xs text-gray-400 hover:text-brand-600 px-1">Edit</button>
+                              <button className="text-xs text-gray-500 dark:text-gray-400 hover:text-brand-600 px-1">Edit</button>
                             </Link>
                             <button
                               onClick={() => rule.status === 'active' ? pauseRule.mutate(rule.id) : resumeRule.mutate(rule.id)}
-                              className="text-xs text-gray-400 hover:text-brand-600 px-1"
+                              className="text-xs text-gray-500 dark:text-gray-400 hover:text-brand-600 px-1"
                             >
                               {rule.status === 'active' ? 'Pause' : 'Resume'}
                             </button>
                           </div>
                         </div>
-                        <p className="text-xs text-gray-500 font-mono">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
                           {rule.metric_name} {opLabel} {rule.threshold_value} {rule.metric_unit}
                         </p>
                       </div>
@@ -226,7 +226,7 @@ export function AssetIoTDetailPage() {
             <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">
               Raw Readings ({rawReadings.length})
             </h2>
-            {readingsOpen ? <ChevronUp className="h-4 w-4 text-gray-400" /> : <ChevronDown className="h-4 w-4 text-gray-400" />}
+            {readingsOpen ? <ChevronUp className="h-4 w-4 text-gray-500 dark:text-gray-400" /> : <ChevronDown className="h-4 w-4 text-gray-500 dark:text-gray-400" />}
           </button>
 
           {readingsOpen && (
@@ -241,21 +241,21 @@ export function AssetIoTDetailPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-200 dark:border-gray-700 text-left">
-                      <th className="pb-2 pr-4 text-xs font-medium text-gray-500">Timestamp</th>
-                      <th className="pb-2 pr-4 text-xs font-medium text-gray-500">Metric</th>
-                      <th className="pb-2 pr-4 text-xs font-medium text-gray-500">Value</th>
-                      <th className="pb-2 pr-4 text-xs font-medium text-gray-500">Unit</th>
+                      <th className="pb-2 pr-4 text-xs font-medium text-gray-500 dark:text-gray-400">Timestamp</th>
+                      <th className="pb-2 pr-4 text-xs font-medium text-gray-500 dark:text-gray-400">Metric</th>
+                      <th className="pb-2 pr-4 text-xs font-medium text-gray-500 dark:text-gray-400">Value</th>
+                      <th className="pb-2 pr-4 text-xs font-medium text-gray-500 dark:text-gray-400">Unit</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                     {paginatedReadings.map((r) => (
                       <tr key={r.id}>
-                        <td className="py-1.5 pr-4 text-xs text-gray-500">
+                        <td className="py-1.5 pr-4 text-xs text-gray-500 dark:text-gray-400">
                           {formatDistanceToNow(new Date(r.recorded_at), { addSuffix: true })}
                         </td>
                         <td className="py-1.5 pr-4 text-xs font-mono">{r.sensor_type}</td>
                         <td className="py-1.5 pr-4 text-xs font-mono font-medium">{r.value}</td>
-                        <td className="py-1.5 pr-4 text-xs text-gray-500">{r.unit}</td>
+                        <td className="py-1.5 pr-4 text-xs text-gray-500 dark:text-gray-400">{r.unit}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -263,7 +263,7 @@ export function AssetIoTDetailPage() {
               </div>
 
               {totalPages > 1 && (
-                <div className="flex items-center justify-between text-xs text-gray-500">
+                <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                   <button
                     onClick={() => setReadingsPage((p) => Math.max(1, p - 1))}
                     disabled={readingsPage === 1}

@@ -33,10 +33,10 @@ export function HoldModal({ workOrderId, open, onClose }: HoldModalProps) {
     <Modal open={open} onClose={onClose} title={t('workOrders.hold.title')}>
       <div className="space-y-4">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label htmlFor="hold-1" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
             {t('workOrders.hold.reason')}
           </label>
-          <select
+          <select id="hold-1"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
@@ -51,10 +51,10 @@ export function HoldModal({ workOrderId, open, onClose }: HoldModalProps) {
 
         {reason === 'other' && (
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label htmlFor="hold-2" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               {t('workOrders.hold.specify')}
             </label>
-            <textarea
+            <textarea id="hold-2"
               value={other}
               onChange={(e) => setOther(e.target.value)}
               rows={3}
@@ -64,10 +64,10 @@ export function HoldModal({ workOrderId, open, onClose }: HoldModalProps) {
         )}
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label htmlFor="hold-3" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
             {t('workOrders.hold.resume')}
           </label>
-          <input
+          <input id="hold-3"
             type="date"
             value={resumeDate}
             onChange={(e) => setResumeDate(e.target.value)}

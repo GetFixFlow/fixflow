@@ -7,10 +7,10 @@ interface AssetHealthHeatmapProps {
 }
 
 function getDotColor(metrics: { is_breached: boolean; is_stale: boolean; pct_of_threshold?: number }[]) {
-  if (metrics.some((m) => m.is_breached)) return 'bg-red-500 text-red-500'
-  if (metrics.some((m) => m.is_stale)) return 'bg-gray-300 text-gray-400'
-  if (metrics.some((m) => (m.pct_of_threshold ?? 0) >= 80)) return 'bg-yellow-400 text-yellow-500'
-  return 'bg-green-500 text-green-500'
+  if (metrics.some((m) => m.is_breached)) return 'bg-red-500 text-red-600'
+  if (metrics.some((m) => m.is_stale)) return 'bg-gray-300 text-gray-500'
+  if (metrics.some((m) => (m.pct_of_threshold ?? 0) >= 80)) return 'bg-yellow-400 text-yellow-700'
+  return 'bg-green-500 text-green-700'
 }
 
 export function AssetHealthHeatmap({ assetStatus }: AssetHealthHeatmapProps) {
@@ -36,13 +36,13 @@ export function AssetHealthHeatmap({ assetStatus }: AssetHealthHeatmapProps) {
               <span className="h-4 w-4 rounded-full bg-gray-200 dark:bg-gray-600" title="No readings" />
             )}
           </div>
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-gray-500 dark:text-gray-400">
             {asset.metrics.filter((m) => m.is_breached).length > 0 &&
               `${asset.metrics.filter((m) => m.is_breached).length} alert${asset.metrics.filter((m) => m.is_breached).length > 1 ? 's' : ''}`}
           </span>
         </div>
       ))}
-      <div className="flex gap-3 text-xs text-gray-400 pt-1">
+      <div className="flex gap-3 text-xs text-gray-500 dark:text-gray-400 pt-1">
         <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-green-500" />Normal</span>
         <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-yellow-400" />Warning</span>
         <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-red-500" />Alert</span>

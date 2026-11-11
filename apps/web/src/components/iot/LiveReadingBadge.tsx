@@ -20,7 +20,7 @@ function formatAge(seconds: number): string {
 export function LiveReadingBadge({ lastReadingAt, className }: LiveReadingBadgeProps) {
   const ageSeconds = useMemo(() => getAgeSeconds(lastReadingAt), [lastReadingAt])
 
-  if (ageSeconds === null) return <span className={cn('text-xs text-gray-400', className)}>No data</span>
+  if (ageSeconds === null) return <span className={cn('text-xs text-gray-500 dark:text-gray-400', className)}>No data</span>
 
   const isLive = ageSeconds < 60
   const isRecent = ageSeconds < 300
@@ -29,10 +29,10 @@ export function LiveReadingBadge({ lastReadingAt, className }: LiveReadingBadgeP
 
   return (
     <span className={cn('inline-flex items-center gap-1.5 text-xs font-medium', className,
-      isLive ? 'text-green-600 dark:text-green-400' :
-      isRecent ? 'text-yellow-600 dark:text-yellow-400' :
-      isStale ? 'text-orange-500 dark:text-orange-400' :
-      'text-red-500 dark:text-red-400')}>
+      isLive ? 'text-green-700 dark:text-green-400' :
+      isRecent ? 'text-yellow-700 dark:text-yellow-400' :
+      isStale ? 'text-orange-700 dark:text-orange-400' :
+      'text-red-600 dark:text-red-400')}>
       <span className={cn('h-2 w-2 rounded-full shrink-0',
         isLive ? 'bg-green-500 animate-pulse' :
         isRecent ? 'bg-yellow-500' :

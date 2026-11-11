@@ -23,7 +23,7 @@ export function WOStatusDonutChart({ data, onSegmentClick }: WOStatusDonutChartP
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center pointer-events-none">
             <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{total}</p>
-            <p className="text-xs text-gray-400">total</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">total</p>
           </div>
         </div>
       </div>

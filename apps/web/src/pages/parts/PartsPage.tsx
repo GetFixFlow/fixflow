@@ -70,7 +70,7 @@ export function PartsPage() {
 
       <div className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
         <div className="relative min-w-[220px] flex-1">
-          <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+          <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
           <input
             type="search"
             value={search}
@@ -121,14 +121,14 @@ export function PartsPage() {
               {parts.map((part) => (
                 <tr key={part.id}>
                   <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{part.name}</td>
-                  <td className="px-4 py-3 font-mono text-xs text-gray-500">{part.sku ?? '—'}</td>
+                  <td className="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">{part.sku ?? '—'}</td>
                   <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{part.quantity_on_hand} {part.unit}</td>
                   <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{part.reorder_point}</td>
                   <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{formatMoney(part.unit_cost)}</td>
                   <td className="px-4 py-3"><StockBadge part={part} /></td>
                   {listFields.map((field) => (
                     <td key={field.key} className="px-4 py-3 text-gray-700 dark:text-gray-300">
-                      {shownValue(field, part.custom_values?.[field.key]) || <span className="text-gray-400">—</span>}
+                      {shownValue(field, part.custom_values?.[field.key]) || <span className="text-gray-500 dark:text-gray-400">—</span>}
                     </td>
                   ))}
                   <td className="px-4 py-3">
@@ -146,7 +146,7 @@ export function PartsPage() {
                       )}
                       {canDelete && (
                         <Button variant="ghost" size="icon" onClick={() => remove(part)} aria-label={t('parts.page.delete_aria', { name: part.name })}>
-                          <Trash2 className="h-4 w-4 text-red-500" />
+                          <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
                         </Button>
                       )}
                     </div>
@@ -160,7 +160,7 @@ export function PartsPage() {
 
       {meta && meta.total_pages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">{t('parts.page.page_of', { page: meta.current_page, pages: meta.total_pages })}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t('parts.page.page_of', { page: meta.current_page, pages: meta.total_pages })}</p>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>{t('assets.list.previous')}</Button>
             <Button variant="outline" size="sm" disabled={page >= meta.total_pages} onClick={() => setPage((p) => p + 1)}>{t('assets.list.next')}</Button>

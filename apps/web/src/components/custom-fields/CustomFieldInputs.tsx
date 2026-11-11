@@ -38,7 +38,7 @@ export function CustomFieldInputs({ fields, values, onChange, errors = {}, idPre
                 type="checkbox"
                 checked={value === true}
                 onChange={(e) => set(field.key, e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                className="h-4 w-4 rounded border-gray-300 text-brand-600 dark:text-brand-400 focus:ring-brand-500"
               />
               {field.label}
             </label>
@@ -60,7 +60,7 @@ export function CustomFieldInputs({ fields, values, onChange, errors = {}, idPre
                 {/* A choice that was removed since this record was filled in stays selectable until it is changed. */}
                 {typeof value === 'string' && value !== '' && !field.options.includes(value) && <option value={value}>{value}</option>}
               </select>
-              {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+              {error && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{error}</p>}
             </div>
           )
         }

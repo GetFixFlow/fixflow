@@ -36,7 +36,7 @@ export function ReadingsActivityChart({ data, isLoading }: ReadingsActivityChart
           {RANGES.map((r) => (
             <button key={r.key} onClick={() => setRange(r.key)}
               className={cn('px-2 py-1 text-xs rounded transition-colors',
-                range === r.key ? 'bg-brand-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200')}>
+                range === r.key ? 'bg-brand-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200')}>
               {r.label}
             </button>
           ))}

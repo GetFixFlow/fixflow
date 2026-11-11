@@ -9,7 +9,7 @@ export function PMComplianceChart({ data }: { data: MonthData[] }) {
   return (
     <Card>
       <CardContent className="p-4">
-        <p className="text-xs font-medium text-gray-500 mb-3 uppercase tracking-wide">Compliance Trend (6 months)</p>
+        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wide">Compliance Trend (6 months)</p>
         <ResponsiveContainer width="100%" height={80}>
           <BarChart data={data} barCategoryGap="30%">
             <XAxis dataKey="month" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
@@ -25,7 +25,7 @@ export function PMComplianceChart({ data }: { data: MonthData[] }) {
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-        <div className="flex gap-4 mt-1 text-xs text-gray-400">
+        <div className="flex gap-4 mt-1 text-xs text-gray-500 dark:text-gray-400">
           <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-green-500" />Completed</span>
           <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-red-500" />Missed</span>
         </div>

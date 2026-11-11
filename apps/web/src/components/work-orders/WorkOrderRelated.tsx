@@ -13,7 +13,7 @@ export function WorkOrderRelated({ workOrder }: WorkOrderRelatedProps) {
 
   if (!hasRelated) {
     return (
-      <p className="text-sm italic text-gray-400 dark:text-gray-500">{t('workOrders.related.none')}</p>
+      <p className="text-sm italic text-gray-500 dark:text-gray-400">{t('workOrders.related.none')}</p>
     )
   }
 
@@ -24,10 +24,10 @@ export function WorkOrderRelated({ workOrder }: WorkOrderRelatedProps) {
           to={`/preventive-maintenance/${workOrder.pm_id}`}
           className="flex items-center gap-2 rounded-lg border border-gray-200 p-2.5 text-sm hover:border-brand-300 hover:bg-brand-50 dark:border-gray-700 dark:hover:border-brand-600 dark:hover:bg-brand-900/10"
         >
-          <RefreshCw className="h-4 w-4 text-blue-500 shrink-0" />
+          <RefreshCw className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
           <div>
             <p className="font-medium text-gray-800 dark:text-gray-200">{t('workOrders.related.pm')}</p>
-            <p className="text-xs text-gray-500">{t('workOrders.related.pm_id', { id: workOrder.pm_id })}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t('workOrders.related.pm_id', { id: workOrder.pm_id })}</p>
           </div>
         </Link>
       )}
@@ -37,10 +37,10 @@ export function WorkOrderRelated({ workOrder }: WorkOrderRelatedProps) {
           to={`/iot`}
           className="flex items-center gap-2 rounded-lg border border-gray-200 p-2.5 text-sm hover:border-brand-300 hover:bg-brand-50 dark:border-gray-700 dark:hover:border-brand-600 dark:hover:bg-brand-900/10"
         >
-          <Zap className="h-4 w-4 text-yellow-500 shrink-0" />
+          <Zap className="h-4 w-4 text-yellow-700 dark:text-yellow-400 shrink-0" />
           <div>
             <p className="font-medium text-gray-800 dark:text-gray-200">{t('workOrders.related.iot')}</p>
-            <p className="text-xs text-gray-500">{t('workOrders.related.alert_id', { id: workOrder.iot_alert_id })}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t('workOrders.related.alert_id', { id: workOrder.iot_alert_id })}</p>
           </div>
         </Link>
       )}

@@ -63,7 +63,7 @@ function CopyId({ text }: { text: string }) {
       aria-label={t('workOrders.table.copy', { text })}
     >
       {text}
-      {copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+      {copied ? <Check className="h-3.5 w-3.5 text-green-700 dark:text-green-400" /> : <Copy className="h-3.5 w-3.5" />}
     </button>
   )
 }
@@ -209,7 +209,7 @@ export function WorkOrderDetailPage() {
                 )}
                 {canManage && !isReadOnly && (
                   <DropdownMenu.Item
-                    className="flex cursor-pointer items-center rounded px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    className="flex cursor-pointer items-center rounded px-3 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                     onSelect={() => setOpenModal('cancel')}
                   >
                     {t('common.actions.cancel')}
@@ -358,7 +358,7 @@ export function WorkOrderDetailPage() {
                   value={tab}
                   className={cn(
                     'px-4 py-2 text-sm font-medium capitalize border-b-2 -mb-px transition-colors',
-                    'border-transparent text-gray-500 hover:text-gray-700 data-[state=active]:border-brand-600 data-[state=active]:text-brand-600',
+                    'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 data-[state=active]:border-brand-600 data-[state=active]:text-brand-600',
                     'dark:text-gray-400 dark:hover:text-gray-200 dark:data-[state=active]:border-brand-400 dark:data-[state=active]:text-brand-400',
                   )}
                 >
@@ -400,7 +400,7 @@ export function WorkOrderDetailPage() {
                   <span className="font-medium text-gray-900 dark:text-gray-100">
                     {wo.asset.name}
                   </span>
-                  <span className="font-mono text-xs text-gray-400">{wo.asset.asset_tag}</span>
+                  <span className="font-mono text-xs text-gray-500 dark:text-gray-400">{wo.asset.asset_tag}</span>
                 </div>
                 <Link
                   to={`/assets/${wo.asset_id}`}
@@ -428,7 +428,7 @@ export function WorkOrderDetailPage() {
                 <dt className="text-gray-500 dark:text-gray-400">{t('workOrders.table.assignee')}</dt>
                 <dd className="text-gray-900 dark:text-gray-100">
                   {wo.assignee?.full_name ?? (
-                    <span className="italic text-gray-400">{t('common.state.unassigned')}</span>
+                    <span className="italic text-gray-500 dark:text-gray-400">{t('common.state.unassigned')}</span>
                   )}
                 </dd>
               </div>

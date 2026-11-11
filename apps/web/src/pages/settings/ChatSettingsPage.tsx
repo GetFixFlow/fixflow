@@ -63,12 +63,12 @@ function ChatForm({ status }: { status: ChatSettings }) {
             : 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/40'
         }`}
       >
-        {status.enabled && status.url_set ? <CheckCircle className="h-5 w-5 shrink-0 text-green-500" /> : <AlertCircle className="h-5 w-5 shrink-0 text-gray-400" />}
+        {status.enabled && status.url_set ? <CheckCircle className="h-5 w-5 shrink-0 text-green-700 dark:text-green-400" /> : <AlertCircle className="h-5 w-5 shrink-0 text-gray-500 dark:text-gray-400" />}
         <div>
           <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
             {status.enabled && status.url_set ? `Messages are going to ${status.url_hint}` : 'Chat messages are off'}
           </p>
-          {status.last_sent_at && <p className="text-xs text-gray-500">Last message sent {formatDateTime(status.last_sent_at)}.</p>}
+          {status.last_sent_at && <p className="text-xs text-gray-500 dark:text-gray-400">Last message sent {formatDateTime(status.last_sent_at)}.</p>}
         </div>
       </div>
 
@@ -96,7 +96,7 @@ function ChatForm({ status }: { status: ChatSettings }) {
                 </option>
               ))}
             </select>
-            <p className="mt-1 text-xs text-gray-500">{kind.where}</p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{kind.where}</p>
           </div>
 
           <div>
@@ -111,7 +111,7 @@ function ChatForm({ status }: { status: ChatSettings }) {
               placeholder={status.url_set ? `Saved (${status.url_hint}). Leave blank to keep it.` : 'https://…'}
               onChange={(e) => set({ url: e.target.value })}
             />
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               Anyone who has this address can post to your channel, so it is kept encrypted and never shown again.
             </p>
           </div>
@@ -151,7 +151,7 @@ function ChatForm({ status }: { status: ChatSettings }) {
               {test.isPending ? 'Sending…' : 'Send a test message'}
             </Button>
             {status.url_set && (
-              <Button variant="ghost" onClick={forget} disabled={remove.isPending} className="text-red-600">
+              <Button variant="ghost" onClick={forget} disabled={remove.isPending} className="text-red-600 dark:text-red-400">
                 Remove
               </Button>
             )}

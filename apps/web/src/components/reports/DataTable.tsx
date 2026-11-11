@@ -73,7 +73,7 @@ export function DataTable<T extends Record<string, unknown>>({
     <div className={cn('space-y-3', className)}>
       {searchable && (
         <div className="relative max-w-xs">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
           <Input placeholder="Search..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1) }}
             className="pl-9 h-8 text-sm" />
         </div>
@@ -115,7 +115,7 @@ export function DataTable<T extends Record<string, unknown>>({
                 </tr>
               ))
             ) : paged.length === 0 ? (
-              <tr><td colSpan={columns.length} className="px-3 py-8 text-center text-gray-400">{emptyText}</td></tr>
+              <tr><td colSpan={columns.length} className="px-3 py-8 text-center text-gray-500 dark:text-gray-400">{emptyText}</td></tr>
             ) : paged.map((row, idx) => (
               <tr key={keyField ? String(row[keyField]) : idx}
                 onClick={() => onRowClick?.(row)}
@@ -137,7 +137,7 @@ export function DataTable<T extends Record<string, unknown>>({
         </table>
       </div>
       {totalPages > 1 && (
-        <div className="flex items-center justify-between text-xs text-gray-500">
+        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
           <span>{sorted.length} results</span>
           <div className="flex items-center gap-1">
             <button disabled={page === 1} onClick={() => setPage(page - 1)}
