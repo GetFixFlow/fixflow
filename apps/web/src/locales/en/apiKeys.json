@@ -1,0 +1,41 @@
+{
+  "apiKeys": {
+    "modal": {
+      "title": "Create API Key",
+      "description": "API keys let other programs and devices use FixFlow: send it sensor readings, read your work orders and assets, or change them."
+    },
+    "scopes": {
+      "title": "What this key may do",
+      "iot": "Send sensor readings",
+      "iot_hint": "For gateways and sensors that send readings to FixFlow.",
+      "read": "Read work orders, assets, locations and parts",
+      "read_hint": "For dashboards and other programs that only look. They use the public API.",
+      "write": "Also create and change work orders and assets",
+      "write_hint": "For programs that make work orders and move them along. Includes reading.",
+      "read_required": "Needed by the choice below",
+      "required": "Choose at least one thing the key may do.",
+      "write_warning": "Anyone with this key can change work orders and assets. Keep it secret."
+    },
+    "list": {
+      "scopes": "May do",
+      "key_preview": "Key Preview",
+      "scope_iot": "Sensor readings",
+      "scope_read": "Read",
+      "scope_write": "Read and write"
+    },
+    "reveal": {
+      "public_api": "Public API",
+      "check_hint": "Run this to check that the key works. It answers with the key's name and what it may do.",
+      "send_hint": "Send the key in the Authorization header, or in an X-API-Key header. Never in the address."
+    },
+    "tabs": {
+      "webhooks": "Webhooks"
+    },
+    "webhooks": {
+      "title": "Webhooks have their own page",
+      "body": "Webhooks are messages FixFlow sends to other systems when something happens, such as a work order being completed. Set them up under Settings, Webhooks.",
+      "open": "Open Webhooks",
+      "keys_note": "Programs that read or change data in FixFlow, such as n8n or Zapier calling it, use API keys with the read or write scope. Make one on the API Keys tab."
+    }
+  }
+}

@@ -43,7 +43,7 @@ These pages are for the person who **installs and looks after** a FixFlow server
 | Connect sensors and set alert rules | [Sensors and IoT](iot.md) |
 | Understand the reports and the dashboard | [Reports and the dashboard](reports.md) |
 | Get messages on a phone when work is assigned | [Notifications](notifications.md) |
-| Connect another program | [API](api.md) and [API endpoints](api-endpoints.md) |
+| Connect another program, or n8n and Zapier | [Public API, API keys and webhooks](public-api.md), and the full [API](api.md) and [API endpoints](api-endpoints.md) |
 
 ## Helping with FixFlow
 

@@ -6,6 +6,7 @@ class LowStockAlertJob < ApplicationJob
     part = ActsAsTenant.without_tenant { Part.find_by(id: part_id) }
     return unless part
 
+    Webhooks.part(part, kind)
     title = kind.to_s == "out" ? "Out of stock: #{part.name}" : "Running low: #{part.name}"
     left = part.quantity_on_hand.to_f.round(2)
     reorder = part.reorder_point.to_f.round(2)

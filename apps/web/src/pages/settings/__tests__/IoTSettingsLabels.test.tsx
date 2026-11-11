@@ -22,7 +22,7 @@ function renderPage() {
 describe('IoTSettingsPage: what a screen reader announces for the icon buttons', () => {
   it('names each key\'s menu button after the key, and says whether the menu is open', async () => {
     server.use(http.get('/api/v1/api_keys', () => HttpResponse.json({
-      api_keys: [{ id: 3, name: 'Gateway', key_prefix: 'ff_ab12', scopes: ['iot_write'], status: 'active', created_at: '2026-11-01T00:00:00Z', last_used_at: null, expires_at: null }],
+      api_keys: [{ id: 3, name: 'Gateway', prefix: 'fxk_ab12cd34', scopes: ['iot'], status: 'active', created_at: '2026-11-01T00:00:00Z', last_used_at: null, expires_at: null }],
       meta: { request_id: 't', timestamp: '' },
     })))
     renderPage()

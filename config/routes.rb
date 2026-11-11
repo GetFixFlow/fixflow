@@ -30,6 +30,28 @@ Rails.application.routes.draw do
       get "auth/oidc/start",    to: "auth/directory#start"
       get "auth/oidc/callback", to: "auth/directory#callback"
 
+      # The public API: for the company's other programs, signed in with an API key (see docs/public-api.md)
+      namespace :open do
+        get "me", to: "me#show"
+        get "openapi", to: "openapi#show", defaults: { format: "json" }
+        resources :work_orders, only: %i[index show create update] do
+          post :transitions, on: :member
+        end
+        resources :assets, only: %i[index show create update]
+        resources :locations, only: %i[index show]
+        resources :parts, only: %i[index show]
+      end
+
+      # Where messages go when things happen (administrators): see docs/public-api.md
+      resources :webhooks, only: %i[index show create update destroy] do
+        member do
+          post :rotate_secret
+          post :enable
+          post :test
+        end
+        post :redeliver, on: :collection, path: "deliveries/:id/redeliver"
+      end
+
       # How the company's directory is set up (administrators): read, change, remove, and try the settings
       resource :directory_settings, only: %i[show update destroy], controller: "directory_settings" do
         post :test

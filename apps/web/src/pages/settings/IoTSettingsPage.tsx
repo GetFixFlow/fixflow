@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Plus, MoreVertical, Key, Copy, Check, Wifi, WifiOff } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -17,9 +19,20 @@ import { formatDate } from '@/lib/localeFormat'
 
 type Tab = 'api_keys' | 'mqtt' | 'webhooks'
 
+/** What a key may do, as the screen words it. Keys made before scopes existed carry the old sensor names (or none): all of them are sensor keys. */
+const scopesOf = (scopes: string[] | undefined): ('iot' | 'read' | 'write')[] => {
+  const given = scopes ?? []
+  const shown = new Set<'iot' | 'read' | 'write'>()
+  if (given.length === 0 || given.some((s) => s === 'iot' || s.startsWith('iot'))) shown.add('iot')
+  if (given.includes('write')) shown.add('write')
+  else if (given.includes('read')) shown.add('read')
+  return (['iot', 'read', 'write'] as const).filter((s) => shown.has(s))
+}
+
 const ORG_TOKEN = 'org_tk_fixflow_demo_001'
 
 function ApiKeysTab() {
+  const { t } = useTranslation()
   const [showCreate, setShowCreate] = useState(false)
   const [revealedKey, setRevealedKey] = useState<ApiKeyWithSecret | null>(null)
   const [revokeTarget, setRevokeTarget] = useState<number | null>(null)
@@ -97,7 +110,8 @@ function ApiKeysTab() {
                 <thead className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Name</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Key Preview</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{t('apiKeys.list.key_preview')}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{t('apiKeys.list.scopes')}</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Created</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Last Used</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Expires</th>
@@ -111,7 +125,16 @@ function ApiKeysTab() {
                     return (
                       <tr key={key.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                         <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{key.name}</td>
-                        <td className="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">{key.key_prefix}...</td>
+                        <td className="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">{key.prefix ?? key.key_prefix}…</td>
+                        <td className="px-4 py-3">
+                          <ul className="flex flex-wrap gap-1" aria-label={t('apiKeys.list.scopes')}>
+                            {scopesOf(key.scopes).map((scope) => (
+                              <li key={scope} className="rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-200">
+                                {t(`apiKeys.list.scope_${scope}`)}
+                              </li>
+                            ))}
+                          </ul>
+                        </td>
                         <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
                           {formatDate(new Date(key.created_at))}
                         </td>
@@ -313,33 +336,17 @@ function MqttTab() {
 }
 
 function WebhooksTab() {
+  const { t } = useTranslation()
   return (
     <div className="space-y-4">
       <Card>
-        <CardContent className="p-8 text-center space-y-4">
-          <div className="h-12 w-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto">
-            <Key className="h-6 w-6 text-gray-500 dark:text-gray-400" />
-          </div>
-          <div>
-            <h2 className="font-semibold text-gray-900 dark:text-gray-100">Webhook Support Coming Soon</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Get notified in real-time when events happen in FixFlow.
-            </p>
-          </div>
-          <div className="text-left max-w-xs mx-auto">
-            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Available Events (coming soon)</p>
-            <ul className="space-y-1 text-xs text-gray-500 dark:text-gray-400">
-              {[
-                'work_order.created', 'work_order.completed', 'work_order.overdue',
-                'pm.generated', 'pm.overdue',
-                'iot.alert.triggered', 'iot.alert.resolved',
-                'asset.status_changed',
-              ].map((event) => (
-                <li key={event} className="font-mono">{event}</li>
-              ))}
-            </ul>
-          </div>
-          <Button disabled>Join Waitlist</Button>
+        <CardContent className="space-y-3 p-6">
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100">{t('apiKeys.webhooks.title')}</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{t('apiKeys.webhooks.body')}</p>
+          <Link to="/settings/webhooks" className="inline-flex items-center text-sm font-medium text-brand-600 hover:underline dark:text-brand-400">
+            {t('apiKeys.webhooks.open')}
+          </Link>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{t('apiKeys.webhooks.keys_note')}</p>
         </CardContent>
       </Card>
     </div>
@@ -347,6 +354,7 @@ function WebhooksTab() {
 }
 
 export function IoTSettingsPage() {
+  const { t: tr } = useTranslation()
   const { user } = useAuthStore()
   const [tab, setTab] = useState<Tab>('api_keys')
 
@@ -366,7 +374,7 @@ export function IoTSettingsPage() {
   const tabs: { key: Tab; label: string }[] = [
     { key: 'api_keys', label: 'API Keys' },
     { key: 'mqtt', label: 'MQTT Configuration' },
-    { key: 'webhooks', label: 'Webhook Setup' },
+    { key: 'webhooks', label: tr('apiKeys.tabs.webhooks') },
   ]
 
   return (
@@ -384,8 +392,8 @@ export function IoTSettingsPage() {
               className={cn(
                 'px-4 py-2 text-sm font-medium border-b-2 transition-colors',
                 tab === t.key
-                  ? 'border-brand-600 text-brand-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700',
+                  ? 'border-brand-600 text-brand-600 dark:border-brand-400 dark:text-brand-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
               )}
             >
               {t.label}

@@ -8,7 +8,7 @@ import type { ApiKeyWithSecret } from '@/types'
 import { vi } from 'vitest'
 
 const mockKey: ApiKeyWithSecret = {
-  id: 1, name: 'Factory Floor Gateway', key_prefix: 'fk_live_abc', key: 'fk_live_abc123xyz456secretkey',
+  id: 1, name: 'Factory Floor Gateway', key_prefix: 'fk_live_abc', scopes: ['iot'], key: 'fk_live_abc123xyz456secretkey',
   active: true, organization_id: 1, created_at: new Date().toISOString(),
 }
 

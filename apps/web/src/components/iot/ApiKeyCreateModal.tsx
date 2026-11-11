@@ -1,9 +1,15 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { AlertTriangle } from 'lucide-react'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { useCreateApiKey } from '@/hooks/useIoT'
-import type { ApiKeyCreateRequest, ApiKeyWithSecret } from '@/types'
+import type { ApiKeyCreateRequest, ApiKeyScope, ApiKeyWithSecret } from '@/types'
+
+// The order they are shown and sent in.
+const SCOPES: ApiKeyScope[] = ['iot', 'read', 'write']
+const DEFAULT_SCOPES: ApiKeyScope[] = ['iot']
 
 interface ApiKeyCreateModalProps {
   open: boolean
@@ -16,21 +22,27 @@ export function ApiKeyCreateModal({ open, onClose, onCreated }: ApiKeyCreateModa
   const [description, setDescription] = useState('')
   const [expiresAt, setExpiresAt] = useState('')
   const [noExpiry, setNoExpiry] = useState(false)
-  const [scopes, setScopes] = useState<string[]>(['iot_write'])
+  const { t } = useTranslation()
+  const [scopes, setScopes] = useState<ApiKeyScope[]>(DEFAULT_SCOPES)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const createKey = useCreateApiKey()
 
-  const toggleScope = (scope: string) => {
-    if (scope === 'iot_write') return // required
-    setScopes((prev) =>
-      prev.includes(scope) ? prev.filter((s) => s !== scope) : [...prev, scope],
-    )
+  // Writing includes reading: ticking write ticks and locks read, and unticking read unticks write.
+  const toggleScope = (scope: ApiKeyScope) => {
+    setScopes((prev) => {
+      const on = !prev.includes(scope)
+      let next = on ? [...prev, scope] : prev.filter((s) => s !== scope)
+      if (scope === 'write' && on && !next.includes('read')) next = [...next, 'read']
+      if (scope === 'read' && !on) next = next.filter((s) => s !== 'write')
+      return SCOPES.filter((s) => next.includes(s))
+    })
   }
 
   const validate = () => {
     const errs: Record<string, string> = {}
     if (!name.trim()) errs.name = 'Name is required'
+    if (scopes.length === 0) errs.scopes = t('apiKeys.scopes.required')
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -48,11 +60,11 @@ export function ApiKeyCreateModal({ open, onClose, onCreated }: ApiKeyCreateModa
     onCreated(keyData)
     onClose()
     // reset
-    setName(''); setDescription(''); setExpiresAt(''); setNoExpiry(false); setScopes(['iot_write'])
+    setName(''); setDescription(''); setExpiresAt(''); setNoExpiry(false); setScopes(DEFAULT_SCOPES)
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Create API Key" description="API keys allow IoT devices to send sensor data to FixFlow.">
+    <Modal open={open} onClose={onClose} title={t('apiKeys.modal.title')} description={t('apiKeys.modal.description')}>
       <div className="space-y-4">
         <Input
           id="key-name"
@@ -96,31 +108,41 @@ export function ApiKeyCreateModal({ open, onClose, onCreated }: ApiKeyCreateModa
         </div>
 
         <div>
-          <p id="key-scopes-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Scopes</p>
-          <div role="group" aria-labelledby="key-scopes-label" className="space-y-2">
-            <div className="flex items-center gap-2 opacity-70">
-              <input id="key-scope-write" type="checkbox" checked disabled aria-describedby="key-scope-write-note" className="rounded cursor-not-allowed" />
-              <div>
-                <label htmlFor="key-scope-write" className="cursor-not-allowed text-sm font-medium text-gray-700 dark:text-gray-300">iot_write</label>
-                <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">(required)</span>
-                <p id="key-scope-write-note" className="text-xs text-gray-500 dark:text-gray-400">Send sensor readings and telemetry data</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                id="key-scope-read"
-                type="checkbox"
-                checked={scopes.includes('iot_read')}
-                onChange={() => toggleScope('iot_read')}
-                aria-describedby="key-scope-read-note"
-                className="rounded cursor-pointer"
-              />
-              <div>
-                <label htmlFor="key-scope-read" className="cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300">iot_read</label>
-                <p id="key-scope-read-note" className="text-xs text-gray-500 dark:text-gray-400">Read sensor data and alert status</p>
-              </div>
-            </div>
+          <p id="key-scopes-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('apiKeys.scopes.title')}</p>
+          <div role="group" aria-labelledby="key-scopes-label" aria-describedby={errors.scopes ? 'key-scopes-error' : undefined} className="space-y-2">
+            {SCOPES.map((scope) => {
+              const locked = scope === 'read' && scopes.includes('write')
+              return (
+                <div key={scope} className={`flex items-start gap-2 ${locked ? 'opacity-70' : ''}`}>
+                  <input
+                    id={`key-scope-${scope}`}
+                    type="checkbox"
+                    checked={scopes.includes(scope)}
+                    disabled={locked}
+                    onChange={() => toggleScope(scope)}
+                    aria-describedby={`key-scope-${scope}-note`}
+                    className={`mt-0.5 rounded ${locked ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                  />
+                  <div>
+                    <label htmlFor={`key-scope-${scope}`} className={`text-sm font-medium text-gray-700 dark:text-gray-300 ${locked ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
+                      {t(`apiKeys.scopes.${scope}`)} <code className="ml-1 font-mono text-xs text-gray-500 dark:text-gray-400">{scope}</code>
+                    </label>
+                    <p id={`key-scope-${scope}-note`} className="text-xs text-gray-500 dark:text-gray-400">
+                      {t(`apiKeys.scopes.${scope}_hint`)}
+                      {locked && <> {t('apiKeys.scopes.read_required')}.</>}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
           </div>
+          {errors.scopes && <p id="key-scopes-error" role="alert" className="mt-1 text-xs text-red-600 dark:text-red-400">{errors.scopes}</p>}
+          {scopes.includes('write') && (
+            <div role="note" className="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/20">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700 dark:text-amber-400" aria-hidden="true" />
+              <p className="text-sm text-amber-700 dark:text-amber-300">{t('apiKeys.scopes.write_warning')}</p>
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end gap-2 pt-2">

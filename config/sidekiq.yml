@@ -57,6 +57,12 @@
       :queue: scheduled
       :description: "Delete audit log lines older than the company's retention setting (none by default)"
 
+    webhook_cleanup:
+      :cron: "45 2 * * *"
+      :class: WebhookCleanupJob
+      :queue: scheduled
+      :description: "Delete records of webhook messages older than 30 days"
+
     db_backup:
       :cron: "0 3 * * *"
       :class: DatabaseBackupJob

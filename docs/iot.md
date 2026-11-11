@@ -11,6 +11,8 @@ Body: { "asset_id": 1, "metric": "temperature", "value": 72.4, "unit": "C" }
 Body: { "asset_id": 1, "device_id": "pump-1", "timestamp": "2026-05-03T10:00:00Z",
         "readings": [ { "metric": "temperature", "value": 72.4, "unit": "C" }, { "metric": "vibration", "value": 3.2, "unit": "mm/s" } ] }
 ```
+
+The key needs the `iot` scope (keys made before scopes existed have it). Keys can also be given `read` and `write` to use the [public API](public-api.md).
 `asset_tag` can be used instead of `asset_id`. A body that is a list of readings, each naming its asset, is accepted too.
 
 ## MQTT

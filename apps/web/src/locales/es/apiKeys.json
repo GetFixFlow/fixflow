@@ -1,0 +1,41 @@
+{
+  "apiKeys": {
+    "modal": {
+      "title": "Crear clave de API",
+      "description": "Las claves de API permiten que otros programas y dispositivos usen FixFlow: enviarle lecturas de sensores, leer tus órdenes de trabajo y activos, o modificarlos."
+    },
+    "scopes": {
+      "title": "Qué puede hacer esta clave",
+      "iot": "Enviar lecturas de sensores",
+      "iot_hint": "Para pasarelas y sensores que envían lecturas a FixFlow.",
+      "read": "Leer órdenes de trabajo, activos, ubicaciones y repuestos",
+      "read_hint": "Para paneles y otros programas que solo consultan. Usan la API pública.",
+      "write": "También crear y modificar órdenes de trabajo y activos",
+      "write_hint": "Para programas que crean órdenes de trabajo y las hacen avanzar. Incluye leer.",
+      "read_required": "Lo necesita la opción de abajo",
+      "required": "Elige al menos una cosa que pueda hacer la clave.",
+      "write_warning": "Quien tenga esta clave puede modificar órdenes de trabajo y activos. Mantenla en secreto."
+    },
+    "list": {
+      "scopes": "Puede",
+      "key_preview": "Vista previa de la clave",
+      "scope_iot": "Lecturas de sensores",
+      "scope_read": "Leer",
+      "scope_write": "Leer y escribir"
+    },
+    "reveal": {
+      "public_api": "API pública",
+      "check_hint": "Ejecuta esto para comprobar que la clave funciona. Responde con el nombre de la clave y lo que puede hacer.",
+      "send_hint": "Envía la clave en la cabecera Authorization, o en una cabecera X-API-Key. Nunca en la dirección."
+    },
+    "tabs": {
+      "webhooks": "Webhooks"
+    },
+    "webhooks": {
+      "title": "Los webhooks tienen su propia página",
+      "body": "Los webhooks son mensajes que FixFlow envía a otros sistemas cuando algo ocurre, por ejemplo cuando se completa una orden de trabajo. Se configuran en Ajustes, Webhooks.",
+      "open": "Abrir Webhooks",
+      "keys_note": "Los programas que leen o modifican datos de FixFlow, como n8n o Zapier al llamarlo, usan claves de API con el ámbito de lectura o escritura. Crea una en la pestaña Claves de API."
+    }
+  }
+}
