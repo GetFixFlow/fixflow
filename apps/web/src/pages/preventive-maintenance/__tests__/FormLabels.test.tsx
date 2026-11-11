@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -61,7 +61,9 @@ describe('PM schedule forms: what a screen reader announces for each control', (
       </QueryClientProvider>,
     )
 
-    expect(await screen.findByLabelText('PM Schedule Name*')).toHaveValue('Oil change')
+    // The form draws before the schedule's values are put into it.
+    expect(await screen.findByLabelText('PM Schedule Name*')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByLabelText('PM Schedule Name*')).toHaveValue('Oil change'))
     expect(screen.getByLabelText('Asset*')).toBeInTheDocument()
     expect(screen.getByLabelText('Description')).toHaveValue('Every so often')
     expect(screen.getByLabelText('Frequency: Every')).toHaveValue(30)
