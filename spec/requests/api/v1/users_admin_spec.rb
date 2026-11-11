@@ -133,6 +133,24 @@ RSpec.describe "Api::V1::Users administration", type: :request do
       expect(response).to have_http_status(:unprocessable_entity)
       expect(User.exists?(admin.id)).to be true
     end
+
+    it "deletes a person who has never signed in" do
+      delete "/api/v1/users/#{tech.id}", headers: as(admin), as: :json
+
+      expect(response).to have_http_status(:no_content)
+      expect(User.exists?(tech.id)).to be false
+    end
+
+    it "says to deactivate, instead of failing, for a person the audit log names (anyone who has signed in)" do
+      as(tech) # signing in writes a line to the audit log
+      expect(ActivityLog.where(user_id: tech.id)).to exist
+
+      delete "/api/v1/users/#{tech.id}", headers: as(admin), as: :json
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(json_body.dig("error", "message")).to match(/audit log.*Deactivate them instead/)
+      expect(User.exists?(tech.id)).to be true
+    end
   end
 
   describe "bulk actions" do

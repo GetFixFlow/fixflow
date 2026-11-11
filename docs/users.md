@@ -8,6 +8,10 @@ Administrators add people from **Settings → Users → Invite User**. Choose a 
 
 Set `APP_URL` to the address your web app is served from, so invitation links point to the right place.
 
+## People from the company directory
+
+If the company uses [directory sign-in](directory-sign-in.md), people appear here the first time they sign in, with the role their group gives. Their role follows their groups (it cannot be changed here while that is on), and they have no FixFlow password to reset.
+
 ## Forgotten passwords
 
 On the sign-in screen, **Forgot your password?** emails a reset link (if email is set up). If your server cannot send email, an administrator opens **Settings → Users → ⋯ → Reset Password**, copies the link and gives it to the person; the link works once and expires after 6 hours. The person's current password keeps working until they use the link. Using it signs them out everywhere.

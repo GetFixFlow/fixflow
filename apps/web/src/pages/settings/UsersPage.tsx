@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 import { Plus, MoreVertical, UserCheck, UserX, Pencil, Link2, KeyRound, ShieldOff, LockOpen } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
@@ -59,6 +60,7 @@ function NameAvatar({ name }: { name: string }) {
 }
 
 export function UsersPage() {
+  const { t } = useTranslation()
   const { user: currentUser } = useAuthStore()
   const { data: users = [], isLoading } = useUsers()
   const deactivate = useDeactivateUser()
@@ -265,6 +267,11 @@ export function UsersPage() {
                             {u.locked && (
                               <span title="Too many wrong passwords. It opens by itself after 30 minutes, or unlock it from the menu." className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-700">Locked</span>
                             )}
+                            {u.identity_provider && (
+                              <span title={t('settings.directory_user.badge_title')} className="rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-medium text-sky-800 dark:bg-sky-900/30 dark:text-sky-300">
+                                {t(u.identity_provider === 'ldap' ? 'settings.directory_user.badge_ldap' : 'settings.directory_user.badge_oidc')}
+                              </span>
+                            )}
                             {u.two_factor_enabled && (
                               <span title="Signs in with an authenticator app" className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-medium text-green-700">2FA</span>
                             )}
@@ -278,6 +285,9 @@ export function UsersPage() {
                           )}>
                             {u.role}
                           </span>
+                          {u.identity_provider && (
+                            <p className="mt-1 max-w-[16rem] text-xs text-gray-500 dark:text-gray-400">{t('settings.directory_user.role_hint')}</p>
+                          )}
                         </td>
                         <td className="px-4 py-3">
                           <span className={cn(
@@ -309,7 +319,7 @@ export function UsersPage() {
                                 >
                                   <Pencil className="h-3.5 w-3.5" /> Edit User
                                 </button>
-                                {isAdmin && u.invitation_pending && (
+                                {isAdmin && u.invitation_pending && !u.identity_provider && (
                                   <button
                                     onClick={() => {
                                       resendInvitation.mutate(u.id, {
@@ -327,7 +337,7 @@ export function UsersPage() {
                                     <Link2 className="h-3.5 w-3.5" /> Copy invite link
                                   </button>
                                 )}
-                                {isAdmin && u.id !== currentUser?.id && u.active !== false && !u.invitation_pending && (
+                                {isAdmin && u.id !== currentUser?.id && u.active !== false && !u.invitation_pending && !u.identity_provider && (
                                   <button
                                     onClick={() => {
                                       resetPassword.mutate(u.id, {

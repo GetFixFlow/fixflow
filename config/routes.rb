@@ -16,11 +16,24 @@ Rails.application.routes.draw do
   # The second step of signing in for a person with two-factor sign-in on (the first, sign_in, answers with a challenge)
   devise_scope :user do
     post "api/v1/auth/two_factor", to: "api/v1/auth/two_factor_sessions#create"
+
+    # The last step of signing in through OpenID Connect: the note the callback handed the browser, for a session
+    post "api/v1/auth/directory", to: "api/v1/auth/directory_sessions#create"
   end
 
   namespace :api do
     namespace :v1 do
       get "auth/me", to: "auth/profile#show"
+
+      # Signing in through the company directory: what the sign-in screen offers, and the OpenID Connect start and return
+      get "auth/directory",     to: "auth/directory#show"
+      get "auth/oidc/start",    to: "auth/directory#start"
+      get "auth/oidc/callback", to: "auth/directory#callback"
+
+      # How the company's directory is set up (administrators): read, change, remove, and try the settings
+      resource :directory_settings, only: %i[show update destroy], controller: "directory_settings" do
+        post :test
+      end
 
       # Where the signed-in person is signed in, and ending one of those sessions
       delete "sessions/all", to: "user_sessions#destroy_all"

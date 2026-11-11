@@ -64,6 +64,7 @@ module Api
       # the set-up screens; the controllers for those skip this.
       def require_two_factor_when_company_does
         return unless current_user && current_organization&.require_two_factor? && !current_user.two_factor_enabled?
+        return if current_user.directory_managed? # the company directory asks for the second factor
 
         render_error("Your company requires two-factor sign-in. Set it up under Settings, Security.", :forbidden,
                      code: "TWO_FACTOR_SETUP_REQUIRED")

@@ -135,6 +135,7 @@ module Api
           if user.id == current_user.id then "You can change your own password in My Profile."
           elsif user.invitation_pending? then "#{user.full_name} has not accepted their invitation yet. Send a new invitation instead."
           elsif !user.active? then "#{user.full_name} is deactivated."
+          elsif user.directory_managed? then "#{user.full_name} signs in through the company directory, which keeps their password."
           end
         raise UserAdministration::Refused, refusal if refusal
       end

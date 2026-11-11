@@ -4,9 +4,10 @@ module PasswordReset
   extend ActiveSupport::Concern
 
   # People who can use a reset link: active, and past the invitation step (someone who
-  # was invited has not chosen a password yet and uses their invitation link instead).
+  # was invited has not chosen a password yet and uses their invitation link instead), and not signed in through the
+  # directory (whose password is not kept here).
   def can_reset_password?
-    active? && !invitation_pending?
+    active? && !invitation_pending? && !directory_managed?
   end
 
   # Returns the link to send or hand over. Any earlier link stops working.

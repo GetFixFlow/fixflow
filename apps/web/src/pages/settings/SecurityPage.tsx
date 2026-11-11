@@ -3,14 +3,24 @@ import { useTranslation } from 'react-i18next'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Card, CardContent } from '@/components/ui/Card'
 import { TwoFactorCard } from '@/components/security/TwoFactorCard'
+import { useAuthStore } from '@/stores/authStore'
 
 export function SecurityPage() {
   const { t } = useTranslation()
+  const { user } = useAuthStore()
   return (
     <div className="max-w-2xl space-y-6">
       <PageHeader title={t('settings.security.title')} description={t('settings.security.description')} />
 
-      <TwoFactorCard />
+      {user?.identity_provider ? (
+        <Card>
+          <CardContent className="p-5">
+            <p className="text-sm text-gray-600 dark:text-gray-400">{t('settings.directory_user.password_kept')}</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <TwoFactorCard />
+      )}
 
       <Card>
         <CardContent className="flex items-center justify-between gap-4 p-5">

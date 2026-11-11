@@ -114,3 +114,5 @@ end
 gem "rotp", "~> 6.3"
 
 gem "web-push", "~> 3.1"
+
+gem "net-ldap", "~> 0.19"

@@ -1,0 +1,104 @@
+dn: ou=people,dc=acme,dc=test
+objectClass: organizationalUnit
+ou: people
+
+dn: ou=services,dc=acme,dc=test
+objectClass: organizationalUnit
+ou: services
+
+dn: ou=groups,dc=acme,dc=test
+objectClass: organizationalUnit
+ou: groups
+
+dn: cn=fixflow,ou=services,dc=acme,dc=test
+objectClass: organizationalRole
+objectClass: simpleSecurityObject
+cn: fixflow
+userPassword: fixflow-service-pass
+
+dn: uid=alice,ou=people,dc=acme,dc=test
+objectClass: inetOrgPerson
+uid: alice
+cn: Alice Admin
+givenName: Alice
+sn: Admin
+mail: alice@acme.test
+userPassword: alice-pass
+
+dn: uid=bob,ou=people,dc=acme,dc=test
+objectClass: inetOrgPerson
+uid: bob
+cn: Bob Manager
+givenName: Bob
+sn: Manager
+mail: bob@acme.test
+userPassword: bob-pass
+
+dn: uid=carol,ou=people,dc=acme,dc=test
+objectClass: inetOrgPerson
+uid: carol
+cn: Carol Technician
+givenName: Carol
+sn: Technician
+mail: carol@acme.test
+userPassword: carol-pass
+
+dn: uid=dave,ou=people,dc=acme,dc=test
+objectClass: inetOrgPerson
+uid: dave
+cn: Dave Nogroup
+givenName: Dave
+sn: Nogroup
+mail: dave@acme.test
+userPassword: dave-pass
+
+dn: uid=frank,ou=people,dc=acme,dc=test
+objectClass: inetOrgPerson
+uid: frank
+cn: Frank Twin
+sn: Twin
+mail: frank@acme.test
+userPassword: frank-pass
+
+dn: uid=frank2,ou=people,dc=acme,dc=test
+objectClass: inetOrgPerson
+uid: frank
+cn: Frank Twin Two
+sn: Twin
+mail: frank2@acme.test
+userPassword: frank2-pass
+
+dn: uid=lena,ou=people,dc=acme,dc=test
+objectClass: inetOrgPerson
+uid: lena
+cn: Lena Lead
+givenName: Lena
+sn: Lead
+mail: lena@acme.test
+userPassword: lena-pass
+
+dn: uid=mark,ou=people,dc=acme,dc=test
+objectClass: inetOrgPerson
+uid: mark
+cn: Mark Maint
+givenName: Mark
+sn: Maint
+mail: mark@acme.test
+userPassword: mark-pass
+
+dn: cn=fixflow-admins,ou=groups,dc=acme,dc=test
+objectClass: groupOfNames
+cn: fixflow-admins
+member: uid=alice,ou=people,dc=acme,dc=test
+member: uid=lena,ou=people,dc=acme,dc=test
+
+dn: cn=fixflow-managers,ou=groups,dc=acme,dc=test
+objectClass: groupOfNames
+cn: fixflow-managers
+member: uid=bob,ou=people,dc=acme,dc=test
+member: uid=mark,ou=people,dc=acme,dc=test
+
+dn: cn=fixflow-technicians,ou=groups,dc=acme,dc=test
+objectClass: groupOfNames
+cn: fixflow-technicians
+member: uid=carol,ou=people,dc=acme,dc=test

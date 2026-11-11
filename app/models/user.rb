@@ -91,6 +91,14 @@ class User < ApplicationRecord
     self.last_name = last
   end
 
+  # Joined the company directory (OpenID Connect or LDAP) at some point: the account came from it, or was joined to it.
+  def directory_user? = identity_provider.present?
+
+  # Signs in through the directory now: the directory holds the password and the second factor, and, when the company
+  # says so, the role. When the company turns the directory off, these people become ordinary password accounts again
+  # (an administrator sends them a link to choose a password).
+  def directory_managed? = directory_user? && organization.directory_sign_in?
+
   # Deactivated people cannot sign in, and every token they hold stops working.
   def active?
     deactivated_at.nil?

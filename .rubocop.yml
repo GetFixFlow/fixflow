@@ -14,6 +14,7 @@ AllCops:
     - "db/schema.rb"
     - "db/migrate/**/*"
     - "bin/**/*"
+    - "script/directory_live/**/*" # a stand-alone check that talks to real servers, run by hand
     - "vendor/**/*"
 
 Style/Documentation:

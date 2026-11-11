@@ -11,6 +11,7 @@
       "custom_fields": "Custom Fields",
       "users": "Users",
       "roles": "Roles & Permissions",
+      "directory": "Company sign-in",
       "iot": "IoT & API Keys",
       "chat": "Team Chat",
       "ai": "AI Features",
@@ -27,6 +28,13 @@
       "integrations": "Integrations",
       "data": "Data",
       "advanced": "Advanced"
+    },
+    "directory_user": {
+      "badge_oidc": "Company account",
+      "badge_ldap": "LDAP",
+      "badge_title": "Signs in through the company directory",
+      "role_hint": "Follows their groups in the company directory when role syncing is on.",
+      "password_kept": "Your password and second step are kept by your company directory. Change them there."
     },
     "profile": {
       "title": "My Profile",

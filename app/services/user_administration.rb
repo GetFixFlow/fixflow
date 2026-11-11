@@ -20,6 +20,10 @@ class UserAdministration
       return user if user.role == role.to_s
 
       guard_self!(user, by, "change your own role")
+      if user.directory_managed? && user.organization.directory_settings_config.sync_roles
+        raise Refused, "#{user.full_name}'s role follows their groups in the company directory. " \
+                       "Change the groups there, or turn off role syncing in Settings, Company sign-in."
+      end
       guarded(user) { user.update!(role: role.to_s) }
     end
 
@@ -47,6 +51,9 @@ class UserAdministration
     def delete!(user, by:)
       guard_self!(user, by, "delete your own account")
       guarded(user) { user.destroy! }
+    rescue ActiveRecord::InvalidForeignKey
+      # Anyone who has signed in is in the audit log, which keeps who did what: deactivating ends their access instead.
+      raise Refused, "#{user.full_name} appears in the audit log, so they cannot be deleted. Deactivate them instead."
     end
 
     private

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_121400) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_123100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -280,6 +280,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_121400) do
     t.datetime "updated_at", null: false
     t.jsonb "email_settings", default: {}, null: false
     t.jsonb "chat_settings", default: {}, null: false
+    t.jsonb "directory_settings", default: {}, null: false
     t.index ["settings"], name: "index_organizations_on_settings", using: :gin
     t.index ["subdomain"], name: "index_organizations_on_subdomain", unique: true
   end
@@ -520,7 +521,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_121400) do
     t.integer "failed_attempts", default: 0, null: false
     t.datetime "locked_at"
     t.string "locale"
+    t.string "identity_provider"
+    t.string "external_id"
+    t.datetime "directory_synced_at"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["identity_provider", "external_id"], name: "index_users_on_identity", unique: true, where: "(external_id IS NOT NULL)"
     t.index ["invitation_token_digest"], name: "index_users_on_invitation_token_digest", unique: true
     t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
     t.index ["jti"], name: "index_users_on_jti", unique: true
