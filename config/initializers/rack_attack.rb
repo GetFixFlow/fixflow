@@ -17,6 +17,17 @@ class Rack::Attack
     req.ip if req.path == "/api/v1/auth/two_factor" && req.post?
   end
 
+  # Signing in through the company's identity provider: 60 starts or returns / 1 min per IP (a shift starting behind one
+  # office address signs in together), and the last step 30 / min. Each is a sign-in the identity provider has already
+  # asked for a password and its own checks for.
+  throttle("api/auth/oidc", limit: 60, period: 1.minute) do |req|
+    req.ip if req.path.start_with?("/api/v1/auth/oidc/") && req.get?
+  end
+
+  throttle("api/auth/directory", limit: 30, period: 1.minute) do |req|
+    req.ip if req.path == "/api/v1/auth/directory" && req.post?
+  end
+
   # IoT ingestion: 1000 req / min per API key
   throttle("api/iot/ingest", limit: 1000, period: 1.minute) do |req|
     req.get_header("HTTP_X_API_KEY") if req.path == "/api/v1/iot/ingest"

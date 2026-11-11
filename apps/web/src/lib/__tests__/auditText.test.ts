@@ -21,6 +21,15 @@ describe('describeAction', () => {
     expect(describeAction('part.stock_adjusted')).toBe('Part stock adjusted')
   })
 
+  it('words what company sign-in writes', () => {
+    expect(describeAction('directory.person_created')).toBe('Person made by company sign-in')
+    expect(describeAction('directory.role_changed')).toBe('Role changed by the company directory')
+    expect(describeAction('directory.role_kept')).toBe('Last administrator kept by the company directory')
+    expect(describeAction('directory.sign_in_refused')).toBe('Company sign-in refused')
+    expect(describeAction('directory_settings.updated')).toBe('Company sign-in settings changed')
+    expect(describeAction('directory_settings.removed')).toBe('Company sign-in settings removed')
+  })
+
   it('still says something readable for an action it has never heard of', () => {
     expect(describeAction('widget.polished')).toBe('Widget polished')
     expect(describeAction('mystery')).toBe('Mystery')

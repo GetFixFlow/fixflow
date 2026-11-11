@@ -22,7 +22,8 @@ apiClient.interceptors.response.use(
       toast.error('Rate limit exceeded. Please slow down.')
     } else if (error.response && error.response.status >= 500) {
       toast.error('Server error. Please try again later.')
-    } else if (error.response?.status === 401) {
+    } else if (error.response?.status === 401 && error.config?.url !== '/auth/directory') {
+      // (A note for the company sign-in that did not hold up is answered on its own page, not by reloading the sign-in screen.)
       localStorage.removeItem('auth_token')
       clearApiCache()
       window.location.href = '/login'

@@ -241,7 +241,14 @@ export function ProfilePage() {
         </CardContent>
       </Card>
 
-      {/* Change Password */}
+      {/* Change Password: a person who signs in through the company directory has theirs kept there */}
+      {user?.identity_provider ? (
+        <Card>
+          <CardContent className="p-5">
+            <p className="text-sm text-gray-600 dark:text-gray-400">{t('settings.directory_user.password_kept')}</p>
+          </CardContent>
+        </Card>
+      ) : (
       <Card>
         <button
           onClick={() => setPwOpen(!pwOpen)}
@@ -322,6 +329,7 @@ export function ProfilePage() {
           </CardContent>
         )}
       </Card>
+      )}
 
       <SessionsCard />
     </div>

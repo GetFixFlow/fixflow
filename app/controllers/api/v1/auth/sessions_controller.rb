@@ -15,10 +15,45 @@ module Api
         # POST /api/v1/auth/two_factor. A wrong password, or a person without two-factor, carries on to Devise as before.
         prepend_before_action :ask_for_second_factor, only: :create
 
+        # A company with LDAP set up (Settings, Company sign-in) is also signed in by the directory: it runs ahead of the
+        # second step, because the directory asks for any second factor itself. A FixFlow account whose password is right
+        # signs in as ever.
+        prepend_before_action :sign_in_through_ldap, only: :create
+
         private
 
         def remember_signed_in_user
           @signed_in_user = current_user
+        end
+
+        def sign_in_through_ldap
+          settings = DirectorySettings.current
+          return unless settings.ldap? && (login, password = credentials_given)
+
+          local = User.find_for_authentication(email: login)
+          return if local && !local.directory_user? && local.valid_password?(password)
+
+          identity = Directory::Ldap.new(settings).authenticate(login, password)
+          return render json: { error: "Invalid Email or password." }, status: :unauthorized unless identity
+
+          user = Directory::Accounts.sign_in!(identity, settings)
+          sign_in(:user, user)
+          render json: { message: "Logged in successfully", user: UserBlueprint.render_as_hash(user) }
+        rescue Directory::Refused => e
+          Directory::Accounts.log_refused(e, identity, request)
+          render json: { error: e.user_message, code: "DIRECTORY_#{e.code.to_s.upcase}" }, status: :forbidden
+        rescue Directory::Error => e
+          Rails.logger.warn "[Directory] LDAP sign-in failed: #{e.message}"
+          render json: { error: "Your company directory could not be reached. Try again, or ask your administrator.",
+                         code: "DIRECTORY_UNREACHABLE" }, status: :service_unavailable
+        end
+
+        # The email (or username) and password sent, when they are both text.
+        def credentials_given
+          credentials = params[:user]
+          return unless credentials.respond_to?(:[]) && credentials[:email].is_a?(String) && credentials[:password].is_a?(String)
+
+          [credentials[:email], credentials[:password]]
         end
 
         def ask_for_second_factor

@@ -20,6 +20,11 @@ module Api
       # Changing the password signs the user out everywhere: every issued token carries
       # the old jti, so rotating it revokes them all, this session's included.
       def password
+        if current_user.directory_managed?
+          return render_error("Your password is kept by your company directory. Change it there.", :unprocessable_entity,
+code: "DIRECTORY_PASSWORD")
+        end
+
         attrs = params.expect(user: %i[current_password password password_confirmation])
 
         return render_error("Password can't be blank", :unprocessable_entity, code: "VALIDATION_ERROR") if attrs[:password].blank?

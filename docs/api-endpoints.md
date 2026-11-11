@@ -6,7 +6,7 @@ the like stand for a value, and `:format` is left out. Live updates are a WebSoc
 holds the standard routes of the sign-in library that nothing uses (`sign_up/edit` and the like): the ones to use are
 `sign_in`, `sign_out`, `two_factor`, `password` and `me`; `sign_up` works only until the first company exists.
 
-There are 242 endpoints in 45 groups: [activity_logs](#activity-logs), [ai](#ai), [api_keys](#api-keys), [asset_documents](#asset-documents), [assets](#assets), [auth](#auth), [backups](#backups), [branding](#branding), [chat_settings](#chat-settings), [custom_fields](#custom-fields), [dashboard](#dashboard), [data_usage](#data-usage), [downtimes](#downtimes), [email_settings](#email-settings), [getting_started](#getting-started), [health](#health), [imports](#imports), [invitations](#invitations), [iot](#iot), [iot_alerts](#iot-alerts), [iot_rules](#iot-rules), [localization_settings](#localization-settings), [locations](#locations), [meters](#meters), [notification_preferences](#notification-preferences), [organization_settings](#organization-settings), [parts](#parts), [preventive_maintenances](#preventive-maintenances), [profile](#profile), [public_assets](#public-assets), [public_request_form](#public-request-form), [purchase_orders](#purchase-orders), [push_subscriptions](#push-subscriptions), [reports](#reports), [sample_data](#sample-data), [saved_reports](#saved-reports), [schedule](#schedule), [sessions](#sessions), [setup](#setup), [storage](#storage), [system_health](#system-health), [users](#users), [vendors](#vendors), [work_orders](#work-orders), [work_requests](#work-requests).
+There are 250 endpoints in 46 groups: [activity_logs](#activity-logs), [ai](#ai), [api_keys](#api-keys), [asset_documents](#asset-documents), [assets](#assets), [auth](#auth), [backups](#backups), [branding](#branding), [chat_settings](#chat-settings), [custom_fields](#custom-fields), [dashboard](#dashboard), [data_usage](#data-usage), [directory_settings](#directory-settings), [downtimes](#downtimes), [email_settings](#email-settings), [getting_started](#getting-started), [health](#health), [imports](#imports), [invitations](#invitations), [iot](#iot), [iot_alerts](#iot-alerts), [iot_rules](#iot-rules), [localization_settings](#localization-settings), [locations](#locations), [meters](#meters), [notification_preferences](#notification-preferences), [organization_settings](#organization-settings), [parts](#parts), [preventive_maintenances](#preventive-maintenances), [profile](#profile), [public_assets](#public-assets), [public_request_form](#public-request-form), [purchase_orders](#purchase-orders), [push_subscriptions](#push-subscriptions), [reports](#reports), [sample_data](#sample-data), [saved_reports](#saved-reports), [schedule](#schedule), [sessions](#sessions), [setup](#setup), [storage](#storage), [system_health](#system-health), [users](#users), [vendors](#vendors), [work_orders](#work-orders), [work_requests](#work-requests).
 
 ## activity-logs
 
@@ -63,7 +63,11 @@ There are 242 endpoints in 45 groups: [activity_logs](#activity-logs), [ai](#ai)
 
 | Method | Path | Handled by |
 | --- | --- | --- |
+| GET | `/api/v1/auth/directory` | `api/v1/auth/directory#show` |
+| POST | `/api/v1/auth/directory` | `api/v1/auth/directory_sessions#create` |
 | GET | `/api/v1/auth/me` | `api/v1/auth/profile#show` |
+| GET | `/api/v1/auth/oidc/callback` | `api/v1/auth/directory#callback` |
+| GET | `/api/v1/auth/oidc/start` | `api/v1/auth/directory#start` |
 | PATCH, PUT | `/api/v1/auth/password` | `api/v1/auth/passwords#update` |
 | POST | `/api/v1/auth/password` | `api/v1/auth/passwords#create` |
 | GET | `/api/v1/auth/sign_in` | `api/v1/auth/sessions#new` |
@@ -121,6 +125,15 @@ There are 242 endpoints in 45 groups: [activity_logs](#activity-logs), [ai](#ai)
 | Method | Path | Handled by |
 | --- | --- | --- |
 | GET | `/api/v1/data_usage` | `api/v1/data_usage#show` |
+
+## directory-settings
+
+| Method | Path | Handled by |
+| --- | --- | --- |
+| DELETE | `/api/v1/directory_settings` | `api/v1/directory_settings#destroy` |
+| GET | `/api/v1/directory_settings` | `api/v1/directory_settings#show` |
+| PATCH, PUT | `/api/v1/directory_settings` | `api/v1/directory_settings#update` |
+| POST | `/api/v1/directory_settings/test` | `api/v1/directory_settings#test` |
 
 ## downtimes
 

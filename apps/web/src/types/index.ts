@@ -57,6 +57,8 @@ export interface User {
   active?: boolean
   invitation_pending?: boolean
   invitation_accepted_at?: string | null
+  /** "oidc" or "ldap" for a person who signs in through the company directory: the directory keeps their password and, when the company says so, their role. */
+  identity_provider?: 'oidc' | 'ldap' | null
   /** Signs in with an authenticator app as well as the password. */
   two_factor_enabled?: boolean
   /** Too many wrong passwords: locked for 30 minutes, or until an administrator unlocks it. */

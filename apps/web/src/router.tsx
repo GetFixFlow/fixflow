@@ -6,6 +6,7 @@ import { PageLoader } from '@/components/shared/PageLoader'
 
 // Eagerly-loaded pages (above-the-fold / entry points)
 import { LoginPage } from '@/pages/auth/LoginPage'
+import { DirectoryCallbackPage } from '@/pages/auth/DirectoryCallbackPage'
 import { SetupPage } from '@/pages/auth/SetupPage'
 import { TwoFactorSetupPage } from '@/pages/auth/TwoFactorSetupPage'
 import { AcceptInvitePage } from '@/pages/auth/AcceptInvitePage'
@@ -69,6 +70,7 @@ const ImportExportPage = lazy(() => import('@/pages/settings/ImportExportPage').
 const AdvancedSettingsPage = lazy(() => import('@/pages/settings/AdvancedSettingsPage').then(m => ({ default: m.AdvancedSettingsPage })))
 const SystemHealthPage = lazy(() => import('@/pages/settings/SystemHealthPage').then(m => ({ default: m.SystemHealthPage })))
 const CustomFieldsPage = lazy(() => import('@/pages/settings/CustomFieldsPage').then(m => ({ default: m.CustomFieldsPage })))
+const DirectorySettingsPage = lazy(() => import('@/pages/settings/DirectorySettingsPage').then(m => ({ default: m.DirectorySettingsPage })))
 const AISettingsPage = lazy(() => import('@/pages/settings/AISettingsPage').then(m => ({ default: m.AISettingsPage })))
 
 function Lazy({ children }: { children: React.ReactNode }) {
@@ -77,6 +79,7 @@ function Lazy({ children }: { children: React.ReactNode }) {
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
+  { path: '/login/directory', element: <DirectoryCallbackPage /> },
   { path: '/setup', element: <SetupPage /> },
   { path: '/accept-invite', element: <AcceptInvitePage /> },
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
@@ -174,6 +177,7 @@ export const router = createBrowserRouter([
                       { path: 'advanced', element: <Lazy><AdvancedSettingsPage /></Lazy> },
                       { path: 'ai', element: <Lazy><AISettingsPage /></Lazy> },
                       { path: 'chat', element: <Lazy><ChatSettingsPage /></Lazy> },
+                      { path: 'directory', element: <Lazy><DirectorySettingsPage /></Lazy> },
                     ],
                   },
                 ],

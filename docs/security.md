@@ -23,6 +23,10 @@ Anyone can make signing in safer with an authenticator app (Google Authenticator
 - **For programs**, `POST /api/v1/auth/sign_in` answers a person who has it on with `{"two_factor_required": true, "challenge": "..."}` and no token; send the challenge (good for 5 minutes) and the code to `POST /api/v1/auth/two_factor` to get the token, in the `Authorization` header, as before.
 - IoT devices use API keys and are not affected.
 
+## The company directory
+
+A company can have its people sign in with the account they use at work (OpenID Connect or LDAP) and take their role from their groups there. People who sign in that way have their password and second step kept by the directory: see [Sign in with the company directory](directory-sign-in.md).
+
 ## Passwords, and locked accounts
 
 - **A new password** (a new account, an accepted invitation, a reset, a change in My Profile, `rails fixflow:create_admin`) must be **10 to 128 characters** and must not be easy to guess: the most common passwords are refused (also with digits or symbols added, like `Password1234` or `p@ssw0rd`), and so are one character or one short stretch repeated, a run of digits, the name of this app, and anything made from the person's own email address or name (parts of four letters or more). Nothing is required of the kinds of characters: length and being hard to guess matter more than a capital and a symbol, and a few words in a row (`blue ladder 4721 kite`) are fine. Only a password being set is checked: people who already have a shorter one keep signing in until they change it. The demo accounts (`SEED_DB=true`) keep their well-known password on purpose.

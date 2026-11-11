@@ -35,6 +35,16 @@ class Organization < ApplicationRecord
   # The mail server saved in the app, or an empty one.
   def smtp_config = SmtpConfig.load(self)
 
+  # Whether sign-in through the company directory is switched on (read without decrypting anything, so it is cheap
+  # enough to ask for every person in a list).
+  def directory_sign_in?
+    saved = directory_settings || {}
+    saved["oidc_enabled"] == true || saved["ldap_enabled"] == true
+  end
+
+  # How people sign in through the company directory, or the settings with it all off.
+  def directory_settings_config = DirectorySettings.load(self)
+
   # Where chat messages go (Slack, Teams...), or an empty one.
   def chat_config = ChatConfig.load(self)
 

@@ -3,6 +3,7 @@ import type { AxiosError } from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { authApi } from '@/api'
+import { directoryApi } from '@/api/directory'
 import { useAuthStore } from '@/stores/authStore'
 import { queryClient } from '@/lib/queryClient'
 import { t } from '@/i18n'
@@ -93,6 +94,16 @@ export function useLogin({ onChallenge }: { onChallenge?: (challenge: string) =>
     onSuccess: (result) => (result.twoFactor ? onChallenge?.(result.challenge) : finish(result)),
     onError: (error: AxiosError<{ error?: string }>) =>
       toast.error(error.response?.data?.error ?? t('auth.toast.invalid_credentials')),
+  })
+}
+
+/** The last step of signing in through the company account: swap the one-use note the server handed the browser for a session. */
+export function useDirectoryExchange() {
+  const finish = useFinishSignIn()
+
+  return useMutation({
+    mutationFn: (code: string) => directoryApi.exchange(code),
+    onSuccess: finish,
   })
 }
 

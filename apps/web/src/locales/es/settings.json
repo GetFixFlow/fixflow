@@ -10,6 +10,7 @@
       "localization": "Idioma y región",
       "custom_fields": "Campos personalizados",
       "users": "Usuarios",
+      "directory": "Acceso con la cuenta de la empresa",
       "roles": "Roles y permisos",
       "iot": "IoT y claves de API",
       "chat": "Chat del equipo",
@@ -27,6 +28,13 @@
       "integrations": "Integraciones",
       "data": "Datos",
       "advanced": "Avanzado"
+    },
+    "directory_user": {
+      "badge_oidc": "Cuenta de la empresa",
+      "badge_ldap": "LDAP",
+      "badge_title": "Inicia sesión a través del directorio de la empresa",
+      "role_hint": "Sigue sus grupos en el directorio de la empresa cuando la sincronización de roles está activada.",
+      "password_kept": "Tu contraseña y el segundo paso los guarda el directorio de tu empresa. Cámbialos allí."
     },
     "profile": {
       "title": "Mi perfil",

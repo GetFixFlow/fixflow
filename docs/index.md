@@ -31,6 +31,7 @@ These pages are for the person who **installs and looks after** a FixFlow server
 | Run work orders, checklists and QR-label requests | [Work orders and maintenance](work-orders.md) |
 | See who is busy, who is overloaded, and move work by dragging | [The schedule and workload](schedule.md) |
 | Find a machine by scanning, and print a sheet of labels | [Scanning and labels](scanning-and-labels.md) |
+| Let people sign in with their work account (Keycloak, Entra, LDAP, Active Directory) | [Company directory sign-in](directory-sign-in.md) |
 | Use FixFlow in Spanish, or add a language | [Languages and translating](translating.md) |
 | Use FixFlow by keyboard or with a screen reader | [Accessibility](accessibility.md) |
 | Add your own fields to work orders and parts | [Custom fields](custom-fields.md) |
