@@ -43,12 +43,12 @@ export function SyncStatus() {
 
           {queue.length > 0 && (
             <div className="mb-3">
-              <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">{t('shell.sync.waiting_title')}</h3>
+              <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t('shell.sync.waiting_title')}</h3>
               <ul className="space-y-1 text-sm text-gray-700 dark:text-gray-200">
                 {queue.map((a) => (
                   <li key={a.id}>
                     {a.label}
-                    {a.type === 'comment' && <span className="block truncate text-xs text-gray-400">“{a.body}”</span>}
+                    {a.type === 'comment' && <span className="block truncate text-xs text-gray-500 dark:text-gray-400">“{a.body}”</span>}
                   </li>
                 ))}
               </ul>
@@ -62,14 +62,14 @@ export function SyncStatus() {
 
           {rejected.length > 0 && (
             <div>
-              <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-red-600">{t('shell.sync.rejected_title')}</h3>
+              <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-red-600 dark:text-red-400">{t('shell.sync.rejected_title')}</h3>
               <ul className="space-y-2 text-sm">
                 {rejected.map(({ action, message }) => (
                   <li key={action.id} className="rounded-md bg-red-50 p-2 dark:bg-red-900/20">
                     <p className="font-medium text-gray-800 dark:text-gray-100">{action.label}</p>
-                    {action.type === 'comment' && <p className="text-xs text-gray-500">“{action.body}”</p>}
+                    {action.type === 'comment' && <p className="text-xs text-gray-500 dark:text-gray-400">“{action.body}”</p>}
                     <p className="text-xs text-red-700 dark:text-red-300">{message}</p>
-                    <button className="mt-1 text-xs text-gray-500 underline" onClick={() => offlineQueue.dismissRejected(action.id)}>
+                    <button className="mt-1 text-xs text-gray-500 dark:text-gray-400 underline" onClick={() => offlineQueue.dismissRejected(action.id)}>
                       {t('shell.sync.dismiss')}
                     </button>
                   </li>

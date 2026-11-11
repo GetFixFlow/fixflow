@@ -38,13 +38,13 @@ export function ReportsHubPage() {
                   <section.icon className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">{section.title}</h3>
-                  <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{section.description}</p>
+                  <h2 className="font-semibold text-gray-900 dark:text-gray-100">{section.title}</h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">{section.description}</p>
                 </div>
               </div>
               <div className="flex flex-wrap gap-1.5 mt-3">
                 {section.kpis.map((kpi) => (
-                  <span key={kpi} className="rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-[11px] text-gray-600 dark:text-gray-400">{kpi}</span>
+                  <span key={kpi} className="rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-[11px] text-gray-600 dark:text-gray-300">{kpi}</span>
                 ))}
               </div>
             </CardContent>

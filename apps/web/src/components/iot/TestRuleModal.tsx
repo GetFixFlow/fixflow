@@ -42,7 +42,7 @@ export function TestRuleModal({ open, rule, onClose }: TestRuleModalProps) {
         {/* Rule summary */}
         <div className="rounded-lg bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 p-3 space-y-1">
           <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{rule.name}</p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             Trigger when <span className="font-mono font-medium text-gray-700 dark:text-gray-300">{rule.metric_name}</span>
             {' '}{opLabel}{' '}
             <span className="font-mono font-medium text-gray-700 dark:text-gray-300">
@@ -56,11 +56,12 @@ export function TestRuleModal({ open, rule, onClose }: TestRuleModalProps) {
 
         {/* Test input */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          <label htmlFor="rule-test-value" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
             Test Value {rule.metric_unit ? `(${rule.metric_unit})` : ''}
           </label>
           <div className="flex gap-2">
             <Input
+              id="rule-test-value"
               type="number"
               value={testValue}
               onChange={(e) => { setTestValue(e.target.value); setResult(null) }}
@@ -92,12 +93,12 @@ export function TestRuleModal({ open, rule, onClose }: TestRuleModalProps) {
 
             {result.recent_readings && result.recent_readings.length > 0 && (
               <div className="mt-3 space-y-1">
-                <p className="text-xs font-medium text-gray-500 uppercase">Recent Readings</p>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Recent Readings</p>
                 {result.recent_readings.slice(0, 5).map((r, i) => (
                   <div key={i} className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 py-0.5">
                     <span className="font-mono">{r.value} {r.unit}</span>
                     <span>{formatTime(r.recorded_at)}</span>
-                    <span className={r.would_trigger ? 'text-red-600' : 'text-green-600'}>
+                    <span className={r.would_trigger ? 'text-red-600 dark:text-red-400' : 'text-green-700 dark:text-green-400'}>
                       {r.would_trigger ? '⚡ trigger' : '✓ ok'}
                     </span>
                   </div>

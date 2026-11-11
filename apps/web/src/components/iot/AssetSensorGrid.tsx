@@ -23,7 +23,7 @@ export function AssetSensorGrid({ assetStatus, isLoading }: AssetSensorGridProps
 
   if (assetStatus.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-400">
+      <div className="text-center py-12 text-gray-500 dark:text-gray-400">
         <p className="text-4xl mb-3">📡</p>
         <p className="font-medium">No monitored assets yet</p>
         <p className="text-sm mt-1">Add IoT rules to start monitoring assets</p>

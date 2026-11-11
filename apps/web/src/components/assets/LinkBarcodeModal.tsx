@@ -41,7 +41,7 @@ export function LinkBarcodeModal({ code, onClose, onLinked }: LinkBarcodeModalPr
           <Trans i18nKey="assets.link_barcode.code" values={{ code }} components={{ code: <span className="break-all font-mono" /> }} />
         </p>
         <AssetSelect id="link-barcode-asset" label={t('assets.link_barcode.asset')} value={assetId} onChange={setAssetId} />
-        {problem && <p role="alert" className="text-sm text-red-600">{problem}</p>}
+        {problem && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{problem}</p>}
         <div className="flex gap-2">
           <Button type="button" variant="outline" onClick={onClose} className="flex-1">{t('common.actions.cancel')}</Button>
           <Button type="button" onClick={link} disabled={assetId === null || saving} className="flex-1">

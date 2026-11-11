@@ -45,14 +45,14 @@ export function IotPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <Badge variant={severityVariant(alert.severity)}>{alert.severity}</Badge>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
                         {formatDistanceToNow(new Date(alert.created_at), { addSuffix: true })}
                       </span>
                     </div>
                     <p className="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100">
                       {alert.message}
                     </p>
-                    <p className="text-xs text-gray-500">Value: {alert.sensor_value}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Value: {alert.sensor_value}</p>
                   </div>
                   <div className="flex gap-2">
                     {alert.status === 'open' && (

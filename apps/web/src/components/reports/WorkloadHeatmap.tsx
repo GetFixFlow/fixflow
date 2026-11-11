@@ -16,8 +16,8 @@ export function WorkloadHeatmap({ data }: { data: WorkloadCell[] }) {
       <table className="w-full text-xs">
         <thead>
           <tr>
-            <th className="text-left pr-3 py-1 text-gray-400 font-normal w-28">Technician</th>
-            {DAYS.map((d) => <th key={d} className="text-center py-1 font-normal text-gray-400 w-10">{d}</th>)}
+            <th className="text-left pr-3 py-1 text-gray-500 dark:text-gray-400 font-normal w-28">Technician</th>
+            {DAYS.map((d) => <th key={d} className="text-center py-1 font-normal text-gray-500 dark:text-gray-400 w-10">{d}</th>)}
           </tr>
         </thead>
         <tbody>

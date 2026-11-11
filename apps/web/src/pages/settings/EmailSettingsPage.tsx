@@ -112,9 +112,9 @@ function EmailForm({ status }: { status: EmailStatus }) {
           : 'bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800'
       }`}>
         {status.configured ? (
-          <CheckCircle className="h-5 w-5 text-green-500 shrink-0" />
+          <CheckCircle className="h-5 w-5 text-green-700 dark:text-green-400 shrink-0" />
         ) : (
-          <AlertCircle className="h-5 w-5 text-amber-500 shrink-0" />
+          <AlertCircle className="h-5 w-5 text-amber-700 dark:text-amber-400 shrink-0" />
         )}
         <div>
           <p className={`text-sm font-medium ${status.configured ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'}`}>
@@ -122,7 +122,7 @@ function EmailForm({ status }: { status: EmailStatus }) {
             {fromEnvironment && `Email is set up on the server (${status.environment_host})`}
             {!status.configured && 'Email is not set up'}
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             {fromSettings && 'Using the settings saved below.'}
             {fromEnvironment && 'Settings saved below would take over from it.'}
             {!status.configured && 'Until it is, invitations and password resets give you a link to copy and send yourself.'}
@@ -133,10 +133,10 @@ function EmailForm({ status }: { status: EmailStatus }) {
       {/* SMTP Form */}
       <Card>
         <CardContent className="p-6 space-y-4">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Mail server</h3>
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100">Mail server</h2>
 
           <div>
-            <p className="mb-1.5 text-xs text-gray-500">Fill in common settings:</p>
+            <p className="mb-1.5 text-xs text-gray-500 dark:text-gray-400">Fill in common settings:</p>
             <div className="flex flex-wrap gap-2">
               {PRESETS.map((p) => (
                 <Button
@@ -151,7 +151,7 @@ function EmailForm({ status }: { status: EmailStatus }) {
               ))}
             </div>
             {preset && (
-              <p className="mt-2 flex items-start gap-1.5 text-xs text-gray-500">
+              <p className="mt-2 flex items-start gap-1.5 text-xs text-gray-500 dark:text-gray-400">
                 <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 {PRESETS.find((p) => p.name === preset)?.hint}
               </p>
@@ -198,7 +198,7 @@ function EmailForm({ status }: { status: EmailStatus }) {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2.5 top-2.5 text-gray-400"
+                  className="absolute right-2.5 top-2.5 text-gray-500 dark:text-gray-400"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -236,7 +236,7 @@ function EmailForm({ status }: { status: EmailStatus }) {
               </Button>
             )}
           </div>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             The test goes to your own address using what is in the form, without saving it. Saved settings are used for every email, ahead of the server&apos;s own.
           </p>
         </CardContent>
@@ -245,11 +245,12 @@ function EmailForm({ status }: { status: EmailStatus }) {
       {/* Email Templates */}
       <Card>
         <CardContent className="p-5 space-y-3">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Email Templates</h3>
-          <p className="text-sm text-gray-500">Preview the email templates sent by FixFlow.</p>
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100">Email Templates</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Preview the email templates sent by FixFlow.</p>
 
           <div>
             <select
+              aria-label="Email template"
               value={selectedTemplate ?? ''}
               onChange={(e) => setSelectedTemplate(e.target.value || null)}
               className="h-9 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-sm"
@@ -263,7 +264,7 @@ function EmailForm({ status }: { status: EmailStatus }) {
 
           {selectedTemplate && templateContent && (
             <div className="mt-3 space-y-2">
-              <div className="flex items-center gap-2 text-xs text-gray-500">
+              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                 <ChevronDown className="h-3 w-3" />
                 <span>Subject: {EMAIL_TEMPLATES.find((t) => t.id === selectedTemplate)?.subject}</span>
               </div>
@@ -293,7 +294,7 @@ export function EmailSettingsPage() {
         <PageHeader title="Email Settings" description="Configure outgoing email" />
         <Card>
           <CardContent className="p-8 text-center">
-            <p className="text-gray-500">Access Denied. Only administrators can manage email settings.</p>
+            <p className="text-gray-500 dark:text-gray-400">Access Denied. Only administrators can manage email settings.</p>
           </CardContent>
         </Card>
       </div>

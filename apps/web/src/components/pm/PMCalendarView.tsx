@@ -16,7 +16,7 @@ const PRIORITY_CHIP: Record<Priority, string> = {
   critical: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
   high: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
   medium: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-  low: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
+  low: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',
 }
 
 interface PMCalendarViewProps {
@@ -61,7 +61,7 @@ export function PMCalendarView({ pms, onTrigger }: PMCalendarViewProps) {
       {/* Day names */}
       <div className="grid grid-cols-7 mb-1">
         {weekdayLabels().map((d) => (
-          <div key={d} className="text-center text-xs font-medium text-gray-400 py-1">{d}</div>
+          <div key={d} className="text-center text-xs font-medium text-gray-500 dark:text-gray-400 py-1">{d}</div>
         ))}
       </div>
 
@@ -94,7 +94,7 @@ export function PMCalendarView({ pms, onTrigger }: PMCalendarViewProps) {
                   </button>
                 ))}
                 {dayPMs.length > 3 && (
-                  <span className="text-xs text-gray-400 px-1">+{dayPMs.length - 3} more</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 px-1">+{dayPMs.length - 3} more</span>
                 )}
               </div>
             </div>
@@ -106,17 +106,17 @@ export function PMCalendarView({ pms, onTrigger }: PMCalendarViewProps) {
       {selectedPM && (
         <div className="absolute right-0 top-0 z-20 w-72 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 shadow-xl p-4 space-y-3">
           <div className="flex items-start justify-between">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm line-clamp-2">
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100 text-sm line-clamp-2">
               {selectedPM.name}
-            </h3>
-            <button onClick={() => setSelectedPM(null)} className="text-gray-400 hover:text-gray-600 shrink-0 ml-2">
+            </h2>
+            <button onClick={() => setSelectedPM(null)} className="text-gray-500 dark:text-gray-400 hover:text-gray-600 shrink-0 ml-2">
               <X className="h-4 w-4" />
             </button>
           </div>
           <dl className="space-y-1.5 text-sm">
-            <div><dt className="text-gray-400 text-xs">Asset</dt><dd>{selectedPM.asset?.name ?? '—'}</dd></div>
-            <div><dt className="text-gray-400 text-xs">Next Due</dt><dd><PMDueDateDisplay dueDate={selectedPM.next_due_at} /></dd></div>
-            {selectedPM.assigned_to && <div><dt className="text-gray-400 text-xs">Assigned to</dt><dd>{selectedPM.assigned_to.full_name}</dd></div>}
+            <div><dt className="text-gray-500 dark:text-gray-400 text-xs">Asset</dt><dd>{selectedPM.asset?.name ?? '—'}</dd></div>
+            <div><dt className="text-gray-500 dark:text-gray-400 text-xs">Next Due</dt><dd><PMDueDateDisplay dueDate={selectedPM.next_due_at} /></dd></div>
+            {selectedPM.assigned_to && <div><dt className="text-gray-500 dark:text-gray-400 text-xs">Assigned to</dt><dd>{selectedPM.assigned_to.full_name}</dd></div>}
           </dl>
           <div className="flex gap-2">
             <Button size="sm" onClick={() => { onTrigger?.(selectedPM); setSelectedPM(null) }} className="flex-1">

@@ -21,8 +21,8 @@ export function MeterScheduleFields({ assetId, meterId, onMeter, value, onValue,
   const base = lastService.trim() !== '' && !Number.isNaN(Number(lastService)) ? Number(lastService) : meter?.reading
   const select = 'w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
 
-  if (!assetId) return <p className="text-sm text-gray-500">Choose the asset first (step 1): a schedule follows one of its meters.</p>
-  if (isLoading) return <p className="text-sm text-gray-500">Loading the asset's meters…</p>
+  if (!assetId) return <p className="text-sm text-gray-500 dark:text-gray-400">Choose the asset first (step 1): a schedule follows one of its meters.</p>
+  if (isLoading) return <p className="text-sm text-gray-500 dark:text-gray-400">Loading the asset's meters…</p>
   if (!meters?.length) {
     return (
       <p className="rounded-md border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-800 dark:border-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300">
@@ -52,7 +52,7 @@ export function MeterScheduleFields({ assetId, meterId, onMeter, value, onValue,
         <label htmlFor="pm-last-service" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Last serviced at (optional)</label>
         <Input id="pm-last-service" type="number" min={0} step="any" value={lastService} onChange={(e) => onLastService(e.target.value)}
           placeholder={meter ? number(meter.reading) : ''} className="w-40" />
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
           The meter's reading at the last service. Leave it empty to count from the reading now.
         </p>
       </div>

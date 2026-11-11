@@ -57,7 +57,7 @@ export function IoTDashboardPage() {
       <PageHeader
         title="IoT Monitor"
         description={
-          <span className="flex items-center gap-2 text-sm text-gray-500">
+          <span className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
             <span className={cn('h-2 w-2 rounded-full', connected ? 'bg-green-500 animate-pulse' : 'bg-gray-400')} />
             {connected ? 'Live' : 'Offline'} · {updatedLabel}
           </span>
@@ -116,7 +116,7 @@ export function IoTDashboardPage() {
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Open Alerts</h2>
-            <Link to="/iot/alerts" className="text-sm text-brand-600 hover:underline">View All →</Link>
+            <Link to="/iot/alerts" className="text-sm text-brand-600 dark:text-brand-400 hover:underline">View All →</Link>
           </div>
 
           {/* Severity tabs */}
@@ -134,7 +134,7 @@ export function IoTDashboardPage() {
                   'flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors',
                   severityTab === tab.id
                     ? 'bg-brand-600 text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600',
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600',
                 )}
               >
                 {tab.label}
@@ -144,7 +144,7 @@ export function IoTDashboardPage() {
           </div>
 
           {filteredAlerts.length === 0 ? (
-            <div className="text-center py-8 text-green-600 dark:text-green-400">
+            <div className="text-center py-8 text-green-700 dark:text-green-400">
               <span className="text-2xl">✅</span>
               <p className="text-sm font-medium mt-1">No alerts</p>
             </div>
@@ -184,7 +184,7 @@ export function IoTDashboardPage() {
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Recent Alerts</h2>
-            <Link to="/iot/alerts" className="text-sm text-brand-600 hover:underline">View All Alerts →</Link>
+            <Link to="/iot/alerts" className="text-sm text-brand-600 dark:text-brand-400 hover:underline">View All Alerts →</Link>
           </div>
           <IoTAlertsList
             alerts={openAlerts}

@@ -90,7 +90,7 @@ describe('assets in Spanish', () => {
   it('shows the status changer and its confirmation in Spanish', async () => {
     renderIn(<AssetStatusChanger asset={asset(1, 'Bomba-01', 'operational')} />)
 
-    await userEvent.click(screen.getByLabelText('Cambiar el estado del activo'))
+    await userEvent.click(screen.getByRole('button', { name: /cambiar el estado del activo/i }))
     expect(screen.getByText('actual')).toBeInTheDocument()
     await userEvent.click(screen.getByText('Fuera de servicio'))
     expect(screen.getByText(/¿Cambiar el estado a/)).toBeInTheDocument()

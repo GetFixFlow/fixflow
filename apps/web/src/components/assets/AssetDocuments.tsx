@@ -22,7 +22,7 @@ function DocumentRow({ document, canRemove, onRemove }: { document: AssetDocumen
         <img src={document.url} alt="" loading="lazy" className="h-12 w-12 shrink-0 rounded-md border border-gray-200 object-cover dark:border-gray-700" />
       ) : (
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-gray-100 dark:bg-gray-700">
-          <FileText className="h-6 w-6 text-gray-400" />
+          <FileText className="h-6 w-6 text-gray-500 dark:text-gray-400" />
         </div>
       )}
       <div className="min-w-0 flex-1">
@@ -31,7 +31,7 @@ function DocumentRow({ document, canRemove, onRemove }: { document: AssetDocumen
           {document.filename}
         </a>
         {document.description && <p className="truncate text-sm text-gray-700 dark:text-gray-300">{document.description}</p>}
-        <p className="text-xs text-gray-500">{t('assets.documents.added_by', { name: document.user.full_name, date: formatDate(document.created_at) })}</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">{t('assets.documents.added_by', { name: document.user.full_name, date: formatDate(document.created_at) })}</p>
       </div>
       {canRemove && (
         <Button size="sm" variant="outline" aria-label={t('assets.documents.remove_aria', { name: document.filename })} onClick={onRemove}>
@@ -62,7 +62,7 @@ export function AssetDocuments({ assetId, canManage, userId }: { assetId: number
   }
 
   if (isLoading) return <Skeleton className="h-24 w-full" />
-  if (isError) return <p className="text-sm text-red-600">{t('assets.documents.load_failed')}</p>
+  if (isError) return <p className="text-sm text-red-600 dark:text-red-400">{t('assets.documents.load_failed')}</p>
 
   return (
     <div className="space-y-3">

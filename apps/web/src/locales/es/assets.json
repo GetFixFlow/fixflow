@@ -123,7 +123,7 @@
       "none_found": "No se encontraron activos"
     },
     "status_changer": {
-      "aria": "Cambiar el estado del activo",
+      "aria": "{{status}}: cambiar el estado del activo",
       "confirm_text": "¿Cambiar el estado a <b>{{status}}</b>?",
       "current": "actual"
     },
@@ -425,7 +425,8 @@
       "type_placeholder": "Etiqueta del activo, código de barras o número de serie",
       "look_up": "Buscar",
       "linked": "Vinculado. Al escanearlo se abrirá este activo.",
-      "and": " y "
+      "and": " y ",
+      "page_title": "Escanear un código"
     },
     "print": {
       "assets": "Activos",

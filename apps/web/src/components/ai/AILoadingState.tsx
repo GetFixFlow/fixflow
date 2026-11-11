@@ -20,7 +20,7 @@ export function AILoadingState({ messages = DEFAULT_MESSAGES, className }: AILoa
   return (
     <div className={className}>
       <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-        <Sparkles className="h-4 w-4 animate-pulse text-brand-500" />
+        <Sparkles className="h-4 w-4 animate-pulse text-brand-600 dark:text-brand-400" />
         <span className="animate-pulse">{messages[index]}</span>
       </div>
       <div className="mt-2 space-y-2">

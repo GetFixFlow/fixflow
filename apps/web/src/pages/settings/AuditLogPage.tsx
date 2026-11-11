@@ -25,11 +25,11 @@ function useSettled(value: string, ms = 300) {
 const FIELD = 'h-9 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-sm'
 
 function Who({ line }: { line: AuditLine }) {
-  if (!line.user) return <span className="text-xs italic text-gray-500">System</span>
+  if (!line.user) return <span className="text-xs italic text-gray-500 dark:text-gray-400">System</span>
   return (
     <>
       <p className="text-xs font-medium text-gray-900 dark:text-gray-100">{line.user.full_name}</p>
-      <p className="text-xs text-gray-400">{line.user.email}</p>
+      <p className="text-xs text-gray-500 dark:text-gray-400">{line.user.email}</p>
     </>
   )
 }
@@ -39,7 +39,7 @@ function Details({ line }: { line: AuditLine }) {
   const role = roleChange(line)
   const removed = removalSummary(line)
   const backup = backupSummary(line)
-  if (fields.length === 0 && !role && !removed && !backup) return <span className="text-xs text-gray-400">—</span>
+  if (fields.length === 0 && !role && !removed && !backup) return <span className="text-xs text-gray-500 dark:text-gray-400">—</span>
   return (
     <div className="text-xs text-gray-600 dark:text-gray-400">
       {removed && <p>{removed}</p>}
@@ -83,7 +83,7 @@ export function AuditLogPage() {
         <PageHeader title="Audit Log" description="Who did what, and when" />
         <Card>
           <CardContent className="p-8 text-center">
-            <p className="text-gray-500">Only administrators can see the audit log.</p>
+            <p className="text-gray-500 dark:text-gray-400">Only administrators can see the audit log.</p>
           </CardContent>
         </Card>
       </div>
@@ -124,12 +124,12 @@ export function AuditLogPage() {
         <CardContent className="p-4">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" aria-hidden="true" />
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" aria-hidden="true" />
               <input type="text" aria-label="Person" placeholder="Person (name or email)" value={person}
                 onChange={(e) => setPerson(e.target.value)} className={`${FIELD} pl-8`} />
             </div>
             <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" aria-hidden="true" />
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" aria-hidden="true" />
               <input type="text" aria-label="Record" placeholder="Record name (a work order, asset…)" value={search}
                 onChange={(e) => setSearch(e.target.value)} className={`${FIELD} pl-8`} />
             </div>
@@ -141,10 +141,10 @@ export function AuditLogPage() {
               <option value="">Anything that happened</option>
               {Object.entries(VERBS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
             </select>
-            <label className="flex items-center gap-2 text-xs text-gray-500">
+            <label className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
               From <input type="date" aria-label="From date" value={from} onChange={(e) => setFrom(e.target.value)} className={FIELD} />
             </label>
-            <label className="flex items-center gap-2 text-xs text-gray-500">
+            <label className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
               To <input type="date" aria-label="To date" value={to} onChange={(e) => setTo(e.target.value)} className={FIELD} />
             </label>
           </div>
@@ -164,28 +164,28 @@ export function AuditLogPage() {
               <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
                 <tr>
                   {['When', 'Who', 'What happened', 'Record', 'Details'].map((heading) => (
-                    <th key={heading} className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{heading}</th>
+                    <th key={heading} className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">{heading}</th>
                   ))}
-                  <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 md:table-cell">From</th>
+                  <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400 md:table-cell">From</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                 {isLoading ? (
-                  <tr><td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-400">Loading…</td></tr>
+                  <tr><td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">Loading…</td></tr>
                 ) : lines.length === 0 ? (
-                  <tr><td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-400">Nothing in the audit log matches these filters.</td></tr>
+                  <tr><td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">Nothing in the audit log matches these filters.</td></tr>
                 ) : (
                   lines.map((line) => (
                     <tr key={line.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
-                      <td className="whitespace-nowrap px-4 py-2.5 text-xs text-gray-500">{formatDateTime(line.created_at)}</td>
+                      <td className="whitespace-nowrap px-4 py-2.5 text-xs text-gray-500 dark:text-gray-400">{formatDateTime(line.created_at)}</td>
                       <td className="px-4 py-2.5"><Who line={line} /></td>
                       <td className="px-4 py-2.5 text-xs font-medium text-gray-900 dark:text-gray-100">{describeAction(line.action)}</td>
                       <td className="px-4 py-2.5">
-                        <p className="text-xs text-gray-500">{line.resource_type ? (RECORD_TYPES[line.resource_type] ?? line.resource_type) : ''}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{line.resource_type ? (RECORD_TYPES[line.resource_type] ?? line.resource_type) : ''}</p>
                         <p className="text-xs text-gray-700 dark:text-gray-300">{line.resource_name}</p>
                       </td>
                       <td className="px-4 py-2.5"><Details line={line} /></td>
-                      <td className="hidden px-4 py-2.5 font-mono text-xs text-gray-400 md:table-cell">{line.ip_address}</td>
+                      <td className="hidden px-4 py-2.5 font-mono text-xs text-gray-500 dark:text-gray-400 md:table-cell">{line.ip_address}</td>
                     </tr>
                   ))
                 )}
@@ -197,7 +197,7 @@ export function AuditLogPage() {
 
       {pagination && pagination.total_pages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Page {pagination.current_page} of {pagination.total_pages} ({pagination.total_count} lines)
           </p>
           <div className="flex gap-2">

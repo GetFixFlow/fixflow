@@ -76,21 +76,21 @@ export function LiveMetricCard({ metricName, unit, readings, threshold, operator
             {metricName.replace(/_/g, ' ')}
           </span>
         </div>
-        {isBreached && <AlertTriangle className="h-4 w-4 text-red-500" />}
+        {isBreached && <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />}
       </div>
 
       <div className={cn('text-3xl font-bold transition-colors duration-200',
         flash && 'text-blue-600 dark:text-blue-400',
         isBreached ? 'text-red-600 dark:text-red-400' :
-        isWarning ? 'text-yellow-600 dark:text-yellow-400' :
-        isStale ? 'text-gray-400' : 'text-gray-900 dark:text-gray-100')}>
+        isWarning ? 'text-yellow-700 dark:text-yellow-400' :
+        isStale ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100')}>
         {isVeryStale ? '—' : value != null ? `${value}` : '—'}
-        {value != null && unit && <span className="text-lg font-medium ml-1 text-gray-500">{unit}</span>}
+        {value != null && unit && <span className="text-lg font-medium ml-1 text-gray-500 dark:text-gray-400">{unit}</span>}
       </div>
 
       {threshold != null && (
         <>
-          <p className="text-xs text-gray-500">Threshold: {formatOperator(operator)} {threshold} {unit}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Threshold: {formatOperator(operator)} {threshold} {unit}</p>
           {pct != null && (
             <div className="space-y-1">
               <div className="h-1.5 w-full rounded-full bg-gray-200 dark:bg-gray-700">
@@ -98,7 +98,7 @@ export function LiveMetricCard({ metricName, unit, readings, threshold, operator
                   pct >= 100 ? 'bg-red-500' : pct >= 80 ? 'bg-yellow-500' : 'bg-green-500')}
                   style={{ width: `${pct}%` }} />
               </div>
-              <p className="text-xs text-gray-400 text-right">{pct}% of limit</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 text-right">{pct}% of limit</p>
             </div>
           )}
         </>
@@ -106,7 +106,7 @@ export function LiveMetricCard({ metricName, unit, readings, threshold, operator
 
       <div className="flex items-center justify-between">
         <span className={cn('text-xs font-medium',
-          isBreached ? 'text-red-600' : isWarning ? 'text-yellow-600' : isStale ? 'text-orange-500' : 'text-green-600')}>
+          isBreached ? 'text-red-600 dark:text-red-400' : isWarning ? 'text-yellow-700 dark:text-yellow-400' : isStale ? 'text-orange-700 dark:text-orange-400' : 'text-green-700 dark:text-green-400')}>
           {isVeryStale ? '⚠️ Sensor may be offline' : isStale ? '⚠️ No data (5+ min)' : isBreached ? '🔴 Threshold breached' : isWarning ? '🟡 Near threshold' : threshold != null ? '✓ Normal' : 'No threshold set'}
         </span>
         {latest && <LiveReadingBadge lastReadingAt={latest.recorded_at} />}

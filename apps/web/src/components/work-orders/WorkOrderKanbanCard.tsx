@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { MessageSquare, Paperclip, MapPin, User, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { WorkOrderStatusBadge } from './WorkOrderStatusBadge'
@@ -25,7 +25,6 @@ export function WorkOrderKanbanCard({
   commentCount = 0,
   attachmentCount = 0,
 }: WorkOrderKanbanCardProps) {
-  const navigate = useNavigate()
   const borderClass = PRIORITY_BORDER[wo.priority] ?? 'border-l-gray-300'
 
   const locationPath = wo.asset?.location
@@ -34,13 +33,8 @@ export function WorkOrderKanbanCard({
 
   return (
     <div
-      role="button"
-      tabIndex={0}
-      aria-label={`${wo.work_order_number}: ${wo.title}`}
-      onClick={() => navigate(`/work-orders/${wo.id}`)}
-      onKeyDown={(e) => e.key === 'Enter' && navigate(`/work-orders/${wo.id}`)}
       className={cn(
-        'cursor-pointer rounded-lg border border-gray-200 bg-white p-3 shadow-sm hover:shadow-md transition-shadow dark:border-gray-700 dark:bg-gray-800',
+        'relative cursor-pointer rounded-lg border focus-within:ring-2 focus-within:ring-brand-500 border-gray-200 bg-white p-3 shadow-sm hover:shadow-md transition-shadow dark:border-gray-700 dark:bg-gray-800',
         'border-l-4',
         borderClass,
       )}
@@ -48,12 +42,16 @@ export function WorkOrderKanbanCard({
       {/* Header row */}
       <div className="flex items-start justify-between gap-2 mb-2">
         <WorkOrderPriorityBadge priority={wo.priority} size="sm" />
-        <span className="font-mono text-xs text-gray-400 shrink-0">{wo.work_order_number}</span>
+        <span className="font-mono text-xs text-gray-500 dark:text-gray-400 shrink-0">{wo.work_order_number}</span>
       </div>
 
       {/* Title */}
       <p className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-2">
-        {wo.title}
+        {/* The whole card is this link, stretched over it: one tab stop, announced as a link to the work order. */}
+        <Link to={`/work-orders/${wo.id}`} className="after:absolute after:inset-0 after:content-[''] focus:outline-none">
+          <span className="sr-only">{wo.work_order_number}: </span>
+          {wo.title}
+        </Link>
       </p>
 
       {/* Location */}
@@ -82,7 +80,7 @@ export function WorkOrderKanbanCard({
 
       {/* Footer: counts + status */}
       <div className="flex items-center justify-between pt-1.5 border-t border-gray-100 dark:border-gray-700">
-        <div className="flex items-center gap-2 text-xs text-gray-400">
+        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
           {commentCount > 0 && (
             <span className="flex items-center gap-0.5">
               <MessageSquare className="h-3 w-3" /> {commentCount}

@@ -127,7 +127,7 @@ export function MyWorkOrdersPage() {
         {activeFilter && (
           <button
             onClick={() => setActiveFilter(null)}
-            className="shrink-0 text-xs text-gray-500 underline"
+            className="shrink-0 text-xs text-gray-500 dark:text-gray-400 underline"
           >
             {t('common.actions.clear')}
           </button>
@@ -166,7 +166,7 @@ export function MyWorkOrdersPage() {
                 <div className="p-4">
                   <div className="flex items-start justify-between gap-2">
                     <WorkOrderPriorityBadge priority={wo.priority} size="sm" />
-                    <span className="font-mono text-xs text-gray-400">{wo.work_order_number}</span>
+                    <span className="font-mono text-xs text-gray-500 dark:text-gray-400">{wo.work_order_number}</span>
                   </div>
 
                   <p className="mt-2 font-semibold text-gray-900 dark:text-gray-100">{wo.title}</p>
@@ -180,7 +180,7 @@ export function MyWorkOrdersPage() {
                   <div className="mt-1 flex items-center gap-1">
                     ⏰ <WorkOrderDueDate dueDate={wo.due_date} />
                     {isOverdue && (
-                      <span className="flex items-center gap-0.5 text-xs font-semibold text-red-600">
+                      <span className="flex items-center gap-0.5 text-xs font-semibold text-red-600 dark:text-red-400">
                         <AlertTriangle className="h-3 w-3" /> {t('workOrders.my.overdue_flag')}
                       </span>
                     )}

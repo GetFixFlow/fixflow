@@ -48,7 +48,7 @@ export function PMDetailPage() {
     )
   }
 
-  if (!pm) return <div className="text-center py-20 text-gray-500">PM schedule not found</div>
+  if (!pm) return <div className="text-center py-20"><h1 className="text-gray-500 dark:text-gray-400">PM schedule not found</h1></div>
 
   const compliance = pm.compliance_rate ?? 0
   const mockTrendData = Array.from({ length: 6 }, (_, i) => ({
@@ -63,14 +63,14 @@ export function PMDetailPage() {
       {/* Back + header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <Link to="/preventive-maintenance" className="text-gray-400 hover:text-gray-600">
+          <Link to="/preventive-maintenance" className="text-gray-500 dark:text-gray-400 hover:text-gray-600">
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{pm.name}</h1>
             <div className="flex items-center gap-2 mt-1">
               <PMStatusBadge status={pm.status} />
-              {pm.priority && <span className="capitalize text-sm text-gray-500">{pm.priority} priority</span>}
+              {pm.priority && <span className="capitalize text-sm text-gray-500 dark:text-gray-400">{pm.priority} priority</span>}
             </div>
           </div>
         </div>
@@ -137,14 +137,14 @@ export function PMDetailPage() {
           {/* Compliance stats */}
           <Card>
             <CardContent className="p-4 space-y-3">
-              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Compliance Rate (90 days)</h3>
+              <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Compliance Rate (90 days)</h2>
               <div className="flex items-center gap-4">
                 <PMComplianceMeter rate={compliance} size="lg" />
                 <dl className="space-y-1 text-sm">
-                  {pm.completed_count != null && <div className="flex gap-2"><dt className="text-gray-400">✅ Completed</dt><dd className="font-medium">{pm.completed_count}</dd></div>}
-                  {pm.skipped_count != null && <div className="flex gap-2"><dt className="text-gray-400">⏭ Skipped</dt><dd className="font-medium">{pm.skipped_count}</dd></div>}
-                  {pm.missed_count != null && <div className="flex gap-2"><dt className="text-gray-400">❌ Missed</dt><dd className="font-medium">{pm.missed_count}</dd></div>}
-                  {pm.generated_count != null && <div className="flex gap-2"><dt className="text-gray-400">📋 Generated</dt><dd className="font-medium">{pm.generated_count}</dd></div>}
+                  {pm.completed_count != null && <div className="flex gap-2"><dt className="text-gray-500 dark:text-gray-400">✅ Completed</dt><dd className="font-medium">{pm.completed_count}</dd></div>}
+                  {pm.skipped_count != null && <div className="flex gap-2"><dt className="text-gray-500 dark:text-gray-400">⏭ Skipped</dt><dd className="font-medium">{pm.skipped_count}</dd></div>}
+                  {pm.missed_count != null && <div className="flex gap-2"><dt className="text-gray-500 dark:text-gray-400">❌ Missed</dt><dd className="font-medium">{pm.missed_count}</dd></div>}
+                  {pm.generated_count != null && <div className="flex gap-2"><dt className="text-gray-500 dark:text-gray-400">📋 Generated</dt><dd className="font-medium">{pm.generated_count}</dd></div>}
                 </dl>
               </div>
               <PMComplianceChart data={mockTrendData} />
@@ -155,7 +155,7 @@ export function PMDetailPage() {
 
           <Card>
             <CardContent className="p-4">
-              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Generated Work Orders</h3>
+              <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Generated Work Orders</h2>
               <PMGeneratedWOList pmId={pm.id} limit={5} />
             </CardContent>
           </Card>

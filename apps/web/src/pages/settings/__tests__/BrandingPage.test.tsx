@@ -37,10 +37,10 @@ beforeEach(() => {
 
 describe('BrandingPage', () => {
   it('shows what is saved', async () => {
-    serve({ ...saved, primary_color: '#16a34a', login_headline: 'Acme Maintenance', logo_url: '/api/v1/storage/x/logo.png' })
+    serve({ ...saved, primary_color: '#15803d', login_headline: 'Acme Maintenance', logo_url: '/api/v1/storage/x/logo.png' })
     renderPage()
 
-    expect(await screen.findByLabelText('Colour')).toHaveValue('#16a34a')
+    expect(await screen.findByLabelText('Colour')).toHaveValue('#15803d')
     expect(screen.getByLabelText('Headline')).toHaveValue('Acme Maintenance')
     expect(screen.getAllByAltText('Logo')[0]).toHaveAttribute('src', '/api/v1/storage/x/logo.png')
   })

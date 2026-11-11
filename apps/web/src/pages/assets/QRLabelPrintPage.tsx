@@ -121,7 +121,7 @@ export function QRLabelPrintPage() {
               <CardContent className="space-y-3 p-4">
                 <h2 className="font-medium text-gray-900 dark:text-gray-100">{t('assets.print.which')}</h2>
                 {picked && (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     {t('assets.print.picked')}{' '}
                     <button onClick={() => setPicked('')} className="text-brand-600 underline dark:text-brand-400">{t('assets.print.show_all')}</button>
                   </p>
@@ -161,7 +161,7 @@ export function QRLabelPrintPage() {
                     {(Object.keys(PAPER) as PaperKey[]).map((key) => <option key={key} value={key}>{t(`assets.print.paper_${key}`)}</option>)}
                   </select>
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   {t('assets.print.real_size')}
                 </p>
               </CardContent>
@@ -184,13 +184,13 @@ export function QRLabelPrintPage() {
                   </p>
                 )}
                 <div className="max-h-72 space-y-1 overflow-auto">
-                  {isLoading && <p className="py-4 text-center text-sm text-gray-400">{t('assets.print.loading')}</p>}
-                  {!isLoading && labels.length === 0 && <p className="py-4 text-center text-sm text-gray-400">{t('assets.print.no_match')}</p>}
+                  {isLoading && <p className="py-4 text-center text-sm text-gray-500 dark:text-gray-400">{t('assets.print.loading')}</p>}
+                  {!isLoading && labels.length === 0 && <p className="py-4 text-center text-sm text-gray-500 dark:text-gray-400">{t('assets.print.no_match')}</p>}
                   {labels.map((label) => (
                     <label key={label.id} className="flex cursor-pointer items-center gap-2 rounded-md px-1 py-0.5 hover:bg-gray-50 dark:hover:bg-gray-700">
-                      <input type="checkbox" checked={selected.has(label.id)} onChange={() => toggle(label.id)} className="rounded border-gray-300 text-brand-600" />
+                      <input type="checkbox" checked={selected.has(label.id)} onChange={() => toggle(label.id)} className="rounded border-gray-300 text-brand-600 dark:text-brand-400" />
                       <span className="flex-1 truncate text-sm text-gray-700 dark:text-gray-300">{label.name}</span>
-                      <span className="font-mono text-xs text-gray-400">{label.asset_tag}</span>
+                      <span className="font-mono text-xs text-gray-500 dark:text-gray-400">{label.asset_tag}</span>
                     </label>
                   ))}
                 </div>
@@ -204,14 +204,14 @@ export function QRLabelPrintPage() {
               <CardContent className="p-4">
                 <h2 className="mb-3 font-medium text-gray-900 dark:text-gray-100">{t('assets.print.preview')}</h2>
                 {chosen.length === 0 ? (
-                  <p className="py-8 text-center text-sm text-gray-400">{t('assets.print.choose_to_preview')}</p>
+                  <p className="py-8 text-center text-sm text-gray-500 dark:text-gray-400">{t('assets.print.choose_to_preview')}</p>
                 ) : (
                   <>
                     <div className="overflow-x-auto">
                       <AssetLabelSheet assets={chosen.slice(0, PREVIEW_LIMIT)} options={options} qrCodes={qrCodes} origin={origin} />
                     </div>
                     {chosen.length > PREVIEW_LIMIT && (
-                      <p className="mt-3 text-xs text-gray-500">{t('assets.print.showing_first', { limit: PREVIEW_LIMIT, count: chosen.length })}</p>
+                      <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">{t('assets.print.showing_first', { limit: PREVIEW_LIMIT, count: chosen.length })}</p>
                     )}
                   </>
                 )}

@@ -36,7 +36,7 @@ export function PMScheduleCard({ pm, onTrigger, onPause, onResume, onArchive }: 
           <PMStatusBadge status={pm.status} size="sm" />
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
-              <button className="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400" aria-label="PM actions">
+              <button className="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400" aria-label="PM actions">
                 <MoreVertical className="h-4 w-4" />
               </button>
             </DropdownMenu.Trigger>
@@ -84,11 +84,11 @@ export function PMScheduleCard({ pm, onTrigger, onPause, onResume, onArchive }: 
         {pm.asset && (
           <div className="text-sm text-gray-600 dark:text-gray-400">
             <span className="font-medium">🔧 {pm.asset.name}</span>
-            <span className="ml-1 text-gray-400">({pm.asset.asset_tag})</span>
+            <span className="ml-1 text-gray-500 dark:text-gray-400">({pm.asset.asset_tag})</span>
           </div>
         )}
         {pm.asset?.location && (
-          <div className="text-xs text-gray-400 flex items-center gap-1">
+          <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
             📍 {pm.asset.location.name}
           </div>
         )}
@@ -109,22 +109,22 @@ export function PMScheduleCard({ pm, onTrigger, onPause, onResume, onArchive }: 
             />
           </div>
           {pm.assigned_to && (
-            <div className="text-xs text-gray-500">👤 {pm.assigned_to.full_name}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">👤 {pm.assigned_to.full_name}</div>
           )}
         </div>
 
         {/* Compliance bar */}
         <div>
           <div className="flex items-center justify-between text-xs mb-1">
-            <span className="text-gray-500">Compliance</span>
-            <span className={cn('font-medium', compliance >= 90 ? 'text-green-600' : compliance >= 70 ? 'text-yellow-600' : 'text-red-600')}>
+            <span className="text-gray-500 dark:text-gray-400">Compliance</span>
+            <span className={cn('font-medium', compliance >= 90 ? 'text-green-700 dark:text-green-400' : compliance >= 70 ? 'text-yellow-700 dark:text-yellow-400' : 'text-red-600 dark:text-red-400')}>
               {compliance}%
             </span>
           </div>
           <div className="h-1.5 w-full rounded-full bg-gray-200 dark:bg-gray-700">
             <div className={cn('h-full rounded-full transition-all', complianceColor)} style={{ width: `${compliance}%` }} />
           </div>
-          <div className="flex gap-3 mt-1 text-xs text-gray-400">
+          <div className="flex gap-3 mt-1 text-xs text-gray-500 dark:text-gray-400">
             {pm.completed_count != null && <span>✅ {pm.completed_count}</span>}
             {pm.skipped_count != null && <span>⏭ {pm.skipped_count} skipped</span>}
             {pm.missed_count != null && <span>❌ {pm.missed_count} missed</span>}

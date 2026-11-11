@@ -21,10 +21,10 @@ export function PMUpcomingSchedule({ pmId }: { pmId: number }) {
     <Card>
       <CardContent className="p-4">
         <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-blue-500" /> Upcoming Schedule
+          <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" /> Upcoming Schedule
         </h3>
         {items.length === 0 ? (
-          <p className="text-sm text-gray-400 italic">No upcoming dates</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 italic">No upcoming dates</p>
         ) : (
           <ul className="space-y-2">
             {items.map((item, idx) => {
@@ -34,9 +34,9 @@ export function PMUpcomingSchedule({ pmId }: { pmId: number }) {
                 <li key={item.occurrence} className={cn('flex items-center justify-between text-sm', isNext && 'font-medium')}>
                   <span className="text-gray-700 dark:text-gray-300">{formatDate(new Date(item.date))}</span>
                   <span className={cn('text-xs',
-                    diff < 0 ? 'text-red-500' :
-                    diff === 0 ? 'text-orange-500 font-semibold' :
-                    diff <= 7 ? 'text-blue-500' : 'text-gray-400'
+                    diff < 0 ? 'text-red-600 dark:text-red-400' :
+                    diff === 0 ? 'text-orange-700 dark:text-orange-400 font-semibold' :
+                    diff <= 7 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
                   )}>
                     {diff < 0 ? `${Math.abs(diff)}d overdue` : diff === 0 ? 'Today' : `in ${diff}d`}
                     {isNext && <span className="ml-1">← next</span>}

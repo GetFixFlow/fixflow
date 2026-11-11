@@ -34,14 +34,14 @@ export function PMNextDueCard({ assetId }: PMNextDueCardProps) {
       <CardContent className="p-4 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-            <Wrench className="h-4 w-4 text-blue-500" />
+            <Wrench className="h-4 w-4 text-blue-600 dark:text-blue-400" />
             Preventive Maintenance
           </h3>
           {pms.length > 0 && <PMComplianceMeter rate={avgCompliance} size="sm" />}
         </div>
 
         {pms.length === 0 ? (
-          <p className="text-sm text-gray-400 italic">No PM schedules for this asset</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 italic">No PM schedules for this asset</p>
         ) : (
           <>
             <ul className="space-y-2">

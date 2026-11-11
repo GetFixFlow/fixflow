@@ -117,29 +117,30 @@ export function IoTRulesPage() {
               <table className="w-full text-sm">
                 <thead className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
                   <tr>
-                    <th className="w-8 px-4 py-3" />
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rule Name</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Asset</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Condition</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Auto WO</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Priority</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cooldown</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Triggered</th>
-                    <th className="px-4 py-3" />
+                    <th className="w-8 px-4 py-3"><span className="sr-only">Status</span></th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Rule Name</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Asset</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Condition</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Auto WO</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Priority</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Cooldown</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Triggered</th>
+                    <th className="px-4 py-3"><span className="sr-only">Actions</span></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {filtered.map((rule) => (
                     <tr key={rule.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                       <td className="px-4 py-3">
-                        <span className={cn('h-2.5 w-2.5 rounded-full inline-block', STATUS_DOT[rule.status] ?? 'bg-gray-400')} />
+                        <span className={cn('h-2.5 w-2.5 rounded-full inline-block', STATUS_DOT[rule.status] ?? 'bg-gray-400')} aria-hidden="true" />
+                        <span className="sr-only">{rule.status}</span>
                       </td>
                       <td className="px-4 py-3">
                         <Link to={`/iot/rules/${rule.id}/edit`} className="font-medium text-gray-900 dark:text-gray-100 hover:text-brand-600">
                           {rule.name}
                         </Link>
                       </td>
-                      <td className="px-4 py-3 text-xs text-gray-500">
+                      <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
                         {rule.asset ? rule.asset.name : rule.asset_id ? `Asset #${rule.asset_id}` : '—'}
                       </td>
                       <td className="px-4 py-3 font-mono text-xs text-gray-700 dark:text-gray-300">
@@ -147,16 +148,16 @@ export function IoTRulesPage() {
                       </td>
                       <td className="px-4 py-3 text-xs">
                         {rule.auto_create_wo ? (
-                          <span className="text-green-600 font-medium">Yes</span>
+                          <span className="text-green-700 dark:text-green-400 font-medium">Yes</span>
                         ) : (
-                          <span className="text-gray-400">No</span>
+                          <span className="text-gray-500 dark:text-gray-400">No</span>
                         )}
                       </td>
                       <td className="px-4 py-3 text-xs capitalize">{rule.wo_priority ?? '—'}</td>
-                      <td className="px-4 py-3 text-xs text-gray-500">
+                      <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
                         {rule.cooldown_minutes ? `${rule.cooldown_minutes}m` : '—'}
                       </td>
-                      <td className="px-4 py-3 text-xs text-gray-500">
+                      <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
                         {rule.last_triggered_at
                           ? formatDistanceToNow(new Date(rule.last_triggered_at), { addSuffix: true })
                           : rule.trigger_count
@@ -167,7 +168,7 @@ export function IoTRulesPage() {
                         <div className="relative">
                           <button
                             onClick={() => setOpenMenuId(openMenuId === rule.id ? null : rule.id)}
-                            className="rounded p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            className="rounded p-1 text-gray-500 dark:text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                             aria-label="actions"
                           >
                             <MoreVertical className="h-4 w-4" />
@@ -206,7 +207,7 @@ export function IoTRulesPage() {
                               <hr className="my-1 border-gray-100 dark:border-gray-700" />
                               <button
                                 onClick={() => { archive.mutate(rule.id); setOpenMenuId(null) }}
-                                className="block w-full px-3 py-1.5 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                className="block w-full px-3 py-1.5 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                               >
                                 Archive
                               </button>

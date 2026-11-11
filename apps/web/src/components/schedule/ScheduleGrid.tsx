@@ -45,14 +45,14 @@ function Chip({ order, detailed, onDragStart, onDragEnd, onPick }: {
           <Link to={`/work-orders/${order.id}`} className="block truncate text-xs font-medium text-gray-900 hover:underline dark:text-gray-100">
             <span className="sr-only">{t('schedule.grid.priority', { priority: label('priority', order.priority).toLowerCase() })}</span>{order.work_order_number} {order.title}
           </Link>
-          <p className="text-[11px] text-gray-500 dark:text-gray-400">
+          <p className="text-[11px] text-gray-600 dark:text-gray-300">
             {hoursLabel(order.hours)}{order.estimated ? '' : ` ${t('schedule.grid.no_estimate')}`}
             {detailed && ` · ${label('status', order.status).toLowerCase()}`}
             {detailed && order.asset && ` · ${order.asset}`}
           </p>
         </div>
         <button type="button" onClick={onPick} aria-label={t('schedule.move.title', { number: order.work_order_number })}
-          className="rounded p-0.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-600 dark:hover:text-gray-200">
+          className="rounded p-0.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-600 dark:hover:text-gray-200">
           <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden />
         </button>
       </div>
@@ -130,7 +130,7 @@ export function ScheduleGrid({ schedule, mode, onMove, onPick }: ScheduleGridPro
               <tr key={row.id ?? 'nobody'} className="border-t border-gray-200 align-top dark:border-gray-700">
                 <th scope="row" className="sticky left-0 z-10 bg-white p-2 text-sm font-medium text-gray-900 dark:bg-gray-900 dark:text-gray-100">
                   {nobody ? t('schedule.nobody') : row.name}
-                  {!nobody && row.role !== 'technician' && <span className="block text-xs font-normal capitalize text-gray-500">{label('role', row.role).toLowerCase()}</span>}
+                  {!nobody && row.role !== 'technician' && <span className="block text-xs font-normal capitalize text-gray-500 dark:text-gray-400">{label('role', row.role).toLowerCase()}</span>}
                 </th>
                 <td className={cn('p-1.5', tint(`${row.id}:${EARLIER}`))} data-testid={`cell-${row.id ?? 'nobody'}-${EARLIER}`} {...cell(row, EARLIER)}>
                   {row.earlier.count > 0 && (
@@ -140,7 +140,7 @@ export function ScheduleGrid({ schedule, mode, onMove, onPick }: ScheduleGridPro
                   )}
                   <div className="space-y-1">{chips(row, EARLIER)}</div>
                   {row.earlier.count > earlierShown && (
-                    <p className="mt-1 text-[11px] text-gray-500">{t('schedule.grid.more_not_listed', { count: row.earlier.count - earlierShown })}</p>
+                    <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">{t('schedule.grid.more_not_listed', { count: row.earlier.count - earlierShown })}</p>
                   )}
                 </td>
                 {row.days.map((load, i) => (

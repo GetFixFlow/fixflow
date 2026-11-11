@@ -123,7 +123,7 @@
       "none_found": "No assets found"
     },
     "status_changer": {
-      "aria": "Change asset status",
+      "aria": "{{status}}: change asset status",
       "confirm_text": "Change status to <b>{{status}}</b>?",
       "current": "current"
     },
@@ -425,7 +425,8 @@
       "type_placeholder": "Asset tag, barcode or serial number",
       "look_up": "Look up",
       "linked": "Linked. Scanning it will now open this asset.",
-      "and": " and "
+      "and": " and ",
+      "page_title": "Scan a code"
     },
     "print": {
       "assets": "Assets",

@@ -23,7 +23,7 @@ export function LocationBreadcrumb({
   if (!locationId) return null
 
   const path = getLocationPath(locations, locationId)
-  if (path.length === 0) return <span className="text-sm text-gray-400">{t('shell.locations.unknown')}</span>
+  if (path.length === 0) return <span className="text-sm text-gray-500 dark:text-gray-400">{t('shell.locations.unknown')}</span>
 
   const displayPath = compact && path.length > 2 ? [path[0], path[path.length - 1]] : path
 
@@ -36,12 +36,12 @@ export function LocationBreadcrumb({
         return (
           <span key={loc.id} className="flex items-center gap-1">
             {index > 0 && (
-              <ChevronRight className="h-3.5 w-3.5 shrink-0 text-gray-400" aria-hidden="true" />
+              <ChevronRight className="h-3.5 w-3.5 shrink-0 text-gray-500 dark:text-gray-400" aria-hidden="true" />
             )}
             {compact && index === 1 && path.length > 2 && (
               <>
-                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-gray-400" aria-hidden="true" />
-                <span className="text-gray-400">…</span>
+                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-gray-500 dark:text-gray-400" aria-hidden="true" />
+                <span className="text-gray-500 dark:text-gray-400">…</span>
               </>
             )}
             {isLast || !onNavigate ? (

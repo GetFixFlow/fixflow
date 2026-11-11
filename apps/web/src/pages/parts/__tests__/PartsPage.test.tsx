@@ -88,7 +88,7 @@ describe('PartsPage', () => {
     }))
     renderPage()
 
-    await userEvent.click(await screen.findByRole('button', { name: 'Ask for more Drive chain' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Order more Drive chain' }))
 
     expect(screen.getByLabelText('How many Drive chain')).toHaveValue(3) // 2 x 2 - 1 on hand
     expect(screen.getByLabelText('Why is it needed?')).toHaveValue('Drive chain is running low')

@@ -97,7 +97,7 @@ export function CostAnalysisPage() {
 
       <ChartContainer title="Costs by Vendor">
         {v?.vendors?.length === 0 ? (
-          <p className="py-6 text-center text-sm text-gray-500">No work given to a vendor was finished in this period.</p>
+          <p className="py-6 text-center text-sm text-gray-500 dark:text-gray-400">No work given to a vendor was finished in this period.</p>
         ) : (
           <DataTable data={v?.vendors ?? []} compact
             columns={[

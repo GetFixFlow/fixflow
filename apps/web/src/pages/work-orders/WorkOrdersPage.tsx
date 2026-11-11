@@ -49,12 +49,12 @@ export function WorkOrdersPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono text-gray-400">{wo.work_order_number}</span>
+                      <span className="text-xs font-mono text-gray-500 dark:text-gray-400">{wo.work_order_number}</span>
                       <Badge variant={priorityBadge(wo.priority)}>{label('priority', wo.priority)}</Badge>
                     </div>
                     <p className="mt-1 font-medium text-gray-900 dark:text-gray-100">{wo.title}</p>
                     {wo.due_date && (
-                      <p className="mt-1 text-xs text-gray-500">
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         {t('workOrders.page.due', { date: formatDate(new Date(wo.due_date)) })}
                       </p>
                     )}

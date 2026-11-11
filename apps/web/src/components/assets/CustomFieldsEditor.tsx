@@ -55,7 +55,7 @@ export function CustomFieldsEditor({ value, onChange }: CustomFieldsEditorProps)
       </div>
 
       {entries.length === 0 && (
-        <p className="text-xs text-gray-400 dark:text-gray-500">{t('assets.custom_fields.empty')}</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">{t('assets.custom_fields.empty')}</p>
       )}
 
       <div className="space-y-2">
@@ -88,7 +88,7 @@ export function CustomFieldsEditor({ value, onChange }: CustomFieldsEditorProps)
             <button
               type="button"
               onClick={() => removeField(index)}
-              className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
+              className="flex h-8 w-8 items-center justify-center rounded-md text-gray-500 dark:text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
               aria-label={t('assets.custom_fields.remove_aria', { n: index + 1 })}
             >
               <Trash2 className="h-4 w-4" />

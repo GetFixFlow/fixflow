@@ -48,21 +48,21 @@ export function WorkOrderChecklist({ workOrderId, items, editable = true }: Work
                 checked={!!item.completed}
                 onChange={() => toggle.mutate({ step: item.step, completed: !item.completed })}
                 disabled={!editable}
-                className="mt-0.5 h-5 w-5 shrink-0 rounded border-gray-300 text-brand-600 focus:ring-brand-500 disabled:opacity-50"
+                className="mt-0.5 h-5 w-5 shrink-0 rounded border-gray-300 text-brand-600 dark:text-brand-400 focus:ring-brand-500 disabled:opacity-50"
                 aria-label={item.instruction}
               />
               <span className="flex-1 text-sm">
-                <span className={item.completed ? 'text-gray-400 line-through dark:text-gray-500' : 'text-gray-800 dark:text-gray-200'}>
+                <span className={item.completed ? 'text-gray-500 line-through dark:text-gray-400' : 'text-gray-800 dark:text-gray-200'}>
                   {item.instruction}
                 </span>
-                {item.required !== false && !item.completed && <span className="ml-1.5 text-xs text-red-500">{t('workOrders.checklist.required')}</span>}
+                {item.required !== false && !item.completed && <span className="ml-1.5 text-xs text-red-600 dark:text-red-400">{t('workOrders.checklist.required')}</span>}
                 {item.pending && (
-                  <span className="ml-2 inline-flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
+                  <span className="ml-2 inline-flex items-center gap-1 text-xs text-amber-700 dark:text-amber-400">
                     <CloudOff className="h-3 w-3" /> {t('workOrders.checklist.waiting')}
                   </span>
                 )}
                 {item.completed && !item.pending && item.completed_by_name && (
-                  <span className="block text-xs text-gray-400 dark:text-gray-500">
+                  <span className="block text-xs text-gray-500 dark:text-gray-400">
                     {t('workOrders.checklist.done_by', { name: item.completed_by_name })}
                     {item.completed_at ? `, ${formatDateTime(item.completed_at)}` : ''}
                   </span>

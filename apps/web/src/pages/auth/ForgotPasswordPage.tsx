@@ -26,7 +26,7 @@ export function ForgotPasswordPage() {
   const cannotSendEmail = status?.email_configured === false
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-8 dark:bg-gray-900">
+    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-8 dark:bg-gray-900">
       <div className="fixed right-4 top-4 z-10"><LanguageSelect /></div>
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center">
@@ -65,12 +65,12 @@ export function ForgotPasswordPage() {
           )}
 
           <p className="mt-4 text-center text-sm">
-            <Link to="/login" className="text-brand-600 hover:underline">
+            <Link to="/login" className="text-brand-600 dark:text-brand-400 hover:underline">
               {t('auth.back_to_sign_in')}
             </Link>
           </p>
         </div>
       </div>
-    </div>
+    </main>
   )
 }

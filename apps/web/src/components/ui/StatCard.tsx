@@ -24,7 +24,7 @@ export function StatCard({ title, value, subtitle, icon: Icon, trend, className,
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{subtitle}</p>
             )}
             {trend && (
-              <p className={cn('mt-1 text-xs', trend.value >= 0 ? 'text-green-600' : 'text-red-600')}>
+              <p className={cn('mt-1 text-xs', trend.value >= 0 ? 'text-green-700 dark:text-green-400' : 'text-red-600 dark:text-red-400')}>
                 {trend.value >= 0 ? '↑' : '↓'} {Math.abs(trend.value)}% {trend.label}
               </p>
             )}

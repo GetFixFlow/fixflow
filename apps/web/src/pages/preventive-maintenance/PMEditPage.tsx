@@ -74,15 +74,15 @@ export function PMEditPage() {
   }, [pm])
 
   if (!isManager) return (
-    <div className="text-center py-20 text-gray-500">You do not have permission to edit PM schedules.</div>
+    <div className="text-center py-20 text-gray-500 dark:text-gray-400">You do not have permission to edit PM schedules.</div>
   )
   if (isLoading) return <div className="space-y-4">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}</div>
-  if (!pm) return <div className="text-center py-20 text-gray-500">PM schedule not found</div>
+  if (!pm) return <div className="text-center py-20"><h1 className="text-gray-500 dark:text-gray-400">PM schedule not found</h1></div>
   if (pm.status === 'archived') return (
     <div className="max-w-lg mx-auto text-center py-20">
-      <AlertTriangle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-      <p className="text-gray-500">Archived PM schedules cannot be edited.</p>
-      <Link to={`/preventive-maintenance/${pm.id}`} className="mt-4 inline-block text-brand-600 hover:underline">Back to PM detail</Link>
+      <AlertTriangle className="h-12 w-12 text-gray-500 dark:text-gray-400 mx-auto mb-4" />
+      <p className="text-gray-500 dark:text-gray-400">Archived PM schedules cannot be edited.</p>
+      <Link to={`/preventive-maintenance/${pm.id}`} className="mt-4 inline-block text-brand-600 dark:text-brand-400 hover:underline">Back to PM detail</Link>
     </div>
   )
 
@@ -106,12 +106,12 @@ export function PMEditPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
-        <Link to={`/preventive-maintenance/${pm.id}`} className="text-gray-400 hover:text-gray-600"><ArrowLeft className="h-5 w-5" /></Link>
+        <Link to={`/preventive-maintenance/${pm.id}`} aria-label="Back to the PM schedule" className="text-gray-500 dark:text-gray-400 hover:text-gray-600"><ArrowLeft className="h-5 w-5" /></Link>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Edit PM Schedule</h1>
       </div>
 
       <div className="rounded-lg border border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20 p-3 flex gap-2 text-sm">
-        <AlertTriangle className="h-4 w-4 text-yellow-600 shrink-0 mt-0.5" />
+        <AlertTriangle className="h-4 w-4 text-yellow-700 dark:text-yellow-400 shrink-0 mt-0.5" />
         <p className="text-yellow-700 dark:text-yellow-300">
           {freqType === 'meter_based'
             ? 'Changing the interval moves the reading the schedule falls due at; it keeps counting from the last service.'
@@ -122,27 +122,27 @@ export function PMEditPage() {
       <Card>
         <CardContent className="p-6 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">PM Schedule Name*</label>
-            <Input value={name} onChange={(e) => { setName(e.target.value); setIsDirty(true) }} />
+            <label htmlFor="pm-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">PM Schedule Name*</label>
+            <Input id="pm-name" value={name} onChange={(e) => { setName(e.target.value); setIsDirty(true) }} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Asset*</label>
-            <AssetSelect value={assetId} onChange={(v) => { setAssetId(v ?? undefined); setIsDirty(true) }} />
+            <label htmlFor="pm-asset" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Asset*</label>
+            <AssetSelect id="pm-asset" value={assetId} onChange={(v) => { setAssetId(v ?? undefined); setIsDirty(true) }} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</label>
-            <div className="flex gap-2 flex-wrap">
+            <p id="pm-priority-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</p>
+            <div role="group" aria-labelledby="pm-priority-label" className="flex gap-2 flex-wrap">
               {PRIORITY_OPTIONS.map((p) => (
-                <button key={p} type="button" onClick={() => { setPriority(p); setIsDirty(true) }}
-                  className={cn('rounded-md border px-3 py-1.5 text-sm font-medium capitalize', priority === p ? PRIORITY_COLORS[p] : 'border-gray-200 text-gray-500 dark:border-gray-700')}>
+                <button key={p} type="button" aria-pressed={priority === p} onClick={() => { setPriority(p); setIsDirty(true) }}
+                  className={cn('rounded-md border px-3 py-1.5 text-sm font-medium capitalize', priority === p ? PRIORITY_COLORS[p] : 'border-gray-200 text-gray-500 dark:text-gray-400 dark:border-gray-700')}>
                   {p}
                 </button>
               ))}
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-            <textarea value={description} onChange={(e) => { setDescription(e.target.value); setIsDirty(true) }} rows={3}
+            <label htmlFor="pm-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+            <textarea id="pm-description" value={description} onChange={(e) => { setDescription(e.target.value); setIsDirty(true) }} rows={3}
               className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none" />
           </div>
           {freqType === 'meter_based' ? (
@@ -151,12 +151,12 @@ export function PMEditPage() {
           ) : (
           <div className="flex gap-3">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Frequency: Every</label>
-              <Input type="number" min={1} value={freqValue} onChange={(e) => { setFreqValue(parseInt(e.target.value) || 1); setIsDirty(true) }} />
+              <label htmlFor="pm-every" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Frequency: Every</label>
+              <Input id="pm-every" type="number" min={1} value={freqValue} onChange={(e) => { setFreqValue(parseInt(e.target.value) || 1); setIsDirty(true) }} />
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Unit</label>
-              <select value={freqUnit} onChange={(e) => { setFreqUnit(e.target.value as PmFrequencyUnit); setIsDirty(true) }}
+              <label htmlFor="pm-unit" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Unit</label>
+              <select id="pm-unit" value={freqUnit} onChange={(e) => { setFreqUnit(e.target.value as PmFrequencyUnit); setIsDirty(true) }}
                 className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
                 {['days','weeks','months','hours','cycles'].map((u) => <option key={u} value={u}>{u}</option>)}
               </select>
@@ -164,12 +164,12 @@ export function PMEditPage() {
           </div>
           )}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title Template</label>
-            <Input value={titleTemplate} onChange={(e) => { setTitleTemplate(e.target.value); setIsDirty(true) }} placeholder={name} />
+            <label htmlFor="pm-title-template" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title Template</label>
+            <Input id="pm-title-template" value={titleTemplate} onChange={(e) => { setTitleTemplate(e.target.value); setIsDirty(true) }} placeholder={name} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estimated Hours</label>
-            <Input type="number" min={0} step={0.5} value={estimatedHours} onChange={(e) => { setEstimatedHours(e.target.value); setIsDirty(true) }} className="w-32" />
+            <label htmlFor="pm-hours" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estimated Hours</label>
+            <Input id="pm-hours" type="number" min={0} step={0.5} value={estimatedHours} onChange={(e) => { setEstimatedHours(e.target.value); setIsDirty(true) }} className="w-32" />
           </div>
           <ChecklistTemplateBuilder value={checklistSteps} onChange={(v) => { setChecklistSteps(v); setIsDirty(true) }} />
           <RequiredPartsEditor value={requiredParts} onChange={(v) => { setRequiredParts(v); setIsDirty(true) }} />

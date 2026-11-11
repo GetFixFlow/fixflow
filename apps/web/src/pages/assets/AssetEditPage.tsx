@@ -101,7 +101,7 @@ export function AssetEditPage() {
   if (!asset) {
     return (
       <div className="py-12 text-center">
-        <p className="text-sm text-gray-500">{t('assets.edit.not_found')}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{t('assets.edit.not_found')}</p>
       </div>
     )
   }
@@ -150,7 +150,7 @@ export function AssetEditPage() {
                 error={msg(errors.barcode?.message)}
                 {...register('barcode')}
               />
-              <p className="mt-1 text-xs text-gray-500">{t('assets.edit.barcode_help')}</p>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{t('assets.edit.barcode_help')}</p>
             </div>
             <div>
               <label htmlFor="status" className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">

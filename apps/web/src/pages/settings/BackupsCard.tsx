@@ -33,7 +33,7 @@ export function BackupsCard({ backups }: { backups: DataUsage['backups'] | undef
   return (
     <Card>
       <CardContent className="space-y-3 p-5">
-        <h3 className="font-semibold text-gray-900 dark:text-gray-100">Database backups</h3>
+        <h2 className="font-semibold text-gray-900 dark:text-gray-100">Database backups</h2>
         {backups && (backups.runs ? (
           <p className="text-sm text-gray-600 dark:text-gray-400">
             A copy of the database, and of any photos and documents people uploaded since the last one, is made every night at {backups.at}.
@@ -60,19 +60,19 @@ export function BackupsCard({ backups }: { backups: DataUsage['backups'] | undef
           </p>
         )}
 
-        {isLoading && <p className="text-sm text-gray-500">Loading the backups…</p>}
+        {isLoading && <p className="text-sm text-gray-500 dark:text-gray-400">Loading the backups…</p>}
         {(isError || list?.error) && (
           <p role="alert" className="rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">
             {list?.error ?? 'The list of backups could not be loaded. Try again in a moment.'}
           </p>
         )}
         {list && !list.error && list.backups.length === 0 && !list.overdue && (
-          <p className="text-sm text-gray-500">No backups yet.{backups?.runs ? ` The first one is made tonight at ${backups.at}.` : ''}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">No backups yet.{backups?.runs ? ` The first one is made tonight at ${backups.at}.` : ''}</p>
         )}
         {list && list.backups.length > 0 && (
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs uppercase text-gray-500">
+              <tr className="text-left text-xs uppercase text-gray-500 dark:text-gray-400">
                 <th className="py-1 font-medium">Made</th>
                 <th className="py-1 text-right font-medium">Size</th>
                 <th className="py-1"><span className="sr-only">Download</span></th>
@@ -83,7 +83,7 @@ export function BackupsCard({ backups }: { backups: DataUsage['backups'] | undef
                 <tr key={backup.name}>
                   <td className="py-2 text-gray-700 dark:text-gray-300">
                     {formatDateTime(backup.created_at)}
-                    <span className="ml-2 font-mono text-xs text-gray-400">{backup.name}</span>
+                    <span className="ml-2 font-mono text-xs text-gray-500 dark:text-gray-400">{backup.name}</span>
                   </td>
                   <td className="py-2 text-right font-mono text-xs text-gray-700 dark:text-gray-300">{formatBytes(backup.bytes)}</td>
                   <td className="py-2 text-right">
@@ -99,7 +99,7 @@ export function BackupsCard({ backups }: { backups: DataUsage['backups'] | undef
           </table>
         )}
 
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-gray-500 dark:text-gray-400">
           A backup holds everything in the database, password hashes included: keep a downloaded copy somewhere safe. Every download is written to the
           audit log. Uploaded files are copied under <span className="font-mono">files/</span> in the same {backups?.disk ? 'folder' : 'bucket'} and are never deleted from
           the copy, because an older backup may still point at them.

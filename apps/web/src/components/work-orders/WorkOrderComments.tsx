@@ -78,7 +78,7 @@ export function WorkOrderComments({ workOrderId, canViewInternal = false }: Work
           ))}
         </div>
       ) : visible.length === 0 ? (
-        <p className="text-sm text-gray-400 dark:text-gray-500 italic">{t('workOrders.comments.none')}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 italic">{t('workOrders.comments.none')}</p>
       ) : (
         <div className="space-y-4">
           {visible.map((comment) => (
@@ -91,10 +91,10 @@ export function WorkOrderComments({ workOrderId, canViewInternal = false }: Work
                   <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                     {comment.user.full_name}
                   </span>
-                  <span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+                  <span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] text-gray-600 dark:bg-gray-700 dark:text-gray-300">
                     {label('role', comment.user.role).toLowerCase()}
                   </span>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
                     {timeAgo(comment.created_at)}
                   </span>
                   {comment.pending && (
@@ -115,7 +115,7 @@ export function WorkOrderComments({ workOrderId, canViewInternal = false }: Work
               {canDelete(comment) && (
                 <button
                   onClick={() => deleteComment.mutate(comment.id)}
-                  className="shrink-0 rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
+                  className="shrink-0 rounded p-1 text-gray-500 dark:text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
                   aria-label={t('workOrders.comments.delete')}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
@@ -152,14 +152,14 @@ export function WorkOrderComments({ workOrderId, canViewInternal = false }: Work
                   type="checkbox"
                   checked={isInternal}
                   onChange={(e) => setIsInternal(e.target.checked)}
-                  className="h-3.5 w-3.5 rounded border-gray-300 text-brand-600"
+                  className="h-3.5 w-3.5 rounded border-gray-300 text-brand-600 dark:text-brand-400"
                 />
                 <Lock className="h-3 w-3" />
                 {t('workOrders.comments.internal_note')}
               </label>
             )}
             <button
-              className="rounded p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              className="rounded p-1 text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
               title={t('workOrders.comments.voice')}
               type="button"
             >
@@ -167,7 +167,7 @@ export function WorkOrderComments({ workOrderId, canViewInternal = false }: Work
             </button>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-400">{body.length}/2000</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">{body.length}/2000</span>
             <Button
               size="sm"
               onClick={submit}

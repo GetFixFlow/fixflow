@@ -130,11 +130,11 @@ function DowntimeRow({ downtime, canManage }: { downtime: Downtime; canManage: b
     <li className="flex flex-wrap items-start justify-between gap-3 py-3">
       <div className="min-w-0">
         <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-          {formatDateTime(downtime.started_at)} → {downtime.ended_at ? formatDateTime(downtime.ended_at) : <span className="text-red-600">{t('assets.downtime.still_down')}</span>}
-          <span className="ml-2 font-normal text-gray-500">{formatHours(downtime.hours)}</span>
+          {formatDateTime(downtime.started_at)} → {downtime.ended_at ? formatDateTime(downtime.ended_at) : <span className="text-red-600 dark:text-red-400">{t('assets.downtime.still_down')}</span>}
+          <span className="ml-2 font-normal text-gray-500 dark:text-gray-400">{formatHours(downtime.hours)}</span>
         </p>
         {downtime.reason && <p className="text-sm text-gray-700 dark:text-gray-300">{downtime.reason}</p>}
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-gray-500 dark:text-gray-400">
           {downtime.started_by ? t('assets.downtime.stopped_by', { name: downtime.started_by }) : t('assets.downtime.recorded_by_status')}
           {downtime.ended_by && t('assets.downtime.restarted_by', { name: downtime.ended_by })}
         </p>
@@ -163,7 +163,7 @@ export function AssetDowntime({ assetId, canManage }: { assetId: number; canMana
   const [restarting, setRestarting] = useState(false)
 
   if (isLoading) return <Skeleton className="h-24 w-full" />
-  if (isError) return <p className="text-sm text-red-600">{t('assets.downtime.load_failed')}</p>
+  if (isError) return <p className="text-sm text-red-600 dark:text-red-400">{t('assets.downtime.load_failed')}</p>
 
   const current = downtimes?.find((downtime) => downtime.open)
 

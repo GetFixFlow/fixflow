@@ -7,6 +7,9 @@ RSpec.describe "PM Reports", type: :request do
   let(:headers) { auth_headers_for(manager) }
 
   describe "GET /api/v1/reports/pm/compliance" do
+    # Mid-month, so that "15 days ago" and "10 days ago" are in the same month whatever day the suite runs on.
+    around { |example| travel_to(Time.zone.local(2026, 6, 25, 12, 0)) { example.run } }
+
     before do
       pm = create(:preventive_maintenance, organization: org, asset: asset)
       create(:pm_execution, preventive_maintenance: pm, status: :completed,

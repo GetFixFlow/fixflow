@@ -6,7 +6,7 @@ import { formatDate } from '@/lib/localeFormat'
 interface PMDueDateDisplayProps { dueDate?: string | null; className?: string; showIcon?: boolean }
 
 export function PMDueDateDisplay({ dueDate, className, showIcon = true }: PMDueDateDisplayProps) {
-  if (!dueDate) return <span className={cn('text-gray-400 italic text-sm', className)}>No due date</span>
+  if (!dueDate) return <span className={cn('text-gray-500 dark:text-gray-400 italic text-sm', className)}>No due date</span>
 
   const date = new Date(dueDate)
   const diff = differenceInCalendarDays(date, new Date())
@@ -20,9 +20,9 @@ export function PMDueDateDisplay({ dueDate, className, showIcon = true }: PMDueD
       </span>
     )
   }
-  if (isToday(date)) return <span className={cn('text-sm font-bold text-orange-600 dark:text-orange-400', className)}>Due today</span>
+  if (isToday(date)) return <span className={cn('text-sm font-bold text-orange-700 dark:text-orange-400', className)}>Due today</span>
   if (isTomorrow(date)) return (
-    <span className={cn('inline-flex items-center gap-1 text-sm font-medium text-yellow-600 dark:text-yellow-400', className)}>
+    <span className={cn('inline-flex items-center gap-1 text-sm font-medium text-yellow-700 dark:text-yellow-400', className)}>
       {showIcon && <Clock className="h-3.5 w-3.5" />}Due tomorrow
     </span>
   )

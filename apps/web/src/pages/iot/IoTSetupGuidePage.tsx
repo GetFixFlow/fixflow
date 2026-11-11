@@ -139,7 +139,7 @@ export function IoTSetupGuidePage() {
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Connect Your First IoT Device</h1>
-        <p className="text-sm text-gray-500 mt-1">Follow these steps to start sending sensor data to FixFlow.</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Follow these steps to start sending sensor data to FixFlow.</p>
       </div>
 
       {/* Vertical stepper */}
@@ -155,10 +155,10 @@ export function IoTSetupGuidePage() {
 
                 <div className="flex-1 space-y-3">
                   <div className="flex items-center gap-2">
-                    <step.icon className="h-4 w-4 text-brand-600" />
+                    <step.icon className="h-4 w-4 text-brand-600 dark:text-brand-400" />
                     <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">{step.title}</h2>
                   </div>
-                  <p className="text-sm text-gray-500">{step.description}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{step.description}</p>
 
                   {step.custom ? (
                     // Step 2 with tabs
@@ -172,8 +172,8 @@ export function IoTSetupGuidePage() {
                             className={cn(
                               'px-3 py-1.5 text-sm font-medium border-b-2 transition-colors uppercase',
                               sendTab === t
-                                ? 'border-brand-600 text-brand-600'
-                                : 'border-transparent text-gray-500 hover:text-gray-700',
+                                ? 'border-brand-600 text-brand-600 dark:text-brand-400'
+                                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700',
                             )}
                           >
                             {t}
@@ -193,7 +193,7 @@ export function IoTSetupGuidePage() {
                                   'rounded px-3 py-1 text-xs font-medium transition-colors',
                                   codeTab === t
                                     ? 'bg-brand-600 text-white'
-                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200',
+                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200',
                                 )}
                               >
                                 {t === 'nodejs' ? 'Node.js' : t.charAt(0).toUpperCase() + t.slice(1)}
@@ -236,7 +236,7 @@ export function IoTSetupGuidePage() {
             language="json"
             filename="POST /api/v1/iot/ingest"
           />
-          <div className="mt-3 space-y-1 text-xs text-gray-500">
+          <div className="mt-3 space-y-1 text-xs text-gray-500 dark:text-gray-400">
             <p><span className="font-medium text-gray-700 dark:text-gray-300">asset_id</span> — Your asset tag (e.g. FF-000001) or numeric ID. Required.</p>
             <p><span className="font-medium text-gray-700 dark:text-gray-300">metric</span> — Sensor metric name. Required.</p>
             <p><span className="font-medium text-gray-700 dark:text-gray-300">value</span> — Numeric reading. Required.</p>

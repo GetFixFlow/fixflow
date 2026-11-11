@@ -6,9 +6,9 @@ export function PrintHeader({ reportTitle, dateRange }: { reportTitle: string; d
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-xl font-bold text-gray-900">FixFlow CMMS</h1>
-          <p className="text-lg font-semibold text-gray-700 mt-1">{reportTitle}</p>
+          <p className="text-lg font-semibold text-gray-700 dark:text-gray-200 mt-1">{reportTitle}</p>
         </div>
-        <div className="text-right text-sm text-gray-500">
+        <div className="text-right text-sm text-gray-500 dark:text-gray-400">
           <p>{dateRange}</p>
           <p>Generated {formatDate(new Date())}</p>
         </div>

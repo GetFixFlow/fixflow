@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/Button'
 import type { PMForecastItem, Priority } from '@/types'
 
 const PRIORITY_COLOR: Record<Priority, string> = {
-  critical: 'bg-red-500 text-white',
-  high: 'bg-orange-400 text-white',
-  medium: 'bg-blue-400 text-white',
+  critical: 'bg-red-600 text-white',
+  high: 'bg-orange-700 text-white',
+  medium: 'bg-blue-600 text-white',
   low: 'bg-gray-400 text-white',
 }
 
@@ -56,7 +56,7 @@ export function PMForecastTimeline({ items }: PMForecastTimelineProps) {
             {dateHeaders.map((d) => (
               <span
                 key={d.toISOString()}
-                className="absolute text-xs text-gray-400 transform -translate-x-1/2"
+                className="absolute text-xs text-gray-500 dark:text-gray-400 transform -translate-x-1/2"
                 style={{ left: `${(differenceInCalendarDays(d, today) / days) * 100}%` }}
               >
                 {format(d, 'MMM d')}
@@ -88,7 +88,7 @@ export function PMForecastTimeline({ items }: PMForecastTimelineProps) {
               </div>
             ))}
             {uniquePMs.filter(dueInRange).length === 0 && (
-              <div className="py-6 text-center text-sm text-gray-400">No PMs due in the next {days} days</div>
+              <div className="py-6 text-center text-sm text-gray-500 dark:text-gray-400">No PMs due in the next {days} days</div>
             )}
           </div>
         </div>

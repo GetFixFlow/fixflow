@@ -19,7 +19,7 @@ export function AssetHealthByLocation({ data }: { data: LocationHealth[] }) {
       </ResponsiveContainer>
       <table className="w-full text-xs">
         <thead>
-          <tr className="text-gray-400 border-b border-gray-100 dark:border-gray-700">
+          <tr className="text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
             <th className="text-left py-1">Location</th>
             <th className="text-right py-1">Total</th>
             <th className="text-right py-1">Operational</th>
@@ -32,7 +32,7 @@ export function AssetHealthByLocation({ data }: { data: LocationHealth[] }) {
               <td className="py-1.5 font-medium">{row.location}</td>
               <td className="text-right">{row.total}</td>
               <td className="text-right">{row.operational}</td>
-              <td className={`text-right font-semibold ${row.health_score >= 90 ? 'text-green-600' : row.health_score >= 70 ? 'text-yellow-600' : 'text-red-500'}`}>
+              <td className={`text-right font-semibold ${row.health_score >= 90 ? 'text-green-700 dark:text-green-400' : row.health_score >= 70 ? 'text-yellow-700 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'}`}>
                 {row.health_score}%
               </td>
             </tr>

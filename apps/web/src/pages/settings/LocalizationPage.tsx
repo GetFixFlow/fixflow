@@ -91,7 +91,7 @@ function LocalizationForm({ saved }: { saved: LocaleSettings }) {
               </select>
             </Field>
           </div>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             {t('settings.localization.time_zone_note')}
           </p>
         </CardContent>
@@ -99,12 +99,12 @@ function LocalizationForm({ saved }: { saved: LocaleSettings }) {
 
       <Card>
         <CardContent className="p-6">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">{t('settings.localization.preview')}</h3>
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">{t('settings.localization.preview')}</h2>
           <dl className="grid grid-cols-[8rem_1fr] gap-y-2 text-sm">
-            <dt className="text-gray-500">{t('settings.localization.preview_date')}</dt><dd data-testid="preview-date">{fmt.date(sample)}</dd>
-            <dt className="text-gray-500">{t('settings.localization.preview_datetime')}</dt><dd data-testid="preview-datetime">{fmt.dateTime(sample)}</dd>
-            <dt className="text-gray-500">{t('settings.localization.preview_amount')}</dt><dd data-testid="preview-money">{fmt.money(1234.5)}</dd>
-            <dt className="text-gray-500">{t('settings.localization.preview_number')}</dt><dd data-testid="preview-number">{fmt.number(1234567)}</dd>
+            <dt className="text-gray-500 dark:text-gray-400">{t('settings.localization.preview_date')}</dt><dd data-testid="preview-date">{fmt.date(sample)}</dd>
+            <dt className="text-gray-500 dark:text-gray-400">{t('settings.localization.preview_datetime')}</dt><dd data-testid="preview-datetime">{fmt.dateTime(sample)}</dd>
+            <dt className="text-gray-500 dark:text-gray-400">{t('settings.localization.preview_amount')}</dt><dd data-testid="preview-money">{fmt.money(1234.5)}</dd>
+            <dt className="text-gray-500 dark:text-gray-400">{t('settings.localization.preview_number')}</dt><dd data-testid="preview-number">{fmt.number(1234567)}</dd>
           </dl>
         </CardContent>
       </Card>
@@ -125,7 +125,7 @@ export function LocalizationPage() {
     return (
       <div className="space-y-6 max-w-2xl">
         <PageHeader title={t('settings.localization.title')} description={t('settings.localization.regional')} />
-        <Card><CardContent className="p-8 text-center"><p className="text-gray-500">{t('settings.localization.denied')}</p></CardContent></Card>
+        <Card><CardContent className="p-8 text-center"><p className="text-gray-500 dark:text-gray-400">{t('settings.localization.denied')}</p></CardContent></Card>
       </div>
     )
   }

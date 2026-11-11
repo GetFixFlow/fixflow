@@ -38,8 +38,8 @@ export function KPICard({
 
   const trendIcon = trend === 'improved' ? ArrowUpRight : trend === 'degraded' ? ArrowDownRight : Minus
   const TrendIcon = trendIcon
-  const trendColor = trend === 'improved' ? 'text-green-600 dark:text-green-400' :
-                     trend === 'degraded' ? 'text-red-500 dark:text-red-400' : 'text-gray-400'
+  const trendColor = trend === 'improved' ? 'text-green-700 dark:text-green-400' :
+                     trend === 'degraded' ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'
 
   return (
     <Card className={cn(
@@ -61,7 +61,7 @@ export function KPICard({
               </p>
             )}
             {previousValue != null && (
-              <p className="text-xs text-gray-400 mt-0.5">Prev: {previousValue}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Prev: {previousValue}</p>
             )}
           </div>
           {sparklineData && sparklineData.length > 1 && (

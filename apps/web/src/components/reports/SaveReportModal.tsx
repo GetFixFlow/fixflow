@@ -73,7 +73,7 @@ export function SaveReportModal({ report, saved, filters = {}, onClose, onSaved 
           <select id="sr-period" value={period} onChange={(e) => setPeriod(e.target.value as SavedReportPeriod)} className={SELECT_CLASS}>
             {(Object.keys(PERIOD_LABELS) as SavedReportPeriod[]).map((p) => <option key={p} value={p}>{PERIOD_LABELS[p]}</option>)}
           </select>
-          <p className="mt-1 text-xs text-gray-500">It moves with the calendar. The last days are the whole days before today.</p>
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">It moves with the calendar. The last days are the whole days before today.</p>
         </div>
 
         <p className="text-sm text-gray-600 dark:text-gray-400">Filters: {filtersSummary(kept)}</p>
@@ -90,7 +90,7 @@ export function SaveReportModal({ report, saved, filters = {}, onClose, onSaved 
                 <select id="sr-day" value={day} onChange={(e) => setDay(Number(e.target.value))} className={SELECT_CLASS}>
                   {[1, 2, 3, 4, 5, 6, 0].map((d) => <option key={d} value={d}>{weekdayName(d)}</option>)}
                 </select>
-                <p className="mt-1 text-xs text-gray-500">From {SEND_HOUR}:00 in the morning, company time.</p>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">From {SEND_HOUR}:00 in the morning, company time.</p>
               </div>
               <fieldset>
                 <legend className="mb-1.5 text-sm text-gray-700 dark:text-gray-300">To</legend>
@@ -98,17 +98,17 @@ export function SaveReportModal({ report, saved, filters = {}, onClose, onSaved 
                   {people.map((person) => (
                     <label key={person.id} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                       <input type="checkbox" checked={chosen.includes(person.id)} onChange={() => toggle(person.id)} className="h-4 w-4 rounded border-gray-300" />
-                      {person.full_name} <span className="text-xs text-gray-400">{person.role}</span>
+                      {person.full_name} <span className="text-xs text-gray-500 dark:text-gray-400">{person.role}</span>
                     </label>
                   ))}
                 </div>
-                <p className="mt-1 text-xs text-gray-500">Only managers and administrators: a report shows what work cost.</p>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Only managers and administrators: a report shows what work cost.</p>
               </fieldset>
             </>
           )}
         </div>
 
-        {problem && <p role="alert" className="text-sm text-red-600">{problem}</p>}
+        {problem && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{problem}</p>}
 
         <div className="flex gap-2 pt-2">
           <Button type="button" variant="outline" onClick={onClose} className="flex-1">Cancel</Button>

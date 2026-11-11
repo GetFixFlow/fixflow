@@ -21,7 +21,7 @@ import { LANGUAGES, currentLanguage, label } from '@/i18n'
 import { cn } from '@/lib/utils'
 
 function nameToColor(name: string): string {
-  const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-orange-500', 'bg-teal-500', 'bg-pink-500']
+  const colors = ['bg-blue-700', 'bg-green-700', 'bg-purple-700', 'bg-orange-700', 'bg-teal-700', 'bg-pink-700']
   let hash = 0
   for (const c of name) hash = c.charCodeAt(0) + ((hash << 5) - hash)
   return colors[Math.abs(hash) % colors.length]
@@ -140,7 +140,7 @@ export function ProfilePage() {
       {/* Profile Form */}
       <Card>
         <CardContent className="p-6 space-y-5">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t('settings.profile.info')}</h3>
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100">{t('settings.profile.info')}</h2>
 
           {/* Avatar: initials only; photo upload is not supported yet */}
           <div className="flex items-center gap-4">
@@ -158,38 +158,38 @@ export function ProfilePage() {
               {/* Form fields */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="profile-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     {t('settings.profile.full_name')} *
                   </label>
-                  <Input {...form.register('full_name')} />
+                  <Input id="profile-name" {...form.register('full_name')} />
                   {form.formState.errors.full_name && (
-                    <p className="text-xs text-red-500 mt-1">{t(form.formState.errors.full_name.message ?? '')}</p>
+                    <p className="text-xs text-red-600 dark:text-red-400 mt-1">{t(form.formState.errors.full_name.message ?? '')}</p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="profile-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     {t('auth.email')}
                   </label>
-                  <Input {...form.register('email')} type="email" disabled aria-describedby="email-note" />
-                  <p id="email-note" className="text-xs text-gray-400 mt-1">{t('settings.profile.email_note')}</p>
+                  <Input id="profile-email" {...form.register('email')} type="email" disabled aria-describedby="email-note" />
+                  <p id="email-note" className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('settings.profile.email_note')}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="profile-phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     {t('settings.profile.phone')}
                   </label>
-                  <Input {...form.register('phone')} type="tel" />
+                  <Input id="profile-phone" {...form.register('phone')} type="tel" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="profile-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     {t('settings.profile.job_title')}
                   </label>
-                  <Input {...form.register('job_title')} />
+                  <Input id="profile-title" {...form.register('job_title')} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="profile-department" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     {t('settings.profile.department')}
                   </label>
-                  <Input {...form.register('department')} />
+                  <Input id="profile-department" {...form.register('department')} />
                 </div>
                 <div className="sm:col-span-2">
                   <label htmlFor="profile-language" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -213,7 +213,7 @@ export function ProfilePage() {
               {/* Read-only fields */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-gray-100 dark:border-gray-700">
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">{t('settings.profile.role')}</label>
+                  <p className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{t('settings.profile.role')}</p>
                   <span className={cn(
                     'inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize',
                     ROLE_COLORS[user?.role ?? 'technician'],
@@ -222,11 +222,11 @@ export function ProfilePage() {
                   </span>
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">{t('settings.profile.organization')}</label>
+                  <p className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{t('settings.profile.organization')}</p>
                   <p className="text-sm text-gray-700 dark:text-gray-300">{profile?.organization_name ?? '—'}</p>
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">{t('settings.profile.member_since')}</label>
+                  <p className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{t('settings.profile.member_since')}</p>
                   <p className="text-sm text-gray-700 dark:text-gray-300">
                     {user?.created_at ? new Intl.DateTimeFormat(currentLanguage(), { month: 'long', year: 'numeric' }).format(new Date(user.created_at)) : '—'}
                   </p>
@@ -247,8 +247,8 @@ export function ProfilePage() {
           onClick={() => setPwOpen(!pwOpen)}
           className="w-full flex items-center justify-between p-5 text-left"
         >
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t('settings.profile.change_password')}</h3>
-          {pwOpen ? <ChevronUp className="h-5 w-5 text-gray-400" /> : <ChevronDown className="h-5 w-5 text-gray-400" />}
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100">{t('settings.profile.change_password')}</h2>
+          {pwOpen ? <ChevronUp className="h-5 w-5 text-gray-500 dark:text-gray-400" /> : <ChevronDown className="h-5 w-5 text-gray-500 dark:text-gray-400" />}
         </button>
         {pwOpen && (
           <CardContent className="px-5 pb-5 space-y-4 border-t border-gray-100 dark:border-gray-700">
@@ -260,11 +260,12 @@ export function ProfilePage() {
               }
               return (
                 <div key={field}>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor={`profile-${field}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     {labels[field]} *
                   </label>
                   <div className="relative">
                     <Input
+                      id={`profile-${field}`}
                       {...pwForm.register(field)}
                       type={pwVisible[field] ? 'text' : 'password'}
                       className="pr-10"
@@ -272,13 +273,14 @@ export function ProfilePage() {
                     <button
                       type="button"
                       onClick={() => setPwVisible((v) => ({ ...v, [field]: !v[field] }))}
-                      className="absolute right-2.5 top-2.5 text-gray-400"
+                      aria-label={pwVisible[field] ? t('settings.profile.hide_password') : t('settings.profile.show_password')}
+                      className="absolute right-2.5 top-2.5 text-gray-500 dark:text-gray-400"
                     >
                       {pwVisible[field] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
                   {pwForm.formState.errors[field] && (
-                    <p className="text-xs text-red-500 mt-1">{t(pwForm.formState.errors[field]?.message ?? '')}</p>
+                    <p className="text-xs text-red-600 dark:text-red-400 mt-1">{t(pwForm.formState.errors[field]?.message ?? '')}</p>
                   )}
                 </div>
               )
@@ -287,10 +289,10 @@ export function ProfilePage() {
             {newPw && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-500">{t('settings.profile.strength')}</span>
+                  <span className="text-gray-500 dark:text-gray-400">{t('settings.profile.strength')}</span>
                   <span className={cn(
                     'font-medium',
-                    pwScore >= 3 ? 'text-green-600' : pwScore >= 2 ? 'text-amber-600' : 'text-red-600',
+                    pwScore >= 3 ? 'text-green-700 dark:text-green-400' : pwScore >= 2 ? 'text-amber-700 dark:text-amber-400' : 'text-red-600 dark:text-red-400',
                   )}>
                     {pwLabelKey ? t(`settings.profile.strength_${pwLabelKey}`) : ''}
                   </span>
@@ -302,13 +304,13 @@ export function ProfilePage() {
                 </div>
                 <div className="space-y-1">
                   {pwReqs.map((req) => (
-                    <div key={req.label} className={cn('flex items-center gap-1.5 text-xs', req.met ? 'text-green-600' : 'text-gray-400')}>
+                    <div key={req.label} className={cn('flex items-center gap-1.5 text-xs', req.met ? 'text-green-700 dark:text-green-400' : 'text-gray-500 dark:text-gray-400')}>
                       <Check className={cn('h-3 w-3', req.met ? 'opacity-100' : 'opacity-30')} />
                       <span>{req.label}</span>
                     </div>
                   ))}
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   {t('settings.profile.refused')}
                 </p>
               </div>

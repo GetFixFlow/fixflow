@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -121,5 +121,42 @@ describe('OrganizationPage', () => {
       })
       expect(sent).not.toHaveProperty('slug')
     })
+  })
+})
+
+describe('OrganizationPage: what a screen reader announces for each control', () => {
+  it('names every field by its label, not by its position', () => {
+    mocks.org = SAVED_ORG
+    render(<OrganizationPage />, { wrapper: Wrapper })
+
+    expect(screen.getByLabelText('Organization Name *')).toHaveValue('Acme Corp')
+    expect(screen.getByLabelText('Industry')).toHaveValue('Manufacturing')
+    expect(screen.getByLabelText('Company Size')).toHaveValue('11-50')
+    expect(screen.getByLabelText('Default Priority')).toHaveValue('high')
+    expect(screen.getByLabelText('Default Due Days')).toHaveValue(3)
+    expect(screen.getByLabelText('WO Number Prefix')).toHaveValue('MNT')
+    expect(screen.getByLabelText('Keep sensor readings for (days)')).toHaveValue(365)
+    expect(screen.getByLabelText('Auto-Create WO Threshold')).toHaveValue('critical')
+    expect(screen.getByLabelText('Work Start Time')).toHaveValue('07:00')
+    expect(screen.getByLabelText('Timezone')).toHaveValue('Asia/Colombo')
+  })
+
+  it('names the working days as a group, says which are on, and names each button in full', () => {
+    mocks.org = SAVED_ORG
+    render(<OrganizationPage />, { wrapper: Wrapper })
+
+    const group = screen.getByRole('group', { name: 'Working Days' })
+    expect(within(group).getByRole('button', { name: 'Monday' })).toHaveAttribute('aria-pressed', 'true')
+    expect(within(group).getByRole('button', { name: 'Sunday' })).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('says which holiday a delete button removes, and names the fields for a new one', async () => {
+    mocks.org = SAVED_ORG
+    render(<OrganizationPage />, { wrapper: Wrapper })
+
+    expect(screen.getByRole('button', { name: 'Remove Christmas' })).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: /add holiday/i }))
+    expect(screen.getByLabelText('Holiday date')).toBeInTheDocument()
+    expect(screen.getByLabelText('Holiday name')).toBeInTheDocument()
   })
 })

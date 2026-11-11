@@ -94,6 +94,7 @@ nav:
       - Reports and the dashboard: reports.md
       - Notifications: notifications.md
       - Languages and translating: translating.md
+      - Accessibility: accessibility.md
   - Reference:
       - API: api.md
       - API endpoints: api-endpoints.md

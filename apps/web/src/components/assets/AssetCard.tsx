@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { MoreVertical, Eye, Pencil, QrCode, Trash2 } from 'lucide-react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
@@ -23,27 +23,17 @@ export function AssetCard({ asset, locations = [], onDelete, className }: AssetC
   const locationPath = getLocationDisplayPath(locations, asset.location_id)
 
   return (
-    <Card
-      className={cn('group relative transition-shadow hover:shadow-md', className)}
-      onClick={() => navigate(`/assets/${asset.id}`)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => e.key === 'Enter' && navigate(`/assets/${asset.id}`)}
-      aria-label={t('assets.card.view_aria', { name: asset.name })}
-    >
+    <Card className={cn('group relative transition-shadow focus-within:ring-2 focus-within:ring-brand-500 hover:shadow-md', className)}>
       <CardContent className="p-4">
         {/* Three-dot menu */}
-        <div
-          className="absolute right-3 top-3 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="absolute right-3 top-3 z-10 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
               <button
                 className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
                 aria-label={t('assets.card.options')}
               >
-                <MoreVertical className="h-4 w-4 text-gray-500" />
+                <MoreVertical className="h-4 w-4 text-gray-500 dark:text-gray-400" />
               </button>
             </DropdownMenu.Trigger>
             <DropdownMenu.Portal>
@@ -92,7 +82,16 @@ export function AssetCard({ asset, locations = [], onDelete, className }: AssetC
         </div>
 
         {/* Name + tag */}
-        <p className="font-semibold text-gray-900 dark:text-gray-100 truncate pr-8">{asset.name}</p>
+        {/* The whole card is this link (it is stretched over the card), so the card is one tab stop and a link, not a button holding a menu. */}
+        <p className="font-semibold text-gray-900 dark:text-gray-100 truncate pr-8">
+          <Link
+            to={`/assets/${asset.id}`}
+            aria-label={t('assets.card.view_aria', { name: asset.name })}
+            className="after:absolute after:inset-0 after:content-[''] focus:outline-none"
+          >
+            {asset.name}
+          </Link>
+        </p>
         <p className="font-mono text-xs text-gray-500 dark:text-gray-400">{asset.asset_tag}</p>
 
         {/* Location */}

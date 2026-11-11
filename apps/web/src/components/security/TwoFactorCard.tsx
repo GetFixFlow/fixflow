@@ -85,7 +85,7 @@ function ProveItsYou({ action, busy, error, onSubmit, onCancel }: {
       <p className="text-sm text-gray-600 dark:text-gray-400">{t('security.two_factor.prove', { action })}</p>
       <Input id="tf-password" type="password" label={t('auth.password')} autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
       <Input id="tf-code" label={t('auth.login.code')} inputMode="text" autoComplete="one-time-code" value={code} onChange={(e) => setCode(e.target.value)} />
-      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{error}</p>}
       <div className="flex gap-2">
         <Button type="submit" size="sm" loading={busy} disabled={!password || !code}>{t('common.actions.confirm')}</Button>
         <Button type="button" variant="outline" size="sm" onClick={onCancel}>{t('common.actions.cancel')}</Button>
@@ -155,21 +155,21 @@ export function TwoFactorCard({ onEnabled }: { onEnabled?: () => void }) {
       <CardContent className="space-y-4 p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3">
-            {enabled ? <ShieldCheck className="mt-0.5 h-5 w-5 text-green-600" /> : <Shield className="mt-0.5 h-5 w-5 text-gray-400" />}
+            {enabled ? <ShieldCheck className="mt-0.5 h-5 w-5 text-green-700 dark:text-green-400" /> : <Shield className="mt-0.5 h-5 w-5 text-gray-500 dark:text-gray-400" />}
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t('security.two_factor.title')}</h3>
-              <p className="mt-0.5 text-sm text-gray-500">
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100">{t('security.two_factor.title')}</h2>
+              <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
                 {t('security.two_factor.intro')}
               </p>
-              {isLoading && <p className="mt-1.5 text-xs text-gray-500">{t('shell.loading')}</p>}
-              {isError && <p role="alert" className="mt-1.5 text-xs text-red-600">{t('security.two_factor.load_failed')}</p>}
+              {isLoading && <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">{t('shell.loading')}</p>}
+              {isError && <p role="alert" className="mt-1.5 text-xs text-red-600 dark:text-red-400">{t('security.two_factor.load_failed')}</p>}
               {status && (
                 <p role="status" className={`mt-1.5 inline-flex rounded-full px-2 py-0.5 text-xs ${enabled ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
                   {enabled ? t('security.two_factor.on', { count: status.recovery_codes_left }) : t('security.two_factor.off')}
                 </p>
               )}
               {status?.required_by_company && (
-                <p className="mt-1.5 text-xs text-gray-500">{t('security.two_factor.required')}</p>
+                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">{t('security.two_factor.required')}</p>
               )}
             </div>
           </div>
@@ -178,7 +178,7 @@ export function TwoFactorCard({ onEnabled }: { onEnabled?: () => void }) {
           )}
         </div>
 
-        {problem && step === 'idle' && <p role="alert" className="text-sm text-red-600">{problem}</p>}
+        {problem && step === 'idle' && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{problem}</p>}
 
         {step === 'setup' && setup && (
           <form
@@ -192,7 +192,7 @@ export function TwoFactorCard({ onEnabled }: { onEnabled?: () => void }) {
             <div className="flex flex-wrap items-center gap-4">
               <SetupQr uri={setup.otpauth_uri} />
               <div className="min-w-0 space-y-1">
-                <p className="text-xs text-gray-500">{t('security.two_factor.cannot_scan')}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t('security.two_factor.cannot_scan')}</p>
                 <code className="block break-all rounded bg-white px-2 py-1 font-mono text-xs dark:bg-gray-900">{setup.secret}</code>
               </div>
             </div>
@@ -206,7 +206,7 @@ export function TwoFactorCard({ onEnabled }: { onEnabled?: () => void }) {
               value={code}
               onChange={(e) => setCode(e.target.value)}
             />
-            {problem && <p role="alert" className="text-sm text-red-600">{problem}</p>}
+            {problem && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{problem}</p>}
             <div className="flex gap-2">
               <Button type="submit" size="sm" loading={confirm.isPending} disabled={code.replace(/\s/g, '').length !== 6}>{t('security.two_factor.turn_on')}</Button>
               <Button type="button" variant="outline" size="sm" onClick={() => { setStep('idle'); setSetup(null); setProblem(null) }}>{t('common.actions.cancel')}</Button>

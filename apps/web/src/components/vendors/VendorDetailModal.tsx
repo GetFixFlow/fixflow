@@ -21,7 +21,7 @@ const linkClass = 'text-brand-600 hover:underline dark:text-brand-400'
 function Line({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="grid grid-cols-3 gap-2 text-sm">
-      <dt className="text-gray-500">{label}</dt>
+      <dt className="text-gray-500 dark:text-gray-400">{label}</dt>
       <dd className="col-span-2 whitespace-pre-line text-gray-900 dark:text-gray-100">{children}</dd>
     </div>
   )
@@ -74,7 +74,7 @@ export function VendorDetailModal({ vendor, canManage, onEdit, onClose }: Vendor
       <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant={current.active ? 'success' : 'secondary'}>{current.active ? t('vendors.detail.active') : t('vendors.detail.not_in_use')}</Badge>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-500 dark:text-gray-400">
             {t('vendors.detail.work_orders', { count: current.work_orders_count })}
           </span>
         </div>
@@ -94,7 +94,7 @@ export function VendorDetailModal({ vendor, canManage, onEdit, onClose }: Vendor
         <section aria-label={t('vendors.detail.contacts_aria')}>
           <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t('vendors.detail.people_to_call')}</h3>
           {contacts.length === 0 ? (
-            <p className="mt-1 text-sm text-gray-500">{t('vendors.detail.no_contacts')}</p>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t('vendors.detail.no_contacts')}</p>
           ) : (
             <ul className="mt-2 divide-y divide-gray-200 rounded-md border border-gray-200 dark:divide-gray-700 dark:border-gray-700">
               {contacts.map((contact) => {
@@ -103,7 +103,7 @@ export function VendorDetailModal({ vendor, canManage, onEdit, onClose }: Vendor
                   <li key={contact.id} className="flex items-start justify-between gap-2 p-3 text-sm">
                     <div>
                       <p className="font-medium text-gray-900 dark:text-gray-100">
-                        {contact.name}{contact.role && <span className="font-normal text-gray-500"> · {contact.role}</span>}
+                        {contact.name}{contact.role && <span className="font-normal text-gray-500 dark:text-gray-400"> · {contact.role}</span>}
                       </p>
                       <div className="mt-0.5 flex flex-wrap gap-x-4 gap-y-1 text-gray-600 dark:text-gray-300">
                         {contact.phone && (
@@ -124,7 +124,7 @@ export function VendorDetailModal({ vendor, canManage, onEdit, onClose }: Vendor
                         disabled={remove.isPending}
                         onClick={() => { if (confirm(t('vendors.detail.confirm_remove', { name: contact.name, vendor: current.name }))) remove.mutate(contact.id) }}
                       >
-                        <Trash2 className="h-4 w-4 text-red-500" />
+                        <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
                       </Button>
                     )}
                   </li>

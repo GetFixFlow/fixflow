@@ -113,7 +113,7 @@ export function AssetHealthReportPage() {
       {selectedAsset && (
         <div className="fixed inset-y-0 right-0 z-50 w-96 bg-white dark:bg-gray-900 shadow-xl border-l border-gray-200 dark:border-gray-700 overflow-y-auto p-5">
           {historyLoading || !history ? (
-            <p className="text-sm text-gray-500">Loading {selectedAsset.name}…</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Loading {selectedAsset.name}…</p>
           ) : (
             <AssetDetailReport asset={selectedAsset}
               stats={{

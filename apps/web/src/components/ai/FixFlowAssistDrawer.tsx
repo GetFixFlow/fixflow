@@ -33,21 +33,21 @@ function AnswerActions({ text }: { text: string }) {
           setCopied(true)
           setTimeout(() => setCopied(false), 1500)
         }}
-        className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
+        className="rounded p-1 text-gray-500 dark:text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
         aria-label="Copy answer"
       >
-        {copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+        {copied ? <Check className="h-3.5 w-3.5 text-green-700 dark:text-green-400" /> : <Copy className="h-3.5 w-3.5" />}
       </button>
       <button
         onClick={() => setFeedback('up')}
-        className={cn('rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700', feedback === 'up' ? 'text-green-600' : 'text-gray-400')}
+        className={cn('rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700', feedback === 'up' ? 'text-green-700 dark:text-green-400' : 'text-gray-500 dark:text-gray-400')}
         aria-label="Good answer"
       >
         <ThumbsUp className="h-3.5 w-3.5" />
       </button>
       <button
         onClick={() => setFeedback('down')}
-        className={cn('rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700', feedback === 'down' ? 'text-red-600' : 'text-gray-400')}
+        className={cn('rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700', feedback === 'down' ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400')}
         aria-label="Poor answer"
       >
         <ThumbsDown className="h-3.5 w-3.5" />
@@ -115,7 +115,7 @@ export function FixFlowAssistDrawer({ open, onClose, workOrder }: FixFlowAssistD
                   {m.content && (
                     <>
                       {m.citations && m.citations.length > 0 && (
-                        <p className="mt-1 text-xs text-gray-400">Source: {m.citations.join(', ')}</p>
+                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Source: {m.citations.join(', ')}</p>
                       )}
                       <AnswerActions text={m.content} />
                     </>

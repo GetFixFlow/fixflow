@@ -23,7 +23,7 @@ export function IoTAlertsList({ alerts, onAcknowledge, onResolve, onRowClick, co
 
   if (shown.length === 0) {
     return (
-      <div className="flex items-center justify-center gap-2 py-8 text-green-600 dark:text-green-400">
+      <div className="flex items-center justify-center gap-2 py-8 text-green-700 dark:text-green-400">
         <span className="text-2xl">✅</span>
         <span className="text-sm font-medium">No alerts</span>
       </div>
@@ -36,22 +36,25 @@ export function IoTAlertsList({ alerts, onAcknowledge, onResolve, onRowClick, co
         const sev = normalizeSeverity(alert.severity)
         return (
           <div key={alert.id}
-            className={cn('flex items-center gap-3 py-2.5 px-1 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors',
-              sev === 'critical' && alert.status === 'open' && 'animate-pulse-subtle')}
-            onClick={() => onRowClick?.(alert)}>
-            <AlertSeverityBadge severity={sev} size="sm" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{alert.rule_name ?? alert.message}</p>
-              {!compact && (
-                <p className="text-xs text-gray-500 truncate">{alert.asset?.name ?? `Asset ${alert.asset_id}`} · {alert.metric_name} = {alert.sensor_value} {alert.metric_unit}</p>
-              )}
-            </div>
-            <div className="text-xs text-gray-400 whitespace-nowrap shrink-0">
-              {formatDistanceToNow(new Date(alert.created_at), { addSuffix: true })}
-            </div>
+            className={cn('flex items-center gap-3 px-1 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors',
+              sev === 'critical' && alert.status === 'open' && 'animate-pulse-subtle')}>
+            {/* The row opens the alert: a button, so the keyboard reaches it; the Ack button beside it is its own control. */}
+            <button type="button" onClick={() => onRowClick?.(alert)}
+              className="flex min-w-0 flex-1 items-center gap-3 py-2.5 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
+              <AlertSeverityBadge severity={sev} size="sm" />
+              <span className="block min-w-0 flex-1">
+                <span className="block truncate text-sm font-medium text-gray-900 dark:text-gray-100">{alert.rule_name ?? alert.message}</span>
+                {!compact && (
+                  <span className="block truncate text-xs text-gray-500 dark:text-gray-400">{alert.asset?.name ?? `Asset ${alert.asset_id}`} · {alert.metric_name} = {alert.sensor_value} {alert.metric_unit}</span>
+                )}
+              </span>
+              <span className="shrink-0 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
+                {formatDistanceToNow(new Date(alert.created_at), { addSuffix: true })}
+              </span>
+            </button>
             {!compact && alert.status === 'open' && onAcknowledge && (
-              <button onClick={(e) => { e.stopPropagation(); onAcknowledge(alert.id) }}
-                className="shrink-0 text-xs text-blue-600 hover:underline">Ack</button>
+              <button onClick={() => onAcknowledge(alert.id)}
+                className="shrink-0 text-xs text-blue-600 dark:text-blue-400 hover:underline">Ack</button>
             )}
           </div>
         )

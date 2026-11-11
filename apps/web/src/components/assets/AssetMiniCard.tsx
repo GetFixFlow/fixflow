@@ -25,7 +25,7 @@ export function AssetMiniCard({ asset, locations = [], className }: AssetMiniCar
         <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">{asset.name}</p>
         <p className="font-mono text-xs text-gray-500 dark:text-gray-400">{asset.asset_tag}</p>
         {locationPath && (
-          <p className="truncate text-xs text-gray-400 dark:text-gray-500">{locationPath}</p>
+          <p className="truncate text-xs text-gray-500 dark:text-gray-400">{locationPath}</p>
         )}
       </div>
     </div>

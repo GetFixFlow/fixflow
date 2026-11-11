@@ -39,7 +39,7 @@ export function KeyboardShortcutsHelp({ open, onClose }: KeyboardShortcutsHelpPr
           </div>
         ))}
       </div>
-      <p className="mt-4 text-center text-xs text-gray-400">
+      <p className="mt-4 text-center text-xs text-gray-500 dark:text-gray-400">
         <Trans i18nKey="shell.shortcuts.toggle" components={{ kbd: <kbd className="rounded bg-gray-100 px-1 font-mono dark:bg-gray-700" /> }} />
       </p>
     </Modal>

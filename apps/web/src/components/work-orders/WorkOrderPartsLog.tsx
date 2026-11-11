@@ -35,11 +35,11 @@ export function WorkOrderPartsLog({ workOrderId, editable = false, onAddPart }: 
           <table className="w-full text-sm">
             <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
               <tr>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">{t('workOrders.parts.part')}</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">{t('workOrders.parts.sku')}</th>
-                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">{t('workOrders.parts.qty')}</th>
-                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">{t('workOrders.parts.unit')}</th>
-                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">{t('workOrders.parts.total')}</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">{t('workOrders.parts.part')}</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">{t('workOrders.parts.sku')}</th>
+                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400">{t('workOrders.parts.qty')}</th>
+                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400">{t('workOrders.parts.unit')}</th>
+                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400">{t('workOrders.parts.total')}</th>
                 {editable && <th className="w-10 px-3 py-2"><span className="sr-only">{t('common.actions.remove')}</span></th>}
               </tr>
             </thead>
@@ -49,7 +49,7 @@ export function WorkOrderPartsLog({ workOrderId, editable = false, onAddPart }: 
                   <td className="px-3 py-2 font-medium text-gray-800 dark:text-gray-200">
                     {p.name}
                   </td>
-                  <td className="px-3 py-2 font-mono text-xs text-gray-500">
+                  <td className="px-3 py-2 font-mono text-xs text-gray-500 dark:text-gray-400">
                     {p.sku ?? '—'}
                   </td>
                   <td className="px-3 py-2 text-right text-gray-700 dark:text-gray-300">
@@ -91,7 +91,7 @@ export function WorkOrderPartsLog({ workOrderId, editable = false, onAddPart }: 
           </table>
         </div>
       ) : (
-        <p className="text-sm italic text-gray-400 dark:text-gray-500">{t('workOrders.parts.none')}</p>
+        <p className="text-sm italic text-gray-500 dark:text-gray-400">{t('workOrders.parts.none')}</p>
       )}
 
       {editable && (

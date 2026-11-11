@@ -75,7 +75,8 @@ export function AssetSelect({
           disabled={disabled}
           onClick={() => setOpen((v) => !v)}
           className={cn(
-            'flex h-9 w-full items-center justify-between rounded-md border bg-white px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-800',
+            'flex h-9 w-full items-center justify-between gap-2 rounded-md border bg-white py-1 pl-3 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-800',
+            value != null ? 'pr-14' : 'pr-3',
             error ? 'border-red-500' : 'border-gray-300 dark:border-gray-600',
           )}
           aria-haspopup="listbox"
@@ -85,33 +86,30 @@ export function AssetSelect({
             <span className="flex flex-1 items-center gap-2 truncate">
               <AssetHealthIndicator status={selectedAsset.status} variant="dot" />
               <span className="truncate text-gray-900 dark:text-gray-100">{selectedAsset.name}</span>
-              <span className="font-mono text-xs text-gray-400">{selectedAsset.asset_tag}</span>
+              <span className="font-mono text-xs text-gray-500 dark:text-gray-400">{selectedAsset.asset_tag}</span>
             </span>
           ) : (
-            <span className="flex-1 text-left text-gray-400">{placeholder ?? t('assets.select.placeholder')}</span>
+            <span className="flex-1 text-left text-gray-500 dark:text-gray-400">{placeholder ?? t('assets.select.placeholder')}</span>
           )}
-          <span className="flex items-center gap-1">
-            {value != null && (
-              <span
-                role="button"
-                tabIndex={0}
-                onClick={(e) => { e.stopPropagation(); onChange(null) }}
-                onKeyDown={(e) => e.key === 'Enter' && onChange(null)}
-                className="rounded p-0.5 hover:bg-gray-200 dark:hover:bg-gray-600"
-                aria-label={t('assets.select.clear')}
-              >
-                <X className="h-3.5 w-3.5 text-gray-400" />
-              </span>
-            )}
-            <ChevronDown className={cn('h-4 w-4 text-gray-400 transition-transform', open && 'rotate-180')} />
-          </span>
+          <ChevronDown className={cn('h-4 w-4 shrink-0 text-gray-500 dark:text-gray-400 transition-transform', open && 'rotate-180')} />
         </button>
+        {/* Beside the trigger, not inside it: a control cannot hold another control. */}
+        {value != null && (
+          <button
+            type="button"
+            onClick={() => onChange(null)}
+            className="absolute right-8 top-1/2 -translate-y-1/2 rounded p-1.5 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:hover:bg-gray-600"
+            aria-label={t('assets.select.clear')}
+          >
+            <X className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
+          </button>
+        )}
 
         {open && (
           <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
             <div className="border-b border-gray-200 p-2 dark:border-gray-700">
               <div className="relative">
-                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
                 <input
                   type="search"
                   placeholder={t('assets.select.search')}
@@ -124,9 +122,9 @@ export function AssetSelect({
             </div>
             <div className="max-h-52 overflow-auto py-1" role="listbox">
               {isLoading ? (
-                <div className="px-3 py-2 text-sm text-gray-500">{t('assets.select.loading')}</div>
+                <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">{t('assets.select.loading')}</div>
               ) : assets.length === 0 ? (
-                <div className="px-3 py-2 text-sm text-gray-500">{t('assets.select.none_found')}</div>
+                <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">{t('assets.select.none_found')}</div>
               ) : (
                 assets.map((asset) => (
                   <button
@@ -140,7 +138,7 @@ export function AssetSelect({
                     <span className="flex-1 truncate text-left text-gray-900 dark:text-gray-100">
                       {asset.name}
                     </span>
-                    <span className="font-mono text-xs text-gray-400">{asset.asset_tag}</span>
+                    <span className="font-mono text-xs text-gray-500 dark:text-gray-400">{asset.asset_tag}</span>
                     <AssetStatusBadge status={asset.status} />
                   </button>
                 ))
@@ -149,7 +147,7 @@ export function AssetSelect({
           </div>
         )}
       </div>
-      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+      {error && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{error}</p>}
     </div>
   )
 }

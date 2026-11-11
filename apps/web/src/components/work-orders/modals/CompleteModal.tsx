@@ -51,7 +51,7 @@ export function CompleteModal({
         {requiredIncomplete.length > 0 && (
           <div className="rounded-md bg-yellow-50 p-3 dark:bg-yellow-900/20">
             <div className="flex items-start gap-2">
-              <AlertTriangle className="h-4 w-4 text-yellow-600 shrink-0 mt-0.5" />
+              <AlertTriangle className="h-4 w-4 text-yellow-700 dark:text-yellow-400 shrink-0 mt-0.5" />
               <div className="text-sm text-yellow-800 dark:text-yellow-300">
                 <strong>{t('workOrders.complete.unchecked', { count: requiredIncomplete.length })}</strong>
                 <ul className="mt-1 list-disc pl-4 text-xs">
@@ -65,24 +65,24 @@ export function CompleteModal({
         )}
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            {t('workOrders.complete.notes')} <span className="text-xs text-gray-400">{t('workOrders.complete.notes_min')}</span>
+          <label htmlFor="complete-1" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t('workOrders.complete.notes')} <span className="text-xs text-gray-500 dark:text-gray-400">{t('workOrders.complete.notes_min')}</span>
           </label>
-          <textarea
+          <textarea id="complete-1"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={4}
             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
             placeholder={t('workOrders.complete.notes_placeholder')}
           />
-          <p className="mt-0.5 text-xs text-gray-400">{t('workOrders.complete.chars', { count: notes.length })}</p>
+          <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{t('workOrders.complete.chars', { count: notes.length })}</p>
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label htmlFor="complete-2" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
             {t('workOrders.complete.hours')}
           </label>
-          <input
+          <input id="complete-2"
             type="number"
             step="0.5"
             min="0.5"
@@ -94,10 +94,10 @@ export function CompleteModal({
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <p id="complete-resolution-label" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
             {t('workOrders.complete.resolution')}
-          </label>
-          <div className="space-y-2">
+          </p>
+          <div role="radiogroup" aria-labelledby="complete-resolution-label" className="space-y-2">
             {RESOLUTION_OPTIONS.map((opt) => (
               <label key={opt} className="flex cursor-pointer items-center gap-2 text-sm">
                 <input
@@ -106,7 +106,7 @@ export function CompleteModal({
                   value={opt}
                   checked={resolution === opt}
                   onChange={() => setResolution(opt)}
-                  className="text-brand-600 focus:ring-brand-500"
+                  className="text-brand-600 dark:text-brand-400 focus:ring-brand-500"
                 />
                 {t(`workOrders.complete.resolution_${opt}`)}
               </label>

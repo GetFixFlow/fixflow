@@ -29,7 +29,7 @@ export function ResolutionHeatmap({ data }: { data: HeatmapCell[] }) {
       <div className="flex gap-1 min-w-[600px]">
         <div className="flex flex-col gap-1 mr-1">
           {days.map((d, i) => (
-            <div key={i} className="h-3 w-6 text-[9px] text-gray-400 flex items-center">{d}</div>
+            <div key={i} className="h-3 w-6 text-[9px] text-gray-500 dark:text-gray-400 flex items-center">{d}</div>
           ))}
         </div>
         {weeks.map((week, wi) => (
@@ -46,7 +46,7 @@ export function ResolutionHeatmap({ data }: { data: HeatmapCell[] }) {
           </div>
         ))}
       </div>
-      <div className="flex items-center gap-1.5 text-xs text-gray-400">
+      <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
         <span>Less</span>
         {INTENSITY_CLASSES.map((cls, i) => (
           <span key={i} className={cn('h-3 w-3 rounded-sm', cls)} />

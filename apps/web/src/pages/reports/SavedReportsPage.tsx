@@ -63,14 +63,14 @@ export function SavedReportsPage() {
                 <p className="font-medium text-gray-900 dark:text-gray-100">
                   {saved.name} <Badge variant="secondary">{saved.title}</Badge>
                 </p>
-                <p className="text-xs text-gray-500">{PERIOD_LABELS[saved.period]}. {filtersSummary(saved.filters)}. Saved by {saved.owner.full_name}.</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{PERIOD_LABELS[saved.period]}. {filtersSummary(saved.filters)}. Saved by {saved.owner.full_name}.</p>
                 <p className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
                   <Mail className="h-3 w-3" />{scheduleSummary(saved)}
                 </p>
                 {saved.last_sent_at && (
-                  <p className="text-xs text-gray-500">Last sent {formatDateTime(saved.last_sent_at)}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Last sent {formatDateTime(saved.last_sent_at)}</p>
                 )}
-                {saved.last_error && <p role="alert" className="text-xs text-red-600">{saved.last_error}</p>}
+                {saved.last_error && <p role="alert" className="text-xs text-red-600 dark:text-red-400">{saved.last_error}</p>}
               </div>
               <div className="flex gap-1">
                 <Button variant="ghost" size="sm" onClick={() => open(saved)} aria-label={`Open ${saved.name}`}>
@@ -91,7 +91,7 @@ export function SavedReportsPage() {
                       <Pencil className="h-4 w-4" />
                     </Button>
                     <Button variant="ghost" size="icon" onClick={() => confirmDelete(saved)} aria-label={`Delete ${saved.name}`}>
-                      <Trash2 className="h-4 w-4 text-red-500" />
+                      <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
                     </Button>
                   </>
                 )}

@@ -64,8 +64,9 @@ export function ApiKeyCreateModal({ open, onClose, onCreated }: ApiKeyCreateModa
         />
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Description</label>
+          <label htmlFor="key-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Description</label>
           <textarea
+            id="key-description"
             className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-brand-500"
             rows={2}
             value={description}
@@ -75,8 +76,9 @@ export function ApiKeyCreateModal({ open, onClose, onCreated }: ApiKeyCreateModa
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Expires At</label>
+          <label htmlFor="key-expires" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Expires At</label>
           <Input
+            id="key-expires"
             type="date"
             value={expiresAt}
             onChange={(e) => setExpiresAt(e.target.value)}
@@ -94,28 +96,30 @@ export function ApiKeyCreateModal({ open, onClose, onCreated }: ApiKeyCreateModa
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Scopes</label>
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 cursor-not-allowed opacity-70">
-              <input type="checkbox" checked disabled className="rounded" />
+          <p id="key-scopes-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Scopes</p>
+          <div role="group" aria-labelledby="key-scopes-label" className="space-y-2">
+            <div className="flex items-center gap-2 opacity-70">
+              <input id="key-scope-write" type="checkbox" checked disabled aria-describedby="key-scope-write-note" className="rounded cursor-not-allowed" />
               <div>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">iot_write</span>
-                <span className="ml-2 text-xs text-gray-400">(required)</span>
-                <p className="text-xs text-gray-500">Send sensor readings and telemetry data</p>
+                <label htmlFor="key-scope-write" className="cursor-not-allowed text-sm font-medium text-gray-700 dark:text-gray-300">iot_write</label>
+                <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">(required)</span>
+                <p id="key-scope-write-note" className="text-xs text-gray-500 dark:text-gray-400">Send sensor readings and telemetry data</p>
               </div>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
+            </div>
+            <div className="flex items-center gap-2">
               <input
+                id="key-scope-read"
                 type="checkbox"
                 checked={scopes.includes('iot_read')}
                 onChange={() => toggleScope('iot_read')}
-                className="rounded"
+                aria-describedby="key-scope-read-note"
+                className="rounded cursor-pointer"
               />
               <div>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">iot_read</span>
-                <p className="text-xs text-gray-500">Read sensor data and alert status</p>
+                <label htmlFor="key-scope-read" className="cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300">iot_read</label>
+                <p id="key-scope-read-note" className="text-xs text-gray-500 dark:text-gray-400">Read sensor data and alert status</p>
               </div>
-            </label>
+            </div>
           </div>
         </div>
 

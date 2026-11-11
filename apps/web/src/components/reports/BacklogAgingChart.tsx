@@ -24,7 +24,7 @@ export function BacklogAgingChart({ data, oldestWOs }: BacklogAgingChartProps) {
       {oldestWOs.length > 0 && (
         <table className="w-full text-xs">
           <thead>
-            <tr className="text-gray-400 border-b border-gray-100 dark:border-gray-700">
+            <tr className="text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
               <th className="text-left py-1">WO #</th>
               <th className="text-left py-1">Title</th>
               <th className="text-left py-1">Asset</th>
@@ -36,8 +36,8 @@ export function BacklogAgingChart({ data, oldestWOs }: BacklogAgingChartProps) {
               <tr key={wo.id} className="border-b border-gray-50 dark:border-gray-800">
                 <td className="py-1.5 font-mono">{wo.work_order_number}</td>
                 <td className="py-1.5 truncate max-w-[120px]">{wo.title}</td>
-                <td className="py-1.5 text-gray-500">{wo.asset_name}</td>
-                <td className="py-1.5 text-right font-medium text-red-600">{wo.days_open}d</td>
+                <td className="py-1.5 text-gray-500 dark:text-gray-400">{wo.asset_name}</td>
+                <td className="py-1.5 text-right font-medium text-red-600 dark:text-red-400">{wo.days_open}d</td>
               </tr>
             ))}
           </tbody>

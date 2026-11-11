@@ -40,7 +40,7 @@ function Facts({ facts }: { facts: [string, React.ReactNode][] }) {
     <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
       {shown.map(([label, value]) => (
         <div key={label} className="contents">
-          <dt className="text-gray-500">{label}</dt>
+          <dt className="text-gray-500 dark:text-gray-400">{label}</dt>
           <dd className="text-right font-mono text-gray-800 dark:text-gray-200">{value}</dd>
         </div>
       ))}
@@ -59,7 +59,7 @@ function HealthCard({ title, status, message, facts, children }: {
     <Card>
       <CardContent className="p-5">
         <div className="flex items-center justify-between gap-2">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100">{title}</h2>
           <StatusBadge status={status} />
         </div>
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{message}</p>
@@ -83,7 +83,7 @@ function UpdateCard({ update }: { update: SystemHealth['update'] }) {
       facts={[['You have', update.current], ['Latest release', update.latest]]}>
       {update.status === 'warning' && update.url && (
         <a href={update.url} target="_blank" rel="noopener noreferrer"
-          className="mt-3 inline-flex items-center gap-1 text-sm text-brand-600 hover:underline">
+          className="mt-3 inline-flex items-center gap-1 text-sm text-brand-600 dark:text-brand-400 hover:underline">
           See what is new <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
         </a>
       )}
@@ -94,7 +94,7 @@ function UpdateCard({ update }: { update: SystemHealth['update'] }) {
           })} />
         <span>
           Look for new releases on GitHub
-          <span className="block text-xs text-gray-500">
+          <span className="block text-xs text-gray-500 dark:text-gray-400">
             When this is on, opening this page asks GitHub for the latest FixFlow release (at most twice a day). Nothing about
             your install is sent except the version, in the request&apos;s user agent.
             {update.locked && ' The server\'s environment has turned it off (FIXFLOW_UPDATE_CHECK=false).'}
@@ -114,7 +114,7 @@ export function SystemHealthPage() {
     return (
       <div className="max-w-2xl space-y-6">
         <PageHeader title="System Health" />
-        <Card><CardContent className="p-8 text-center text-gray-500">Only administrators can see the system's health.</CardContent></Card>
+        <Card><CardContent className="p-8 text-center text-gray-500 dark:text-gray-400">Only administrators can see the system's health.</CardContent></Card>
       </div>
     )
   }
@@ -131,7 +131,7 @@ export function SystemHealthPage() {
         }
       />
 
-      {isLoading && <p className="text-sm text-gray-500">Checking…</p>}
+      {isLoading && <p className="text-sm text-gray-500 dark:text-gray-400">Checking…</p>}
 
       {isError && (
         <p role="alert" className="rounded-lg bg-red-50 p-4 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">

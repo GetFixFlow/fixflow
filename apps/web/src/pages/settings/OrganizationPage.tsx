@@ -166,7 +166,7 @@ export function OrganizationPage() {
         <PageHeader title="Organization" description="Organization settings" />
         <Card>
           <CardContent className="p-8 text-center">
-            <p className="text-gray-500">Access Denied. Only administrators can view organization settings.</p>
+            <p className="text-gray-500 dark:text-gray-400">Access Denied. Only administrators can view organization settings.</p>
           </CardContent>
         </Card>
       </div>
@@ -235,29 +235,29 @@ export function OrganizationPage() {
       {/* Section 1: Organization Details */}
       <Card>
         <CardContent className="p-6 space-y-4">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Organization Details</h3>
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100">Organization Details</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="org-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Organization Name *
               </label>
-              <Input {...form.register('name')} placeholder="Acme Corp" />
+              <Input id="org-name" {...form.register('name')} placeholder="Acme Corp" />
               {form.formState.errors.name && (
-                <p className="text-xs text-red-500 mt-1">{form.formState.errors.name.message}</p>
+                <p className="text-xs text-red-600 dark:text-red-400 mt-1">{form.formState.errors.name.message}</p>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="org-slug" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 URL Slug
               </label>
-              <Input {...form.register('slug')} disabled />
-              <p className="text-xs text-gray-400 mt-1">Set when the company was created; it cannot be changed.</p>
+              <Input id="org-slug" {...form.register('slug')} disabled />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Set when the company was created; it cannot be changed.</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="org-industry" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Industry
               </label>
-              <select
+              <select id="org-industry"
                 {...form.register('industry')}
                 className="h-9 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-sm"
               >
@@ -266,10 +266,10 @@ export function OrganizationPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="org-size" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Company Size
               </label>
-              <select
+              <select id="org-size"
                 {...form.register('size')}
                 className="h-9 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-sm"
               >
@@ -278,19 +278,19 @@ export function OrganizationPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="org-website" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Website
               </label>
-              <Input {...form.register('website')} placeholder="https://example.com" type="url" />
+              <Input id="org-website" {...form.register('website')} placeholder="https://example.com" type="url" />
               {form.formState.errors.website && (
-                <p className="text-xs text-red-500 mt-1">{form.formState.errors.website.message}</p>
+                <p className="text-xs text-red-600 dark:text-red-400 mt-1">{form.formState.errors.website.message}</p>
               )}
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="org-address" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Address
               </label>
-              <Input {...form.register('address')} placeholder="123 Main St, City, Country" />
+              <Input id="org-address" {...form.register('address')} placeholder="123 Main St, City, Country" />
             </div>
           </div>
         </CardContent>
@@ -299,16 +299,16 @@ export function OrganizationPage() {
       {/* Section 2: Maintenance Settings */}
       <Card>
         <CardContent className="p-6 space-y-4">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Maintenance Settings</h3>
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100">Maintenance Settings</h2>
 
           <div className="space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Work Orders</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Work Orders</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label htmlFor="org-default-priority" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Default Priority
                 </label>
-                <select
+                <select id="org-default-priority"
                   {...form.register('default_priority')}
                   className="h-9 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-sm capitalize"
                 >
@@ -316,17 +316,17 @@ export function OrganizationPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label htmlFor="org-default-due-days" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Default Due Days
                 </label>
-                <Input {...form.register('default_due_days')} type="number" min={1} max={365} />
+                <Input id="org-default-due-days" {...form.register('default_due_days')} type="number" min={1} max={365} />
               </div>
               <div>
                 <label htmlFor="labor-rate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Hourly labor rate ({currencySymbol})
                 </label>
                 <Input id="labor-rate" {...form.register('labor_rate')} type="number" min={0} step="0.01" />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   What an hour of work costs when the technician has no rate of their own. A person&apos;s own rate is set in Users. Without any rate, labor is counted as nothing.
                 </p>
               </div>
@@ -335,22 +335,22 @@ export function OrganizationPage() {
                   Approval limit ({currencySymbol})
                 </label>
                 <Input id="approval-limit" {...form.register('approval_limit')} type="number" min={0} step="0.01" />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   A work order expected to cost more than this (parts, a vendor&apos;s charge and labor, from the estimate until hours are recorded) needs a manager&apos;s approval before it is started, and again before it is completed if the cost has grown. 0 means nothing needs approving.
                 </p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label htmlFor="org-wo-prefix" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   WO Number Prefix
                 </label>
-                <Input {...form.register('wo_number_prefix')} placeholder="WO" />
+                <Input id="org-wo-prefix" {...form.register('wo_number_prefix')} placeholder="WO" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label htmlFor="org-auto-close" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Auto-Close After (days)<NotApplied />
                 </label>
-                <Input {...form.register('auto_close_days')} type="number" min={0} max={365} />
-                <p className="text-xs text-gray-400 mt-1">0 = disabled</p>
+                <Input id="org-auto-close" {...form.register('auto_close_days')} type="number" min={0} max={365} />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">0 = disabled</p>
               </div>
               <div className="sm:col-span-2">
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -363,19 +363,19 @@ export function OrganizationPage() {
           </div>
 
           <div className="pt-3 border-t border-gray-100 dark:border-gray-700 space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Preventive Maintenance<NotApplied /></p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Preventive Maintenance<NotApplied /></p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label htmlFor="org-pm-target" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Compliance Target (%)
                 </label>
-                <Input {...form.register('pm_compliance_target')} type="number" min={0} max={100} />
+                <Input id="org-pm-target" {...form.register('pm_compliance_target')} type="number" min={0} max={100} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label htmlFor="org-pm-reminder" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   PM Reminder Days Before Due
                 </label>
-                <Input {...form.register('pm_reminder_days')} type="number" min={0} max={30} />
+                <Input id="org-pm-reminder" {...form.register('pm_reminder_days')} type="number" min={0} max={30} />
               </div>
               <div className="sm:col-span-2">
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -387,34 +387,34 @@ export function OrganizationPage() {
           </div>
 
           <div className="pt-3 border-t border-gray-100 dark:border-gray-700 space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">IoT Settings<NotApplied /></p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">IoT Settings<NotApplied /></p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label htmlFor="org-iot-cooldown" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Alert Cooldown (minutes)
                 </label>
-                <Input {...form.register('iot_alert_cooldown')} type="number" min={0} />
+                <Input id="org-iot-cooldown" {...form.register('iot_alert_cooldown')} type="number" min={0} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label htmlFor="org-iot-stale" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Stale Reading Threshold (seconds)
                 </label>
-                <Input {...form.register('iot_stale_threshold')} type="number" min={1} />
+                <Input id="org-iot-stale" {...form.register('iot_stale_threshold')} type="number" min={1} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label htmlFor="org-iot-retention" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Keep sensor readings for (days)
                 </label>
-                <Input {...form.register('iot_data_retention_days')} type="number" min={1} />
-                <p className="mt-1 text-xs text-gray-500">
+                <Input id="org-iot-retention" {...form.register('iot_data_retention_days')} type="number" min={1} />
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   Older sensor readings are deleted every night. See what that will remove under Settings, Data Retention.
                 </p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label htmlFor="org-iot-threshold" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Auto-Create WO Threshold
                 </label>
-                <select
+                <select id="org-iot-threshold"
                   {...form.register('iot_auto_wo_threshold')}
                   className="h-9 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-sm"
                 >
@@ -432,27 +432,27 @@ export function OrganizationPage() {
       {/* Section 3: Working Hours */}
       <Card>
         <CardContent className="p-6 space-y-4">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Working Hours</h3>
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100">Working Hours</h2>
           <p className="text-xs text-gray-500 dark:text-gray-400">
             The time zone is applied to dates and reports. Working hours, days and holidays are saved but not used yet.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="org-work-start" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Work Start Time
               </label>
-              <input
+              <input id="org-work-start"
                 type="time"
                 {...form.register('work_hours_start')}
                 className="h-9 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-sm"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="org-work-end" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Work End Time
               </label>
-              <input
+              <input id="org-work-end"
                 type="time"
                 {...form.register('work_hours_end')}
                 className="h-9 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-sm"
@@ -461,32 +461,33 @@ export function OrganizationPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <p id="org-work-days-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Working Days
-            </label>
-            <div className="flex flex-wrap gap-2">
+            </p>
+            <div role="group" aria-labelledby="org-work-days-label" className="flex flex-wrap gap-2">
               {DAYS.map((day, i) => (
                 <button
                   key={day}
                   type="button"
                   onClick={() => toggleWorkDay(i)}
+                  aria-pressed={workDays.includes(i)}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                     workDays.includes(i)
                       ? 'bg-brand-600 text-white'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
                   }`}
                 >
-                  {day.slice(0, 3)}
+                  {day}
                 </button>
               ))}
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="org-timezone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Timezone
             </label>
-            <select
+            <select id="org-timezone"
               {...form.register('timezone')}
               className="h-9 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-sm"
             >
@@ -499,20 +500,21 @@ export function OrganizationPage() {
           {/* Holidays */}
           <div className="pt-3 border-t border-gray-100 dark:border-gray-700">
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <h3 className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Public Holidays
-              </label>
+              </h3>
               <Button variant="ghost" size="sm" onClick={() => setAddingHoliday(true)} className="text-xs">
                 <Plus className="h-3 w-3 mr-1" /> Add Holiday
               </Button>
             </div>
             {holidays.length === 0 && !addingHoliday && (
-              <p className="text-xs text-gray-400">No holidays configured.</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">No holidays configured.</p>
             )}
             {addingHoliday && (
               <div className="flex items-center gap-2 mb-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <input
                   type="date"
+                  aria-label="Holiday date"
                   value={newHoliday.date}
                   onChange={(e) => setNewHoliday((h) => ({ ...h, date: e.target.value }))}
                   className="h-8 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 text-xs"
@@ -522,6 +524,7 @@ export function OrganizationPage() {
                   value={newHoliday.name}
                   onChange={(e) => setNewHoliday((h) => ({ ...h, name: e.target.value }))}
                   placeholder="Holiday name"
+                  aria-label="Holiday name"
                   className="h-8 flex-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 text-xs"
                 />
                 <label className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">
@@ -541,10 +544,11 @@ export function OrganizationPage() {
               <div key={idx} className="flex items-center justify-between py-1.5 border-b border-gray-50 dark:border-gray-800 text-sm">
                 <span className="text-gray-700 dark:text-gray-300">{h.name}</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-400">{h.date}{h.repeating && ' (yearly)'}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{h.date}{h.repeating && ' (yearly)'}</span>
                   <button
                     type="button"
                     onClick={() => setHolidays((prev) => prev.filter((_, i) => i !== idx))}
+                    aria-label={`Remove ${h.name}`}
                     className="text-red-400 hover:text-red-600"
                   >
                     <Trash2 className="h-3.5 w-3.5" />

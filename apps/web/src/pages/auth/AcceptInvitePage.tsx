@@ -25,7 +25,7 @@ type FormValues = z.infer<typeof schema>
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-8 dark:bg-gray-900">
+    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-8 dark:bg-gray-900">
       <div className="fixed right-4 top-4 z-10"><LanguageSelect /></div>
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center">
@@ -35,7 +35,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         </div>
         {children}
       </div>
-    </div>
+    </main>
   )
 }
 
@@ -61,7 +61,7 @@ export function AcceptInvitePage() {
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             {t('auth.invite.invalid_body')}
           </p>
-          <Link to="/login" className="mt-4 inline-block text-sm text-brand-600 hover:underline">
+          <Link to="/login" className="mt-4 inline-block text-sm text-brand-600 dark:text-brand-400 hover:underline">
             {t('auth.invite.go_to_sign_in')}
           </Link>
         </div>
@@ -92,7 +92,7 @@ export function AcceptInvitePage() {
             error={errors.password?.message && t(errors.password.message)}
             {...register('password')}
           />
-            <p className="-mt-2 text-xs text-gray-500">{t('auth.password_hint')}</p>
+            <p className="-mt-2 text-xs text-gray-500 dark:text-gray-400">{t('auth.password_hint')}</p>
           <Input
             id="password_confirmation"
             type="password"

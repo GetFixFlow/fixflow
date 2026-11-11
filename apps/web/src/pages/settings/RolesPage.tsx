@@ -119,14 +119,14 @@ type RoleName = typeof ROLES[number]
 const ROLE_CONFIG: Record<RoleName, { label: string; color: string; bg: string; border: string }> = {
   admin: { label: 'Admin', color: 'text-purple-700', bg: 'bg-purple-50 dark:bg-purple-900/20', border: 'border-purple-300 dark:border-purple-700' },
   manager: { label: 'Manager', color: 'text-blue-700', bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-300 dark:border-blue-700' },
-  technician: { label: 'Technician', color: 'text-green-700', bg: 'bg-green-50 dark:bg-green-900/20', border: 'border-green-300 dark:border-green-700' },
-  requester: { label: 'Requester', color: 'text-gray-700', bg: 'bg-gray-50 dark:bg-gray-800', border: 'border-gray-300 dark:border-gray-700' },
+  technician: { label: 'Technician', color: 'text-green-700 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-900/20', border: 'border-green-300 dark:border-green-700' },
+  requester: { label: 'Requester', color: 'text-gray-700 dark:text-gray-200', bg: 'bg-gray-50 dark:bg-gray-800', border: 'border-gray-300 dark:border-gray-700' },
 }
 
 function PermIcon({ value, tooltip }: { value: PermValue; tooltip?: string }) {
   const icons = {
-    full: <Check className="h-4 w-4 text-green-600" />,
-    limited: <Minus className="h-4 w-4 text-amber-500" />,
+    full: <Check className="h-4 w-4 text-green-700 dark:text-green-400" />,
+    limited: <Minus className="h-4 w-4 text-amber-700 dark:text-amber-400" />,
     none: <XIcon className="h-4 w-4 text-gray-300" />,
   }
   return (
@@ -166,7 +166,7 @@ export function RolesPage() {
               <p className={cn('font-semibold text-sm', isActive ? cfg.color : 'text-gray-700 dark:text-gray-300')}>
                 {cfg.label}
               </p>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                 {role === 'admin' && 'Full system access'}
                 {role === 'manager' && 'Operational control'}
                 {role === 'technician' && 'Task execution'}
@@ -178,9 +178,9 @@ export function RolesPage() {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4 text-xs text-gray-500">
-        <span className="flex items-center gap-1"><Check className="h-3.5 w-3.5 text-green-600" /> Full access</span>
-        <span className="flex items-center gap-1"><Minus className="h-3.5 w-3.5 text-amber-500" /> Limited access</span>
+      <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+        <span className="flex items-center gap-1"><Check className="h-3.5 w-3.5 text-green-700 dark:text-green-400" /> Full access</span>
+        <span className="flex items-center gap-1"><Minus className="h-3.5 w-3.5 text-amber-700 dark:text-amber-400" /> Limited access</span>
         <span className="flex items-center gap-1"><XIcon className="h-3.5 w-3.5 text-gray-300" /> No access</span>
       </div>
 
@@ -191,7 +191,7 @@ export function RolesPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase w-1/2">
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-1/2">
                     Permission
                   </th>
                   {ROLES.map((role) => {
@@ -201,7 +201,7 @@ export function RolesPage() {
                         key={role}
                         className={cn(
                           'text-center px-4 py-3 text-xs font-medium uppercase transition-colors',
-                          highlighted === role ? `${cfg.color} ${cfg.bg}` : 'text-gray-500',
+                          highlighted === role ? `${cfg.color} ${cfg.bg}` : 'text-gray-500 dark:text-gray-400',
                         )}
                       >
                         {cfg.label}
@@ -215,7 +215,7 @@ export function RolesPage() {
                   <>
                     <tr key={`section-${section}`} className="bg-gray-50 dark:bg-gray-800/30">
                       <td colSpan={5} className="px-4 py-2">
-                        <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                           {section}
                         </span>
                       </td>
@@ -249,7 +249,7 @@ export function RolesPage() {
         </CardContent>
       </Card>
 
-      <p className="text-xs text-gray-400">
+      <p className="text-xs text-gray-500 dark:text-gray-400">
         * Hover over the limited access icon (—) for details on what's restricted.
         Contact support to request custom role configurations.
       </p>

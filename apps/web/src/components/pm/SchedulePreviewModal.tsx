@@ -63,9 +63,9 @@ export function SchedulePreviewModal({ open, onClose, pmId, pm, previewDates }: 
           <div className="flex items-start justify-between mb-4">
             <div>
               <Dialog.Title className="text-lg font-semibold text-gray-900 dark:text-gray-100">Schedule Preview</Dialog.Title>
-              {pm && <p className="text-sm text-gray-500 mt-0.5">{pm.name}</p>}
+              {pm && <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{pm.name}</p>}
             </div>
-            <Dialog.Close asChild><button className="text-gray-400 hover:text-gray-600 p-1"><X className="h-5 w-5" /></button></Dialog.Close>
+            <Dialog.Close asChild><button aria-label="Close" className="text-gray-500 dark:text-gray-400 hover:text-gray-600 p-1"><X className="h-5 w-5" /></button></Dialog.Close>
           </div>
 
           {isLoading && !previewDates ? (
@@ -74,7 +74,7 @@ export function SchedulePreviewModal({ open, onClose, pmId, pm, previewDates }: 
             <div className="overflow-y-auto max-h-96">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700 text-xs text-gray-400 uppercase">
+                  <tr className="border-b border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400 uppercase">
                     <th className="pb-2 text-left w-6">#</th>
                     <th className="pb-2 text-left">Date</th>
                     <th className="pb-2 text-left">Day</th>
@@ -86,10 +86,10 @@ export function SchedulePreviewModal({ open, onClose, pmId, pm, previewDates }: 
                     const { date, daysUntil, warnings } = item
                     return (
                       <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                        <td className="py-2 text-gray-400 text-xs">{idx + 1}</td>
+                        <td className="py-2 text-gray-500 dark:text-gray-400 text-xs">{idx + 1}</td>
                         <td className="py-2 font-medium text-gray-900 dark:text-gray-100">{formatDate(date)}</td>
-                        <td className="py-2 text-gray-500">{format(date, 'EEEE')}</td>
-                        <td className={cn('py-2 text-xs', daysUntil < 0 ? 'text-red-500' : daysUntil <= 7 ? 'text-orange-500' : 'text-gray-400')}>
+                        <td className="py-2 text-gray-500 dark:text-gray-400">{format(date, 'EEEE')}</td>
+                        <td className={cn('py-2 text-xs', daysUntil < 0 ? 'text-red-600 dark:text-red-400' : daysUntil <= 7 ? 'text-orange-700 dark:text-orange-400' : 'text-gray-500 dark:text-gray-400')}>
                           {daysUntil < 0 ? `${Math.abs(daysUntil)}d overdue` : daysUntil === 0 ? 'Today' : `in ${daysUntil}d`}
                           {warnings.length > 0 && <span className="ml-1 text-orange-400" title={warnings.join(', ')}><AlertTriangle className="h-3 w-3 inline" /></span>}
                         </td>

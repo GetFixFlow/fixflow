@@ -39,9 +39,9 @@ export function GettingStarted() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="font-semibold text-gray-900 dark:text-gray-100">{t('dashboard.start.title')}</h2>
-                <p className="text-sm text-gray-500">{t('dashboard.start.intro')}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t('dashboard.start.intro')}</p>
               </div>
-              <button onClick={() => dismiss.mutate()} aria-label={t('dashboard.start.dismiss')} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700">
+              <button onClick={() => dismiss.mutate()} aria-label={t('dashboard.start.dismiss')} className="rounded p-1 text-gray-500 dark:text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -49,10 +49,10 @@ export function GettingStarted() {
             <ol className="space-y-3">
               {guide.steps.map((step) => (
                 <li key={step.key} className="flex items-start gap-3">
-                  {step.done ? <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-green-500" aria-label={t('dashboard.start.done')} /> : <Circle className="mt-0.5 h-5 w-5 shrink-0 text-gray-300" aria-label={t('dashboard.start.not_done')} />}
+                  {step.done ? <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-green-700 dark:text-green-400" aria-label={t('dashboard.start.done')} /> : <Circle className="mt-0.5 h-5 w-5 shrink-0 text-gray-300" aria-label={t('dashboard.start.not_done')} />}
                   <div className="flex-1">
-                    <p className={step.done ? 'text-sm font-medium text-gray-400 line-through' : 'text-sm font-medium text-gray-900 dark:text-gray-100'}>{t(`dashboard.start.steps.${step.key}.title`, { defaultValue: step.title })}</p>
-                    <p className="text-xs text-gray-500">{t(`dashboard.start.steps.${step.key}.description`, { defaultValue: step.description })}</p>
+                    <p className={step.done ? 'text-sm font-medium text-gray-500 dark:text-gray-400 line-through' : 'text-sm font-medium text-gray-900 dark:text-gray-100'}>{t(`dashboard.start.steps.${step.key}.title`, { defaultValue: step.title })}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{t(`dashboard.start.steps.${step.key}.description`, { defaultValue: step.description })}</p>
                   </div>
                   {!step.done && <Link to={step.path}><Button size="sm" variant="outline">{t('dashboard.start.go')}</Button></Link>}
                 </li>

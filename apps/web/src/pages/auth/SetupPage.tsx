@@ -42,7 +42,7 @@ export function SetupPage() {
   if (status && !status.setup_required) return <Navigate to="/login" replace />
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-8 dark:bg-gray-900">
+    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-8 dark:bg-gray-900">
       <div className="fixed right-4 top-4 z-10"><LanguageSelect /></div>
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center">
@@ -100,7 +100,7 @@ export function SetupPage() {
               autoComplete="new-password"
               {...register('password')}
             />
-            <p className="-mt-2 text-xs text-gray-500">{t('auth.password_hint')}</p>
+            <p className="-mt-2 text-xs text-gray-500 dark:text-gray-400">{t('auth.password_hint')}</p>
             <Input
               id="password_confirmation"
               type="password"
@@ -116,6 +116,6 @@ export function SetupPage() {
           </form>
         </div>
       </div>
-    </div>
+    </main>
   )
 }

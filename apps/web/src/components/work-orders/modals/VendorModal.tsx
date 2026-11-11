@@ -51,7 +51,7 @@ export function VendorModal({ workOrder, onClose }: VendorModalProps) {
             {options.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}
           </select>
           {!isLoading && vendors.length === 0 && !current && (
-            <p className="mt-1 text-xs text-gray-500">{t('workOrders.vendor_modal.no_vendors')}</p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{t('workOrders.vendor_modal.no_vendors')}</p>
           )}
         </div>
         {vendorId !== '' && (

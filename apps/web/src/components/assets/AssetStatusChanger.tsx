@@ -42,10 +42,10 @@ export function AssetStatusChanger({ asset }: AssetStatusChangerProps) {
       <Popover.Trigger asChild>
         <button
           className="flex items-center gap-1.5 rounded-md px-1 py-0.5 hover:bg-gray-100 dark:hover:bg-gray-700"
-          aria-label={t('assets.status_changer.aria')}
+          aria-label={t('assets.status_changer.aria', { status: label('status', asset.status) })}
         >
           <AssetStatusBadge status={asset.status} />
-          <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
+          <ChevronDown className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
         </button>
       </Popover.Trigger>
 
@@ -87,7 +87,7 @@ export function AssetStatusChanger({ asset }: AssetStatusChangerProps) {
                   <AssetHealthIndicator status={s} variant="dot" />
                   <span className="capitalize">{label('status', s)}</span>
                   {s === asset.status && (
-                    <span className="ml-auto text-xs text-gray-400">{t('assets.status_changer.current')}</span>
+                    <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">{t('assets.status_changer.current')}</span>
                   )}
                 </button>
               ))}

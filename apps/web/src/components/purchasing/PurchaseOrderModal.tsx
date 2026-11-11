@@ -39,7 +39,7 @@ export function PurchaseOrderModal({ id, onClose, canManage, userId }: PurchaseO
       {isLoading ? (
         <Skeleton className="h-40 w-full" />
       ) : isError || !order ? (
-        <p className="text-sm text-gray-500">{t('purchasing.order.load_failed')}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{t('purchasing.order.load_failed')}</p>
       ) : (
         <Details order={order} panel={panel} setPanel={setPanel} canManage={canManage} userId={userId} onEdit={() => setEditing(true)} />
       )}
@@ -50,7 +50,7 @@ export function PurchaseOrderModal({ id, onClose, canManage, userId }: PurchaseO
 function Fact({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <dt className="text-xs uppercase tracking-wide text-gray-500">{label}</dt>
+      <dt className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{label}</dt>
       <dd className="text-sm text-gray-900 dark:text-gray-100">{children}</dd>
     </div>
   )
@@ -85,7 +85,7 @@ function Details({ order, panel, setPanel, canManage, userId, onEdit }: DetailsP
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         <PurchaseStatusBadge status={order.status} />
-        <span className="text-sm text-gray-500">{t('purchasing.order.asked_by', { name: order.requested_by?.name ?? t('purchasing.order.someone'), date: formatDate(order.created_at) })}</span>
+        <span className="text-sm text-gray-500 dark:text-gray-400">{t('purchasing.order.asked_by', { name: order.requested_by?.name ?? t('purchasing.order.someone'), date: formatDate(order.created_at) })}</span>
       </div>
 
       {order.reason && <p className="text-sm text-gray-700 dark:text-gray-300">{order.reason}</p>}
@@ -112,7 +112,7 @@ function Details({ order, panel, setPanel, canManage, userId, onEdit }: DetailsP
           <thead className="bg-gray-50 dark:bg-gray-700/50">
             <tr>
               {['part', 'wanted', 'received', 'each', 'total'].map((h) => (
-                <th key={h} className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">{t(`purchasing.order.col_${h}`)}</th>
+                <th key={h} className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t(`purchasing.order.col_${h}`)}</th>
               ))}
             </tr>
           </thead>
@@ -129,7 +129,7 @@ function Details({ order, panel, setPanel, canManage, userId, onEdit }: DetailsP
           </tbody>
           <tfoot>
             <tr>
-              <td colSpan={4} className="px-3 py-2 text-right text-xs font-semibold uppercase text-gray-500">{t('purchasing.order.total')}</td>
+              <td colSpan={4} className="px-3 py-2 text-right text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">{t('purchasing.order.total')}</td>
               <td className="px-3 py-2 font-semibold">{formatMoney(order.total)}</td>
             </tr>
           </tfoot>
@@ -240,7 +240,7 @@ function ReceiveForm({ order, onDone }: { order: PurchaseOrder; onDone: () => vo
       <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('purchasing.order.how_many_arrived')}</p>
       {lines.map((line) => (
         <label key={line.id} className="flex items-center justify-between gap-3 text-sm">
-          <span>{line.part_name} <span className="text-xs text-gray-400">{t('purchasing.order.still_to_come', { count: line.quantity - line.quantity_received })}</span></span>
+          <span>{line.part_name} <span className="text-xs text-gray-500 dark:text-gray-400">{t('purchasing.order.still_to_come', { count: line.quantity - line.quantity_received })}</span></span>
           <input
             type="number" min="0" step="any" value={counts[line.id] ?? ''} aria-label={t('purchasing.order.arrived_aria', { name: line.part_name })}
             onChange={(e) => setCounts((all) => ({ ...all, [line.id]: e.target.value }))}

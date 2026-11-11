@@ -30,14 +30,14 @@ export function WorkOrderStats({ stats, className }: WorkOrderStatsProps) {
       label: statusLabel('status', 'in_progress'),
       value: stats.in_progress ?? 0,
       icon: PlayCircle,
-      color: 'text-yellow-600 dark:text-yellow-400',
+      color: 'text-yellow-700 dark:text-yellow-400',
       bg: 'bg-yellow-50 dark:bg-yellow-900/20',
     },
     {
       label: statusLabel('status', 'completed'),
       value: stats.completed_this_month ?? 0,
       icon: CheckCircle,
-      color: 'text-green-600 dark:text-green-400',
+      color: 'text-green-700 dark:text-green-400',
       bg: 'bg-green-50 dark:bg-green-900/20',
     },
     {
@@ -64,7 +64,7 @@ export function WorkOrderStats({ stats, className }: WorkOrderStatsProps) {
           </div>
           <div>
             <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{item.value}</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{item.label}</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400">{item.label}</p>
           </div>
         </div>
       ))}

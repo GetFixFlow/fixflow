@@ -57,7 +57,7 @@ function CopyableId({ text }: { text: string }) {
     >
       {text}
       {copied ? (
-        <Check className="h-3 w-3 text-green-500" />
+        <Check className="h-3 w-3 text-green-700 dark:text-green-400" />
       ) : (
         <Copy className="h-3 w-3 opacity-0 group-hover:opacity-100" />
       )}
@@ -131,7 +131,7 @@ export function WorkOrdersTable({
                   checked={!!allSelected}
                   onChange={toggleAll}
                   aria-label={t('workOrders.table.select_all')}
-                  className="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                  className="h-4 w-4 rounded border-gray-300 text-brand-600 dark:text-brand-400 focus:ring-brand-500"
                 />
               </th>
             )}
@@ -165,7 +165,7 @@ export function WorkOrdersTable({
                 {field.label}
               </th>
             ))}
-            <th className="w-8 px-2 py-3" />
+            <th className="w-8 px-2 py-3"><span className="sr-only">{t('workOrders.table.actions')}</span></th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
@@ -195,14 +195,14 @@ export function WorkOrdersTable({
                       checked={selectedIds?.has(wo.id) ?? false}
                       onChange={() => toggleRow(wo.id)}
                       aria-label={t('workOrders.table.select', { number: wo.work_order_number })}
-                      className="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                      className="h-4 w-4 rounded border-gray-300 text-brand-600 dark:text-brand-400 focus:ring-brand-500"
                     />
                   </td>
                 )}
                 <td className={cn('px-4 py-3', compact && 'py-2')}>
                   <div className="flex items-center gap-2">
                     <CopyableId text={wo.work_order_number} />
-                    <SourceIcon className="h-3 w-3 text-gray-400" title={wo.source} />
+                    <SourceIcon className="h-3 w-3 text-gray-500 dark:text-gray-400" title={wo.source} />
                   </div>
                 </td>
                 <td className={cn('px-4 py-3', compact && 'py-2')}>
@@ -228,13 +228,13 @@ export function WorkOrdersTable({
                       >
                         <span className="font-medium">{wo.asset.name}</span>
                         {wo.asset.asset_tag && (
-                          <span className="ml-1 font-mono text-xs text-gray-400">
+                          <span className="ml-1 font-mono text-xs text-gray-500 dark:text-gray-400">
                             {wo.asset.asset_tag}
                           </span>
                         )}
                       </Link>
                     ) : (
-                      <span className="text-gray-400">—</span>
+                      <span className="text-gray-500 dark:text-gray-400">—</span>
                     )}
                   </td>
                 )}
@@ -245,7 +245,7 @@ export function WorkOrdersTable({
                         {wo.assignee.full_name}
                       </span>
                     ) : (
-                      <span className="italic text-gray-400">{t('common.state.unassigned')}</span>
+                      <span className="italic text-gray-500 dark:text-gray-400">{t('common.state.unassigned')}</span>
                     )}
                   </td>
                 )}
@@ -254,7 +254,7 @@ export function WorkOrdersTable({
                 </td>
                 {listFields.map((field) => (
                   <td key={field.key} className={cn('px-4 py-3 text-gray-700 dark:text-gray-300', compact && 'py-2')}>
-                    {shownValue(field, wo.custom_values?.[field.key]) || <span className="text-gray-400">—</span>}
+                    {shownValue(field, wo.custom_values?.[field.key]) || <span className="text-gray-500 dark:text-gray-400">—</span>}
                   </td>
                 ))}
                 <td className="px-2 py-3">
@@ -280,7 +280,7 @@ export function WorkOrdersTable({
                               key={action.label}
                               className={cn(
                                 'flex cursor-pointer select-none items-center rounded px-3 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 dark:hover:bg-gray-700',
-                                action.danger && 'text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20',
+                                action.danger && 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20',
                               )}
                               onSelect={() => action.onClick(wo)}
                             >

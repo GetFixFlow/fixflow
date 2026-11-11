@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useDialogA11y } from '@/hooks/useDialogA11y'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/authStore'
@@ -93,17 +94,17 @@ function SettingsSidebar({ onNav }: { onNav?: () => void }) {
   })).filter((s) => s.items.length > 0)
 
   return (
-    <nav className="flex flex-col h-full overflow-y-auto">
+    <nav aria-label={t('shell.settings_menu')} className="flex flex-col h-full overflow-y-auto">
       <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-2">
-          <Settings className="h-5 w-5 text-gray-400" />
+          <Settings className="h-5 w-5 text-gray-500 dark:text-gray-400" />
           <h2 className="font-semibold text-gray-900 dark:text-gray-100">{t('shell.nav.settings')}</h2>
         </div>
       </div>
       <div className="flex-1 py-3 px-2 space-y-5">
         {visibleSections.map((section) => (
           <div key={section.title}>
-            <p className="px-2 mb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+            <p className="px-2 mb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
               {t(section.title)}
             </p>
             {section.items.map((item) => (
@@ -133,6 +134,7 @@ export function SettingsLayout() {
   const { t } = useTranslation()
   const location = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const mobileMenu = useDialogA11y<HTMLDivElement>(mobileOpen, () => setMobileOpen(false))
 
   const allItems = NAV_SECTIONS.flatMap((s) => s.items)
   const activeItem = allItems.find((i) => location.pathname.startsWith(i.href))
@@ -148,18 +150,18 @@ export function SettingsLayout() {
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         {/* Mobile header */}
         <div className="md:hidden flex items-center gap-2 px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="text-gray-500">
+          <button onClick={() => setMobileOpen(!mobileOpen)} aria-label={t('shell.settings_menu')} aria-expanded={mobileOpen} className="text-gray-500 dark:text-gray-400">
             <Settings className="h-5 w-5" />
           </button>
           <span className="font-medium text-sm">{activeItem ? t(activeItem.label) : t('shell.nav.settings')}</span>
-          <ChevronRight className="h-4 w-4 text-gray-400 ml-auto" />
+          <ChevronRight className="h-4 w-4 text-gray-500 dark:text-gray-400 ml-auto" />
         </div>
 
         {/* Mobile sidebar overlay */}
         {mobileOpen && (
           <div className="md:hidden fixed inset-0 z-50 flex">
-            <div className="fixed inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
-            <div className="relative w-72 bg-white dark:bg-gray-900 h-full shadow-xl overflow-hidden">
+            <div className="fixed inset-0 bg-black/40" onClick={() => setMobileOpen(false)} aria-hidden="true" />
+            <div ref={mobileMenu} role="dialog" aria-modal="true" aria-label={t('shell.settings_menu')} className="relative w-72 bg-white dark:bg-gray-900 h-full shadow-xl overflow-hidden">
               <SettingsSidebar onNav={() => setMobileOpen(false)} />
             </div>
           </div>

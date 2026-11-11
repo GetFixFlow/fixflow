@@ -81,14 +81,14 @@ export function PMDashboardPage() {
           <CardContent className="p-4 flex items-center gap-4">
             {stats.overall_compliance != null && <PMComplianceMeter rate={stats.overall_compliance} size="md" />}
             <div>
-              <p className="text-xs text-gray-500">Overall Compliance</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Overall Compliance</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 {stats.overall_compliance == null ? '—' : `${stats.overall_compliance}%`}
               </p>
               {stats.overall_compliance == null ? (
-                <p className="text-xs text-gray-400">Nothing has come due yet</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Nothing has come due yet</p>
               ) : change != null ? (
-                <p className={`text-xs flex items-center gap-0.5 ${change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                <p className={`text-xs flex items-center gap-0.5 ${change >= 0 ? 'text-green-700' : 'text-red-600 dark:text-red-400'}`}>
                   {change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                   {Math.abs(change)} pts vs previous {stats.period_days} days
                 </p>
@@ -125,7 +125,7 @@ export function PMDashboardPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardContent className="p-4">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Monthly Completed vs Missed</h3>
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Monthly Completed vs Missed</h2>
             {trendHasData ? (
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={trend}>
@@ -138,14 +138,14 @@ export function PMDashboardPage() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <p className="py-12 text-center text-sm text-gray-400">No maintenance has come due in the last six months.</p>
+              <p className="py-12 text-center text-sm text-gray-500 dark:text-gray-400">No maintenance has come due in the last six months.</p>
             )}
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-4">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Compliance by Location</h3>
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Compliance by Location</h2>
             {stats.by_location.length > 0 ? (
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={stats.by_location} layout="vertical" margin={{ left: 60 }}>
@@ -160,7 +160,7 @@ export function PMDashboardPage() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <p className="py-12 text-center text-sm text-gray-400">No maintenance has come due in this period.</p>
+              <p className="py-12 text-center text-sm text-gray-500 dark:text-gray-400">No maintenance has come due in this period.</p>
             )}
           </CardContent>
         </Card>
@@ -170,18 +170,18 @@ export function PMDashboardPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardContent className="p-4">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-red-500" />Overdue PM Schedules
-            </h3>
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />Overdue PM Schedules
+            </h2>
             {stats.overdue_pms.length === 0 ? (
               <div className="text-center py-8">
-                <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                <p className="text-sm text-green-600 dark:text-green-400">✅ No overdue PM schedules!</p>
+                <CheckCircle className="h-8 w-8 text-green-700 dark:text-green-400 mx-auto mb-2" />
+                <p className="text-sm text-green-700 dark:text-green-400">✅ No overdue PM schedules!</p>
               </div>
             ) : (
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-xs text-gray-400 border-b border-gray-100 dark:border-gray-800">
+                  <tr className="text-xs text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-800">
                     <th className="pb-1 text-left">PM Name</th>
                     <th className="pb-1 text-left">Asset</th>
                     <th className="pb-1 text-right">Actions</th>
@@ -191,7 +191,7 @@ export function PMDashboardPage() {
                   {stats.overdue_pms.map((pm) => (
                     <tr key={pm.id} className="border-b border-gray-50 dark:border-gray-800/50">
                       <td className="py-2 font-medium">{pm.name}</td>
-                      <td className="py-2 text-gray-500">{pm.asset?.name ?? '—'}</td>
+                      <td className="py-2 text-gray-500 dark:text-gray-400">{pm.asset?.name ?? '—'}</td>
                       <td className="py-2 text-right">
                         <Button size="sm" onClick={() => setTriggerTarget(pm)}>
                           <Zap className="h-3.5 w-3.5 mr-1" />Trigger
@@ -207,18 +207,18 @@ export function PMDashboardPage() {
 
         <Card>
           <CardContent className="p-4">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-              <Clock className="h-4 w-4 text-blue-500" />Upcoming This Week
-            </h3>
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+              <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400" />Upcoming This Week
+            </h2>
             {stats.upcoming_week.length === 0 ? (
-              <p className="text-sm text-gray-400 py-4">No PMs due this week.</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 py-4">No PMs due this week.</p>
             ) : (
               <ul className="space-y-2">
                 {stats.upcoming_week.map(({ pm, due_date }, i) => (
                   <li key={i} className="flex items-center justify-between text-sm">
                     <div>
                       <Link to={`/preventive-maintenance/${pm.id}`} className="font-medium text-gray-900 dark:text-gray-100 hover:text-brand-600">{pm.name}</Link>
-                      <p className="text-xs text-gray-500">{pm.asset?.name ?? '—'}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{pm.asset?.name ?? '—'}</p>
                     </div>
                     <PMDueDateDisplay dueDate={due_date} showIcon={false} className="text-xs" />
                   </li>
@@ -240,13 +240,13 @@ export function PMDashboardPage() {
       {stats.recent_activity.length > 0 && (
         <Card>
           <CardContent className="p-4">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Recent PM Activity</h3>
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Recent PM Activity</h2>
             <ul className="space-y-2">
               {stats.recent_activity.slice(0, 10).map((evt, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm">
                   <span>{evt.type === 'completed' ? '✅' : evt.type === 'skipped' ? '⏭' : evt.type === 'missed' ? '❌' : '📋'}</span>
                   <span className="flex-1 text-gray-700 dark:text-gray-300">{evt.pm_name}{evt.wo_number ? ` auto-generated ${evt.wo_number}` : ''}</span>
-                  <span className="text-xs text-gray-400">{formatDate(evt.occurred_at)}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{formatDate(evt.occurred_at)}</span>
                 </li>
               ))}
             </ul>

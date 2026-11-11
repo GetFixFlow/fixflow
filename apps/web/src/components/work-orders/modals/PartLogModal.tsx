@@ -55,7 +55,7 @@ export function PartLogModal({ workOrderId, open, onClose }: PartLogModalProps) 
           <div className="flex items-start justify-between rounded-md border border-gray-200 px-3 py-2 dark:border-gray-700">
             <div>
               <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{selected.name}</p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 {selected.sku ? `${selected.sku} · ` : ''}
                 {t('workOrders.partlog.in_stock_unit', { qty: selected.quantity_on_hand, unit: selected.unit ?? t('workOrders.partlog.each') })}
               </p>
@@ -89,16 +89,16 @@ export function PartLogModal({ workOrderId, open, onClose }: PartLogModalProps) 
                   >
                     <span className="text-gray-900 dark:text-gray-100">
                       {part.name}
-                      {part.sku && <span className="ml-1 text-xs text-gray-400">{part.sku}</span>}
+                      {part.sku && <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">{part.sku}</span>}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       {part.quantity_on_hand <= 0 ? t('workOrders.partlog.out') : t('workOrders.partlog.in_stock', { qty: part.quantity_on_hand })}
                     </span>
                   </button>
                 </li>
               ))}
               {!isLoading && parts.length === 0 && (
-                <li className="px-3 py-2 text-xs text-gray-400">
+                <li className="px-3 py-2 text-xs text-gray-500 dark:text-gray-400">
                   {search ? t('workOrders.partlog.no_match') : t('workOrders.partlog.no_parts')}
                 </li>
               )}

@@ -37,7 +37,7 @@ export function ExportDropdown({ onExportCSV, onExportPDF, onExportExcel, isExpo
             <DropdownMenu.Item key={item.label}
               className="flex items-center gap-2 px-3 py-2 text-sm rounded cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
               onClick={() => { item.action?.(); setOpen(false) }}>
-              <item.icon className="h-4 w-4 text-gray-400" />
+              <item.icon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
               {item.label}
             </DropdownMenu.Item>
           ))}

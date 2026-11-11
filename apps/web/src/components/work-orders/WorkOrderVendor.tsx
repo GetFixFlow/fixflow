@@ -26,7 +26,7 @@ export function WorkOrderVendor({ workOrder, canManage }: WorkOrderVendorProps) 
     <section aria-label={t('workOrders.vendor.title')} className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
-          <Building2 className="h-4 w-4 text-gray-400" />{t('workOrders.vendor.title')}
+          <Building2 className="h-4 w-4 text-gray-500 dark:text-gray-400" />{t('workOrders.vendor.title')}
         </h2>
         {canManage && !finished && (
           <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>{vendor ? t('workOrders.vendor.change') : t('workOrders.vendor.give')}</Button>

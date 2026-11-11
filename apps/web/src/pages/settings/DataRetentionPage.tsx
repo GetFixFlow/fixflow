@@ -28,7 +28,7 @@ function Policy({ label, hint, children }: { label: string; hint?: string; child
         <span className="text-sm font-medium text-gray-800 dark:text-gray-200">{label}</span>
         {children}
       </div>
-      {hint && <p className="text-xs text-gray-500">{hint}</p>}
+      {hint && <p className="text-xs text-gray-500 dark:text-gray-400">{hint}</p>}
     </div>
   )
 }
@@ -68,7 +68,7 @@ export function DataRetentionPage() {
     return (
       <div className="max-w-2xl space-y-6">
         <PageHeader title="Data Retention" description="How long data is kept" />
-        <Card><CardContent className="p-8 text-center text-gray-500">Only administrators can manage data retention.</CardContent></Card>
+        <Card><CardContent className="p-8 text-center text-gray-500 dark:text-gray-400">Only administrators can manage data retention.</CardContent></Card>
       </div>
     )
   }
@@ -103,8 +103,8 @@ export function DataRetentionPage() {
       <Card>
         <CardContent className="space-y-4 p-5">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100">What your data takes up</h3>
-            <div className="flex items-center gap-1.5 text-sm text-gray-500">
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100">What your data takes up</h2>
+            <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
               <HardDrive className="h-4 w-4" aria-hidden="true" />
               <span>{usage ? `${formatBytes(usage.database_bytes)} database` : '…'}</span>
             </div>
@@ -114,7 +114,7 @@ export function DataRetentionPage() {
               {usage && TABLE_LABELS.map(([key, label]) => (
                 <tr key={key}>
                   <td className="py-2 text-gray-700 dark:text-gray-300">{label}</td>
-                  <td className="py-2 text-right text-gray-500">
+                  <td className="py-2 text-right text-gray-500 dark:text-gray-400">
                     {key === 'sensor_readings' ? 'about ' : ''}{formatNumber(usage.tables[key].rows)} rows
                   </td>
                   <td className="py-2 text-right font-mono text-xs text-gray-700 dark:text-gray-300">{formatBytes(usage.tables[key].bytes)}</td>
@@ -123,13 +123,13 @@ export function DataRetentionPage() {
               {usage && (
                 <tr>
                   <td className="py-2 text-gray-700 dark:text-gray-300">Uploaded files (photos, documents)</td>
-                  <td className="py-2 text-right text-gray-500">{formatNumber(usage.attachments.count)} files</td>
+                  <td className="py-2 text-right text-gray-500 dark:text-gray-400">{formatNumber(usage.attachments.count)} files</td>
                   <td className="py-2 text-right font-mono text-xs text-gray-700 dark:text-gray-300">{formatBytes(usage.attachments.bytes)}</td>
                 </tr>
               )}
             </tbody>
           </table>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             These are the sizes in the database and the file storage as they are now. FixFlow does not know how big your disk is.
           </p>
         </CardContent>
@@ -137,7 +137,7 @@ export function DataRetentionPage() {
 
       <Card>
         <CardContent className="space-y-5 p-5">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">How long data is kept</h3>
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100">How long data is kept</h2>
 
           <Policy label="Sensor readings and their hourly summaries"
             hint="A reading that raised an IoT alert is always kept, as the alert's evidence.">
@@ -148,7 +148,7 @@ export function DataRetentionPage() {
               ))}
             </select>
           </Policy>
-          <p role="status" className={sensor.removes ? 'text-xs text-amber-700 dark:text-amber-400' : 'text-xs text-gray-500'}>
+          <p role="status" className={sensor.removes ? 'text-xs text-amber-700 dark:text-amber-400' : 'text-xs text-gray-500 dark:text-gray-400'}>
             {sensor.text}{summaries > 0 && sensor.removes ? ` (and ${formatNumber(summaries)} hourly summaries)` : ''}
             {usage?.sensor_data.oldest_at && ` The oldest reading is from ${formatDate(usage.sensor_data.oldest_at)}.`}
           </p>
@@ -161,12 +161,12 @@ export function DataRetentionPage() {
               ))}
             </select>
           </Policy>
-          <p role="status" className={audit.removes ? 'text-xs text-amber-700 dark:text-amber-400' : 'text-xs text-gray-500'}>
+          <p role="status" className={audit.removes ? 'text-xs text-amber-700 dark:text-amber-400' : 'text-xs text-gray-500 dark:text-gray-400'}>
             {usage?.audit_log.checked_days === null ? 'The audit log is kept for ever, so nothing is deleted.' : audit.text}
             {usage?.audit_log.oldest_at && ` The oldest line is from ${formatDate(usage.audit_log.oldest_at)}.`}
           </p>
 
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             Everything else (work orders, assets, IoT alerts, comments, uploaded files) is kept until someone deletes it.
             {usage && ` The cleanup runs every night: sensor data at ${usage.cleanup_at.sensor_data}, the audit log at ${usage.cleanup_at.audit_log}.`}
           </p>

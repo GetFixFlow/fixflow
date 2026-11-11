@@ -44,7 +44,7 @@ export function LoginPage() {
   if (setup?.setup_required) return <Navigate to="/setup" replace />
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 dark:bg-gray-900">
+    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 dark:bg-gray-900">
       <div className="fixed right-4 top-4 z-10"><LanguageSelect /></div>
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center">
@@ -86,7 +86,7 @@ export function LoginPage() {
               </Button>
               <button
                 type="button"
-                className="block w-full text-center text-sm text-brand-600 hover:underline"
+                className="block w-full text-center text-sm text-brand-600 dark:text-brand-400 hover:underline"
                 onClick={() => { setChallenge(null); setCode('') }}
               >
                 {codeError ? t('auth.login.start_again') : t('auth.back_to_sign_in')}
@@ -119,7 +119,7 @@ export function LoginPage() {
           </form>
 
           <p className="mt-4 text-center text-sm">
-            <Link to="/forgot-password" className="text-brand-600 hover:underline">
+            <Link to="/forgot-password" className="text-brand-600 dark:text-brand-400 hover:underline">
               {t('auth.login.forgot')}
             </Link>
           </p>
@@ -130,6 +130,6 @@ export function LoginPage() {
           </p>
         </div>
       </div>
-    </div>
+    </main>
   )
 }

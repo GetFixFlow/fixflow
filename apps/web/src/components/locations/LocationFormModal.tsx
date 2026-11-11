@@ -135,7 +135,7 @@ export function LocationFormModal({
             ))}
           </select>
           {errors.location_type && (
-            <p className="mt-1 text-xs text-red-600">{errors.location_type.message}</p>
+            <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errors.location_type.message}</p>
           )}
         </div>
 

@@ -34,7 +34,7 @@ export function IoTAlertCard({ alert, onAcknowledge, onResolve, className }: IoT
     )}>
       <div className="flex items-start justify-between gap-2">
         <AlertSeverityBadge severity={sev} />
-        <span className="text-xs text-gray-400 whitespace-nowrap">
+        <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
           {formatDistanceToNow(new Date(alert.created_at), { addSuffix: true })}
         </span>
       </div>
@@ -47,20 +47,20 @@ export function IoTAlertCard({ alert, onAcknowledge, onResolve, className }: IoT
           <p className="text-sm text-gray-600 dark:text-gray-400">{alert.asset.name}</p>
         )}
         {alert.metric_name && (
-          <p className="text-xs text-gray-500 mt-0.5">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
             Reading: <span className="font-mono font-medium">{alert.sensor_value} {alert.metric_unit}</span>
           </p>
         )}
       </div>
 
       {alert.location_path && (
-        <p className="text-xs text-gray-400 flex items-center gap-1">
+        <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
           <MapPin className="h-3 w-3" />{alert.location_path}
         </p>
       )}
 
       {alert.work_order_number && (
-        <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+        <p className="text-xs text-green-700 dark:text-green-400 flex items-center gap-1">
           <Wrench className="h-3 w-3" />
           <Link to={`/work-orders/${alert.work_order_id}`} className="hover:underline">
             {alert.work_order_number} created automatically

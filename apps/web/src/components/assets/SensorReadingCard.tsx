@@ -68,12 +68,12 @@ export function SensorReadingCard({
         <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">{label}</p>
         <p className={cn('text-2xl font-bold', isAlert ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-gray-100')}>
           {value.toFixed(1)}
-          <span className="ml-1 text-sm font-normal text-gray-500">{unit}</span>
+          <span className="ml-1 text-sm font-normal text-gray-500 dark:text-gray-400">{unit}</span>
         </p>
         {threshold != null && (
-          <p className="text-xs text-gray-400 dark:text-gray-500">{t('assets.sensor.threshold', { value: threshold, unit })}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t('assets.sensor.threshold', { value: threshold, unit })}</p>
         )}
-        <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">{t('assets.sensor.updated', { when: timeAgo(recordedAt) })}</p>
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{t('assets.sensor.updated', { when: timeAgo(recordedAt) })}</p>
       </CardContent>
     </Card>
   )

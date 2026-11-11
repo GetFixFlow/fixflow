@@ -58,7 +58,7 @@ export function WorkOrderActivityLog({ events, compact = false }: WorkOrderActiv
   const { t } = useTranslation()
   if (events.length === 0) {
     return (
-      <p className="text-sm italic text-gray-400 dark:text-gray-500">{t('workOrders.activity.none')}</p>
+      <p className="text-sm italic text-gray-500 dark:text-gray-400">{t('workOrders.activity.none')}</p>
     )
   }
 
@@ -82,7 +82,7 @@ export function WorkOrderActivityLog({ events, compact = false }: WorkOrderActiv
               <p className={cn('text-gray-800 dark:text-gray-200', compact ? 'text-xs' : 'text-sm')}>
                 <span className="font-medium">{event.actor_name}</span> {event.description}
               </p>
-              <time className="text-xs text-gray-400 dark:text-gray-500">
+              <time className="text-xs text-gray-500 dark:text-gray-400">
                 {timeAgo(event.created_at)}
               </time>
             </div>
