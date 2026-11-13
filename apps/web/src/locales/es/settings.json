@@ -15,6 +15,7 @@
       "iot": "IoT y claves de API",
       "chat": "Chat del equipo",
       "webhooks": "Webhooks",
+      "plugins": "Complementos",
       "ai": "Funciones de IA",
       "import_export": "Importar / Exportar",
       "data_retention": "Conservación de datos",

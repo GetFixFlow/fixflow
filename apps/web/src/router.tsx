@@ -71,6 +71,8 @@ const AdvancedSettingsPage = lazy(() => import('@/pages/settings/AdvancedSetting
 const SystemHealthPage = lazy(() => import('@/pages/settings/SystemHealthPage').then(m => ({ default: m.SystemHealthPage })))
 const CustomFieldsPage = lazy(() => import('@/pages/settings/CustomFieldsPage').then(m => ({ default: m.CustomFieldsPage })))
 const DirectorySettingsPage = lazy(() => import('@/pages/settings/DirectorySettingsPage').then(m => ({ default: m.DirectorySettingsPage })))
+const PluginsPage = lazy(() => import('@/pages/settings/PluginsPage').then(m => ({ default: m.PluginsPage })))
+const PluginReportPage = lazy(() => import('@/pages/reports/PluginReportPage').then(m => ({ default: m.PluginReportPage })))
 const WebhooksPage = lazy(() => import('@/pages/settings/WebhooksPage').then(m => ({ default: m.WebhooksPage })))
 const AISettingsPage = lazy(() => import('@/pages/settings/AISettingsPage').then(m => ({ default: m.AISettingsPage })))
 
@@ -139,6 +141,7 @@ export const router = createBrowserRouter([
               { path: '/reports/iot', element: <Lazy><IoTAnalyticsReportPage /></Lazy> },
               { path: '/reports/technicians', element: <Lazy><TechnicianPerformancePage /></Lazy> },
               { path: '/reports/costs', element: <Lazy><CostAnalysisPage /></Lazy> },
+              { path: '/reports/plugins/:plugin/:report', element: <Lazy><PluginReportPage /></Lazy> },
             ],
           },
           // Settings — nested under SettingsLayout
@@ -179,6 +182,7 @@ export const router = createBrowserRouter([
                       { path: 'ai', element: <Lazy><AISettingsPage /></Lazy> },
                       { path: 'chat', element: <Lazy><ChatSettingsPage /></Lazy> },
                       { path: 'webhooks', element: <Lazy><WebhooksPage /></Lazy> },
+                      { path: 'plugins', element: <Lazy><PluginsPage /></Lazy> },
                       { path: 'directory', element: <Lazy><DirectorySettingsPage /></Lazy> },
                     ],
                   },

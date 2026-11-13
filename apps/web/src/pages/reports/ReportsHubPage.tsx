@@ -4,6 +4,9 @@ import { Link } from 'react-router-dom'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Card, CardContent } from '@/components/ui/Card'
 import { cn } from '@/lib/utils'
+import { useTranslation } from 'react-i18next'
+import { Puzzle } from 'lucide-react'
+import { usePluginReports } from '@/hooks/usePlugins'
 
 const REPORT_SECTIONS = [
   { title: 'Work Orders', icon: Wrench, href: '/reports/work-orders', description: 'Trends, MTTR, priority breakdown, resolution heatmap, backlog aging', color: 'bg-blue-500', kpis: ['Total WOs', 'Avg MTTR', 'Completion Rate', 'Overdue %'] },
@@ -17,6 +20,8 @@ const REPORT_SECTIONS = [
 
 export function ReportsHubPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
+  const { data: pluginReports = [] } = usePluginReports()
   return (
     <div className="space-y-6">
       <PageHeader
@@ -51,6 +56,34 @@ export function ReportsHubPage() {
           </Card>
         ))}
       </div>
+
+      {pluginReports.length > 0 && (
+        <section aria-labelledby="plugin-reports-heading" className="space-y-3">
+          <div>
+            <h2 id="plugin-reports-heading" className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t('plugins.reports.section')}</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t('plugins.reports.section_text')}</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {pluginReports.map((report) => (
+              <Card key={`${report.plugin}/${report.key}`} className="cursor-pointer hover:shadow-md transition-all hover:border-gray-300"
+                onClick={() => navigate(`/reports/plugins/${report.plugin}/${report.key}`)}>
+                <CardContent className="p-5">
+                  <div className="flex items-start gap-3">
+                    <div className="rounded-xl bg-gray-600 p-2.5"><Puzzle className="h-5 w-5 text-white" /></div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                        <Link to={`/reports/plugins/${report.plugin}/${report.key}`} onClick={(e) => e.stopPropagation()}>{report.title}</Link>
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">{report.description}</p>
+                      <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">{report.plugin_title}{report.period ? '' : ` · ${t('plugins.reports.period_now')}`}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   )
 }

@@ -50,6 +50,16 @@ RSpec.describe "The production stack" do
       expect(services["sidekiq"]["environment"]).to eq(services["api"]["environment"])
     end
 
+    it "shows the api and the worker the plugins folder of the install, read-only, so both can run the plugins" do
+      plugins = "./plugins:/app/plugins:ro"
+
+      expect(services["api"]["volumes"]).to include(plugins)
+      expect(services["sidekiq"]["volumes"]).to include(plugins)
+      expect(YAML.safe_load(read("docker-compose.yml"), aliases: true)["services"].values_at("api", "sidekiq").pluck("volumes"))
+        .to all(include(plugins))
+      expect(read("plugins/README.md")).to include("plugin.rb")
+    end
+
     it "sets the bucket names itself, so the app and the setup task cannot look in different ones" do
       environment = services["api"]["environment"]
 
@@ -99,9 +109,9 @@ RSpec.describe "The production stack" do
       expect(lite_services["api"].except(*own)).to eq(services["api"].except(*own))
     end
 
-    it "gives the api and the worker the same settings, and the same two volumes for the uploaded files and the backups" do
+    it "gives the api and the worker the same settings, and the same volumes for the uploaded files, the backups and the plugins" do
       expect(lite_services["sidekiq"]["environment"]).to eq(lite_services["api"]["environment"])
-      expect(lite_services["api"]["volumes"]).to eq(%w[uploads:/app/storage backups:/app/backups])
+      expect(lite_services["api"]["volumes"]).to eq(%w[uploads:/app/storage backups:/app/backups ./plugins:/app/plugins:ro])
       expect(lite_services["sidekiq"]["volumes"]).to eq(lite_services["api"]["volumes"])
       expect(lite["volumes"].keys).to include("uploads", "backups")
       expect(lite_services["api"]["depends_on"].keys).to contain_exactly("db", "redis")

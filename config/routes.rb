@@ -305,6 +305,19 @@ Rails.application.routes.draw do
         get "iot/sensor_trends",                  to: "iot#sensor_trends"
       end
 
+      # ── Plugins (see Plugins and docs/plugins.md) ─────────────────────────
+      plugin_name = /[a-z][a-z0-9_]{1,39}/ # as Plugins::KEY_FORMAT
+      resources :plugins, only: %i[index update], param: :key, constraints: { key: plugin_name } do
+        member do
+          put    "channels/:channel_key", to: "plugins#update_channel",  constraints: { channel_key: plugin_name }
+          delete "channels/:channel_key", to: "plugins#destroy_channel", constraints: { channel_key: plugin_name }
+          post   "channels/:channel_key/test", to: "plugins#test_channel",    constraints: { channel_key: plugin_name }
+        end
+      end
+      get "plugin_reports", to: "plugin_reports#index"
+      get "plugin_reports/:plugin/:report", to: "plugin_reports#show",
+          constraints: { plugin: plugin_name, report: plugin_name }
+
       # ── AI ────────────────────────────────────────────────────────────────
       namespace :ai do
         get "config", to: "config#show"

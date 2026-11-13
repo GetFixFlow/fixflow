@@ -44,6 +44,10 @@ Choose the filters on **Work Orders**, **Asset Health** or **PM Compliance** and
 - If the mail server fails, FixFlow tries again the next hour of the same day. If it reaches some people and not others, it counts as sent and the page names the addresses it could not reach, so the ones who got it do not get it twice. If the server was down for the whole day, that week's report is skipped.
 - Emailing needs the mail server to be set up ([Configuration](configuration.md#email)). The weekly emails are sent by the background worker.
 
+## Reports from plugins
+
+A plugin can add reports of its own. They appear on the Reports page under **From plugins**, for managers and administrators, once an administrator has switched the plugin on under **Settings → Plugins**. They show a table, with a summary above it when the plugin gives one, and have a **Export as CSV** button. See [Plugins](plugins.md).
+
 ## Exporting reports
 
 The **Export** menu on a report page downloads the report as a file made by the server, with the same dates and filters as the screen (managers and administrators only, like the reports themselves):

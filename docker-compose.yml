@@ -29,6 +29,7 @@ services:
         condition: service_healthy
     volumes:
       - ./storage:/rails/storage
+      - ./plugins:/app/plugins:ro
     restart: unless-stopped
 
   sidekiq:
@@ -48,6 +49,8 @@ services:
       MINIO_ENDPOINT: http://s3:8333
       MINIO_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY_ID:-minioadmin}
       MINIO_SECRET_ACCESS_KEY: ${MINIO_SECRET_ACCESS_KEY:-minioadmin}
+    volumes:
+      - ./plugins:/app/plugins:ro
     depends_on:
       db:
         condition: service_healthy

@@ -95,3 +95,7 @@ Each message has a link back to the page in FixFlow. It carries a work order's n
 - **The server must be able to reach the chat service** over the network: `hooks.slack.com` for Slack, the address of your own server for Mattermost. Addresses on your own network are fine; the server refuses its own address and link-local addresses (where cloud metadata services live). Redirects are not followed.
 - **Microsoft Teams has not yet been tried against a real Teams.** The message is the documented form for a Teams workflow webhook (an Adaptive Card in a message), and the page says so; if Teams refuses it, the reason shown is Teams' own.
 
+
+## More channels, from plugins
+
+A plugin can add another place to send these same notifications (a phone app, a different chat tool, your own program). It hears the same events as team chat, and an administrator chooses which under **Settings → Plugins**. FixFlow comes with a sample plugin for [ntfy](https://ntfy.sh). See [Plugins](plugins.md).

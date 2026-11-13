@@ -42,6 +42,8 @@ x-api-env: &api-env
 x-file-volumes: &file-volumes
   - uploads:/app/storage
   - backups:/app/backups
+  # The plugins installed on this server (docs/plugins.md). Read-only: the server never changes them.
+  - ./plugins:/app/plugins:ro
 
 services:
   # The front door: the web app, with /api and /cable passed on to the api service.

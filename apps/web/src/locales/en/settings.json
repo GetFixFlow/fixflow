@@ -15,6 +15,7 @@
       "iot": "IoT & API Keys",
       "chat": "Team Chat",
       "webhooks": "Webhooks",
+      "plugins": "Plugins",
       "ai": "AI Features",
       "import_export": "Import / Export",
       "data_retention": "Data Retention",
