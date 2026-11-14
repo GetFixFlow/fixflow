@@ -24,6 +24,11 @@
 /tmp/pids/*
 !/tmp/pids/.keep
 
+# Plugins installed on a server are mounted into the containers, never built into the image (docs/plugins.md).
+/plugins/*
+!/plugins/.keep
+!/plugins/README.md
+
 # Ignore storage (uploaded files in development and any SQLite databases).
 /storage/*
 !/storage/.keep

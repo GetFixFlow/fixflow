@@ -89,6 +89,9 @@ services:
     restart: unless-stopped
     env_file: .env
     environment: *api-env
+    volumes:
+      # The plugins installed on this server (docs/plugins.md). Read-only: the server never changes them.
+      - ./plugins:/app/plugins:ro
     depends_on:
       db:
         condition: service_healthy
@@ -113,6 +116,8 @@ services:
     command: bundle exec sidekiq -C config/sidekiq.yml
     env_file: .env
     environment: *api-env
+    volumes:
+      - ./plugins:/app/plugins:ro
     depends_on:
       # The api container runs the database migrations when it starts.
       api:

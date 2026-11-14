@@ -1,0 +1,82 @@
+{
+  "plugins": {
+    "page": {
+      "title": "Complementos",
+      "description": "Añada un informe o un canal de avisos a FixFlow sin cambiar FixFlow.",
+      "note": "Un complemento es código que alguien puso en el servidor y se ejecuta con los permisos del servidor: active solo complementos de personas de confianza.",
+      "load_failed": "No se pudieron cargar los complementos.",
+      "try_again": "Reintentar",
+      "empty_title": "No hay complementos instalados",
+      "empty_text": "Para añadir uno, ponga su carpeta en la carpeta plugins del servidor y reinicie FixFlow. La guía de complementos lo explica y trae dos ejemplos para copiar."
+    },
+    "failed": {
+      "title": "Algunos complementos no se cargaron",
+      "intro": "FixFlow siguió sin ellos. Corrija o quite la carpeta en el servidor y reinicie.",
+      "item": "Carpeta {{folder}}: {{message}}"
+    },
+    "card": {
+      "version": "Versión {{version}}",
+      "author": "de {{author}}",
+      "folder": "En la carpeta {{folder}}",
+      "on": "Activado",
+      "off": "Desactivado",
+      "switch_on": "Activar",
+      "switch_off": "Desactivar",
+      "switch_on_aria": "Activar {{name}}",
+      "switch_off_aria": "Desactivar {{name}}",
+      "off_note": "Desactivado para su empresa: sus informes se ocultan a sus gerentes y sus canales no envían nada.",
+      "reports": "Informes que añade",
+      "reports_where": "Los gerentes los encuentran en la página de Informes.",
+      "open_report": "Abrir {{name}}",
+      "channels": "Canales de avisos"
+    },
+    "channel": {
+      "events": "Enviar un mensaje cuando",
+      "enabled": "Enviar estos mensajes",
+      "save": "Guardar",
+      "saving": "Guardando…",
+      "test": "Enviar un mensaje de prueba",
+      "testing": "Enviando…",
+      "remove": "Quitar",
+      "remove_aria": "Quitar los ajustes de {{name}}",
+      "remove_confirm": "¿Quitar los ajustes de {{name}}? FixFlow dejará de enviar mensajes por este canal y olvidará sus secretos.",
+      "secret_saved": "Guardado. Déjelo en blanco para conservarlo.",
+      "secret_note": "Se guarda cifrado y no se vuelve a mostrar.",
+      "needs": "Hace falta {{field}} para activar los mensajes.",
+      "on": "Los mensajes salen por este canal.",
+      "off": "Este canal está apagado.",
+      "last_sent": "Último mensaje enviado {{when}}.",
+      "last_error": "El último mensaje no llegó: {{error}}",
+      "test_failed": "No se pudo enviar el mensaje de prueba."
+    },
+    "toast": {
+      "switched_on": "Complemento activado",
+      "switched_off": "Complemento desactivado",
+      "switch_failed": "No se pudo cambiar el complemento.",
+      "saved": "Canal guardado",
+      "save_failed": "No se pudo guardar el canal.",
+      "removed": "Ajustes del canal quitados",
+      "remove_failed": "No se pudieron quitar los ajustes del canal."
+    },
+    "reports": {
+      "section": "De complementos",
+      "section_text": "Informes añadidos por complementos que su administrador activó.",
+      "period_now": "A este momento"
+    },
+    "report": {
+      "back": "Informes",
+      "from": "Desde",
+      "to": "Hasta",
+      "export": "Exportar como CSV",
+      "exporting": "Exportando…",
+      "period_now": "A este momento",
+      "empty": "No hay nada que mostrar en este periodo.",
+      "load_failed": "No se pudo generar el informe.",
+      "off": "Este complemento está desactivado. Un administrador puede activarlo en Ajustes, Complementos.",
+      "gone": "Este informe ya no está instalado.",
+      "try_again": "Reintentar",
+      "plugin": "Del complemento {{name}}",
+      "table": "Informe {{name}}"
+    }
+  }
+}

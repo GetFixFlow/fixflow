@@ -74,6 +74,7 @@ nav:
       - Sign-in and security: security.md
       - Sign in with the company directory: directory-sign-in.md
       - Public API, API keys and webhooks: public-api.md
+      - Plugins (reports and notification channels): plugins.md
       - Importing data and sample data: import.md
   - Keep it running:
       - Upgrading and rolling back: upgrading.md

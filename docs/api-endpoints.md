@@ -6,7 +6,7 @@ the like stand for a value, and `:format` is left out. Live updates are a WebSoc
 holds the standard routes of the sign-in library that nothing uses (`sign_up/edit` and the like): the ones to use are
 `sign_in`, `sign_out`, `two_factor`, `password` and `me`; `sign_up` works only until the first company exists.
 
-There are 274 endpoints in 48 groups: [activity_logs](#activity-logs), [ai](#ai), [api_keys](#api-keys), [asset_documents](#asset-documents), [assets](#assets), [auth](#auth), [backups](#backups), [branding](#branding), [chat_settings](#chat-settings), [custom_fields](#custom-fields), [dashboard](#dashboard), [data_usage](#data-usage), [directory_settings](#directory-settings), [downtimes](#downtimes), [email_settings](#email-settings), [getting_started](#getting-started), [health](#health), [imports](#imports), [invitations](#invitations), [iot](#iot), [iot_alerts](#iot-alerts), [iot_rules](#iot-rules), [localization_settings](#localization-settings), [locations](#locations), [meters](#meters), [notification_preferences](#notification-preferences), [open](#open), [organization_settings](#organization-settings), [parts](#parts), [preventive_maintenances](#preventive-maintenances), [profile](#profile), [public_assets](#public-assets), [public_request_form](#public-request-form), [purchase_orders](#purchase-orders), [push_subscriptions](#push-subscriptions), [reports](#reports), [sample_data](#sample-data), [saved_reports](#saved-reports), [schedule](#schedule), [sessions](#sessions), [setup](#setup), [storage](#storage), [system_health](#system-health), [users](#users), [vendors](#vendors), [webhooks](#webhooks), [work_orders](#work-orders), [work_requests](#work-requests).
+There are 281 endpoints in 50 groups: [activity_logs](#activity-logs), [ai](#ai), [api_keys](#api-keys), [asset_documents](#asset-documents), [assets](#assets), [auth](#auth), [backups](#backups), [branding](#branding), [chat_settings](#chat-settings), [custom_fields](#custom-fields), [dashboard](#dashboard), [data_usage](#data-usage), [directory_settings](#directory-settings), [downtimes](#downtimes), [email_settings](#email-settings), [getting_started](#getting-started), [health](#health), [imports](#imports), [invitations](#invitations), [iot](#iot), [iot_alerts](#iot-alerts), [iot_rules](#iot-rules), [localization_settings](#localization-settings), [locations](#locations), [meters](#meters), [notification_preferences](#notification-preferences), [open](#open), [organization_settings](#organization-settings), [parts](#parts), [plugin_reports](#plugin-reports), [plugins](#plugins), [preventive_maintenances](#preventive-maintenances), [profile](#profile), [public_assets](#public-assets), [public_request_form](#public-request-form), [purchase_orders](#purchase-orders), [push_subscriptions](#push-subscriptions), [reports](#reports), [sample_data](#sample-data), [saved_reports](#saved-reports), [schedule](#schedule), [sessions](#sessions), [setup](#setup), [storage](#storage), [system_health](#system-health), [users](#users), [vendors](#vendors), [webhooks](#webhooks), [work_orders](#work-orders), [work_requests](#work-requests).
 
 ## activity-logs
 
@@ -287,6 +287,23 @@ There are 274 endpoints in 48 groups: [activity_logs](#activity-logs), [ai](#ai)
 | PATCH, PUT | `/api/v1/parts/:id` | `api/v1/parts#update` |
 | PATCH | `/api/v1/parts/:id/adjust_stock` | `api/v1/parts#adjust_stock` |
 | GET | `/api/v1/parts/low_stock` | `api/v1/parts#low_stock` |
+
+## plugin-reports
+
+| Method | Path | Handled by |
+| --- | --- | --- |
+| GET | `/api/v1/plugin_reports` | `api/v1/plugin_reports#index` |
+| GET | `/api/v1/plugin_reports/:plugin/:report` | `api/v1/plugin_reports#show` |
+
+## plugins
+
+| Method | Path | Handled by |
+| --- | --- | --- |
+| GET | `/api/v1/plugins` | `api/v1/plugins#index` |
+| PATCH, PUT | `/api/v1/plugins/:key` | `api/v1/plugins#update` |
+| DELETE | `/api/v1/plugins/:key/channels/:channel_key` | `api/v1/plugins#destroy_channel` |
+| PUT | `/api/v1/plugins/:key/channels/:channel_key` | `api/v1/plugins#update_channel` |
+| POST | `/api/v1/plugins/:key/channels/:channel_key/test` | `api/v1/plugins#test_channel` |
 
 ## preventive-maintenances
 

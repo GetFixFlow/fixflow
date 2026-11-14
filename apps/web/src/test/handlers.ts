@@ -6,6 +6,8 @@ export const handlers = [
   http.get('/api/v1/saved_reports', () => HttpResponse.json({ saved_reports: [], eligible_recipients: [] })),
   // Nothing but passwords unless a test turns the company sign-in on: the sign-in screen asks what it offers.
   http.get('/api/v1/auth/directory', () => HttpResponse.json({ oidc: { enabled: false, label: 'Company account' }, ldap: { enabled: false } })),
+  // No plugin reports unless a test adds some: the Reports page asks for them.
+  http.get('/api/v1/plugin_reports', () => HttpResponse.json({ reports: [] })),
   http.get('/api/v1/custom_fields', () => HttpResponse.json({ custom_fields: [] })),
 
   http.get('/api/v1/branding', () => {

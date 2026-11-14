@@ -29,6 +29,11 @@
 !/tmp/storage/
 !/tmp/storage/.keep
 
+# Plugins installed on this server are this server's own (see plugins/README.md).
+/plugins/*
+!/plugins/.keep
+!/plugins/README.md
+
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 

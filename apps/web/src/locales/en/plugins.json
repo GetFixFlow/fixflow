@@ -1,0 +1,82 @@
+{
+  "plugins": {
+    "page": {
+      "title": "Plugins",
+      "description": "Add a report or a notification channel to FixFlow without changing FixFlow itself.",
+      "note": "A plugin is code that someone put on the server, and it runs with the server's rights: only switch on plugins from people you trust.",
+      "load_failed": "The plugins could not be loaded.",
+      "try_again": "Try again",
+      "empty_title": "No plugins installed",
+      "empty_text": "To add one, put its folder in the plugins folder on the server and restart FixFlow. The plugins guide explains how, and has two samples to copy."
+    },
+    "failed": {
+      "title": "Some plugins did not load",
+      "intro": "FixFlow carried on without them. Fix or remove the folder on the server and restart.",
+      "item": "Folder {{folder}}: {{message}}"
+    },
+    "card": {
+      "version": "Version {{version}}",
+      "author": "by {{author}}",
+      "folder": "In the folder {{folder}}",
+      "on": "On",
+      "off": "Off",
+      "switch_on": "Switch on",
+      "switch_off": "Switch off",
+      "switch_on_aria": "Switch on {{name}}",
+      "switch_off_aria": "Switch off {{name}}",
+      "off_note": "Switched off for your company: its reports are hidden from your managers and its channels send nothing.",
+      "reports": "Reports it adds",
+      "reports_where": "Managers find them on the Reports page.",
+      "open_report": "Open {{name}}",
+      "channels": "Notification channels"
+    },
+    "channel": {
+      "events": "Send a message when",
+      "enabled": "Send these messages",
+      "save": "Save",
+      "saving": "Saving…",
+      "test": "Send a test message",
+      "testing": "Sending…",
+      "remove": "Remove",
+      "remove_aria": "Remove the settings of {{name}}",
+      "remove_confirm": "Remove the settings of {{name}}? FixFlow will stop sending messages through it and forget its secrets.",
+      "secret_saved": "Saved. Leave blank to keep it.",
+      "secret_note": "Kept encrypted and never shown again.",
+      "needs": "{{field}} is needed to turn messages on.",
+      "on": "Messages are going out through this channel.",
+      "off": "This channel is off.",
+      "last_sent": "Last message sent {{when}}.",
+      "last_error": "The last message did not get through: {{error}}",
+      "test_failed": "The test message could not be sent."
+    },
+    "toast": {
+      "switched_on": "Plugin switched on",
+      "switched_off": "Plugin switched off",
+      "switch_failed": "The plugin could not be switched.",
+      "saved": "Channel saved",
+      "save_failed": "The channel could not be saved.",
+      "removed": "Channel settings removed",
+      "remove_failed": "The channel settings could not be removed."
+    },
+    "reports": {
+      "section": "From plugins",
+      "section_text": "Reports added by plugins your administrator switched on.",
+      "period_now": "As of now"
+    },
+    "report": {
+      "back": "Reports",
+      "from": "From",
+      "to": "To",
+      "export": "Export as CSV",
+      "exporting": "Exporting…",
+      "period_now": "As of now",
+      "empty": "Nothing to show for this period.",
+      "load_failed": "The report could not be made.",
+      "off": "This plugin is switched off. An administrator can switch it on under Settings, Plugins.",
+      "gone": "This report is no longer installed.",
+      "try_again": "Try again",
+      "plugin": "From the plugin {{name}}",
+      "table": "{{name}} report"
+    }
+  }
+}
