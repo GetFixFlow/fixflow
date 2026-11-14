@@ -119,6 +119,32 @@ RSpec.describe Rack::Attack, type: :request do
     end
   end
 
+  describe "AI throttle" do
+    let(:admin) { create(:user, :admin) }
+    let(:headers) { auth_headers_for(admin) } # the throttle counts per sign-in, so the same one is used throughout
+
+    it "counts the assistant and the AI settings' try-it button (each costs a model call), 5 a minute" do
+      5.times do
+        post "/api/v1/ai_settings/test", params: { ai: { provider: "none" } }, as: :json, headers: headers
+        expect(response).not_to have_http_status(:too_many_requests)
+      end
+
+      post "/api/v1/ai_settings/test", params: { ai: { provider: "none" } }, as: :json, headers: headers
+      expect(response).to have_http_status(:too_many_requests)
+      get "/api/v1/ai/config", headers: headers
+      expect(response).to have_http_status(:too_many_requests)
+    end
+
+    it "does not count reading and saving the settings, which cost nothing" do
+      12.times do
+        get "/api/v1/ai_settings", headers: headers
+        expect(response).to have_http_status(:ok)
+      end
+      patch "/api/v1/ai_settings", params: { ai: { provider: "none" } }, as: :json, headers: headers
+      expect(response).to have_http_status(:ok)
+    end
+  end
+
   describe "blocklist" do
     it "blocks IPs in BLOCKED_IPS env var" do
       allow(ENV).to receive(:fetch).and_call_original

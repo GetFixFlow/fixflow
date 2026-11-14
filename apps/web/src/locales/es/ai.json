@@ -1,0 +1,79 @@
+{
+  "ai": {
+    "page": {
+      "title": "IA",
+      "description": "Elija qué proveedor de IA usa el asistente de FixFlow. La IA está desactivada hasta que elija uno.",
+      "denied": "Acceso denegado. Solo los administradores pueden gestionar los ajustes de IA.",
+      "load_failed": "No se pudieron cargar los ajustes de IA.",
+      "try_again": "Reintentar"
+    },
+    "status": {
+      "on": "La IA está activada: {{provider}}",
+      "off": "La IA está desactivada",
+      "off_text": "No se envía nada a ningún proveedor de IA. Elija uno abajo para activarla.",
+      "sending": "Se envía a {{where}}, modelo {{model}}.",
+      "environment": "Esto viene del archivo .env del servidor (AI_ENABLED y ANTHROPIC_API_KEY). Guardar una opción aquí lo reemplaza.",
+      "incomplete": "Hay un proveedor elegido pero sus ajustes no están completos, así que la IA sigue desactivada."
+    },
+    "provider": {
+      "legend": "Proveedor",
+      "label": {
+        "none": "Desactivada",
+        "anthropic": "Anthropic (Claude)",
+        "openai_compatible": "Servicio compatible con OpenAI",
+        "local": "Modelo local"
+      },
+      "help": {
+        "none": "Sin IA. El asistente se oculta.",
+        "anthropic": "Claude, en el servicio de Anthropic. Necesita una clave de Anthropic.",
+        "openai_compatible": "OpenAI, OpenRouter, Groq o cualquier servicio de internet que use la API de chat de OpenAI.",
+        "local": "Un modelo que usted mismo ejecuta (Ollama, LM Studio, vLLM, llama.cpp). Debe estar en este servidor o en su propia red, así que ningún dato sale."
+      }
+    },
+    "field": {
+      "model": "Modelo",
+      "model_default": "Déjelo en blanco para usar {{model}}.",
+      "model_local_help": "El nombre del modelo que sirve el programa, por ejemplo llama3.1.",
+      "base_url": "Dirección",
+      "base_url_openai_compatible": "La dirección del servicio, terminada en /v1. Debe empezar por https://. Por ejemplo https://api.openai.com/v1.",
+      "base_url_local": "Donde escucha el programa. Ollama: http://localhost:11434/v1. Si FixFlow se ejecuta en Docker y el modelo en la misma máquina, use http://host.docker.internal:11434/v1.",
+      "api_key": "Clave",
+      "api_key_optional": "Clave (si la pide)",
+      "api_key_saved": "Guardada. Déjelo en blanco para conservarla.",
+      "api_key_note": "Se guarda cifrada y no se vuelve a mostrar. Solo se envía a {{where}}.",
+      "api_key_host": "Si cambia la dirección a otro servidor, vuelva a escribir la clave: una clave pertenece al servidor para el que se dio.",
+      "api_key_environment": "La clave está en el archivo .env del servidor. Escríbala aquí para pasarla a FixFlow."
+    },
+    "privacy": {
+      "title": "Adónde van sus datos",
+      "none": "No se envía nada a ninguna parte.",
+      "anthropic": "Los detalles de las órdenes de trabajo se envían al servicio de Anthropic (api.anthropic.com) cuando alguien usa el asistente. Lea los términos de Anthropic para ver cómo los trata.",
+      "openai_compatible": "Los detalles de las órdenes de trabajo se envían por internet al servicio en {{where}} cuando alguien usa el asistente. Lea los términos de ese servicio para ver cómo los trata.",
+      "local": "Los detalles de las órdenes de trabajo se envían solo a {{where}}, que FixFlow ha comprobado que está en este servidor o en una red privada. FixFlow no puede ver qué hace esa máquina con ellos.",
+      "sent_title": "Datos enviados",
+      "sent": "Nombres de activos, descripciones de órdenes de trabajo, listas de verificación, notas de trabajos anteriores, texto de manuales adjuntos",
+      "not_sent_title": "Datos que NO se envían",
+      "not_sent": "Correos de usuarios, contraseñas, claves de API"
+    },
+    "actions": {
+      "save": "Guardar",
+      "saving": "Guardando…",
+      "test": "Probar",
+      "testing": "Probando…",
+      "test_note": "Le hace una pregunta fija al modelo. No se envían datos de órdenes de trabajo.",
+      "test_failed": "La prueba no funcionó.",
+      "save_failed": "No se pudieron guardar los ajustes.",
+      "remove": "Olvidar estos ajustes",
+      "remove_confirm": "¿Olvidar los ajustes de IA? FixFlow dejará de usar el proveedor y olvidará todas las claves guardadas.",
+      "pick_first": "Elija primero un proveedor."
+    },
+    "toast": {
+      "saved": "Ajustes de IA guardados",
+      "removed": "Ajustes de IA eliminados"
+    },
+    "features": {
+      "title": "Qué impulsa",
+      "assist": "FixFlow Assist: un chat en cada orden de trabajo que responde con el historial y los manuales del activo"
+    }
+  }
+}

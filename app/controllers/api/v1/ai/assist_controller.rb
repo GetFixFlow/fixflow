@@ -4,8 +4,6 @@ module Api
       class AssistController < Api::V1::Ai::BaseController
         include ActionController::Live
 
-        STREAM_TIMEOUT = 30.seconds
-
         def create
           work_order = current_organization.work_orders.find(params[:work_order_id])
           message = params.require(:message)
@@ -18,8 +16,8 @@ module Api
           system_prompt = ::Ai::AssistService.system_prompt(work_order)
           citations = manual_citations(work_order)
 
-          Timeout.timeout(STREAM_TIMEOUT) do
-            ::Ai::Client.stream(messages: messages, system: system_prompt) do |delta|
+          Timeout.timeout(::Ai::Client.stream_timeout(current_organization)) do
+            ::Ai::Client.stream(messages: messages, system: system_prompt, organization: current_organization) do |delta|
               write_event(text: delta)
             end
           end

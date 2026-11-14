@@ -43,7 +43,7 @@ A production server (and the Docker entrypoint) checks the settings above before
 - `APP_URL`, `ALLOWED_ORIGINS`, `SMTP_PORT`, `MQTT_PORT` or `MINIO_ENDPOINT` is malformed;
 - the database or Redis does not answer, or the mail server set in the environment does not answer.
 
-Things that do not stop it but are printed as **warnings**: `APP_URL` not set (email links would point at localhost), `ALLOWED_ORIGINS` missing the web app's address, example passwords for the file storage, the MQTT broker or the mail server, `SEED_DB=true` (demo accounts with a well-known password), an AI key missing while `AI_ENABLED=true`, and the file storage or the MQTT broker not answering.
+Things that do not stop it but are printed as **warnings**: `APP_URL` not set (email links would point at localhost), `ALLOWED_ORIGINS` missing the web app's address, example passwords for the file storage, the MQTT broker or the mail server, `SEED_DB=true` (demo accounts with a well-known password), an AI key missing while `AI_ENABLED=true` (the older way to switch AI on; a provider is now chosen under Settings, AI: see [AI](ai.md)), and the file storage or the MQTT broker not answering.
 
 Run the same check yourself, without starting anything:
 

@@ -21,6 +21,11 @@ describe('describeAction', () => {
     expect(describeAction('part.stock_adjusted')).toBe('Part stock adjusted')
   })
 
+  it('words what choosing an AI provider writes', () => {
+    expect(describeAction('ai_settings.updated')).toBe('AI provider settings changed')
+    expect(describeAction('ai_settings.removed')).toBe('AI provider settings removed')
+  })
+
   it('words what company sign-in writes', () => {
     expect(describeAction('directory.person_created')).toBe('Person made by company sign-in')
     expect(describeAction('directory.role_changed')).toBe('Role changed by the company directory')

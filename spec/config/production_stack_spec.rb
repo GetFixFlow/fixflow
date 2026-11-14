@@ -60,6 +60,12 @@ RSpec.describe "The production stack" do
       expect(read("plugins/README.md")).to include("plugin.rb")
     end
 
+    it "lets the api reach a model run on the same machine at host.docker.internal (Linux needs it said), for the local AI choice" do
+      expect(services["api"]["extra_hosts"]).to eq(["host.docker.internal:host-gateway"])
+      expect(YAML.safe_load(read("docker-compose.lite.yml"), aliases: true)["services"]["api"]["extra_hosts"])
+        .to eq(["host.docker.internal:host-gateway"])
+    end
+
     it "sets the bucket names itself, so the app and the setup task cannot look in different ones" do
       environment = services["api"]["environment"]
 

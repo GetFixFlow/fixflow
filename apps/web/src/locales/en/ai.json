@@ -1,0 +1,79 @@
+{
+  "ai": {
+    "page": {
+      "title": "AI",
+      "description": "Choose which AI provider FixFlow's assistant uses. AI is off until you pick one.",
+      "denied": "Access Denied. Only administrators can manage AI settings.",
+      "load_failed": "The AI settings could not be loaded.",
+      "try_again": "Try again"
+    },
+    "status": {
+      "on": "AI is on: {{provider}}",
+      "off": "AI is off",
+      "off_text": "Nothing is sent to any AI provider. Pick one below to turn it on.",
+      "sending": "Sending to {{where}}, model {{model}}.",
+      "environment": "This comes from the server's .env file (AI_ENABLED and ANTHROPIC_API_KEY). Saving a choice here replaces it.",
+      "incomplete": "A provider is chosen but its settings are not complete, so AI stays off."
+    },
+    "provider": {
+      "legend": "Provider",
+      "label": {
+        "none": "Off",
+        "anthropic": "Anthropic (Claude)",
+        "openai_compatible": "OpenAI-compatible service",
+        "local": "Local model"
+      },
+      "help": {
+        "none": "No AI. The assistant is hidden.",
+        "anthropic": "Claude, on Anthropic's service. Needs a key from Anthropic.",
+        "openai_compatible": "OpenAI, OpenRouter, Groq or any service on the internet that speaks the OpenAI chat API.",
+        "local": "A model you run yourself (Ollama, LM Studio, vLLM, llama.cpp). It must be on this server or your own network, so no data leaves."
+      }
+    },
+    "field": {
+      "model": "Model",
+      "model_default": "Leave blank to use {{model}}.",
+      "model_local_help": "The name of the model the program serves, for example llama3.1.",
+      "base_url": "Address",
+      "base_url_openai_compatible": "The service's address, ending in /v1. It must start with https://. For example https://api.openai.com/v1.",
+      "base_url_local": "Where the program listens. Ollama: http://localhost:11434/v1. If FixFlow runs in Docker and the model runs on the same machine, use http://host.docker.internal:11434/v1.",
+      "api_key": "Key",
+      "api_key_optional": "Key (if it asks for one)",
+      "api_key_saved": "Saved. Leave blank to keep it.",
+      "api_key_note": "Kept encrypted and never shown again. It is sent only to {{where}}.",
+      "api_key_host": "If you change the address to another host, enter the key again: a key belongs to the host it was given for.",
+      "api_key_environment": "The key is set in the server's .env file. Enter it here to move it into FixFlow."
+    },
+    "privacy": {
+      "title": "Where your data goes",
+      "none": "Nothing is sent anywhere.",
+      "anthropic": "Work order details are sent to Anthropic's service (api.anthropic.com) when someone uses the assistant. Read Anthropic's terms to see how it handles them.",
+      "openai_compatible": "Work order details are sent over the internet to the service at {{where}} when someone uses the assistant. Read that service's terms to see how it handles them.",
+      "local": "Work order details are sent only to {{where}}, which FixFlow has checked is on this server or a private network. FixFlow cannot see what that machine does with them.",
+      "sent_title": "Data sent",
+      "sent": "Asset names, work order descriptions, checklists, past work notes, text from attached manuals",
+      "not_sent_title": "Data NOT sent",
+      "not_sent": "User emails, passwords, API keys"
+    },
+    "actions": {
+      "save": "Save",
+      "saving": "Saving…",
+      "test": "Try it",
+      "testing": "Trying…",
+      "test_note": "Asks the model one fixed question. No work order data is sent.",
+      "test_failed": "The test did not work.",
+      "save_failed": "The settings could not be saved.",
+      "remove": "Forget these settings",
+      "remove_confirm": "Forget the AI settings? FixFlow will stop using the provider and forget every saved key.",
+      "pick_first": "Choose a provider first."
+    },
+    "toast": {
+      "saved": "AI settings saved",
+      "removed": "AI settings removed"
+    },
+    "features": {
+      "title": "What it powers",
+      "assist": "FixFlow Assist: a chat on each work order that answers from the asset's history and manuals"
+    }
+  }
+}

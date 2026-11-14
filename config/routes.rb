@@ -96,6 +96,11 @@ Rails.application.routes.draw do
         post :test
       end
 
+      # Which AI provider is used (none until an administrator picks one)
+      resource :ai_settings, only: %i[show update destroy], controller: "ai_settings" do
+        post :test
+      end
+
       # The signed-in user's own details and password
       resource :profile, only: %i[show update], controller: "profile" do
         patch :password

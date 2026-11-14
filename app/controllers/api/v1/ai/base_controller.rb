@@ -7,7 +7,7 @@ module Api
         private
 
         def ensure_ai_enabled!
-          return if ::Ai::Client.enabled?
+          return if ::Ai::Client.enabled?(current_organization)
 
           render_error("AI features are currently disabled", :service_unavailable, code: "AI_DISABLED")
         end

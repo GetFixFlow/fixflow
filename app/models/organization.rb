@@ -50,6 +50,9 @@ class Organization < ApplicationRecord
   # Where chat messages go (Slack, Teams...), or an empty one.
   def chat_config = ChatConfig.load(self)
 
+  # The AI provider chosen (none until an administrator picks one), as saved.
+  def ai_config = AiConfig.load(self)
+
   # Each install serves one company. Setup is complete once that company
   # exists, after which public sign-up is closed.
   def self.setup_complete?

@@ -35,6 +35,8 @@ const SPECIAL: Record<string, string> = {
   'organization_settings.updated': 'Company settings changed',
   'email_settings.updated': 'Email settings changed',
   'email_settings.removed': 'Email settings removed',
+  'ai_settings.updated': 'AI provider settings changed',
+  'ai_settings.removed': 'AI provider settings removed',
   'plugin.enabled': 'Plugin switched on',
   'plugin.disabled': 'Plugin switched off',
   'plugin.channel_updated': 'Plugin channel settings changed',
