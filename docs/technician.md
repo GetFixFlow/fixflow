@@ -56,6 +56,10 @@ Keep working. Start, hold, resume, complete, comments, ticks and photos are all 
 
 Open the asset, the **Downtime** tab, and press **It stopped**; when it runs again, **Running again**. The time is kept and the asset's status follows, so the managers' availability report is true ([Downtime and availability](downtime.md)).
 
+## Writing a job from a few words
+
+When your administrator has AI switched on, the **new work order** page has a box at the top, **Describe the problem in your own words**. Type (or tap the microphone on your phone's keyboard and say) something like "pump on line 3 is leaking oil", press **Make a draft**, and the form below fills in. **Read it**: the title, the description, the priority and the asset are a draft, they can be wrong, and nothing is saved until you press **Create Work Order**. If it could not tell which asset, it shows the likely ones to pick from. [More about it](ai.md#drafting-a-work-order-from-plain-words).
+
 ## Seeing something broken that is not yet a job
 
 Anyone can scan the QR label on a machine with the phone's camera: it opens a short form that creates a work order, no account needed. If you are signed in, you can also press **New Work Order** under **Work Orders**.

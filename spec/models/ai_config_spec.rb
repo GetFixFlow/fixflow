@@ -166,7 +166,7 @@ RSpec.describe AiConfig do
       expect(config.feature?(:priority)).to be(false)
       pick(provider: "anthropic", api_key: "sk-ant-x")
 
-      expect(config.features).to eq("priority" => true, "anomalies" => true, "limits" => true, "parts" => true)
+      expect(config.features).to eq("priority" => true, "anomalies" => true, "limits" => true, "parts" => true, "draft" => true)
       expect(config.feature?(:priority)).to be(true)
       expect(config.feature?("anomalies")).to be(true)
       pick(provider: "none")
@@ -175,7 +175,7 @@ RSpec.describe AiConfig do
 
     it "start on for a configuration made without any saved switches" do
       expect(described_class.new(provider: "anthropic").features).to eq("priority" => true, "anomalies" => true, "limits" => true,
-"parts" => true)
+"parts" => true, "draft" => true)
     end
 
     it "can be switched off one at a time, and the switch survives a change of provider" do
@@ -198,11 +198,18 @@ RSpec.describe AiConfig do
       expect([config.feature?(:limits), config.feature?(:parts)]).to eq([true, false])
     end
 
+    it "include drafting a work order, which is switched off on its own" do
+      pick(provider: "anthropic", api_key: "sk-ant-x")
+      pick(features: { draft: false })
+
+      expect([config.feature?(:draft), config.feature?(:priority), config.feature?(:limits)]).to eq([false, true, true])
+    end
+
     it "understand the words a form sends, and ignore a feature that does not exist" do
       pick(provider: "anthropic", api_key: "sk-ant-x")
       pick(features: { priority: "false", anomalies: "true", telepathy: false })
 
-      expect(config.features).to eq("priority" => false, "anomalies" => true, "limits" => true, "parts" => true)
+      expect(config.features).to eq("priority" => false, "anomalies" => true, "limits" => true, "parts" => true, "draft" => true)
     end
 
     it "can be saved on their own, so a server set up through its environment keeps using it" do
@@ -210,7 +217,9 @@ RSpec.describe AiConfig do
 
       pick(features: { anomalies: false })
 
-      expect(org.ai_settings).to eq("features" => { "priority" => true, "anomalies" => false, "limits" => true, "parts" => true })
+      expect(org.ai_settings).to eq(
+        "features" => { "priority" => true, "anomalies" => false, "limits" => true, "parts" => true, "draft" => true }
+      )
       expect(config.source).to be_nil
       effective = described_class.effective(org, env: env)
       expect(effective).to have_attributes(provider: "anthropic", source: "environment")

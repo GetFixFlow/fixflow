@@ -29,10 +29,10 @@ class AiConfig
   }.freeze
   KEY_REQUIRED = %w[anthropic openai_compatible].freeze
   DEFAULT_MODELS = { "anthropic" => "claude-sonnet-5-5" }.freeze
-  # priority: suggests a priority for a new work order (asks the provider). The others are arithmetic on the server, and nothing is
-  # sent to the provider: anomalies flags unusual sensor readings, limits says which sensors are heading for a limit set on an
-  # alert rule, parts says which parts may run short.
-  FEATURES = %w[priority anomalies limits parts].freeze
+  # priority: suggests a priority for a new work order, and draft: turns a few plain words into a draft work order (both ask the
+  # provider). The others are arithmetic on the server, and nothing is sent to the provider: anomalies flags unusual sensor
+  # readings, limits says which sensors are heading for a limit set on an alert rule, parts says which parts may run short.
+  FEATURES = %w[priority anomalies limits parts draft].freeze
 
   Setting = Struct.new(:model, :base_url, :api_key, keyword_init: true) do
     def key_set? = api_key.present?

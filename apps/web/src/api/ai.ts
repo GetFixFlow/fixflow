@@ -5,7 +5,7 @@ export type AiProvider = 'none' | 'anthropic' | 'openai_compatible' | 'local'
 export type AiChoice = Exclude<AiProvider, 'none'>
 
 /** What the AI does, each of which an administrator can switch off. */
-export type AiFeature = 'priority' | 'anomalies' | 'limits' | 'parts'
+export type AiFeature = 'priority' | 'anomalies' | 'limits' | 'parts' | 'draft'
 export type AiFeatures = Record<AiFeature, boolean>
 
 export interface AIConfig {
@@ -49,6 +49,24 @@ export interface AiForm {
   base_url?: string
   api_key?: string
   features?: Partial<AiFeatures>
+}
+
+/** An asset the words may be about. */
+export interface DraftAsset {
+  id: number
+  name: string
+  asset_tag: string | null
+  location_path: string | null
+}
+
+/** A draft work order made from a few plain words, for the person to check. The asset is set only when one of the matches clearly is it. */
+export interface WorkOrderDraft {
+  title: string
+  description: string
+  priority: 'critical' | 'high' | 'medium' | 'low' | null
+  asset: DraftAsset | null
+  /** The assets the draft chose from, to pick from when it chose none. */
+  asset_candidates: DraftAsset[]
 }
 
 /** A priority for a work order being written, and a short reason. */
@@ -122,6 +140,8 @@ export const aiApi = {
   config: {
     get: () => apiClient.get<{ data: AIConfig }>('/ai/config'),
   },
+  /** Makes a draft work order from a few plain words. Saves nothing. */
+  draftWorkOrder: (text: string) => apiClient.post<{ data: WorkOrderDraft }>('/ai/work_order_draft', { text }),
   /** Asks the AI for a priority. Saves nothing. */
   suggestPriority: (body: { title: string; description?: string; asset_id?: number }) =>
     apiClient.post<{ data: PrioritySuggestion }>('/ai/priority', body),

@@ -2,7 +2,9 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useState } from 'react'
 import { WorkOrderForm, type WorkOrderFormValues } from '@/components/work-orders/WorkOrderForm'
+import { DraftFromWords, type AppliedDraft } from '@/components/work-orders/DraftFromWords'
 import { useCreateWorkOrder } from '@/hooks/useWorkOrders'
 import { useAuthStore } from '@/stores/authStore'
 
@@ -15,6 +17,7 @@ export function WorkOrderCreatePage() {
     : undefined
 
   const { user } = useAuthStore()
+  const [draft, setDraft] = useState<AppliedDraft | null>(null)
   const createWO = useCreateWorkOrder()
 
   const handleSubmit = async (values: WorkOrderFormValues) => {
@@ -51,8 +54,11 @@ export function WorkOrderCreatePage() {
         </p>
       </div>
 
+      <DraftFromWords onDraft={setDraft} assetLocked={!!lockedAssetId} />
+
       <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
         <WorkOrderForm
+          draft={draft}
           onSubmit={handleSubmit}
           isLoading={createWO.isPending}
           mode="create"

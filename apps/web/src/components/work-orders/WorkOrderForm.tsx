@@ -1,7 +1,7 @@
 import { label } from '@/i18n'
 import { useTranslation } from 'react-i18next'
 import { Sparkles } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -14,6 +14,7 @@ import { activeFields, useCustomFields } from '@/hooks/useCustomFields'
 import { missingRequired, toPayload } from '@/lib/customFields'
 import { apiErrorMessage } from '@/lib/apiError'
 import { useAI, useSuggestPriority } from '@/hooks/useAI'
+import type { AppliedDraft } from './DraftFromWords'
 import type { Priority } from '@/types'
 
 const schema = z.object({
@@ -44,6 +45,8 @@ interface WorkOrderFormProps {
   isLoading?: boolean
   mode?: 'create' | 'edit'
   lockedAssetId?: number
+  /** A draft made from plain words: fills the title, description, priority and asset in (each time `nonce` changes). */
+  draft?: AppliedDraft | null
   onCancel?: () => void
 }
 
@@ -53,6 +56,7 @@ export function WorkOrderForm({
   isLoading,
   mode = 'create',
   lockedAssetId,
+  draft,
   onCancel,
 }: WorkOrderFormProps) {
   const { t } = useTranslation()
@@ -73,6 +77,17 @@ export function WorkOrderForm({
   })
 
   const priority = watch('priority')
+
+  // A draft fills in what it has; what it has not (no priority, no asset) is left as the person had it.
+  useEffect(() => {
+    if (!draft) return
+    const options = { shouldDirty: true, shouldValidate: true }
+    setValue('title', draft.title, options)
+    setValue('description', draft.description, options)
+    if (draft.priority) setValue('priority', draft.priority, options)
+    if (draft.asset_id && !lockedAssetId) setValue('asset_id', draft.asset_id, options)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only a new draft (its nonce) applies
+  }, [draft?.nonce])
   const [title, description, assetId] = watch(['title', 'description', 'asset_id'])
 
   // A new work order can ask the AI for a priority (when an administrator has it on). It only suggests: the person decides.
