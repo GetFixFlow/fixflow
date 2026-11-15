@@ -184,10 +184,10 @@ wait_ready "$REL-sidekiq" 3 || fail "three workers did not become ready"
 # A worker is ready as soon as it runs; it is working when it says so. All four (three, and the listening one) must be, or a
 # worker that listens by mistake could still be starting, and the count below would miss it.
 for _ in $(seq 1 60); do
-  [ "$(worker_logs | grep -c 'Starting processing')" -ge 4 ] && break
+  [ "$(worker_logs | grep -c 'Schedules Loaded')" -ge 4 ] && break
   sleep 3
 done
-[ "$(worker_logs | grep -c 'Starting processing')" -ge 4 ] || fail "the four workers did not all start working"
+[ "$(worker_logs | grep -c 'Schedules Loaded')" -ge 4 ] || fail "the four workers did not all start working"
 sleep 8 # the part of a worker that listens to the broker starts a few seconds after the worker does
 for _ in $(seq 1 30); do
   [ "$(worker_logs | grep -c '\[MQTT\] Connected')" -ge 1 ] && break
