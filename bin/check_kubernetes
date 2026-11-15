@@ -247,9 +247,14 @@ ARGS="$ARGS --set env.CHECK_ROLLOUT=upgraded"
 
 # ── A backup, a change, and a restore: the steps in docs/kubernetes.md ──
 api_exec() { kubectl -n "$NS" exec "deploy/$REL-api" -- "$@"; }
+# The server logs to its output, so a command run in it prints log lines as well as its answer: the answer is marked.
+admin_first_name() {
+  api_exec bundle exec rails runner 'puts "FIRST_NAME=#{User.find_by(email: "admin@check.test").first_name}"' 2>/dev/null \
+    | grep '^FIRST_NAME=' | sed 's/^FIRST_NAME=//' | tr -d '\r'
+}
 api_exec bundle exec rails fixflow:backup >/dev/null 2>&1 || fail "making a backup"
 api_exec bundle exec rails runner 'User.where(email: "admin@check.test").update_all(first_name: "Changed")' >/dev/null 2>&1 || fail "changing data after the backup"
-[ "$(api_exec bundle exec rails runner 'print User.find_by(email: "admin@check.test").first_name' 2>/dev/null)" = "Changed" ] || fail "the change was not made"
+[ "$(admin_first_name)" = "Changed" ] || fail "the change was not made (the first name is \"$(admin_first_name)\")"
 # 1. Close the front door, stop the web and worker pods, and keep one API pod to run the command in.
 # shellcheck disable=SC2086
 helm upgrade "$REL" "$CHART" --namespace "$NS" $ARGS --set ingress.enabled=false --wait --timeout 12m >/dev/null || fail "closing the front door"
@@ -267,8 +272,7 @@ kubectl -n "$NS" scale "deploy/$REL-web" "deploy/$REL-api" "deploy/$REL-sidekiq"
 kubectl -n "$NS" scale "deploy/$REL-sidekiq-iot" --replicas=1 >/dev/null
 # shellcheck disable=SC2086
 helm upgrade "$REL" "$CHART" --namespace "$NS" $ARGS --wait --timeout 12m >/dev/null || fail "opening the front door again"
-[ "$(api_exec bundle exec rails runner 'print User.find_by(email: "admin@check.test").first_name' 2>/dev/null)" = "Check" ] \
-  || fail "the restore did not bring back the data as it was at the backup"
+[ "$(admin_first_name)" = "Check" ] || fail "the restore did not bring back the data as it was at the backup (the first name is \"$(admin_first_name)\")"
 # The Ingress has just been made again: the controller may take a few seconds to route it.
 TOKEN=""
 for _ in $(seq 1 20); do
