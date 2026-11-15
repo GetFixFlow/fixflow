@@ -46,6 +46,7 @@ describe('the new work order page, with a draft from a few words', () => {
     await waitFor(() => expect(screen.getByPlaceholderText(/describe the issue/i)).toHaveValue('Coolant pump leaking oil'))
     expect(screen.getByLabelText('Description')).toHaveValue('The pump on line 3 is leaking oil.')
     expect(created).toBeUndefined() // a draft is not a work order
+    await screen.findByText('Coolant pump') // the drafted asset is fetched to be shown: let that finish
 
     await userEvent.click(screen.getByRole('button', { name: 'Create Work Order' }))
 

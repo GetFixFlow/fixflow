@@ -40,12 +40,14 @@ describe('WorkOrderForm with a draft', () => {
     await waitFor(() => expect(title()).toHaveValue('Coolant pump leaking oil'))
     expect(description()).toHaveValue('Leaking on line 3.')
     expect(pressed()).toEqual(['🟠 High'])
+    await screen.findByText('Coolant pump') // the drafted asset is fetched to be shown: let that finish
   })
 
   it('is sent as a work order, with the drafted asset, when the person creates it', async () => {
     server.use(http.get('/api/v1/assets/7', () => HttpResponse.json({ data: { id: 7, name: 'Coolant pump', asset_tag: 'P-003', status: 'operational' } })))
     const { onSubmit } = renderForm({ draft: draft() })
     await waitFor(() => expect(title()).toHaveValue('Coolant pump leaking oil'))
+    await screen.findByText('Coolant pump')
 
     await userEvent.click(screen.getByRole('button', { name: 'Create Work Order' }))
 
@@ -87,6 +89,7 @@ describe('WorkOrderForm with a draft', () => {
   it('applies a new draft over what was changed by hand, and the same draft only once', async () => {
     const { again } = renderForm({ draft: draft() })
     await waitFor(() => expect(title()).toHaveValue('Coolant pump leaking oil'))
+    await screen.findByText('Coolant pump')
     await userEvent.clear(title())
     await userEvent.type(title(), 'My own title')
 
@@ -96,5 +99,6 @@ describe('WorkOrderForm with a draft', () => {
 
     again({ draft: draft({ nonce: 2, title: 'Second draft title' }) })
     await waitFor(() => expect(title()).toHaveValue('Second draft title'))
+    await screen.findByText('Coolant pump')
   })
 })
