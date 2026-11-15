@@ -143,6 +143,8 @@ RSpec.describe Rack::Attack, type: :request do
       12.times do
         get "/api/v1/ai/config", headers: headers
         expect(response).to have_http_status(:ok)
+        get "/api/v1/ai/forecasts/parts", headers: headers
+        expect(response).not_to have_http_status(:too_many_requests)
         get "/api/v1/ai_settings", headers: headers
         expect(response).to have_http_status(:ok)
       end

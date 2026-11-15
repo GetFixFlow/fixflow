@@ -77,11 +77,15 @@
       "needs_ai": "Elija un proveedor arriba para usarlas.",
       "label": {
         "priority": "Sugerir una prioridad para las órdenes de trabajo nuevas",
-        "anomalies": "Señalar lecturas inusuales de sensores"
+        "anomalies": "Señalar lecturas inusuales de sensores",
+        "limits": "Avisar cuando un sensor se acerca a su límite",
+        "parts": "Prever repuestos que pueden agotarse"
       },
       "help": {
         "priority": "Añade un botón al formulario de orden de trabajo nueva que sugiere una prioridad y explica por qué. Decide la persona. Envía el título, la descripción y lo que está abierto en el activo a {{where}}.",
-        "anomalies": "Señala una lectura muy fuera de lo que ese sensor suele leer, aprendido de las últimas dos semanas del propio sensor, sin límites que configurar. Se calcula en este servidor: no se envía nada al proveedor."
+        "anomalies": "Señala una lectura muy fuera de lo que ese sensor suele leer, aprendido de las últimas dos semanas del propio sensor, sin límites que configurar. Se calcula en este servidor: no se envía nada al proveedor.",
+        "limits": "Para un sensor que sube o baja de forma constante hacia un límite fijado en una regla de alerta, dice más o menos cuándo llegará, con un rango. Se calcula en este servidor con los últimos 30 días: no se envía nada al proveedor.",
+        "parts": "Dice qué repuestos pueden no alcanzar para los próximos 30 días, según lo usado en los últimos meses y lo que hay en existencia y pedido. Se calcula en este servidor: no se envía nada al proveedor."
       }
     },
     "priority": {
@@ -108,6 +112,31 @@
       "acknowledge_done": "Marcada como real.",
       "dismiss_done": "Descartada.",
       "action_failed": "No se pudo actualizar. Inténtelo de nuevo."
+    },
+    "forecast": {
+      "limits": {
+        "title": "Camino a un límite",
+        "intro": "Sensores que van a alcanzar un límite fijado en una regla de alerta, según cómo se movieron en los últimos 30 días. Es un pronóstico, no una promesa: solo dice algo cuando el movimiento es claro.",
+        "none": "Ningún sensor va claramente hacia un límite.",
+        "rising": "{{metric}} está en {{current}} y sube {{rate}} al día",
+        "falling": "{{metric}} está en {{current}} y baja {{rate}} al día",
+        "reaches": "Llega a {{limit}} {{when}}, hacia el {{date}}",
+        "range": "Entre {{soonest}} y {{latest}} días",
+        "basis": "con {{history}} días de lecturas ({{points}} días usados), regla: {{rule}}",
+        "range_narrow": "Un rango estrecho: las lecturas siguen la línea de cerca"
+      },
+      "parts": {
+        "title": "Repuestos que pueden agotarse",
+        "intro": "Lo que se espera usar en los próximos 30 días, según los últimos meses de uso, frente a lo que hay en existencia y pedido. Es un pronóstico, no una promesa. El trabajo planificado que aún no se ha registrado no está incluido.",
+        "none": "No se espera que se agote ningún repuesto.",
+        "short": "Puede agotarse",
+        "tight": "Justo",
+        "expected": "Uso esperado en los próximos 30 días: {{expected}} {{unit}} (probablemente {{low}} a {{high}})",
+        "held": "En existencia {{on_hand}}, pedido {{on_order}}",
+        "days": "existencias para unos {{days}} días",
+        "suggest": "considere pedir {{quantity}}",
+        "basis": "con {{periods}} meses de uso, registrado {{uses}} veces"
+      }
     }
   }
 }

@@ -52,6 +52,21 @@ beforeEach(() => {
 })
 
 describe('PartsPage', () => {
+
+  it('has the parts that may run short above the catalog', async () => {
+    signInAs('manager')
+    server.use(
+      http.get('/api/v1/parts', () => HttpResponse.json({ parts: [seal], meta: meta(1) })),
+      http.get('/api/v1/ai/forecasts/parts', () => HttpResponse.json({ data: [{
+        part: { id: 1, name: 'Hydraulic seal', sku: 'SKU-1', unit: 'each' }, status: 'short', used_last_30_days: 4, expected: 4, low: 1, high: 7, on_hand: 1, on_order: 0,
+        days_of_stock: 8, suggested_quantity: 6, periods: 6, uses: 12,
+      }] })),
+    )
+    renderPage()
+
+    expect(await screen.findByRole('heading', { name: 'Parts that may run short' })).toBeInTheDocument()
+    expect(await screen.findByText('May run short')).toBeInTheDocument()
+  })
   it('adds a column for each part field chosen for the list, with its value on each part', async () => {
     const shelf = customField({ label: 'Shelf', entity: 'part', in_list: true })
     const grade = customField({ label: 'Grade', entity: 'part' })

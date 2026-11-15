@@ -20,7 +20,7 @@ const providers = (over: Record<string, unknown> = {}) => ({
 
 const off = (over: Record<string, unknown> = {}) => ({
   provider: 'none', enabled: false, source: null, where: null, environment_configured: false, providers: providers(),
-  features: { priority: true, anomalies: true }, ...over,
+  features: { priority: true, anomalies: true, limits: true, parts: true }, ...over,
 })
 
 const local = (over: Record<string, unknown> = {}) =>
@@ -327,6 +327,28 @@ describe('AISettingsPage', () => {
       expect(anomalies).toBeChecked()
       expect(priority).toHaveAccessibleDescription(/sends the title, the description and what is open on the asset to model\.lan/)
       expect(anomalies).toHaveAccessibleDescription(/nothing is sent to the provider/)
+    })
+
+    it('lists the two forecasts as switches too, and says they are worked out on the server', async () => {
+      serve(local())
+      renderPage()
+
+      const limits = await screen.findByRole('checkbox', { name: 'Warn when a sensor is heading for its limit' })
+      const parts = screen.getByRole('checkbox', { name: 'Forecast parts that may run short' })
+      expect(limits).toBeChecked()
+      expect(parts).toBeChecked()
+      expect(limits).toHaveAccessibleDescription(/nothing is sent to the provider/)
+      expect(parts).toHaveAccessibleDescription(/nothing is sent to the provider/)
+    })
+
+    it('switches a forecast off on its own', async () => {
+      const user = userEvent.setup()
+      const sent = serve(local())
+      renderPage()
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Forecast parts that may run short' }))
+
+      await waitFor(() => expect(sent.saved).toEqual({ features: { parts: false } }))
     })
 
     it('switches one off on its own, sending only that and nothing about the provider', async () => {

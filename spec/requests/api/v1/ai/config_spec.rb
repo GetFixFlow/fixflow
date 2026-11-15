@@ -41,15 +41,15 @@ RSpec.describe "Api::V1::Ai::Config", type: :request do
 
   it "says which features are on: none while AI is off, all once it is on, and not one that was switched off" do
     get "/api/v1/ai/config", headers: auth_headers_for(user)
-    expect(config["features"]).to eq("priority" => false, "anomalies" => false)
+    expect(config["features"]).to eq("priority" => false, "anomalies" => false, "limits" => false, "parts" => false)
 
     organization.update!(ai_settings: local_model("http://192.168.1.20:11434/v1"))
     get "/api/v1/ai/config", headers: auth_headers_for(user)
-    expect(config["features"]).to eq("priority" => true, "anomalies" => true)
+    expect(config["features"]).to eq("priority" => true, "anomalies" => true, "limits" => true, "parts" => true)
 
     organization.update!(ai_settings: local_model("http://192.168.1.20:11434/v1").merge("features" => { "priority" => false }))
     get "/api/v1/ai/config", headers: auth_headers_for(user)
-    expect(config["features"]).to eq("priority" => false, "anomalies" => true)
+    expect(config["features"]).to eq("priority" => false, "anomalies" => true, "limits" => true, "parts" => true)
   end
 
   it "does not tell anyone AI is on when the choice is not complete (a Claude key that cannot be read)" do

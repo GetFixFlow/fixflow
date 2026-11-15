@@ -47,6 +47,8 @@ An alert that cannot make the move you ask for is refused with the reason. **Bul
 
 When AI is on ([AI](ai.md)), the **IoT Alerts** page also lists **Unusual readings**: a reading far outside what that sensor usually reads, found from the sensor's own last two weeks, with no limit to set. It is a flag for a person to look at, not an alert: it opens no work order. A manager can mark it **It's real** or **It's nothing**. [How it decides, and when it stays quiet](ai.md#unusual-sensor-readings).
 
+Above it, **Heading for a limit** lists sensors that have been moving steadily towards a limit set on one of your rules, with about when they get there and a range: [how it works](ai.md#heading-for-a-limit).
+
 ### The IoT screens: monitor, report and live alerts
 
 **IoT → Monitor** (everyone signed in) shows what the sensors are doing now, counted from the stored readings and alerts:

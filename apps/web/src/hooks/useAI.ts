@@ -20,7 +20,7 @@ export function useAI() {
     provider: data?.provider,
     source: data?.source,
     /** A feature is on when AI is, and the administrator has not switched it off. */
-    features: data?.features ?? { priority: false, anomalies: false },
+    features: data?.features ?? { priority: false, anomalies: false, limits: false, parts: false },
     isLoading,
   }
 }
@@ -84,4 +84,14 @@ export function useAnswerAnomaly(action: 'acknowledge' | 'dismiss') {
     onSettled: () => qc.invalidateQueries({ queryKey: SENSOR_ANOMALIES_KEY }),
     onError: (error) => toast.error(apiErrorMessage(error, t('ai.anomalies.action_failed'))),
   })
+}
+
+/** The sensors heading for a limit, the soonest first. Only asked for when the feature is on. */
+export function useLimitForecasts(enabled: boolean) {
+  return useQuery({ queryKey: ['ai', 'forecasts', 'limits'], queryFn: () => aiApi.forecasts.limits().then((r) => r.data.data), enabled })
+}
+
+/** The parts that may run short, the ones most likely to first. Only asked for when the feature is on. */
+export function usePartForecasts(enabled: boolean) {
+  return useQuery({ queryKey: ['ai', 'forecasts', 'parts'], queryFn: () => aiApi.forecasts.parts().then((r) => r.data.data), enabled })
 }
