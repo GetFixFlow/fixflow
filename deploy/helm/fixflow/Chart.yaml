@@ -1,0 +1,11 @@
+apiVersion: v2
+name: fixflow
+description: "FixFlow CMMS (maintenance management): the web app, the API, the background workers, and optionally the database, Redis, file storage and sensor broker."
+type: application
+# The chart's version and the version of FixFlow it installs are the same number (bin/release moves both).
+version: 0.1.0
+appVersion: "0.1.0"
+kubeVersion: ">=1.25.0-0"
+home: https://github.com/GetFixFlow/fixflow
+sources:
+  - https://github.com/GetFixFlow/fixflow

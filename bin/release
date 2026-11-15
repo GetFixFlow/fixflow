@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
-# Prepares a release: a branch with the VERSION file changed, the image version in the compose files changed to match, and
-# what is under [Unreleased] in CHANGELOG.md moved into a section for the new version. Nothing is pushed or tagged; it prints
+# Prepares a release: a branch with the VERSION file changed, the image version in the compose files and the Helm chart changed
+# to match, and what is under [Unreleased] in CHANGELOG.md moved into a section for the new version. Nothing is pushed or tagged; it prints
 # what to do next.
 # Usage: bin/release 1.2.3         bin/release 1.2.3 --dry-run   (shows the release notes, changes nothing)
 require "open3"
@@ -44,7 +44,8 @@ git("switch", "-c", "release-#{version}")
 File.write(FixflowRelease::VERSION_FILE, "#{version}\n")
 File.write(FixflowRelease::CHANGELOG_FILE, changelog)
 FixflowRelease::COMPOSE_FILES.each { |file| File.write(file, FixflowRelease.pin_images(File.read(file), version)) }
-git("add", "VERSION", "CHANGELOG.md", *FixflowRelease::COMPOSE_FILES)
+File.write(FixflowRelease::CHART_FILE, FixflowRelease.pin_chart(File.read(FixflowRelease::CHART_FILE), version))
+git("add", "VERSION", "CHANGELOG.md", *FixflowRelease::COMPOSE_FILES, FixflowRelease::CHART_FILE)
 git("commit", "-m", "Release #{version}")
 
 puts <<~NEXT

@@ -5,6 +5,8 @@
 
 Install FixFlow with Docker on a Linux server, then set it up.
 
+For a company that runs Kubernetes, or that needs more than one application server, see [Install on Kubernetes](kubernetes.md) instead.
+
 ## One-command install
 
 On a fresh **Ubuntu 22.04+ or Debian 12+** server, one script does everything below: it installs Docker, downloads FixFlow, writes `.env` with random secrets and starts it.

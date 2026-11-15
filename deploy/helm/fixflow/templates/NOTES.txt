@@ -1,0 +1,30 @@
+FixFlow {{ .Chart.AppVersion }} is being installed as "{{ .Release.Name }}" in the namespace "{{ .Release.Namespace }}".
+
+{{- if .Values.ingress.enabled }}
+
+Open {{ .Values.appUrl }} once the pods are ready. The first time, FixFlow asks for the company and the first administrator.
+{{- if not .Values.ingress.tls.enabled }}
+{{- if hasPrefix "https://" .Values.appUrl }}
+
+appUrl is an https address but ingress.tls.enabled is false: the certificate must come from somewhere (your Ingress controller's default
+certificate, a load balancer in front of it, or ingress.tls here), or people will not get through.
+{{- end }}
+{{- end }}
+{{- else }}
+
+The Ingress is off. Send {{ .Values.appUrl }}/api and {{ .Values.appUrl }}/cable (a WebSocket) to the service {{ include "fixflow.fullname" . }}-api on port 3000, and
+everything else to {{ include "fixflow.fullname" . }}-web on port 80.
+{{- end }}
+
+Watch it start (the first start migrates the database, which can take a few minutes):
+
+  kubectl -n {{ .Release.Namespace }} get pods -l app.kubernetes.io/instance={{ .Release.Name }} -w
+
+Check it:
+
+  helm test {{ .Release.Name }} -n {{ .Release.Namespace }}
+{{- if or .Values.postgresql.enabled .Values.redis.enabled .Values.s3.enabled .Values.mqtt.enabled }}
+
+This install runs ONE copy of {{ if .Values.postgresql.enabled }}PostgreSQL {{ end }}{{ if .Values.redis.enabled }}Redis {{ end }}{{ if .Values.s3.enabled }}the file storage {{ end }}{{ if .Values.mqtt.enabled }}the sensor broker {{ end }}in the cluster: it is not highly available,
+and losing its disk loses its data. See docs/high-availability.md for what to run instead, and docs/backups.md for backups.
+{{- end }}

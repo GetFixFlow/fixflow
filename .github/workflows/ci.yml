@@ -238,6 +238,57 @@ jobs:
       - name: Start the lite install and check it
         run: bin/check_lite
 
+  # Checks the Helm chart (deploy/helm/fixflow) without a cluster: it lints, renders it the ways it is used and validates the
+  # result as Kubernetes, and checks one worker listens to the sensor broker, secrets stay in the Secret, settings changes restart
+  # the pods, and an install that cannot work is refused in words. Seconds, not minutes.
+  helm:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.17.3
+
+      - name: Install kubeconform
+        run: |
+          base=https://github.com/yannh/kubeconform/releases/download/v0.6.7
+          curl -fsSL -o kubeconform.tar.gz "$base/kubeconform-linux-amd64.tar.gz"
+          curl -fsSL -o CHECKSUMS "$base/CHECKSUMS"
+          grep ' kubeconform-linux-amd64.tar.gz$' CHECKSUMS | sed 's/kubeconform-linux-amd64.tar.gz/kubeconform.tar.gz/' | sha256sum -c -
+          tar xzf kubeconform.tar.gz kubeconform
+          sudo mv kubeconform /usr/local/bin/
+
+      - name: Lint, render and check the chart
+        run: bin/check_helm
+
+  # Installs the chart on a real cluster (kind), from images built here, behind an Ingress controller, and checks it works: first-run
+  # setup and sign-in, a WebSocket, System Health, a file in the bundled storage, helm test, then what the chart is for: a sensor
+  # message received once with several workers, an API server killed and the other still answering, and a rolling upgrade with the API
+  # answering throughout. It builds the images and starts about a dozen pods, so it takes a while.
+  kubernetes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.17.3
+
+      - name: Install kind
+        uses: helm/kind-action@v1
+        with:
+          install_only: true
+          version: v0.27.0
+
+      - name: Install the chart on a cluster and check it
+        run: bin/check_kubernetes
+
   # Builds the docs site (mkdocs.yml). A broken link or anchor between pages fails it, and so does a page missing from the
   # navigation. (That docs/api-endpoints.md matches the routes is checked by the `test` job.)
   docs:

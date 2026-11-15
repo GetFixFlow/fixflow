@@ -1,0 +1,88 @@
+{{- include "fixflow.validate" . -}}
+{{- $full := include "fixflow.fullname" . -}}
+{{- $sel := dict "root" . "component" "api" -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $full }}-api
+  labels: {{ include "fixflow.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  {{- if not .Values.api.autoscaling.enabled }}
+  replicas: {{ .Values.api.replicas }}
+  {{- end }}
+  # A new server is started before an old one is stopped, so that there is always one answering.
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxSurge: 1, maxUnavailable: 0 }
+  selector:
+    matchLabels: {{ include "fixflow.selectorLabels" $sel | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "fixflow.selectorLabels" $sel | nindent 8 }}
+      annotations:
+        # A change to the secrets or the settings starts new pods.
+        checksum/config: {{ dict "env" .Values.env "secrets" (ternary .Values.secrets (dict) (not .Values.existingSecret)) "plugins" .Values.plugins | toJson | sha256sum }}
+    spec:
+      serviceAccountName: {{ $full }}
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 40
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile: { type: RuntimeDefault }
+      {{- include "fixflow.imagePullSecrets" . | nindent 6 }}
+      {{- include "fixflow.placement" $sel | nindent 6 }}
+      containers:
+        - name: api
+          image: {{ include "fixflow.image" (dict "root" . "name" "fixflow-api") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - { name: http, containerPort: 3000 }
+          env: {{ include "fixflow.env" (dict "root" . "subscriber" "false") | nindent 12 }}
+          {{- with .Values.extraEnvFrom }}
+          envFrom: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          # The server answers, and the database and Redis answer to it. Used to decide whether to send it requests, not whether to
+          # restart it: a database that is down for a minute must not make every server restart.
+          startupProbe:
+            httpGet: { path: /api/v1/health, port: http }
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: {{ .Values.api.startupFailureThreshold }}
+          readinessProbe:
+            httpGet: { path: /api/v1/health, port: http }
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket: { port: http }
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 6
+          lifecycle:
+            # Gives the Service time to stop sending requests before the server is told to stop.
+            preStop: { exec: { command: ["sleep", "5"] } }
+          resources: {{ toYaml .Values.api.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: ["ALL"] }
+          {{- if .Values.plugins.existingClaim }}
+          volumeMounts: {{ include "fixflow.pluginsMount" . | nindent 12 }}
+          {{- end }}
+      {{- if .Values.plugins.existingClaim }}
+      volumes: {{ include "fixflow.pluginsVolume" . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $full }}-api
+  labels: {{ include "fixflow.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  selector: {{ include "fixflow.selectorLabels" $sel | nindent 4 }}
+  ports:
+    - { name: http, port: 3000, targetPort: http }

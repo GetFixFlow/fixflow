@@ -1,0 +1,71 @@
+{{- if .Values.redis.enabled }}
+{{- $full := include "fixflow.fullname" . }}
+{{- $sel := dict "root" . "component" "redis" }}
+# ONE copy of Redis with its own disk. Not highly available (docs/high-availability.md).
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $full }}-redis
+  labels: {{ include "fixflow.labels" . | nindent 4 }}
+    app.kubernetes.io/component: redis
+spec:
+  serviceName: {{ $full }}-redis
+  replicas: 1
+  selector:
+    matchLabels: {{ include "fixflow.selectorLabels" $sel | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "fixflow.selectorLabels" $sel | nindent 8 }}
+    spec:
+      serviceAccountName: {{ $full }}
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: redis
+          image: {{ .Values.redis.image }}
+          # noeviction: when it is full Redis says so, instead of dropping queued jobs.
+          args: ["redis-server", "--requirepass", "$(REDIS_PASSWORD)", "--maxmemory", "256mb", "--maxmemory-policy", "noeviction"]
+          ports:
+            - { name: redis, containerPort: 6379 }
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom: { secretKeyRef: { name: {{ include "fixflow.secretName" . }}, key: REDIS_PASSWORD } }
+            # redis-cli reads its password from here.
+            - { name: REDISCLI_AUTH, value: "$(REDIS_PASSWORD)" }
+          readinessProbe:
+            exec: { command: ["sh", "-c", "redis-cli ping | grep -q PONG"] }
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            exec: { command: ["sh", "-c", "redis-cli ping | grep -q PONG"] }
+            initialDelaySeconds: 20
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 6
+          resources: {{ toYaml .Values.redis.resources | nindent 12 }}
+          volumeMounts:
+            - { name: data, mountPath: /data }
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- with .Values.redis.persistence.storageClass }}
+        storageClassName: {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.redis.persistence.size }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $full }}-redis
+  labels: {{ include "fixflow.labels" . | nindent 4 }}
+    app.kubernetes.io/component: redis
+spec:
+  selector: {{ include "fixflow.selectorLabels" $sel | nindent 4 }}
+  ports:
+    - { name: redis, port: 6379, targetPort: redis }
+{{- end }}

@@ -1,0 +1,57 @@
+{{- $full := include "fixflow.fullname" . -}}
+{{- $sel := dict "root" . "component" "web" -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $full }}-web
+  labels: {{ include "fixflow.labels" . | nindent 4 }}
+    app.kubernetes.io/component: web
+spec:
+  {{- if not .Values.web.autoscaling.enabled }}
+  replicas: {{ .Values.web.replicas }}
+  {{- end }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxSurge: 1, maxUnavailable: 0 }
+  selector:
+    matchLabels: {{ include "fixflow.selectorLabels" $sel | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "fixflow.selectorLabels" $sel | nindent 8 }}
+    spec:
+      serviceAccountName: {{ $full }}
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile: { type: RuntimeDefault }
+      {{- include "fixflow.imagePullSecrets" . | nindent 6 }}
+      {{- include "fixflow.placement" $sel | nindent 6 }}
+      containers:
+        - name: web
+          image: {{ include "fixflow.image" (dict "root" . "name" "fixflow-web") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - { name: http, containerPort: 80 }
+          readinessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 6
+          resources: {{ toYaml .Values.web.resources | nindent 12 }}
+          # nginx starts as root (to listen on port 80) and serves as its own user; it needs its default capabilities for that.
+          securityContext:
+            allowPrivilegeEscalation: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $full }}-web
+  labels: {{ include "fixflow.labels" . | nindent 4 }}
+    app.kubernetes.io/component: web
+spec:
+  selector: {{ include "fixflow.selectorLabels" $sel | nindent 4 }}
+  ports:
+    - { name: http, port: 80, targetPort: http }

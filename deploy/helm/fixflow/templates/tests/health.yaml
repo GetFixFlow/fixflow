@@ -1,0 +1,33 @@
+{{- $full := include "fixflow.fullname" . }}
+# helm test <release>: asks the API (which checks the database and Redis) and the web service whether they are up.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ $full }}-test
+  labels: {{ include "fixflow.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  restartPolicy: Never
+  serviceAccountName: {{ $full }}
+  automountServiceAccountToken: false
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    seccompProfile: { type: RuntimeDefault }
+  {{- include "fixflow.imagePullSecrets" . | nindent 2 }}
+  containers:
+    - name: health
+      image: {{ include "fixflow.image" (dict "root" . "name" "fixflow-api") }}
+      imagePullPolicy: {{ .Values.image.pullPolicy }}
+      # Not the image's entrypoint, which would check the settings and migrate the database.
+      command: ["sh", "-c"]
+      args:
+        - >-
+          curl -fsS http://{{ $full }}-api:3000/api/v1/health | grep -q '"status":"ok"' &&
+          curl -fsS http://{{ $full }}-web/healthz
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: { drop: ["ALL"] }

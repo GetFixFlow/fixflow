@@ -1,0 +1,71 @@
+{{- if .Values.s3.enabled }}
+{{- $full := include "fixflow.fullname" . }}
+{{- $sel := dict "root" . "component" "s3" }}
+# ONE copy of SeaweedFS (an S3-compatible file storage) with its own disk. Not highly available (docs/high-availability.md).
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $full }}-s3
+  labels: {{ include "fixflow.labels" . | nindent 4 }}
+    app.kubernetes.io/component: s3
+spec:
+  serviceName: {{ $full }}-s3
+  replicas: 1
+  selector:
+    matchLabels: {{ include "fixflow.selectorLabels" $sel | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "fixflow.selectorLabels" $sel | nindent 8 }}
+    spec:
+      serviceAccountName: {{ $full }}
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: s3
+          image: {{ .Values.s3.image }}
+          args: ["server", "-s3", "-dir=/data"]
+          ports:
+            - { name: s3, containerPort: 8333 }
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom: { secretKeyRef: { name: {{ include "fixflow.secretName" . }}, key: MINIO_ACCESS_KEY } }
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: {{ include "fixflow.secretName" . }}, key: MINIO_SECRET_KEY } }
+          readinessProbe:
+            httpGet: { path: /healthz, port: s3 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet: { path: /healthz, port: s3 }
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 6
+          resources: {{ toYaml .Values.s3.resources | nindent 12 }}
+          volumeMounts:
+            - { name: data, mountPath: /data }
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- with .Values.s3.persistence.storageClass }}
+        storageClassName: {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.s3.persistence.size }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $full }}-s3
+  labels: {{ include "fixflow.labels" . | nindent 4 }}
+    app.kubernetes.io/component: s3
+spec:
+  selector: {{ include "fixflow.selectorLabels" $sel | nindent 4 }}
+  ports:
+    - { name: s3, port: 8333, targetPort: s3 }
+{{- end }}

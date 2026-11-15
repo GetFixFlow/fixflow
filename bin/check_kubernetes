@@ -1,0 +1,287 @@
+#!/bin/sh
+# Installs the Helm chart (deploy/helm/fixflow) on a real cluster, from images built from this checkout, and checks that it works:
+# everything starts, the front door (an Ingress controller) serves the web app and the API, a WebSocket upgrades, first-run setup
+# and sign-in work, System Health is fine, a file is kept in the bundled file storage, `helm test` passes, and what the chart
+# is for holds:
+#
+#   - with three workers and a sensor broker, a message sent to the broker is received ONCE (one worker listens), not three times;
+#   - one of the two API servers can be killed and the other keeps answering;
+#   - a rolling upgrade (new settings) leaves the API answering throughout.
+#
+# The cluster is kind (Kubernetes in Docker), made here and removed after unless one named $KIND_CLUSTER (default fixflow-check)
+# already exists, which is then used and left. It needs docker, kind, kubectl, helm and curl, and takes about twenty minutes
+# (the images are built). CI runs it (the kubernetes job).
+set -eu
+cd "$(dirname "$0")/.."
+
+for tool in docker kind kubectl helm curl; do
+  command -v "$tool" >/dev/null 2>&1 || { echo "bin/check_kubernetes: $tool is not installed." >&2; exit 2; }
+done
+
+CLUSTER=${KIND_CLUSTER:-fixflow-check}
+NS=fixflow
+REL=fixflow
+HOST=fixflow.test
+PORT=18080
+URL="http://127.0.0.1:$PORT"
+REPO=fixflow-check
+TAG=ci
+CHART=deploy/helm/fixflow
+MQTT_PASSWORD=$(openssl rand -hex 12)
+PROBE=$(mktemp)
+PF_PID=""
+PROBE_PID=""
+CREATED=""
+
+cleanup() {
+  status=$?
+  if [ "$status" != 0 ]; then
+    echo "---- pods" >&2
+    kubectl -n "$NS" get pods -o wide >&2 || true
+    echo "---- recent events" >&2
+    kubectl -n "$NS" get events --sort-by=.lastTimestamp 2>&1 | tail -30 >&2 || true
+    for pod in $(kubectl -n "$NS" get pods -o name 2>/dev/null); do
+      echo "---- $pod (last log lines)" >&2
+      kubectl -n "$NS" logs "$pod" --all-containers --tail 25 >&2 2>&1 || true
+    done
+  fi
+  [ -z "$PROBE_PID" ] || kill "$PROBE_PID" 2>/dev/null || true
+  [ -z "$PF_PID" ] || kill "$PF_PID" 2>/dev/null || true
+  rm -f "$PROBE"
+  if [ -n "$CREATED" ]; then
+    kind delete cluster --name "$CLUSTER" >/dev/null 2>&1 || true
+  else
+    helm -n "$NS" uninstall "$REL" >/dev/null 2>&1 || true
+    kubectl delete namespace "$NS" --wait=false >/dev/null 2>&1 || true
+  fi
+  exit "$status"
+}
+trap cleanup EXIT
+
+fail() { echo "FAIL: $*" >&2; exit 1; }
+ok() { echo "ok:   $*"; }
+c() { curl -s -H "Host: $HOST" "$@"; }
+
+# ── A cluster, with the images in it ──
+if kind get clusters 2>/dev/null | grep -qx "$CLUSTER"; then
+  ok "using the kind cluster $CLUSTER that is already here"
+else
+  kind create cluster --name "$CLUSTER" --wait 180s >/dev/null || fail "making the kind cluster"
+  CREATED=yes
+  ok "made the kind cluster $CLUSTER"
+fi
+kubectl config use-context "kind-$CLUSTER" >/dev/null
+
+docker build -q -t "$REPO/fixflow-api:$TAG" . >/dev/null || fail "building the api image"
+docker build -q -t "$REPO/fixflow-web:$TAG" apps/web >/dev/null || fail "building the web image"
+kind load docker-image "$REPO/fixflow-api:$TAG" "$REPO/fixflow-web:$TAG" --name "$CLUSTER" >/dev/null || fail "loading the images into the cluster"
+ok "built the api and web images and loaded them into the cluster"
+
+# An Ingress controller, which is what sends /api and /cable to the API and the rest to the web service.
+helm upgrade --install ingress-nginx ingress-nginx --repo https://kubernetes.github.io/ingress-nginx --version 4.12.1 \
+  --namespace ingress-nginx --create-namespace --set controller.service.type=NodePort \
+  --set controller.admissionWebhooks.enabled=false --set controller.watchIngressWithoutClass=true \
+  --wait --timeout 6m >/dev/null || fail "installing the Ingress controller"
+ok "Ingress controller running"
+
+# ── Install the chart: the defaults (everything in the cluster), two copies of each server, two workers ──
+# CPU requests are lowered so that this fits a small machine; memory is left as the chart has it.
+ARGS="--set appUrl=http://$HOST --set image.repository=$REPO --set image.tag=$TAG --set image.pullPolicy=Never \
+--set secrets.secretKeyBase=$(openssl rand -hex 64) --set secrets.deviseJwtSecretKey=$(openssl rand -hex 48) \
+--set secrets.dbPassword=$(openssl rand -hex 24) --set secrets.redisPassword=$(openssl rand -hex 24) \
+--set secrets.s3AccessKey=$(openssl rand -hex 10) --set secrets.s3SecretKey=$(openssl rand -hex 24) --set secrets.mqttPassword=$MQTT_PASSWORD \
+--set api.replicas=2 --set web.replicas=2 --set sidekiq.replicas=2 \
+--set api.resources.requests.cpu=50m --set sidekiq.resources.requests.cpu=50m --set iot.subscriber.resources.requests.cpu=50m \
+--set postgresql.resources.requests.cpu=50m --set s3.resources.requests.cpu=50m"
+# shellcheck disable=SC2086  # ARGS is a list of arguments on purpose
+helm upgrade --install "$REL" "$CHART" --namespace "$NS" --create-namespace $ARGS --wait --timeout 12m >/dev/null \
+  || fail "the chart did not install and become ready in 12 minutes"
+ok "installed, and every Deployment and StatefulSet is ready"
+
+kubectl -n ingress-nginx port-forward svc/ingress-nginx-controller "$PORT:80" >/dev/null 2>&1 &
+PF_PID=$!
+for _ in $(seq 1 30); do
+  [ "$(c -o /dev/null -w '%{http_code}' "$URL/healthz")" = "200" ] && break
+  sleep 1
+done
+
+helm test "$REL" --namespace "$NS" --timeout 3m >/dev/null || fail "helm test"
+ok "helm test: the API and the web service answer"
+
+# ── The front door ──
+[ "$(c -o /dev/null -w '%{http_code}' "$URL/healthz")" = "200" ] || fail "/healthz through the Ingress"
+c "$URL/api/v1/health" | grep -q '"status":"ok"' || fail "/api/v1/health through the Ingress"
+c "$URL/" | grep -q 'id="root"' || fail "the web app is not served at /"
+[ "$(c -o /dev/null -w '%{http_code}' "$URL/settings/data-retention")" = "200" ] || fail "a deep link of the web app"
+c "$URL/api/v1/setup/status" | grep -q '"setup_required":true' || fail "setup status"
+ok "the Ingress serves the web app and the API"
+
+UPGRADE=$(c -i -m 3 -H 'Connection: Upgrade' -H 'Upgrade: websocket' -H 'Sec-WebSocket-Version: 13' \
+  -H 'Sec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw==' -H "Origin: http://$HOST" "$URL/cable" 2>/dev/null | head -1 || true)
+echo "$UPGRADE" | grep -q ' 101 ' || fail "/cable did not upgrade to a WebSocket through the Ingress (got: $UPGRADE)"
+ok "/cable upgrades to a WebSocket through the Ingress"
+
+JSON='Content-Type: application/json'
+c -X POST "$URL/api/v1/auth/sign_up" -H "$JSON" \
+  -d '{"user":{"email":"admin@check.test","password":"Blue-Ladder-4721-Kite","password_confirmation":"Blue-Ladder-4721-Kite","first_name":"Check","last_name":"Admin","organization_name":"Check Co"}}' \
+  | grep -q 'Account created' || fail "first-run setup"
+TOKEN=$(c -D - -o /dev/null -X POST "$URL/api/v1/auth/sign_in" -H "$JSON" \
+  -d '{"user":{"email":"admin@check.test","password":"Blue-Ladder-4721-Kite"}}' | grep -i '^authorization:' | sed 's/^[Aa]uthorization: //' | tr -d '\r')
+[ -n "$TOKEN" ] || fail "sign-in returned no token"
+ok "first-run setup, and sign-in"
+
+# The workers and the broker connection report in a few seconds: wait for them.
+HEALTH_PROBLEM="never asked"
+for _ in $(seq 1 40); do
+  HEALTH_PROBLEM=$(c "$URL/api/v1/system_health" -H "Authorization: $TOKEN" | python3 -c '
+import json, sys
+try:
+    data = json.load(sys.stdin)
+except ValueError:
+    sys.exit("not JSON")
+checks = data.get("checks", data)
+bad = [name for name in ("database", "redis", "background_jobs", "mqtt", "storage") if checks.get(name, {}).get("status") != "ok"]
+print(", ".join("%s: %s" % (n, checks.get(n, {}).get("summary", "missing")) for n in bad))
+' 2>&1) || true
+  [ -z "$HEALTH_PROBLEM" ] && break
+  sleep 3
+done
+[ -z "$HEALTH_PROBLEM" ] || fail "System Health is not ok after two minutes: $HEALTH_PROBLEM"
+ok "System Health: database, Redis, workers, sensor broker and file storage all ok"
+
+# A file kept in the bundled storage and read back: the buckets were made, and the API can write and read them.
+API_POD=$(kubectl -n "$NS" get pod -l app.kubernetes.io/component=api -o name | head -1)
+kubectl -n "$NS" exec "$API_POD" -- bundle exec rails runner \
+  'blob = ActiveStorage::Blob.create_and_upload!(io: StringIO.new("kept in the bundled storage"), filename: "check.txt", content_type: "text/plain"); print blob.download' \
+  2>/dev/null | grep -q 'kept in the bundled storage' || fail "a file was not kept in the bundled file storage"
+ok "a file is kept in the bundled file storage and read back"
+
+# ── Several servers: what the chart is for ──
+wait_ready() { # a Deployment's name and how many pods it should have ready
+  for _ in $(seq 1 90); do
+    [ "$(kubectl -n "$NS" get deploy "$1" -o jsonpath='{.status.readyReplicas}' 2>/dev/null)" = "$2" ] && return 0
+    sleep 2
+  done
+  return 1
+}
+start_probe() {
+  : > "$PROBE"
+  (while :; do
+    if [ "$(c -m 2 -o /dev/null -w '%{http_code}' "$URL/api/v1/health")" = "200" ]; then echo ok; else echo fail; fi >> "$PROBE"
+    sleep 0.5
+  done) &
+  PROBE_PID=$!
+}
+stop_probe() { kill "$PROBE_PID" 2>/dev/null || true; wait "$PROBE_PID" 2>/dev/null || true; PROBE_PID=""; }
+longest_failure() { awk '$1=="fail"{n++; if(n>m)m=n} $1=="ok"{n=0} END{print m+0}' "$PROBE"; }
+# Half a second apart, so three in a row is a second and a half of no answer.
+MOST=3
+
+# Three workers and a sensor broker: a message sent once must be received once.
+worker_logs() { kubectl -n "$NS" logs -l 'app.kubernetes.io/component in (sidekiq,sidekiq-iot)' --all-containers --prefix=false --tail=-1 --max-log-requests=10 2>/dev/null; }
+kubectl -n "$NS" scale "deploy/$REL-sidekiq" --replicas=3 >/dev/null
+wait_ready "$REL-sidekiq" 3 || fail "three workers did not become ready"
+# A worker is ready as soon as it runs; it is working when it says so. All four (three, and the listening one) must be, or a
+# worker that listens by mistake could still be starting, and the count below would miss it.
+for _ in $(seq 1 60); do
+  [ "$(worker_logs | grep -c 'Schedules Loaded')" -ge 4 ] && break
+  sleep 3
+done
+[ "$(worker_logs | grep -c 'Schedules Loaded')" -ge 4 ] || fail "the four workers did not all start working"
+sleep 8 # the part of a worker that listens to the broker starts a few seconds after the worker does
+for _ in $(seq 1 30); do
+  [ "$(worker_logs | grep -c '\[MQTT\] Connected')" -ge 1 ] && break
+  sleep 2
+done
+[ "$(worker_logs | grep -c '\[MQTT\] Connected')" = "1" ] || fail "the sensor broker has $(worker_logs | grep -c '\[MQTT\] Connected') listeners, and should have one"
+MARK="nosuchcompany$$"
+kubectl -n "$NS" exec "sts/$REL-mqtt" -- mosquitto_pub -h 127.0.0.1 -u fixflow -P "$MQTT_PASSWORD" -t "fixflow/$MARK/telemetry" -m '{"value":1}' \
+  || fail "sending a message to the sensor broker"
+for _ in $(seq 1 30); do
+  [ "$(worker_logs | grep -c "Unknown org token: $MARK")" -ge 1 ] && break
+  sleep 1
+done
+sleep 5 # long enough for a second listener to have shown itself
+[ "$(worker_logs | grep -c "Unknown org token: $MARK")" = "1" ] \
+  || fail "the message was received $(worker_logs | grep -c "Unknown org token: $MARK") times by 4 workers, and should be once"
+ok "one message to the sensor broker was received once, with three workers and the listening one running"
+
+# One of the two API servers is killed: the other answers.
+start_probe
+VICTIM=$(kubectl -n "$NS" get pod -l app.kubernetes.io/component=api -o name | head -1)
+kubectl -n "$NS" delete "$VICTIM" --wait=false >/dev/null
+sleep 3
+wait_ready "$REL-api" 2 || fail "the killed API server was not replaced"
+sleep 3
+stop_probe
+[ "$(wc -l < "$PROBE")" -ge 10 ] || fail "too few answers were asked for while an API server was killed"
+[ "$(longest_failure)" -le "$MOST" ] || fail "the API stopped answering for $(longest_failure) checks in a row when one server was killed"
+ok "an API server was killed and replaced: at most $(longest_failure) checks in a row went unanswered, of $(wc -l < "$PROBE")"
+
+# A rolling upgrade: new settings, so new pods, replaced one at a time.
+start_probe
+# shellcheck disable=SC2086
+helm upgrade "$REL" "$CHART" --namespace "$NS" $ARGS --set env.CHECK_ROLLOUT=upgraded --wait --timeout 12m >/dev/null \
+  || { stop_probe; fail "the upgrade did not finish"; }
+sleep 3
+stop_probe
+[ "$(wc -l < "$PROBE")" -ge 20 ] || fail "too few answers were asked for during the upgrade"
+[ "$(longest_failure)" -le "$MOST" ] || fail "the API stopped answering for $(longest_failure) checks in a row during the upgrade"
+ok "a rolling upgrade: at most $(longest_failure) checks in a row went unanswered, of $(wc -l < "$PROBE")"
+# An old pod may still be shutting down (and still listed) for a while after the upgrade: wait until both API pods are new ones.
+UPGRADED=0
+for _ in $(seq 1 30); do
+  UPGRADED=0
+  for pod in $(kubectl -n "$NS" get pods -l app.kubernetes.io/component=api -o name); do
+    kubectl -n "$NS" exec "$pod" -- printenv CHECK_ROLLOUT 2>/dev/null | grep -q upgraded && UPGRADED=$((UPGRADED + 1))
+  done
+  [ "$UPGRADED" -ge 2 ] && break
+  sleep 3
+done
+[ "$UPGRADED" -ge 2 ] || fail "the new setting reached $UPGRADED of the 2 API pods"
+[ "$(kubectl -n "$NS" get pods -l app.kubernetes.io/component=sidekiq-iot --no-headers | wc -l)" = "1" ] \
+  || fail "there must be exactly one listening worker after an upgrade"
+ok "the new setting reached the new pods, and there is still one listening worker"
+
+ARGS="$ARGS --set env.CHECK_ROLLOUT=upgraded"
+
+# ── A backup, a change, and a restore: the steps in docs/kubernetes.md ──
+api_exec() { kubectl -n "$NS" exec "deploy/$REL-api" -- "$@"; }
+# The server logs to its output, so a command run in it prints log lines as well as its answer: the answer is marked.
+admin_first_name() {
+  api_exec bundle exec rails runner 'puts "FIRST_NAME=#{User.find_by(email: "admin@check.test").first_name}"' 2>/dev/null \
+    | grep '^FIRST_NAME=' | sed 's/^FIRST_NAME=//' | tr -d '\r'
+}
+api_exec bundle exec rails fixflow:backup >/dev/null 2>&1 || fail "making a backup"
+api_exec bundle exec rails runner 'User.where(email: "admin@check.test").update_all(first_name: "Changed")' >/dev/null 2>&1 || fail "changing data after the backup"
+[ "$(admin_first_name)" = "Changed" ] || fail "the change was not made (the first name is \"$(admin_first_name)\")"
+# 1. Close the front door, stop the web and worker pods, and keep one API pod to run the command in.
+# shellcheck disable=SC2086
+helm upgrade "$REL" "$CHART" --namespace "$NS" $ARGS --set ingress.enabled=false --wait --timeout 12m >/dev/null || fail "closing the front door"
+kubectl -n "$NS" scale "deploy/$REL-web" "deploy/$REL-sidekiq" "deploy/$REL-sidekiq-iot" --replicas=0 >/dev/null
+kubectl -n "$NS" scale "deploy/$REL-api" --replicas=1 >/dev/null
+for _ in $(seq 1 60); do
+  [ "$(kubectl -n "$NS" get pods -l app.kubernetes.io/component=api --no-headers 2>/dev/null | grep -c .)" = "1" ] && break
+  sleep 2
+done
+wait_ready "$REL-api" 1 || fail "one API pod did not stay ready"
+# 2. Restore.
+api_exec env REPLACE=yes bundle exec rails "fixflow:restore[latest]" >/dev/null 2>&1 || fail "the restore command failed"
+# 3. Start everything again.
+kubectl -n "$NS" scale "deploy/$REL-web" "deploy/$REL-api" "deploy/$REL-sidekiq" --replicas=2 >/dev/null
+kubectl -n "$NS" scale "deploy/$REL-sidekiq-iot" --replicas=1 >/dev/null
+# shellcheck disable=SC2086
+helm upgrade "$REL" "$CHART" --namespace "$NS" $ARGS --wait --timeout 12m >/dev/null || fail "opening the front door again"
+[ "$(admin_first_name)" = "Check" ] || fail "the restore did not bring back the data as it was at the backup (the first name is \"$(admin_first_name)\")"
+# The Ingress has just been made again: the controller may take a few seconds to route it.
+TOKEN=""
+for _ in $(seq 1 20); do
+  TOKEN=$(c -D - -o /dev/null -X POST "$URL/api/v1/auth/sign_in" -H "$JSON" \
+    -d '{"user":{"email":"admin@check.test","password":"Blue-Ladder-4721-Kite"}}' | grep -i '^authorization:' | sed 's/^[Aa]uthorization: //' | tr -d '\r')
+  [ -n "$TOKEN" ] && break
+  sleep 3
+done
+[ -n "$TOKEN" ] || fail "signing in after the restore"
+ok "a change made after a backup was undone by the restore, and everything started again"
+
+echo "All Kubernetes checks passed."
