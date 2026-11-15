@@ -12,6 +12,7 @@ class IotChannel < ApplicationCable::Channel
   private
 
   def authorized_for_asset?(asset_id)
+    Current.hidden_location_ids = SiteAccess.hidden_location_ids(current_user) # a person at some sites only hears those sites' assets
     current_user.organization.assets.exists?(id: asset_id)
   end
 end

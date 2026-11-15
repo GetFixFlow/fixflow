@@ -23,10 +23,12 @@ module Iot
 
     # The IoT screens' live feed: the alert as the alert list shows it.
     def broadcast_to_company(alert)
-      ActionCable.server.broadcast(
-        IotAlertChannel.stream_for_company(alert.asset.organization_id),
-        { alert: IotAlertBlueprint.render_as_hash(alert) }
-      )
+      payload = { alert: IotAlertBlueprint.render_as_hash(alert) }
+      organization_id = alert.asset.organization_id
+      ActionCable.server.broadcast(IotAlertChannel.stream_for_company(organization_id), payload)
+      # And the site's own stream, which is what a person who works at some sites only listens to.
+      site_id = SiteAccess.site_id_for(alert.asset.location)
+      ActionCable.server.broadcast(IotAlertChannel.stream_for_site(organization_id, site_id), payload)
     end
 
     def broadcast_alert(alert)

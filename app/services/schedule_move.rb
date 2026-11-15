@@ -62,8 +62,15 @@ class ScheduleMove
   end
 
   def end_of_working_day
-    hour, min = @order.organization.settings_with_defaults.dig("work_hours", "end").split(":").map(&:to_i)
+    hour, min = work_settings.dig("work_hours", "end").split(":").map(&:to_i)
     Time.zone.now.change(hour: hour, min: min)
+  end
+
+  # The work hours of the site the work order is at, else the company's.
+  def work_settings
+    site_id = SiteAccess.site_id_for(@order.asset&.location)
+    site = Location.unscoped.find_by(id: site_id) if site_id
+    site ? SiteSettings.for(site) : @order.organization.settings_with_defaults
   end
 
   def change_assignee = @assignee.nil? ? unassign : hand_over

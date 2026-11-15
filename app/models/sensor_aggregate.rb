@@ -1,4 +1,7 @@
 class SensorAggregate < ApplicationRecord
+  include SiteScoped
+
+  hidden_by_site by: :asset
   # ─── Enums ─────────────────────────────────────────────────────────────────
 
   enum :period_type, { hourly: 0, daily: 1, weekly: 2 }, default: :hourly

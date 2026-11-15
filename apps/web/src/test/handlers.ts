@@ -70,6 +70,10 @@ export const handlers = [
     return HttpResponse.json({ data: [] })
   }),
 
+  http.get('/api/v1/sites', () => {
+    return HttpResponse.json({ enabled: false, sites: [], company: { timezone: 'UTC', work_hours: { start: '08:00', end: '17:00' }, work_days: [1, 2, 3, 4, 5], holidays: [] }, my_site_ids: [] })
+  }),
+
   http.get('/api/v1/dashboard', () => {
     return HttpResponse.json({
       success: true,

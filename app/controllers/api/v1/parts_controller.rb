@@ -9,7 +9,7 @@ module Api
       end
 
       def index
-        scope = current_organization.parts
+        scope = current_organization.parts.at_my_sites
         scope = search(scope, params[:search]) if params[:search].present?
         scope = scope.low_stock if ActiveModel::Type::Boolean.new.cast(params[:low_stock])
         pagy, parts = pagy(scope.order(:name))
@@ -20,7 +20,7 @@ module Api
       end
 
       def low_stock
-        parts = current_organization.parts.low_stock.order(:name)
+        parts = current_organization.parts.at_my_sites.low_stock.order(:name)
         render json: { parts: PartBlueprint.render_as_hash(parts) }
       end
 
@@ -76,7 +76,7 @@ code: "VALIDATION_ERROR")
       end
 
       def set_part
-        @part = current_organization.parts.find(params[:id])
+        @part = current_organization.parts.at_my_sites.find(params[:id])
       end
 
       # PartPolicy: technicians read and take stock, managers create and edit, admins delete.

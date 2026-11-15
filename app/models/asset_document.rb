@@ -1,5 +1,8 @@
 # A manual, photo or certificate kept with an asset.
 class AssetDocument < ApplicationRecord
+  include SiteScoped
+
+  hidden_by_site by: :asset
   include UploadableFile
 
   belongs_to :asset

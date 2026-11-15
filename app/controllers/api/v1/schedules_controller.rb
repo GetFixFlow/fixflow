@@ -3,7 +3,7 @@ module Api
     class SchedulesController < Api::V1::BaseController
       before_action :require_manager!
 
-      # GET /api/v1/schedule?from=2026-11-02&to=2026-11-08
+      # GET /api/v1/schedule?from=2026-11-02&to=2026-11-08  (site_id: one site's calendar and work)
       def show
         from = parse_date(:from)
         to = parse_date(:to)
@@ -14,10 +14,15 @@ module Api
           return render_error("Ask for at most #{TeamSchedule::MAX_DAYS} days at a time", :bad_request, code: "RANGE_TOO_LONG")
         end
 
-        render json: { data: TeamSchedule.new(current_organization, from: from, to: to).call }
+        render json: { data: TeamSchedule.new(current_organization, from: from, to: to, site: site).call }
       end
 
       private
+
+      # One site's calendar and work, when site_id is given (a site the person may see; another is not found).
+      def site
+        current_organization.locations.sites.find(params[:site_id]) if params[:site_id].present?
+      end
 
       def parse_date(key)
         Date.iso8601(params[key].to_s)

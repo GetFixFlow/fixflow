@@ -1,6 +1,9 @@
 # A reading far outside what that sensor usually reads, flagged by Iot::AnomalyDetector without anyone setting a limit.
 # It is a flag for a person to look at, not an alarm: nothing is created from it, and a person can say it is nothing.
 class SensorAnomaly < ApplicationRecord
+  include SiteScoped
+
+  hidden_by_site by: :asset
   enum :status, { open: 0, acknowledged: 1, dismissed: 2 }, default: :open
 
   acts_as_tenant :organization

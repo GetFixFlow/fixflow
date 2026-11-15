@@ -1,4 +1,7 @@
 class IotAlert < ApplicationRecord
+  include SiteScoped
+
+  hidden_by_site by: :asset
   # ─── Enums ─────────────────────────────────────────────────────────────────
 
   enum :status, { open: 0, acknowledged: 1, resolved: 2, suppressed: 3 }, default: :open

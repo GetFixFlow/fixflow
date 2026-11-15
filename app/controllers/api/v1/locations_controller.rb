@@ -4,6 +4,7 @@ module Api
       before_action :require_manager!, only: %i[create update]
       before_action :require_admin!,   only: %i[destroy]
       before_action :set_location,     only: %i[show update destroy]
+      before_action :require_admin_for_sites!, only: %i[create update]
 
       # GET /api/v1/locations — returns full tree of org's locations
       def index
@@ -52,6 +53,22 @@ module Api
       end
 
       private
+
+      # Once the company works as several sites, a site (a top-level location of type site) is the administrator's to add and change:
+      # it decides who sees what. (Removing any place is the administrator's already: LocationPolicy.)
+      def require_admin_for_sites!
+        return unless current_organization.sites_enabled? && !current_user.admin?
+        return unless touches_a_site?
+
+        render_error("Only an administrator can add or change a site", :forbidden, code: "SITE_ADMIN_ONLY")
+      end
+
+      def touches_a_site?
+        asked = params[:location]&.slice(:location_type, :parent_id)
+        becomes_root_site = !(asked&.key?(:parent_id) ? asked[:parent_id].present? : @location&.parent_id.present?) &&
+                            (asked&.key?(:location_type) ? asked[:location_type] : (@location&.location_type || "site")) == "site"
+        becomes_root_site || @location&.site?
+      end
 
       def set_location
         @location = current_organization.locations.find(params[:id])

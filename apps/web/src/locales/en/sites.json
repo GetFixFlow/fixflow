@@ -1,0 +1,83 @@
+{
+  "sites": {
+    "page": {
+      "title": "Sites",
+      "description": "Work as several sites in one install: each site has its own people and calendar, and the reports can compare them.",
+      "denied": "Access Denied. Only administrators can manage sites.",
+      "load_failed": "The sites could not be loaded.",
+      "try_again": "Try again"
+    },
+    "enable": {
+      "label": "Work as several sites",
+      "help": "A site is a top-level place of type site (see Settings, Locations). Once this is on, a person assigned to one or more sites sees only those sites' places, assets, work orders, preventive maintenance and sensors, plus anything that is not in any site. Administrators, and people assigned to no site, see everything. Vendors and people are shared by all sites.",
+      "confirm_on": "Switch sites on? The top-level places of type site count as sites, and a person you assign to sites will only see those. People assigned to no site keep seeing everything.",
+      "confirm_off": "Switch sites off? Everyone will see everything again. Who works where, and each site's calendar, are kept for when you switch it on again.",
+      "on_note": "Sites are on.",
+      "off_note": "Sites are off: everyone sees everything, whatever the sites below say."
+    },
+    "add": {
+      "title": "Add a site",
+      "name": "Site name",
+      "button": "Add site",
+      "adding": "Adding…",
+      "none": "There are no sites yet. Add one, or turn a top-level place into a site in Settings, Locations (a place with no parent, of type site)."
+    },
+    "card": {
+      "stats": "{{assets}} assets · {{open}} open work orders · {{places}} places inside",
+      "calendar": "Calendar",
+      "calendar_help": "What differs from the company's. A line left on \"same as the company\" follows it.",
+      "people": "People",
+      "people_help": "Who works at this site. Someone at no site works at all of them. Administrators always do.",
+      "no_people": "There is nobody to assign yet.",
+      "save_calendar": "Save calendar",
+      "save_people": "Save people",
+      "saving": "Saving…"
+    },
+    "calendar": {
+      "same": "Same as the company ({{value}})",
+      "timezone": "Time zone",
+      "hours": "Working hours",
+      "hours_start": "Start",
+      "hours_end": "End",
+      "days": "Working days",
+      "holidays": "Holidays",
+      "holiday_date": "Date",
+      "holiday_name": "Name",
+      "holiday_repeats": "Every year",
+      "holiday_add": "Add holiday",
+      "holiday_remove": "Remove {{name}}",
+      "holidays_none": "No holidays",
+      "holidays_same": "{{count}} from the company",
+      "holidays_help": "A site's own list replaces the company's."
+    },
+    "report": {
+      "title": "Sites",
+      "description": "The sites side by side",
+      "site": "Site",
+      "assets": "Assets",
+      "open": "Open work orders",
+      "overdue": "Overdue",
+      "finished": "Finished",
+      "cost": "Cost of finished work",
+      "availability": "Availability",
+      "downtime": "Downtime (h)",
+      "failures": "Failures",
+      "people": "People",
+      "shared": "In no site",
+      "total": "All sites",
+      "load_failed": "The report could not be loaded.",
+      "empty": "No sites yet. Add them under Settings, Sites.",
+      "shared_note": "Assets in no site, and work with no asset, are shared by every site."
+    },
+    "schedule": {
+      "label": "Site",
+      "all": "All sites"
+    },
+    "toast": {
+      "created": "Site added",
+      "saved": "Site saved",
+      "people": "People saved"
+    },
+    "save_failed": "That could not be saved."
+  }
+}

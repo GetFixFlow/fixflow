@@ -1,4 +1,7 @@
 class WorkOrder < ApplicationRecord
+  include SiteScoped
+
+  hidden_by_site by: :asset_or_none
   acts_as_tenant :organization
   include AASM
 

@@ -41,6 +41,7 @@ These pages are for the person who **installs and looks after** a FixFlow server
 | Keep manuals with a machine, and track its warranty | [Asset documents and warranty](asset-documents.md) |
 | Record when a machine stopped, and see its availability | [Downtime and availability](downtime.md) |
 | Connect sensors and set alert rules | [Sensors and IoT](iot.md) |
+| Run several sites from one install | [Several sites](sites.md) |
 | Understand the reports and the dashboard | [Reports and the dashboard](reports.md) |
 | Get messages on a phone when work is assigned | [Notifications](notifications.md) |
 | Add a report or a notification channel of your own | [Plugins](plugins.md) |
