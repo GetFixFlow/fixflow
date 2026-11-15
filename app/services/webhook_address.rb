@@ -9,21 +9,29 @@ module WebhookAddress
   MAX_LENGTH = 2048
 
   # => nil when the address may be used, else the reason in words.
-  def self.problem(url, resolver: Resolv)
-    return "is missing" if url.blank?
-    return "is too long" if url.length > MAX_LENGTH
+  def self.problem(url, resolver: Resolv) = check(url, resolver: resolver).problem
+
+  # The verdict and the one address the name resolved to (see ChatAddress::Checked): the delivery connects to that address,
+  # so what was checked is what is used even if the name answers differently the next time.
+  def self.check(url, resolver: Resolv)
+    return ChatAddress::Checked.new("is missing") if url.blank?
+    return ChatAddress::Checked.new("is too long") if url.length > MAX_LENGTH
 
     uri = URI.parse(url)
-    return "must start with https:// (or http:// for a receiver on your own network)" unless uri.is_a?(URI::HTTP) && uri.host.present?
-    return "must not contain a login" if uri.userinfo
+    unless uri.is_a?(URI::HTTP) && uri.host.present?
+      return ChatAddress::Checked.new("must start with https:// (or http:// for a receiver on your own network)")
+    end
+    return ChatAddress::Checked.new("must not contain a login") if uri.userinfo
 
     addresses = addresses_for(uri.host, resolver)
-    return "does not resolve to an address" if addresses.empty?
-    return "points at this server or a link-local address" if addresses.any? { |address| ChatAddress.refused?(address) }
+    return ChatAddress::Checked.new("does not resolve to an address") if addresses.empty?
+    if addresses.any? { |address| ChatAddress.refused?(address) }
+      return ChatAddress::Checked.new("points at this server or a link-local address")
+    end
 
-    nil
+    ChatAddress::Checked.new(nil, addresses.first)
   rescue URI::InvalidURIError, IPAddr::InvalidAddressError
-    "is not a valid address"
+    ChatAddress::Checked.new("is not a valid address")
   end
 
   # The addresses the host name points at now (the delivery connects to one of these, so what was checked is what is used).

@@ -3,9 +3,12 @@ module Api
     class OrganizationSettingsController < Api::V1::BaseController
       before_action :require_admin!, only: :update
 
+      # The default hourly rate and the amount a manager may approve are made of wages: managers and administrators see them.
+      WAGE_SETTINGS = %w[labor_rate approval_limit].freeze
+
       # GET /api/v1/organization_settings
       def show
-        render json: { organization: payload }
+        render json: { organization: current_user.manager_or_above? ? payload : payload.except(*WAGE_SETTINGS) }
       end
 
       # PATCH /api/v1/organization_settings

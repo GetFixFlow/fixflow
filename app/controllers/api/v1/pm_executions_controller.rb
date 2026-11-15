@@ -1,6 +1,7 @@
 module Api
   module V1
     class PmExecutionsController < Api::V1::BaseController
+      before_action :require_technician_or_above!
       before_action :set_pm
 
       # GET /api/v1/preventive_maintenances/:preventive_maintenance_id/executions

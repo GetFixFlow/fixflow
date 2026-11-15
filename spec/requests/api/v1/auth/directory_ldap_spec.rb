@@ -29,6 +29,13 @@ RSpec.describe "Signing in through LDAP", type: :request do
     expect(UserSession.count).to eq(1)
   end
 
+  it "starts no cookie session beside the token: signing out would not end it" do
+    sign_in_as("jo", "jo-pass")
+
+    expect(response).to have_http_status(:ok)
+    expect(cookies["_fixflow_session"]).to be_blank
+  end
+
   it "gives a working session" do
     sign_in_as("jo", "jo-pass")
 
@@ -43,6 +50,32 @@ RSpec.describe "Signing in through LDAP", type: :request do
     expect(response).to have_http_status(:unauthorized)
     expect(response.headers["Authorization"]).to be_nil
     expect(User.where(email: "jo@acme.test")).to be_empty
+  end
+
+  describe "a FixFlow account that is not the directory's" do
+    let!(:local) { create(:user, :admin, organization: org, email: "boss@acme.test") }
+
+    it "counts wrong passwords tried through the directory sign-in, and locks the account like the ordinary one" do
+      10.times { sign_in_as("boss@acme.test", "guess") }
+
+      expect(local.reload.failed_attempts).to eq(10)
+      expect(local).to be_access_locked
+    end
+
+    it "does not ask the directory at all while the account is locked" do
+      local.lock_access!(send_instructions: false)
+      expect(ldap).not_to receive(:authenticate)
+
+      sign_in_as("boss@acme.test", "guess")
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it "still signs in with the right password" do
+      sign_in_as("boss@acme.test", "password123")
+
+      expect(response).to have_http_status(:ok)
+    end
   end
 
   it "turns away a person in none of the groups, with the words for it, and logs it" do

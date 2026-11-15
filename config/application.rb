@@ -26,6 +26,9 @@ module Fixflow
 
     # Uploaded files are served under /api, which the dev proxy and both nginx configs already forward.
     config.active_storage.routes_prefix = "/api/v1/storage"
+    # A link to a stored photo or document works for a week, not for ever, so one that ends up in a log or a forwarded
+    # message stops working. The pages ask for fresh links each time they load.
+    config.active_storage.urls_expire_in = 7.days
 
     config.time_zone = "UTC"
 

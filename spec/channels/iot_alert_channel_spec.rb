@@ -14,6 +14,14 @@ RSpec.describe IotAlertChannel, type: :channel do
     expect(subscription).to have_stream_from("iot_alerts_org_#{org.id}")
   end
 
+  it "refuses a requester: sensor alerts are for the people who look after the equipment" do
+    stub_connection current_user: create(:user, :requester, organization: org)
+
+    subscribe
+
+    expect(subscription).to be_rejected
+  end
+
   it "does not stream another company's alerts, whatever the person asks for" do
     stub_connection current_user: user
 

@@ -18,5 +18,9 @@ class UserSession < ApplicationRecord
 
   def device = DeviceName.for(user_agent)
 
+  # Ending a session also closes the live-update connections (they belong to the person, not to one session, so their other
+  # devices reconnect at once; the ended one is refused).
+  after_commit(on: :update, if: :saved_change_to_revoked_at?) { LiveConnections.close_for(user) }
+
   def revoke! = update!(revoked_at: Time.current)
 end

@@ -20,8 +20,8 @@ const PERMISSIONS: PermRow[] = [
   // Work Orders
   {
     section: 'Work Orders', label: 'View all WOs',
-    admin: 'full', manager: 'full', technician: 'limited', requester: 'limited',
-    limitedNote: { technician: 'Assigned WOs only', requester: 'Own requests only' },
+    admin: 'full', manager: 'full', technician: 'full', requester: 'limited',
+    limitedNote: { requester: 'Own requests only' },
   },
   {
     section: 'Work Orders', label: 'View own WOs',
@@ -47,8 +47,7 @@ const PERMISSIONS: PermRow[] = [
   // Assets
   {
     section: 'Assets', label: 'View assets',
-    admin: 'full', manager: 'full', technician: 'full', requester: 'limited',
-    limitedNote: { requester: 'Limited details' },
+    admin: 'full', manager: 'full', technician: 'full', requester: 'none',
   },
   {
     section: 'Assets', label: 'Create/edit assets',

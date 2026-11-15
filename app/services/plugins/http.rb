@@ -16,8 +16,8 @@ module Plugins
     module_function
 
     def post(url, body: "", headers: {}, json: false)
-      problem = WebhookAddress.problem(url)
-      raise Refused, "The address #{problem}." if problem
+      checked = WebhookAddress.check(url)
+      raise Refused, "The address #{checked.problem}." if checked.problem
 
       uri = URI.parse(url)
       request = Net::HTTP::Post.new(uri.request_uri, { "User-Agent" => "FixFlow-Plugin/1" }.merge(headers.to_h.to_h { |name, value|
@@ -25,12 +25,12 @@ module Plugins
       }))
       request["Content-Type"] ||= "application/json" if json
       request.body = json ? body.to_json : body.to_s
-      answer(connection(uri).request(request))
+      answer(connection(uri, checked.ip).request(request))
     end
 
-    def connection(uri)
+    def connection(uri, ip)
       http = Net::HTTP.new(uri.host, uri.port)
-      http.ipaddr = WebhookAddress.addresses_for(uri.host).first # the address that was checked is the one used
+      http.ipaddr = ip # the address that was checked is the one used
       http.use_ssl = uri.scheme == "https"
       http.open_timeout = OPEN_TIMEOUT
       http.read_timeout = READ_TIMEOUT

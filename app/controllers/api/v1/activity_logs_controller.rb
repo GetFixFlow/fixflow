@@ -19,7 +19,7 @@ module Api
       private
 
       def filtered_logs
-        logs = ActivityLog.where(organization_id: current_organization.id).recent
+        logs = ActivityLog.where(organization_id: current_organization.id).at_my_sites.recent
         logs = logs.by_resource(params[:resource_type])        if params[:resource_type].present?
         logs = logs.for_resource(params[:resource_type], params[:resource_id]) if params[:resource_id].present?
         logs = logs.by_user(params[:user_id])                  if params[:user_id].present?

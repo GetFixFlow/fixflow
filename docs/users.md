@@ -24,5 +24,12 @@ On the sign-in screen, **Forgot your password?** emails a reset link (if email i
 | Manage PM schedules | Yes | Yes | No | No |
 | Assign work orders | Yes | Yes | No | No |
 | Update work orders | Yes | Yes | Yes (own) | No |
+| Take ("Assign to me") a work order nobody has | Yes | Yes | Yes | No |
+| See work orders | All | All | All | Only the requests they made |
 | Submit work requests | Yes | Yes | Yes | Yes |
-| View assets | Yes | Yes | Yes | No |
+| View assets, maintenance schedules and sensor data | Yes | Yes | Yes | No |
+| See internal notes on a work order | Yes | Yes | No | No |
+| See what people are paid (hourly rates, labor cost, the default rate) | Yes | Yes | No | No |
+| Read the audit log | Yes | Yes (at their sites) | No | No |
+
+A requester who opens a work order that is not theirs is told it was not found, the same as for one that does not exist. A technician can take a work order nobody has, but not one someone else has: only a manager moves work between people. With [several sites](sites.md) switched on, a person who works at some sites sees only those sites' work, assets, sensor data and audit-log entries.

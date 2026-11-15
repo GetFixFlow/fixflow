@@ -3,6 +3,8 @@
 # some sites only (see SiteAccess) hears their sites' alerts and those of assets in no site, not the other sites'.
 class IotAlertChannel < ApplicationCable::Channel
   def subscribed
+    return reject if current_user.requester? # sensor alerts are for the people who look after the equipment
+
     organization_id = current_user.organization_id
     return stream_from self.class.stream_for_company(organization_id) if SiteAccess.hidden_location_ids(current_user).nil?
 

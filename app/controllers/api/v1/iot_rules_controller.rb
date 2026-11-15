@@ -1,6 +1,7 @@
 module Api
   module V1
     class IotRulesController < Api::V1::BaseController
+      before_action :require_technician_or_above!
       before_action :require_manager!, only: %i[create update destroy pause resume archive duplicate test]
       before_action :set_rule, only: %i[show update destroy pause resume archive duplicate test]
 

@@ -170,4 +170,83 @@ RSpec.describe Rack::Attack, type: :request do
       expect(response.status).to eq(403)
     end
   end
+
+  # The security review before 1.0: a route answers more than one spelling of its address, so a limit has to as well.
+  describe "limits that cannot be walked round" do
+    describe ".route_path" do
+      def route_path(path) = described_class.route_path(Rack::Attack::Request.new(Rack::MockRequest.env_for("/", "PATH_INFO" => path)))
+
+      it "reads an address as the router does: without a format, a trailing slash or doubled slashes" do
+        expect(route_path("/api/v1/auth/sign_in")).to eq("/api/v1/auth/sign_in")
+        expect(route_path("/api/v1/auth/sign_in.json")).to eq("/api/v1/auth/sign_in")
+        expect(route_path("/api/v1/auth/sign_in/")).to eq("/api/v1/auth/sign_in")
+        expect(route_path("//api/v1//auth/sign_in")).to eq("/api/v1/auth/sign_in")
+        expect(route_path("/api/v1/work_requests/abc123.json")).to eq("/api/v1/work_requests/abc123")
+      end
+    end
+
+    def sign_in_attempt(path, ip)
+      post path, params: { user: { email: "x@x.com", password: "wrong" } }.to_json,
+                 headers: { "Content-Type" => "application/json", "REMOTE_ADDR" => ip }
+      response.status
+    end
+
+    it "counts sign-ins sent to /sign_in.json, /sign_in/ and //sign_in with the others" do
+      paths = ["/api/v1/auth/sign_in", "/api/v1/auth/sign_in.json", "/api/v1/auth/sign_in/", "//api/v1/auth/sign_in"]
+      statuses = 12.times.map { |i| sign_in_attempt(paths[i % paths.size], "21.1.1.1") }
+
+      expect(statuses.first(10)).to all(be_in([401, 404]))
+      expect(statuses.last(2)).to all(eq(429))
+    end
+
+    it "counts public work requests sent as /work_requests.json" do
+      statuses = 7.times.map do |i|
+        post(i.even? ? "/api/v1/work_requests.json" : "/api/v1/work_requests", params: {}.to_json,
+             headers: { "Content-Type" => "application/json", "REMOTE_ADDR" => "22.2.2.2" })
+        response.status
+      end
+
+      expect(statuses.last(2)).to all(eq(429)) # the limit is five in ten minutes
+    end
+
+    it "counts password-reset requests sent as /password.json" do
+      statuses = 7.times.map do
+        post "/api/v1/auth/password.json", params: { user: { email: "x@x.com" } }.to_json,
+             headers: { "Content-Type" => "application/json", "REMOTE_ADDR" => "23.3.3.3" }
+        response.status
+      end
+
+      expect(statuses.last(2)).to all(eq(429))
+    end
+
+    it "counts a caller's AI requests by their token, not by the whole header (extra words do not make a new caller)" do
+      statuses = 8.times.map do |i|
+        post "/api/v1/ai/assist", params: {}.to_json,
+             headers: { "Content-Type" => "application/json", "REMOTE_ADDR" => "24.4.4.4",
+                        "Authorization" => "Bearer same.token.here #{'x' * i}" }
+        response.status
+      end
+
+      expect(statuses.last(2)).to all(eq(429)) # the limit is five a minute
+    end
+
+    it "counts password-change guesses by the token as well" do
+      statuses = 8.times.map do |i|
+        patch "/api/v1/profile/password", params: {}.to_json,
+              headers: { "Content-Type" => "application/json", "REMOTE_ADDR" => "25.5.5.5",
+                         "Authorization" => "Bearer same.token.here pad#{i}" }
+        response.status
+      end
+
+      expect(statuses.last(2)).to all(eq(429))
+    end
+
+    it "does not keep the full IoT API key in the cache" do
+      key = "fxk_#{'a' * 40}"
+      post "/api/v1/iot/ingest", params: {}.to_json, headers: { "Content-Type" => "application/json", "X-API-Key" => key }
+
+      keys = Rack::Attack.cache.store.instance_variable_get(:@data).keys
+      expect(keys.join).not_to include(key)
+    end
+  end
 end

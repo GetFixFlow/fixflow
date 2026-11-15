@@ -34,6 +34,7 @@ RSpec.describe "Labor cost", type: :request do
     it "keeps what people are paid from technicians and requesters, in every response" do
       complete(2)
       expect(json_body.dig("data", "labor_cost")).to be_nil # the technician's own transition response
+      work_order.update!(requester: requester) # a requester sees the requests they made
 
       [technician, requester].each do |person|
         get "/api/v1/work_orders/#{work_order.id}", headers: auth_headers_for(person)

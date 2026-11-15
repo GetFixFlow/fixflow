@@ -44,7 +44,9 @@ module Api
 
       # Who a report can be emailed to: the company's active managers and administrators.
       def eligible_recipients
-        current_organization.users.managers.active.order(:first_name, :last_name).map do |person|
+        people = current_organization.users.managers.active.order(:first_name, :last_name)
+        people = people.select { |person| person.sees_all_that?(current_user) }
+        people.map do |person|
           { id: person.id, full_name: person.full_name, role: person.role }
         end
       end

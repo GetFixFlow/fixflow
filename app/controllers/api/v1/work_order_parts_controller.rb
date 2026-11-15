@@ -26,7 +26,7 @@ module Api
           quantity = attrs[:quantity_used].presence&.to_i || 1
           part.adjust_stock(quantity, direction: :remove) if quantity.positive?
           line = @work_order.work_order_parts.create!(part: part, quantity_used: quantity,
-                                                      unit_cost: attrs[:unit_cost].presence || part.unit_cost)
+                                                      unit_cost: unit_cost_for(part, attrs[:unit_cost]))
           @work_order.recalculate_parts_cost!
         end
 
@@ -46,8 +46,14 @@ module Api
 
       private
 
+      # What a part cost is the part's price; only a manager may enter another (a different supplier price, a discount).
+      # A technician choosing the price would be choosing what the job cost.
+      def unit_cost_for(part, given)
+        current_user.manager_or_above? && given.present? ? given : part.unit_cost
+      end
+
       def set_work_order
-        @work_order = current_organization.work_orders.find(params[:work_order_id])
+        @work_order = visible_work_orders.find(params[:work_order_id])
       end
 
       def lines

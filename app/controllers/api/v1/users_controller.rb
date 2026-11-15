@@ -26,6 +26,8 @@ module Api
       end
 
       def show
+        return render_error("Forbidden", :forbidden) unless current_user.manager_or_above? || @user.id == current_user.id
+
         render json: UserBlueprint.render_as_hash(@user, show_rate: current_user.admin?)
       end
 

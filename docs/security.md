@@ -8,6 +8,8 @@ Sessions, two-factor sign-in, password rules and locked accounts.
 
 Each sign-in is its own session: **signing out ends only that one**, and your other devices stay signed in. **Changing your password, or an administrator deactivating your account, ends every session.** An ended session can no longer open a live-update connection, but a connection it already had open stays until the page is closed or reloaded. Ending one is written to the activity log.
 
+Signing out, ending a session here, changing your password, or an administrator deactivating you or resetting your two-factor sign-in also **closes the live-update connections** open on those sign-ins (the pages reconnect by themselves, and a connection made with an ended sign-in is refused). A sign-in is the token alone: FixFlow starts no cookie session beside it that signing out would leave behind.
+
 The address shown is the one the server sees, so behind a proxy it is the proxy's address unless the proxy passes `X-Forwarded-For`. Nothing is looked up from it: there is no location.
 
 
@@ -32,3 +34,11 @@ A company can have its people sign in with the account they use at work (OpenID 
 - **A new password** (a new account, an accepted invitation, a reset, a change in My Profile, `rails fixflow:create_admin`) must be **10 to 128 characters** and must not be easy to guess: the most common passwords are refused (also with digits or symbols added, like `Password1234` or `p@ssw0rd`), and so are one character or one short stretch repeated, a run of digits, the name of this app, and anything made from the person's own email address or name (parts of four letters or more). Nothing is required of the kinds of characters: length and being hard to guess matter more than a capital and a symbol, and a few words in a row (`blue ladder 4721 kite`) are fine. Only a password being set is checked: people who already have a shorter one keep signing in until they change it. The demo accounts (`SEED_DB=true`) keep their well-known password on purpose.
 - **Ten wrong passwords for one account lock it for 30 minutes.** The right password is refused too while it is locked, and the sign-in screen says why. It opens by itself after 30 minutes, or an administrator opens it at once (Settings → Users, the person's menu, **Unlock account**; locked accounts are marked **Locked**). A right password sooner than the tenth wrong one starts the count again. The audit log records locking and unlocking (`user.locked`, `user.unlocked`). This is on top of the limit per address (10 sign-in attempts a minute), which a guesser using many addresses gets past. **The trade-off:** someone who knows an email address can lock that person out for 30 minutes by guessing; that costs them an administrator's attention at worst, and a locked account cannot be guessed into.
 - A person who signs in with an authenticator app is counted in the same way for wrong passwords; wrong *codes* have their own lock (see above).
+
+## Links to photos and documents
+
+A photo or document is shown through a link that carries its own signature, so that a picture can be shown in the page and in an email without signing in again. **A link works for a week**, then stops (the page asks for fresh ones each time it loads). Anyone who has a link, for example from a forwarded message or a server log, can open that one file until it expires, so treat the links as you would the files. The company logo is the exception: it is shown on the sign-in page and in emails, so its link does not expire. Files cannot be uploaded without signing in.
+
+## Who sees what
+
+[People and roles](users.md#roles-and-permissions) lists what each role may see and do. In short: a requester sees only the requests they made; technicians, managers and administrators see all the company's work orders, and only managers and administrators see what people are paid and the internal notes on a work order. With [several sites](sites.md), a person who works at some sites does not see the other sites' work, assets, sensor data or audit-log entries, and a report is only emailed to people who may see all it shows.

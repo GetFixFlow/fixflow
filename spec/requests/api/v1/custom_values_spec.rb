@@ -30,6 +30,7 @@ RSpec.describe "Custom field values", type: :request do
       expect(response).to have_http_status(:created)
       expect(json_body.dig("data", "custom_values")).to eq("cost_centre" => "CC-1", "budget" => 250)
       id = json_body.dig("data", "id")
+      WorkOrder.find(id).update!(requester: requester) # a requester sees the requests they made
 
       send_json :get, "/api/v1/work_orders/#{id}", as: requester
       expect(json_body.dig("data", "custom_values")).to eq("cost_centre" => "CC-1", "budget" => 250)

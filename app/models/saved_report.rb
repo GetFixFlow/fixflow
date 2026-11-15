@@ -31,6 +31,7 @@ path: "assets/health" },
   validates :period, inclusion: { in: PERIODS }
   validates :send_on, inclusion: { in: 0..6 }, allow_nil: true
   validate :recipients_can_see_reports
+  validate :recipients_see_every_site_the_report_shows
   validate :somebody_to_send_to, if: :send_on
 
   scope :ordered, -> { order(Arel.sql("lower(saved_reports.name)")) }
@@ -68,7 +69,11 @@ path: "assets/health" },
   def recipients = organization.users.where(id: recipient_ids).order(:first_name, :last_name)
 
   # The people it can really go to: still here, still managers, and not turned off in Settings, Notifications.
-  def people_to_email = recipients.managers.wanting_email("report_scheduled")
+  # A report is made as the person who saved it, so it shows what they can see: it goes only to people who can see all of
+  # that (one who works at some sites only is not sent a report that includes the others).
+  def people_to_email = recipients.managers.wanting_email("report_scheduled").select { |person| sees_all_my_report?(person) }
+
+  def sees_all_my_report?(person) = person.sees_all_that?(user)
 
   # What the report's endpoint is asked, for the company's date `today`.
   def query_for(today)
@@ -86,6 +91,16 @@ path: "assets/health" },
     return if (recipient_ids - managers).empty?
 
     errors.add(:recipient_ids, "can only be managers and administrators: reports show what work cost, which is made of wages")
+  end
+
+  def recipients_see_every_site_the_report_shows
+    return if recipient_ids.empty? || user.nil? || !organization&.sites_enabled?
+
+    limited = organization.users.managers.active.where(id: recipient_ids).reject { |person| sees_all_my_report?(person) }
+    return if limited.empty?
+
+    errors.add(:recipient_ids, "include #{limited.map(&:full_name).to_sentence}, who work at some sites only: the report " \
+                               "shows sites they cannot see")
   end
 
   def somebody_to_send_to

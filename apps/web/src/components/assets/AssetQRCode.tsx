@@ -3,7 +3,7 @@ import QRCode from 'qrcode'
 import { useTranslation } from 'react-i18next'
 import { Download, Printer } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
-import { cn } from '@/lib/utils'
+import { cn, escapeHtml } from '@/lib/utils'
 
 type QRSize = 'sm' | 'md' | 'lg'
 
@@ -65,7 +65,7 @@ export function AssetQRCode({
     const win = window.open('', '_blank')
     if (!win || !dataUrl) return
     win.document.write(`
-      <html><head><title>${t('assets.qr.print_title', { tag: assetTag })}</title>
+      <html><head><title>${escapeHtml(t('assets.qr.print_title', { tag: assetTag }))}</title>
       <style>
         body { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; font-family:sans-serif; gap:8px; }
         img { display:block; }
@@ -73,10 +73,10 @@ export function AssetQRCode({
         small { color:#6b7280; font-family:monospace; }
         @media print { button { display:none; } }
       </style></head><body>
-      <img src="${dataUrl}" width="${px}" height="${px}" alt="${t('assets.qr.print_alt', { tag: assetTag })}" />
-      ${assetName ? `<p>${assetName}</p>` : ''}
-      <small>${assetTag}</small>
-      <small style="font-size:11px;color:#9ca3af">${caption}</small>
+      <img src="${dataUrl}" width="${px}" height="${px}" alt="${escapeHtml(t('assets.qr.print_alt', { tag: assetTag }))}" />
+      ${assetName ? `<p>${escapeHtml(assetName)}</p>` : ''}
+      <small>${escapeHtml(assetTag)}</small>
+      <small style="font-size:11px;color:#9ca3af">${escapeHtml(caption)}</small>
       </body></html>
     `)
     win.document.close()

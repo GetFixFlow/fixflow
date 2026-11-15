@@ -81,4 +81,23 @@ headers: { "Content-Type" => "application/json" })
       expect(a_request(:post, "http://127.0.0.1/admin")).not_to have_been_made
     end
   end
+
+  describe "a name that answers differently the second time (DNS rebinding)" do
+    it "connects to the address that was checked, not to one looked up again" do
+      answers = [["203.0.113.10"], ["127.0.0.1"]]
+      lookups = 0
+      allow(Resolv).to receive(:getaddresses) {
+        lookups += 1
+        answers.shift || ["127.0.0.1"]
+      }
+      stub_request(:post, "https://ntfy.example.test/topic").to_return(status: 200)
+      http = Net::HTTP.new("ntfy.example.test", 443)
+      allow(Net::HTTP).to receive(:new).and_return(http)
+      expect(http).to receive(:ipaddr=).with("203.0.113.10").and_call_original
+
+      described_class.post("https://ntfy.example.test/topic", body: "hi")
+
+      expect(lookups).to eq(1)
+    end
+  end
 end

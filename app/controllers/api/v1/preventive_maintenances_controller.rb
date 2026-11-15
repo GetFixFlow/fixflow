@@ -1,6 +1,7 @@
 module Api
   module V1
     class PreventiveMaintenancesController < Api::V1::BaseController
+      before_action :require_technician_or_above!
       before_action :require_manager!, only: %i[create update destroy pause resume trigger]
       before_action :load_trigger_overrides, only: :trigger
       before_action :set_pm, only: %i[show update destroy pause resume trigger preview]

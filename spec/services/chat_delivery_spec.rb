@@ -95,4 +95,23 @@ RSpec.describe ChatDelivery do
       expect(error.message).not_to include("SECRETPART")
     })
   end
+
+  describe "a name that answers differently the second time (DNS rebinding)" do
+    it "connects to the address that was checked, not to one looked up again" do
+      answers = [["203.0.113.10"], ["127.0.0.1"]]
+      lookups = 0
+      allow(Resolv).to receive(:getaddresses) {
+        lookups += 1
+        answers.shift || ["127.0.0.1"]
+      }
+      stub_request(:post, webhook).to_return(status: 200, body: "ok")
+      http = Net::HTTP.new("hooks.slack.com", 443)
+      allow(Net::HTTP).to receive(:new).and_return(http)
+      expect(http).to receive(:ipaddr=).with("203.0.113.10").and_call_original
+
+      described_class.new(config).deliver(content)
+
+      expect(lookups).to eq(1)
+    end
+  end
 end

@@ -33,13 +33,20 @@ RSpec.describe "Api::V1::WorkOrderParts", type: :request do
   end
 
   describe "POST /api/v1/work_orders/:id/parts" do
-    it "takes the parts out of stock and adds their cost to the work order" do
-      log(part_id: filter.id, quantity_used: 3, unit_cost: 10)
+    it "takes the parts out of stock and adds their cost to the work order, at the price a manager enters" do
+      log(part_id: filter.id, quantity_used: 3, unit_cost: 10, as_user: manager)
 
       expect(response).to have_http_status(:created)
       expect(json_body["data"]).to include("name" => "Oil filter", "quantity_used" => 3)
       expect(filter.reload.quantity_on_hand).to eq(2)
       expect(work_order.reload.parts_cost).to eq(30)
+    end
+
+    it "prices a technician's parts at the catalog's price, whatever they send: they do not choose what the job cost" do
+      log(part_id: filter.id, quantity_used: 2, unit_cost: 0.01)
+
+      expect(response).to have_http_status(:created)
+      expect(work_order.reload.parts_cost).to eq(25)
     end
 
     it "tells the managers when logging parts takes a part down to its reorder point" do
@@ -101,11 +108,12 @@ RSpec.describe "Api::V1::WorkOrderParts", type: :request do
       expect(response).to have_http_status(:created)
     end
 
-    it "does not let another technician or a requester log parts" do
-      [other_tech, requester].each do |person|
-        log(part_id: filter.id, quantity_used: 1, as_user: person)
-        expect(response).to have_http_status(:forbidden)
-      end
+    it "does not let another technician log parts, and a requester cannot even see the work order" do
+      log(part_id: filter.id, quantity_used: 1, as_user: other_tech)
+      expect(response).to have_http_status(:forbidden)
+
+      log(part_id: filter.id, quantity_used: 1, as_user: requester)
+      expect(response).to have_http_status(:not_found)
       expect(filter.reload.quantity_on_hand).to eq(5)
     end
 
@@ -135,7 +143,7 @@ RSpec.describe "Api::V1::WorkOrderParts", type: :request do
     end
 
     it "is refused for someone who may not log parts" do
-      delete "#{path}/#{line.id}", headers: auth_headers_for(requester)
+      delete "#{path}/#{line.id}", headers: auth_headers_for(other_tech)
 
       expect(response).to have_http_status(:forbidden)
       expect(filter.reload.quantity_on_hand).to eq(2)
@@ -144,7 +152,7 @@ RSpec.describe "Api::V1::WorkOrderParts", type: :request do
 
   describe "the work order" do
     it "reports the parts used and what they cost" do
-      log(part_id: filter.id, quantity_used: 2, unit_cost: 10)
+      log(part_id: filter.id, quantity_used: 2, unit_cost: 10, as_user: manager)
 
       get "/api/v1/work_orders/#{work_order.id}", headers: auth_headers_for(assignee)
 

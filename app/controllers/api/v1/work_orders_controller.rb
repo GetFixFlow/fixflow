@@ -6,14 +6,17 @@ module Api
                              cancel transition]
       before_action :require_manager!, only: %i[verify reject reschedule approve]
       before_action :require_manager_for_vendor!, only: %i[create update]
+      before_action :require_technician_or_above!, only: %i[overdue unassigned]
 
       # The vendor who did the work, what they charged and their invoice number: a manager's to enter.
       VENDOR_FIELDS = %w[vendor_id vendor_cost vendor_reference].freeze
       ALLOWED_SORTS = %w[priority due_date created_at updated_at work_order_number].freeze
+      # Who does the work and why a job was sent back are a manager's to set (assign and reject are the routes for them).
+      MANAGER_FIELDS = %i[assignee_id rejection_reason].freeze
 
       # GET /api/v1/work_orders
       def index
-        scope = apply_filters(current_organization.work_orders)
+        scope = apply_filters(visible_work_orders)
         scope = apply_sort(scope)
         pagy, work_orders = pagy(scope)
         render json: {
@@ -165,9 +168,7 @@ module Api
 
         case event
         when "assign_self"
-          return if performed?
-          @work_order.assignee = current_user
-          fire_transition!(:assign)
+          assign_to_me
         when "assign"
           require_manager!
           return if performed?
@@ -216,7 +217,7 @@ module Api
 
       # GET /api/v1/work_orders/overdue
       def overdue
-        pagy, work_orders = pagy(current_organization.work_orders.overdue.order(:due_date))
+        pagy, work_orders = pagy(visible_work_orders.overdue.order(:due_date))
         render json: {
           work_orders: WorkOrderBlueprint.render_as_hash(work_orders),
           meta:        pagy_metadata_response(pagy)
@@ -225,7 +226,7 @@ module Api
 
       # GET /api/v1/work_orders/unassigned
       def unassigned
-        pagy, work_orders = pagy(current_organization.work_orders.unassigned.open.order(created_at: :desc))
+        pagy, work_orders = pagy(visible_work_orders.unassigned.open.order(created_at: :desc))
         render json: {
           work_orders: WorkOrderBlueprint.render_as_hash(work_orders),
           meta:        pagy_metadata_response(pagy)
@@ -239,7 +240,7 @@ module Api
       end
 
       def set_work_order
-        @work_order = current_organization.work_orders.find(params[:id])
+        @work_order = visible_work_orders.find(params[:id])
       end
 
       # ─── AASM transition helper ──────────────────────────────────────────
@@ -293,6 +294,21 @@ module Api
       end
 
       # ─── Authorization helpers ───────────────────────────────────────────
+
+      # "Assign to me" is for technicians and above picking up work nobody has: it never takes a job from the person who has
+      # it (a manager moves work between people with assign).
+      def assign_to_me
+        require_technician_or_above!
+        return if performed?
+        return render_error("This work order is already assigned to someone else", :forbidden) if taken_by_someone_else?
+
+        @work_order.assignee = current_user
+        fire_transition!(:assign)
+      end
+
+      def taken_by_someone_else?
+        @work_order.assignee_id.present? && @work_order.assignee_id != current_user.id
+      end
 
       def authorize_update!
         return if current_user.manager_or_above?
@@ -377,11 +393,12 @@ module Api
       end
 
       def work_order_params
-        params.require(:work_order).permit(
+        permitted = params.require(:work_order).permit(
           :title, :description, :priority, :asset_id, :assignee_id,
           :due_date, :estimated_hours, :actual_hours, :completion_notes,
           :rejection_reason, *VENDOR_FIELDS, checklist: [ :step, :completed ], custom_values: {}
         )
+        current_user.manager_or_above? ? permitted : permitted.except(*MANAGER_FIELDS)
       end
     end
   end

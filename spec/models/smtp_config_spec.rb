@@ -22,10 +22,18 @@ RSpec.describe SmtpConfig do
 
   it "keeps the saved password when the form leaves it blank" do
     saved
-    config = org.reload.smtp_config.assign(host: "smtp.example.com", password: "")
+    config = org.reload.smtp_config.assign(host: saved.host.upcase, port: 2525, password: "")
     config.save_to(org)
 
-    expect(org.reload.smtp_config).to have_attributes(host: "smtp.example.com", password: "s3cret")
+    expect(org.reload.smtp_config).to have_attributes(host: saved.host.upcase, port: 2525, password: "s3cret")
+  end
+
+  it "does not carry the saved password to another server: it is typed again for a new host" do
+    saved
+    config = org.reload.smtp_config.assign(host: "mail.elsewhere.example", password: "")
+
+    expect(config.password).to be_nil
+    expect(org.reload.smtp_config.assign(host: "mail.elsewhere.example", password: "new-one").password).to eq("new-one")
   end
 
   it "needs a host and a sender, a sensible port and a known encryption" do

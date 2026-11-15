@@ -52,7 +52,9 @@ module Ai
 
     def self.build_messages(conversation_history, new_message)
       truncated = Array(conversation_history).last(MAX_HISTORY_TURNS * 2).map do |turn|
-        { role: turn[:role] || turn["role"], content: turn[:content] || turn["content"] }
+        role = (turn[:role] || turn["role"]).to_s
+        # Only the two voices of a conversation: a caller cannot slip in a "system" turn of their own.
+        { role: role == "assistant" ? "assistant" : "user", content: (turn[:content] || turn["content"]).to_s }
       end
       truncated + [ { role: "user", content: new_message } ]
     end

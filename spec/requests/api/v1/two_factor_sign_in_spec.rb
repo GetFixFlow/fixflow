@@ -25,6 +25,21 @@ RSpec.describe "Two-factor sign-in", type: :request do
   context "when the person has switched it on" do
     before { enable_two_factor_for(user) }
 
+    it "starts no cookie session beside the token: signing out and revoking sessions would not end it" do
+      sign_in_with
+      second_step(code_for(user))
+
+      expect(response).to have_http_status(:ok)
+      token = response.headers["Authorization"]
+      expect(response.headers["Set-Cookie"].to_s).not_to include("_fixflow_session")
+      expect(cookies["_fixflow_session"]).to be_blank
+
+      delete "/api/v1/auth/sign_out", headers: { "Authorization" => token }
+      cookies.delete("_fixflow_session")
+      get "/api/v1/auth/me"
+      expect(response).to have_http_status(:unauthorized)
+    end
+
     it "answers the right password with a challenge, and starts no session" do
       expect { sign_in_with }.not_to change(UserSession, :count)
 
