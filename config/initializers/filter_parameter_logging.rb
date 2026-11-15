@@ -9,5 +9,6 @@ Rails.application.config.filter_parameters += [
   :certificate, :otp, :ssn, :cvv, :cvc,
   :api_key, :authorization, :jwt, :private_key,
   :mqtt_password, :encryption_key, :key_digest,
-  :access_key, :secret_key, :database_url
+  :access_key, :secret_key, :database_url,
+  :code, :challenge, :recovery
 ]

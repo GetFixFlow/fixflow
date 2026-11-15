@@ -23,11 +23,10 @@ class WebhookSender
   end
 
   def deliver
-    problem = WebhookAddress.problem(@webhook.url)
-    return failure("The address #{problem}.") if problem
+    checked = WebhookAddress.check(@webhook.url)
+    return failure("The address #{checked.problem}.") if checked.problem
 
-    uri = URI.parse(@webhook.url)
-    response = post(uri, WebhookAddress.addresses_for(uri.host).first)
+    response = post(URI.parse(@webhook.url), checked.ip)
     code = response.code.to_i
     Result.new(ok: response.is_a?(Net::HTTPSuccess), code: code, excerpt: response.body.to_s.scrub.first(EXCERPT),
                error: response.is_a?(Net::HTTPSuccess) ? nil : "The receiver answered #{code}.", gone: code == 410)

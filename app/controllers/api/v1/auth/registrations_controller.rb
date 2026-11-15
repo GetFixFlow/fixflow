@@ -49,6 +49,12 @@ module Api
 
         private
 
+        # The token the response carries is the sign-in: no cookie session beside it, which sign-out and revoking a
+        # session would not end.
+        def sign_up(resource_name, resource)
+          sign_in(resource_name, resource, store: false)
+        end
+
         def build_organization
           name = params.dig(:user, :organization_name).to_s.strip
           subdomain = name.parameterize

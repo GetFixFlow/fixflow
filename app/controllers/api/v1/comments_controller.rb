@@ -41,7 +41,7 @@ module Api
       private
 
       def set_work_order
-        @work_order = current_organization.work_orders.find(params[:work_order_id])
+        @work_order = visible_work_orders.find(params[:work_order_id])
       end
 
       def set_comment

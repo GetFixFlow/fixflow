@@ -217,6 +217,13 @@ RSpec.describe "Signing in through OpenID Connect", type: :request do
       expect(UserSession.count).to eq(1)
     end
 
+    it "starts no cookie session beside the token: signing out would not end it" do
+      post "/api/v1/auth/directory", params: { code: note_for }, as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(cookies["_fixflow_session"]).to be_blank
+    end
+
     it "works once" do
       code = note_for
       post "/api/v1/auth/directory", params: { code: code }, as: :json

@@ -6,7 +6,7 @@ Rails.application.routes.draw do
 
   devise_for :users,
     path: "api/v1/auth",
-    skip: :passwords, # forgot and reset password are Api::V1::Auth::PasswordsController, below
+    skip: %i[passwords registrations], # forgot and reset password are Api::V1::Auth::PasswordsController, below; sign_up, below
     path_names: { sign_in: "sign_in", sign_out: "sign_out", registration: "sign_up" },
     controllers: {
       sessions: "api/v1/auth/sessions",
@@ -15,6 +15,11 @@ Rails.application.routes.draw do
 
   # The second step of signing in for a person with two-factor sign-in on (the first, sign_in, answers with a challenge)
   devise_scope :user do
+    # First-run setup only (it refuses once there is a company). Devise's other registration routes (edit or delete
+    # your own account by PUT, PATCH and DELETE) are not drawn: a person changes their details in My Profile, and an
+    # administrator removes people, with the safeguards that go with it.
+    post "api/v1/auth/sign_up", to: "api/v1/auth/registrations#create"
+
     post "api/v1/auth/two_factor", to: "api/v1/auth/two_factor_sessions#create"
 
     # The last step of signing in through OpenID Connect: the note the callback handed the browser, for a session

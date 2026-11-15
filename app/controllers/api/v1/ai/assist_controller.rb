@@ -5,7 +5,7 @@ module Api
         include ActionController::Live
 
         def create
-          work_order = current_organization.work_orders.find(params[:work_order_id])
+          work_order = visible_work_orders.find(params[:work_order_id])
           message = params.require(:message)
 
           response.headers["Content-Type"] = "text/event-stream"

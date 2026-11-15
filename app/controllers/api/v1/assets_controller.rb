@@ -3,6 +3,7 @@ module Api
     class AssetsController < Api::V1::BaseController
       LABEL_LIMIT = 500
 
+      before_action :require_technician_or_above!
       before_action :require_manager!, only: %i[create update labels]
       before_action :require_admin!,   only: %i[destroy]
       before_action :set_asset,              only: %i[show update destroy work_orders sensor_readings iot_rules iot_alerts qr_code]

@@ -121,6 +121,7 @@ module Api
       # part's own.
       def apply_lines(order)
         rows = Array(params[:lines]).map { |row| row.permit(:id, :part_id, :quantity, :unit_cost) }
+        refuse_parts_at_other_sites(rows)
         existing = order.lines.index_by(&:id)
         kept = rows.map do |row|
           line = existing[row[:id].to_i] || order.lines.build
@@ -128,6 +129,16 @@ module Api
           line
         end
         (existing.values - kept).each(&:mark_for_destruction)
+      end
+
+      # A part kept at a site the person does not work at is not theirs to order (they cannot see it: it is "not found").
+      def refuse_parts_at_other_sites(rows)
+        ids = rows.filter_map { |row| Integer(row[:part_id], exception: false) }.uniq
+        return if ids.empty?
+
+        # (A number that is no part of this company at all is left to the order's own check, which says so.)
+        hidden = current_organization.parts.where(id: ids).pluck(:id) - current_organization.parts.at_my_sites.where(id: ids).pluck(:id)
+        raise ActiveRecord::RecordNotFound, "Part" if hidden.any?
       end
 
       def unit_cost_for(row)

@@ -9,7 +9,13 @@
 
 If that form is not available, open a public issue that says only that you need a private way to report a security problem, **without any details**, and a maintainer will arrange one.
 
-We aim to reply within 7 days, tell you whether we consider it a vulnerability, and keep you informed until it is fixed. We will credit you in the release notes if you wish, and ask that you give us reasonable time to release a fix before you publish anything.
+We aim to reply within 7 days, tell you whether we consider it a vulnerability, and keep you informed until it is fixed. We will credit you in the release notes if you wish, and ask that you give us reasonable time to release a fix before you publish anything: **90 days** from your report, or sooner if a fix is released and has had a fortnight to be installed. If we have not fixed it by then, you are free to publish.
+
+**Good-faith research is welcome.** If you test on your own install, stay within the scope below, do not read or change other people's data, and report what you find, we will not take action against you and will say so if anyone asks.
+
+## What has been checked
+
+[**Security review before 1.0**](https://getfixflow.github.io/fixflow/latest/security-review/) says what the project's own review covered and found, what is fixed, the limits we know and have not fixed, the brief for the independent review, and (when it is done) the summary of that review. Read it before relying on FixFlow with data that matters, and tell us what it misses.
 
 ## Which versions get fixes
 

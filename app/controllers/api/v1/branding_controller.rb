@@ -60,7 +60,10 @@ module Api
 
       def blob_path(attachment)
         # Through the app, not a redirect to the file storage (its address is internal; no browser can open it).
-        Rails.application.routes.url_helpers.rails_storage_proxy_path(attachment, only_path: true) if attachment.attached?
+        return unless attachment.attached?
+
+        # The logo is shown on the sign-in page and in emails, so its link does not expire (a photo's does).
+        Rails.application.routes.url_helpers.rails_storage_proxy_path(attachment, only_path: true, expires_in: nil)
       end
     end
   end

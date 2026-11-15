@@ -43,6 +43,16 @@ class User < ApplicationRecord
 
   def jwt_payload = super.merge("sid" => SecureRandom.uuid)
 
+  # Whether this person can see everything the other can (sites, when a company uses them): what the other sees may be
+  # sent to this person.
+  def sees_all_that?(other)
+    ((SiteAccess.hidden_location_ids(self) || []) - (SiteAccess.hidden_location_ids(other) || [])).empty?
+  end
+
+  # A new jti (signing out, a password change or reset, two-factor reset) or a deactivation ends every sign-in, so it also
+  # closes the live-update connections open on them.
+  after_commit(on: :update, if: -> { saved_change_to_jti? || saved_change_to_deactivated_at? }) { LiveConnections.close_for(self) }
+
   # Called when a token is made at sign-in or sign-up.
   def on_jwt_dispatch(_token, payload)
     user_sessions.where(expires_at: ...1.day.ago).delete_all

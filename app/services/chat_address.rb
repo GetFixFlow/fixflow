@@ -11,26 +11,33 @@ module ChatAddress
   REFUSED = %w[0.0.0.0/8 127.0.0.0/8 169.254.0.0/16 224.0.0.0/4 240.0.0.0/4 ::/128 ::1/128 fe80::/10 ff00::/8 ::ffff:0:0/96]
             .map { |range| IPAddr.new(range) }.freeze
 
+  # The verdict on an address and, when it may be used, the one address the name was resolved to. A sender connects to
+  # THAT address: looking the name up again to connect would let a name that answers differently the second time (DNS
+  # rebinding) reach the places refused here.
+  Checked = Struct.new(:problem, :ip)
+
   # => nil when the address may be used, else the reason in words.
-  def self.problem(url, resolver: Resolv)
-    return "is missing" if url.blank?
-    return "is too long" if url.length > MAX_LENGTH
+  def self.problem(url, resolver: Resolv) = check(url, resolver: resolver).problem
+
+  def self.check(url, resolver: Resolv)
+    return Checked.new("is missing") if url.blank?
+    return Checked.new("is too long") if url.length > MAX_LENGTH
 
     uri = URI.parse(url)
     unless uri.is_a?(URI::HTTP) && uri.host.present?
-      return "must start with https:// (or http:// for a chat server on your own network)"
+      return Checked.new("must start with https:// (or http:// for a chat server on your own network)")
     end
-    return "must not contain a login" if uri.userinfo
+    return Checked.new("must not contain a login") if uri.userinfo
 
-    addresses = literal?(uri.host) ? [uri.host] : resolver.getaddresses(uri.host)
-    return "does not resolve to an address" if addresses.empty?
-    return "points at this server or a link-local address, which is never a chat service" if addresses.any? { |address|
-      refused?(address)
-    }
+    addresses = literal?(uri.host) ? [strip(uri.host)] : resolver.getaddresses(uri.host)
+    return Checked.new("does not resolve to an address") if addresses.empty?
+    if addresses.any? { |address| refused?(address) }
+      return Checked.new("points at this server or a link-local address, which is never a chat service")
+    end
 
-    nil
+    Checked.new(nil, addresses.first)
   rescue URI::InvalidURIError, IPAddr::InvalidAddressError
-    "is not a valid address"
+    Checked.new("is not a valid address")
   end
 
   def self.safe?(url, **) = problem(url, **).nil?

@@ -17,10 +17,10 @@ class ChatDelivery
   end
 
   def deliver(content)
-    problem = ChatAddress.problem(@config.url)
-    raise Refused, "The webhook address #{problem}." if problem
+    checked = ChatAddress.check(@config.url)
+    raise Refused, "The webhook address #{checked.problem}." if checked.problem
 
-    response = post(ChatMessage.new(@config.kind, content).payload)
+    response = post(ChatMessage.new(@config.kind, content).payload, checked.ip)
     return response if response.is_a?(Net::HTTPSuccess)
 
     raise Unavailable, "The chat service answered #{response.code}." if response.code.to_i >= 500 || response.code.to_i == 429
@@ -32,9 +32,10 @@ class ChatDelivery
 
   private
 
-  def post(payload)
+  def post(payload, ip)
     uri = URI.parse(@config.url)
     http = Net::HTTP.new(uri.host, uri.port)
+    http.ipaddr = ip if ip # connect to the address that was checked; the name is still used for the certificate
     http.use_ssl = uri.scheme == "https"
     http.open_timeout = OPEN_TIMEOUT
     http.read_timeout = READ_TIMEOUT

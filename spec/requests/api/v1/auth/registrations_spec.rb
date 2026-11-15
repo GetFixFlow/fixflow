@@ -99,4 +99,37 @@ RSpec.describe "Auth::Registrations", type: :request do
       end
     end
   end
+
+  # Devise's other registration routes (change or delete your own account by PUT, PATCH and DELETE) are not drawn: a person
+  # changes their details in My Profile and an administrator removes people, with the safeguards that go with it.
+  describe "the other registration routes" do
+    let(:org)  { create(:organization) }
+    let(:user) { create(:user, :manager, organization: org) }
+
+    it "offers no way to change or delete one's own account through sign_up" do
+      headers = auth_headers_for(user)
+
+      put "/api/v1/auth/sign_up", params: { user: { email: "new@example.com", current_password: "password123" } },
+                                  headers: headers, as: :json
+      expect(response).to have_http_status(:not_found)
+      patch "/api/v1/auth/sign_up", params: { user: { email: "new@example.com" } }, headers: headers, as: :json
+      expect(response).to have_http_status(:not_found)
+      delete "/api/v1/auth/sign_up", headers: headers, as: :json
+      expect(response).to have_http_status(:not_found)
+
+      expect(user.reload.email).not_to eq("new@example.com")
+      expect(User.exists?(user.id)).to be(true)
+    end
+
+    it "starts no cookie session when it creates the first administrator" do
+      Organization.destroy_all
+      post "/api/v1/auth/sign_up", params: { user: { email: "first@example.com", password: "a long unusual passphrase 42",
+                                                      password_confirmation: "a long unusual passphrase 42", first_name: "First",
+                                                      last_name: "Admin", organization_name: "Acme" } }, as: :json
+
+      expect(response).to have_http_status(:created)
+      expect(response.headers["Authorization"]).to match(/\ABearer /)
+      expect(cookies["_fixflow_session"]).to be_blank
+    end
+  end
 end

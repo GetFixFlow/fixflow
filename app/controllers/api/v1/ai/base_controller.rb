@@ -2,6 +2,7 @@ module Api
   module V1
     module Ai
       class BaseController < Api::V1::BaseController
+        before_action :require_technician_or_above!
         before_action :ensure_ai_enabled!
 
         private

@@ -6,6 +6,7 @@ module Api
       skip_before_action :authenticate_user!,   only: :ingest
       skip_before_action :set_current_context,  only: :ingest
       before_action :authenticate_api_key!,     only: :ingest
+      before_action :require_technician_or_above!, only: %i[readings latest]
       before_action :set_asset, only: %i[readings latest]
 
       # ── POST /api/v1/iot/ingest ────────────────────────────────────────────

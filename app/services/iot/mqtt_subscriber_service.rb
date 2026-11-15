@@ -3,6 +3,8 @@ require "mqtt"
 module Iot
   class MqttSubscriberService
     TOPIC_PATTERN = /\Afixflow\/(?<org_token>[^\/]+)\/(?:assets\/(?<asset_id>[^\/]+)\/)?telemetry\z/
+    # Matches message_size_limit in config/mosquitto/mosquitto.conf: a reading is a few hundred bytes.
+    MAX_PAYLOAD_BYTES = 256 * 1024
 
     class << self
       # Whether this process should listen to the broker. Exactly one should: the broker gives every subscriber every
@@ -29,12 +31,22 @@ module Iot
         Rails.logger.info "[MQTT] Subscriber stopped"
       end
 
+      def too_large?(topic, payload)
+        return false unless payload.to_s.bytesize > MAX_PAYLOAD_BYTES
+
+        Rails.logger.warn "[MQTT] Message too large (#{payload.to_s.bytesize} bytes) on #{topic}: ignored"
+        true
+      end
+      private :too_large?
+
       def process_message(topic, payload)
         match = TOPIC_PATTERN.match(topic)
         return unless match
 
         org_token  = match[:org_token]
         asset_hint = match[:asset_id]
+
+        return if too_large?(topic, payload)
 
         data = JSON.parse(payload)
         organization = Organization.find_by(subdomain: org_token)

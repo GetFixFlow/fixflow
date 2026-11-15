@@ -26,6 +26,8 @@ Payload: { "metric": "temperature", "value": 72.4, "unit": "C" }
 
 The company token is the company name in lowercase with dashes (Acme Plant is `acme-plant`); `GET /api/v1/organization_settings` shows it as `slug`. The asset can also be named in the payload (`asset_id`) on `fixflow/<company token>/telemetry`. A message that names no known asset is logged and dropped.
 
+**Keep the broker off the internet.** Every device and every FixFlow worker uses the one `MQTT_USERNAME` and `MQTT_PASSWORD`, and the broker has no per-device permissions: whoever has the password can publish a reading for any asset of the company and can read every device's messages. Port 1883 is also not encrypted, so on a network you do not control, put the broker behind a VPN or a firewall that lets only your sensors in (or use `docker-compose.prod.yml` with the port bound to an internal address), and give each site its own broker if sensors there are not trusted. The broker refuses a message of more than 256 KB (`message_size_limit` in `config/mosquitto/mosquitto.conf`); FixFlow ignores one that large as well. Per-device logins, permissions and TLS are in the [security review](security-review.md)'s list of known limits.
+
 Exactly one process listens to the broker, the background worker: the broker hands every subscriber every message, so a second listener (the web server too) would store each reading twice. `MQTT_SUBSCRIBER=true` or `false` overrides which process it is, for a server with no worker.
 
 ## IoT alerts and rules

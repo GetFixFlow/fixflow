@@ -74,11 +74,25 @@ class DirectorySettings
   # Change from form input. A blank secret means "keep the one already saved".
   def assign(changes)
     changes = changes.to_h.with_indifferent_access
+    forget_secrets_for_new_servers(changes)
     SECRET_FIELDS.each_key { |name| changes.delete(name) if changes[name].blank? }
     changes[:role_groups] = clean_role_groups(changes[:role_groups]) if changes.key?(:role_groups)
     self.attributes = changes.slice(*PLAIN_FIELDS, *SECRET_FIELDS.keys).transform_values { |v| v.is_a?(String) ? v.strip : v }
     self
   end
+
+  # A saved secret is never sent to a server it was not given for (the "try it" button would otherwise carry it to any
+  # server typed in): a new directory server or issuer needs its secret typed again.
+  SECRET_OF_SERVER = { "ldap_bind_password" => "ldap_host", "oidc_client_secret" => "oidc_issuer" }.freeze
+
+  def forget_secrets_for_new_servers(changes)
+    SECRET_OF_SERVER.each do |secret, server|
+      next unless changes[secret].blank? && changes[server].is_a?(String)
+
+      public_send("#{secret}=", nil) unless changes[server].strip.casecmp?(public_send(server).to_s.strip)
+    end
+  end
+  private :forget_secrets_for_new_servers
 
   def save_to(organization)
     organization.update!(directory_settings: stored_form)

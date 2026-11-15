@@ -4,6 +4,7 @@ module Api
       # The most alerts one bulk request may name.
       MAX_BULK = 200
 
+      before_action :require_technician_or_above!
       before_action :require_manager!, only: %i[acknowledge resolve suppress bulk_acknowledge bulk_resolve]
       before_action :set_alert, only: %i[show acknowledge resolve suppress]
 

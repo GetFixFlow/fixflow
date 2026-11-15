@@ -27,10 +27,15 @@ class SmtpConfig
     new(saved.slice(*FIELDS).merge(password: SmtpSecret.decrypt(saved[:password_ciphertext])))
   end
 
-  # Change from form input. A blank password means "keep the one already saved".
+  # Change from form input. A blank password means "keep the one already saved", unless the server is another one: a saved
+  # password is never sent to a server it was not given for (the "send a test" button would otherwise carry it to any
+  # host typed in), so a new server needs its password typed again.
   def assign(changes)
     changes = changes.to_h.with_indifferent_access
-    changes.delete(:password) if changes[:password].blank?
+    if changes[:password].blank?
+      changes.delete(:password)
+      self.password = nil if another_host?(changes[:host], host)
+    end
     self.attributes = changes.slice(*FIELDS, "password").transform_values { |v| v.is_a?(String) ? v.strip : v }
     self
   end
@@ -38,6 +43,11 @@ class SmtpConfig
   def save_to(organization)
     organization.update!(email_settings: stored_form)
   end
+
+  def another_host?(new_host, old_host)
+    new_host.is_a?(String) && !new_host.strip.casecmp?(old_host.to_s.strip)
+  end
+  private :another_host?
 
   def configured? = host.present? && from_address.present?
   def password_set? = password.present?

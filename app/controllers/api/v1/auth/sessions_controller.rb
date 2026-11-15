@@ -33,11 +33,11 @@ module Api
           local = User.find_for_authentication(email: login)
           return if local && !local.directory_user? && local.valid_password?(password)
 
-          identity = Directory::Ldap.new(settings).authenticate(login, password)
-          return render json: { error: "Invalid Email or password." }, status: :unauthorized unless identity
+          identity = identity_from_directory(settings, local, login, password)
+          return render_invalid_login unless identity
 
           user = Directory::Accounts.sign_in!(identity, settings)
-          sign_in(:user, user)
+          sign_in(:user, user, store: false) # the token is the sign-in: no cookie to outlive it
           render json: { message: "Logged in successfully", user: UserBlueprint.render_as_hash(user) }
         rescue Directory::Refused => e
           Directory::Accounts.log_refused(e, identity, request)
@@ -46,6 +46,21 @@ module Api
           Rails.logger.warn "[Directory] LDAP sign-in failed: #{e.message}"
           render json: { error: "Your company directory could not be reached. Try again, or ask your administrator.",
                          code: "DIRECTORY_UNREACHABLE" }, status: :service_unavailable
+        end
+
+        # Asks the directory, unless a FixFlow account of that name (not the directory's) is locked. That account is counted
+        # and locked like any other: guessing its password through the directory's sign-in must cost as much as here.
+        def identity_from_directory(settings, local, login, password)
+          own_account = local if local && !local.directory_user?
+          return if own_account&.access_locked?
+
+          identity = Directory::Ldap.new(settings).authenticate(login, password)
+          own_account&.valid_for_authentication? { false } unless identity
+          identity
+        end
+
+        def render_invalid_login
+          render json: { error: "Invalid Email or password." }, status: :unauthorized
         end
 
         # The email (or username) and password sent, when they are both text.

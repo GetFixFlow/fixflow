@@ -50,10 +50,24 @@ RSpec.describe "Api::V1::EmailSettings", type: :request do
 
     it "keeps the saved password when the form does not change it" do
       patch "/api/v1/email_settings", params: { smtp: smtp }, headers: auth_headers_for(admin), as: :json
-      patch "/api/v1/email_settings", params: { smtp: smtp.merge(host: "smtp2.acme.com", password: "") },
+      patch "/api/v1/email_settings", params: { smtp: smtp.merge(port: 2525, password: "") },
 headers: auth_headers_for(admin), as: :json
 
-      expect(org.reload.smtp_config).to have_attributes(host: "smtp2.acme.com", password: "s3cret")
+      expect(org.reload.smtp_config).to have_attributes(host: "smtp.acme.com", port: 2525, password: "s3cret")
+    end
+
+    it "does not send the saved password to another server, in a test or when saving" do
+      patch "/api/v1/email_settings", params: { smtp: smtp }, headers: auth_headers_for(admin), as: :json
+      allow(fake).to receive(:deliver!)
+
+      post "/api/v1/email_settings/test", params: { smtp: smtp.merge(host: "attacker.example", password: "") },
+                                          headers: auth_headers_for(admin), as: :json
+      expect(Mail::SMTP).to have_received(:new).with(hash_including(address: "attacker.example"))
+      expect(Mail::SMTP).not_to have_received(:new).with(hash_including(address: "attacker.example", password: "s3cret"))
+
+      patch "/api/v1/email_settings", params: { smtp: smtp.merge(host: "smtp2.acme.com", password: "") },
+                                      headers: auth_headers_for(admin), as: :json
+      expect(org.reload.smtp_config).to have_attributes(host: "smtp2.acme.com", password: nil)
     end
 
     it "explains what is wrong, and saves nothing" do

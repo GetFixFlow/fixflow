@@ -7,6 +7,19 @@ class ActivityLog < ApplicationRecord
 
   validates :action, presence: true
 
+  # The records that belong to a site, by the name the log keeps for them. What happened to one at a site a person does
+  # not work at is not theirs to read (see SiteAccess).
+  SITE_RECORDS = %w[WorkOrder Asset Location PreventiveMaintenance IotRule IotAlert Meter AssetDocument AssetDowntime].freeze
+
+  # Without the entries about records at sites the person cannot see; everything for a person who sees every site.
+  scope :at_my_sites, lambda {
+    next all if Current.hidden_location_ids.blank?
+
+    SITE_RECORDS.inject(where.not(resource_type: SITE_RECORDS)) do |visible, type|
+      visible.or(where(resource_type: type, resource_id: type.constantize.select(:id)))
+    end
+  }
+
   scope :recent,         ->           { order(created_at: :desc) }
   # What a dashboard shows as "recent activity": the work, not who signed in.
   scope :without_sign_ins, -> { where.not(action: "user.signed_in") }

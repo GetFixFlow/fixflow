@@ -20,7 +20,7 @@ module Api
           return render_wrong_code(user) unless kind
 
           ActivityLogService.log(action: "user.recovery_code_used", resource: user, user: user) if kind == :recovery_code
-          sign_in(:user, user)
+          sign_in(:user, user, store: false) # the token is the sign-in: no cookie to outlive it
           render json: { message: "Logged in successfully", user: UserBlueprint.render_as_hash(user) }
         rescue TwoFactorAuth::Locked => e
           ActivityLogService.log(action: "user.two_factor_locked", resource: user, user: user, request: request)

@@ -1,7 +1,8 @@
 class IotChannel < ApplicationCable::Channel
   def subscribed
     asset_id = params[:asset_id]
-    reject unless asset_id.present? && authorized_for_asset?(asset_id.to_i)
+    return reject unless asset_id.present? && !current_user.requester? && authorized_for_asset?(asset_id.to_i)
+
     stream_from "iot_channel_asset_#{asset_id}"
   end
 

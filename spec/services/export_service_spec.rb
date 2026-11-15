@@ -32,6 +32,21 @@ RSpec.describe ExportService, type: :service do
       expect(row["asset"]).to start_with("'+cmd")
     end
 
+    it "covers every report export, not only the work order list (the text in each column that holds a name)" do
+      evil = "=HYPERLINK(\"http://evil.example\",\"x\")"
+      exports = {
+        asset_health_csv: { location: evil }, asset_downtime_csv: { name: evil, asset_tag: evil, location: evil },
+        pm_compliance_csv: { month: evil }, cost_by_asset_csv: { asset_name: evil }, cost_by_location_csv: { location_name: evil },
+        cost_by_vendor_csv: { vendor_name: evil }, technician_performance_csv: { name: evil },
+        sensor_readings_csv: { metric_name: evil, device_id: evil, unit: evil }
+      }
+
+      exports.each do |export, row|
+        cells = CSV.parse(described_class.public_send(export, [row]).delete_prefix(ExportService::BYTE_ORDER_MARK)).flatten.compact
+        expect(cells.grep(/\A=/)).to be_empty, "#{export} wrote a cell a spreadsheet would run as a formula"
+      end
+    end
+
     %w[= + - @].each do |start|
       it "protects text starting with #{start}" do
         csv = described_class.technician_performance_csv([{ name: "#{start}1+1", assigned: 1, completed: 1 }])

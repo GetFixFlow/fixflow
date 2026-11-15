@@ -78,8 +78,9 @@ class WorkOrderBlueprint < Blueprinter::Base
       wo.verified_by ? { id: wo.verified_by.id, full_name: wo.verified_by.full_name } : nil
     end
 
-    association :comments, blueprint: CommentBlueprint do |wo, _opts|
-      wo.comments.order(created_at: :desc).limit(5)
+    association :comments, blueprint: CommentBlueprint do |wo, options|
+      comments = wo.comments.order(created_at: :desc).limit(5)
+      options[:labor] ? comments : comments.where(internal: false) # internal notes are for managers
     end
 
     association :attachments, blueprint: AttachmentBlueprint

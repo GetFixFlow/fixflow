@@ -98,7 +98,7 @@ module Api
       end
 
       def recent_activity(org)
-        ActivityLog.where(organization_id: org.id).without_sign_ins.recent.limit(10).map do |log|
+        ActivityLog.where(organization_id: org.id).at_my_sites.without_sign_ins.recent.limit(10).map do |log|
           {
             type:        log.action,
             description: log.resource_name,

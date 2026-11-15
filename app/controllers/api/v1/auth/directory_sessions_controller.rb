@@ -15,7 +15,7 @@ module Api
 status: :unauthorized
           end
 
-          sign_in(:user, user)
+          sign_in(:user, user, store: false) # the token is the sign-in: no cookie to outlive it
           render json: { message: "Logged in successfully", user: UserBlueprint.render_as_hash(user) }
         end
       end

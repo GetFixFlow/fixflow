@@ -74,6 +74,7 @@ nav:
       - Configuration: configuration.md
       - People and roles: users.md
       - Sign-in and security: security.md
+      - Security review before 1.0: security-review.md
       - Sign in with the company directory: directory-sign-in.md
       - Public API, API keys and webhooks: public-api.md
       - Plugins (reports and notification channels): plugins.md
