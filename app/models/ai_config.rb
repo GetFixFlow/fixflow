@@ -11,6 +11,10 @@
 #   local              a model the company runs on its own network (Ollama, LM Studio, vLLM, llama.cpp...). The address must be on
 #                      this server or a private network (see AiAddress), so with it no data leaves the company.
 #
+# What the AI does is switched on and off per feature (FEATURES), all on once AI is. They are kept apart from the provider, so
+# switching a feature off keeps the provider's settings, and an install that is set up through its environment can switch a
+# feature off without saving a provider.
+#
 # An install that has saved nothing here still works from the server's environment (AI_ENABLED, ANTHROPIC_API_KEY, AI_MODEL),
 # as it did before the provider could be chosen on the screen. Anything saved here wins over it, "none" included.
 class AiConfig
@@ -25,6 +29,9 @@ class AiConfig
   }.freeze
   KEY_REQUIRED = %w[anthropic openai_compatible].freeze
   DEFAULT_MODELS = { "anthropic" => "claude-sonnet-5-5" }.freeze
+  # priority: suggests a priority for a new work order (asks the provider). anomalies: flags unusual sensor readings (arithmetic
+  # on the server; nothing is sent to the provider).
+  FEATURES = %w[priority anomalies].freeze
 
   Setting = Struct.new(:model, :base_url, :api_key, keyword_init: true) do
     def key_set? = api_key.present?
@@ -33,7 +40,7 @@ class AiConfig
   # The words for a field in an error message.
   LABELS = { "base_url" => "Address", "api_key" => "Key", "model" => "Model", "provider" => "Provider" }.freeze
 
-  attr_reader :provider, :source
+  attr_reader :provider, :source, :features
 
   validates :provider, inclusion: { in: PROVIDERS, message: "must be one of #{PROVIDERS.join(', ')}" }
   validate :selected_is_complete
@@ -44,6 +51,7 @@ class AiConfig
     saved = (organization&.ai_settings || {}).with_indifferent_access
     provider = PROVIDERS.include?(saved[:provider]) ? saved[:provider] : "none"
     config = new(provider: provider, source: saved.key?(:provider) ? "app" : nil)
+    config.features = saved[:features]
     FIELDS.each_key do |kind|
       one = (saved.dig(:providers, kind) || {}).with_indifferent_access
       config.setting(kind).model = one[:model]
@@ -62,11 +70,12 @@ class AiConfig
     key = env["ANTHROPIC_API_KEY"].to_s
     return saved unless ActiveModel::Type::Boolean.new.cast(env["AI_ENABLED"]) && key.present?
 
-    from_environment(key, env["AI_MODEL"].presence)
+    from_environment(key, env["AI_MODEL"].presence, saved.features)
   end
 
-  def self.from_environment(key, model)
+  def self.from_environment(key, model, features = nil)
     new(provider: "anthropic", source: "environment").tap do |config|
+      config.features = features
       config.setting("anthropic").api_key = key
       config.setting("anthropic").model = model
     end
@@ -75,6 +84,8 @@ class AiConfig
   def initialize(provider: "none", source: nil)
     @provider = provider
     @source = source
+    @provider_saved = source == "app"
+    @features = FEATURES.index_with(true)
     @settings = FIELDS.keys.index_with { Setting.new }
   end
 
@@ -95,6 +106,16 @@ class AiConfig
   end
 
   def local? = @provider == "local"
+
+  # On, and this feature has not been switched off.
+  def feature?(name) = @features.fetch(name.to_s, false) && active?
+
+  # A feature the person switched off stays off; one that was never mentioned is on.
+  def features=(saved)
+    saved = (saved || {}).to_h.with_indifferent_access
+    @features = FEATURES.index_with { |name| !saved.key?(name) || ActiveModel::Type::Boolean.new.cast(saved[name]) != false }
+  end
+
   def model = selected.model.presence || DEFAULT_MODELS[@provider]
   delegate :api_key, :base_url, to: :selected
 
@@ -102,7 +123,11 @@ class AiConfig
   # unless the address changed, since a key belongs to the address it was given for.
   def assign(changes)
     changes = changes.to_h.with_indifferent_access
-    @provider = changes[:provider].to_s if changes.key?(:provider)
+    self.features = @features.merge(changes[:features].to_h.slice(*FEATURES)) if changes[:features].present?
+    if changes.key?(:provider)
+      @provider = changes[:provider].to_s
+      @provider_saved = true
+    end
     return self if PROVIDERS.exclude?(@provider) || @provider == "none"
 
     one = setting(@provider)
@@ -158,6 +183,8 @@ class AiConfig
 
       all[kind] = { "model" => one.model, "base_url" => one.base_url, "key_ciphertext" => AiSecret.encrypt(one.api_key) }.compact
     end
-    { "provider" => @provider, "providers" => providers }
+    saved = { "features" => @features }
+    saved.merge!("provider" => @provider, "providers" => providers) if @provider_saved
+    saved
   end
 end

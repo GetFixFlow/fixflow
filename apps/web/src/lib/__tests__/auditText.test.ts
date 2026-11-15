@@ -22,8 +22,8 @@ describe('describeAction', () => {
   })
 
   it('words what choosing an AI provider writes', () => {
-    expect(describeAction('ai_settings.updated')).toBe('AI provider settings changed')
-    expect(describeAction('ai_settings.removed')).toBe('AI provider settings removed')
+    expect(describeAction('ai_settings.updated')).toBe('AI settings changed')
+    expect(describeAction('ai_settings.removed')).toBe('AI settings removed')
   })
 
   it('words what company sign-in writes', () => {

@@ -51,7 +51,7 @@
       "openai_compatible": "Work order details are sent over the internet to the service at {{where}} when someone uses the assistant. Read that service's terms to see how it handles them.",
       "local": "Work order details are sent only to {{where}}, which FixFlow has checked is on this server or a private network. FixFlow cannot see what that machine does with them.",
       "sent_title": "Data sent",
-      "sent": "Asset names, work order descriptions, checklists, past work notes, text from attached manuals",
+      "sent": "Asset names, work order titles and descriptions, checklists, past work notes, text from attached manuals, and counts of what is open on an asset (work orders, sensor alerts, unusual readings)",
       "not_sent_title": "Data NOT sent",
       "not_sent": "User emails, passwords, API keys"
     },
@@ -73,7 +73,41 @@
     },
     "features": {
       "title": "What it powers",
-      "assist": "FixFlow Assist: a chat on each work order that answers from the asset's history and manuals"
+      "assist": "FixFlow Assist: a chat on each work order that answers from the asset's history and manuals",
+      "needs_ai": "Choose a provider above to use these.",
+      "label": {
+        "priority": "Suggest a priority for new work orders",
+        "anomalies": "Flag unusual sensor readings"
+      },
+      "help": {
+        "priority": "Adds a button to the new work order form that suggests a priority and says why. The person decides. It sends the title, the description and what is open on the asset to {{where}}.",
+        "anomalies": "Flags a reading far outside what that sensor usually reads, learned from the sensor's own last two weeks, with no limits to set. It is worked out on this server: nothing is sent to the provider."
+      }
+    },
+    "priority": {
+      "suggest": "Suggest a priority",
+      "asking": "Asking…",
+      "suggests": "Suggested priority: {{priority}}",
+      "use": "Use {{priority}}",
+      "same": "That is the priority you chose.",
+      "failed": "A priority could not be suggested.",
+      "note": {
+        "anthropic": "The title, description and asset details are sent to Anthropic. You choose the priority.",
+        "openai_compatible": "The title, description and asset details are sent to your AI service. You choose the priority.",
+        "local": "The title, description and asset details are sent to your own model. You choose the priority."
+      }
+    },
+    "anomalies": {
+      "title": "Unusual readings",
+      "intro": "Readings far outside what that sensor usually reads, found from its own last two weeks. No limits were set.",
+      "none": "Nothing unusual right now.",
+      "reads": "{{metric}} reads {{value}}",
+      "usual": "Usually {{low}} to {{high}}, from {{readings}} readings",
+      "acknowledge": "It's real",
+      "dismiss": "It's nothing",
+      "acknowledge_done": "Marked as real.",
+      "dismiss_done": "Dismissed.",
+      "action_failed": "Could not update it. Try again."
     }
   }
 }

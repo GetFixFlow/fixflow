@@ -134,6 +134,34 @@ RSpec.describe "AI settings", type: :request do
       expect(org.reload.ai_settings).to eq({})
     end
 
+    it "has every feature on until one is switched off, and says which" do
+      save_ai(claude)
+
+      expect(ai["features"]).to eq("priority" => true, "anomalies" => true)
+    end
+
+    it "switches a feature off on its own, leaving the provider as it was, and logs it" do
+      save_ai(claude)
+      save_ai({ features: { anomalies: false } })
+
+      expect(response).to have_http_status(:ok)
+      expect(ai).to include("provider" => "anthropic", "enabled" => true, "features" => { "priority" => true, "anomalies" => false })
+      expect(org.reload.ai_config.api_key).to eq("sk-ant-SECRET")
+      expect(ActivityLog.where(action: "ai_settings.updated").order(:id).last.metadata)
+        .to include("features" => { "priority" => true, "anomalies" => false })
+    end
+
+    it "lets a server set up through its environment switch a feature off without saving a provider" do
+      ENV["AI_ENABLED"] = "true"
+      ENV["ANTHROPIC_API_KEY"] = "sk-ant-ENV"
+      save_ai({ features: { priority: false } })
+
+      expect(ai).to include("provider" => "anthropic", "enabled" => true, "source" => "environment",
+                            "features" => { "priority" => false, "anomalies" => true })
+      expect(org.reload.ai_settings).not_to have_key("provider")
+      expect(org.ai_settings.to_json).not_to include("sk-ant-ENV")
+    end
+
     describe "refuses, with the reason, and saves nothing" do
       {
         "a provider that does not exist" =>

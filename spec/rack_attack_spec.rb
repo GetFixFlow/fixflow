@@ -123,20 +123,26 @@ RSpec.describe Rack::Attack, type: :request do
     let(:admin) { create(:user, :admin) }
     let(:headers) { auth_headers_for(admin) } # the throttle counts per sign-in, so the same one is used throughout
 
-    it "counts the assistant and the AI settings' try-it button (each costs a model call), 5 a minute" do
-      5.times do
-        post "/api/v1/ai_settings/test", params: { ai: { provider: "none" } }, as: :json, headers: headers
+    it "counts the assistant, a suggested priority and the AI settings' try-it button (each costs a model call), 5 a minute together" do
+      allow(Ai::Client).to receive(:chat).and_return('{"priority":"low","reason":"x"}')
+      5.times do |n|
+        path = %w[/api/v1/ai/priority /api/v1/ai_settings/test].fetch(n % 2)
+        post path, params: { ai: { provider: "none" }, title: "x" }, as: :json, headers: headers
         expect(response).not_to have_http_status(:too_many_requests)
       end
 
       post "/api/v1/ai_settings/test", params: { ai: { provider: "none" } }, as: :json, headers: headers
       expect(response).to have_http_status(:too_many_requests)
-      get "/api/v1/ai/config", headers: headers
+      post "/api/v1/ai/priority", params: { title: "x" }, headers: headers
+      expect(response).to have_http_status(:too_many_requests)
+      post "/api/v1/ai/assist", params: { work_order_id: 0, message: "hi" }, headers: headers
       expect(response).to have_http_status(:too_many_requests)
     end
 
-    it "does not count reading and saving the settings, which cost nothing" do
+    it "does not count asking whether AI is on, nor reading and saving the settings, which cost nothing" do
       12.times do
+        get "/api/v1/ai/config", headers: headers
+        expect(response).to have_http_status(:ok)
         get "/api/v1/ai_settings", headers: headers
         expect(response).to have_http_status(:ok)
       end

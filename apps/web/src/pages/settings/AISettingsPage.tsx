@@ -10,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/Card'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { useAuthStore } from '@/stores/authStore'
 import { useAiSettings, useRemoveAiSettings, useSaveAiSettings, useTestAi } from '@/hooks/useAI'
-import type { AiChoice, AiForm, AiProvider, AiSettings } from '@/api/ai'
+import type { AiChoice, AiFeature, AiForm, AiProvider, AiSettings } from '@/api/ai'
 
 const PROVIDERS: AiProvider[] = ['none', 'anthropic', 'openai_compatible', 'local']
 const HAS_ADDRESS: AiProvider[] = ['openai_compatible', 'local']
@@ -260,6 +260,58 @@ function Status({ status }: { status: AiSettings }) {
   )
 }
 
+const FEATURES: AiFeature[] = ['priority', 'anomalies']
+
+/** What the AI does. Each can be switched off on its own; they are all on once AI is. */
+function FeaturesCard({ status }: { status: AiSettings }) {
+  const { t } = useTranslation()
+  const save = useSaveAiSettings()
+  const on = status.enabled
+
+  const change = (name: AiFeature, checked: boolean) =>
+    save.mutate(
+      { features: { [name]: checked } },
+      {
+        onSuccess: () => toast.success(t('ai.toast.saved')),
+        onError: (error) => toast.error(serverMessage(error) ?? t('ai.actions.save_failed')),
+      },
+    )
+
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <Sparkles className="h-4 w-4 text-brand-600 dark:text-brand-400" aria-hidden="true" />
+          {t('ai.features.title')}
+        </h2>
+        <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">{t('ai.features.assist')}</p>
+        {!on && <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">{t('ai.features.needs_ai')}</p>}
+        <ul className="space-y-3">
+          {FEATURES.map((name) => (
+            <li key={name} className="flex items-start gap-3">
+              <input
+                id={`ai-feature-${name}`}
+                type="checkbox"
+                checked={status.features[name]}
+                disabled={!on || save.isPending}
+                aria-describedby={`ai-feature-${name}-help`}
+                onChange={(event) => change(name, event.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+              />
+              <div>
+                <label htmlFor={`ai-feature-${name}`} className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                  {t(`ai.features.label.${name}`)}
+                </label>
+                <p id={`ai-feature-${name}-help`} className={HELP}>{t(`ai.features.help.${name}`, { where: status.where })}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
+  )
+}
+
 export function AISettingsPage() {
   const { t } = useTranslation()
   const { user } = useAuthStore()
@@ -296,15 +348,7 @@ export function AISettingsPage() {
         <>
           <Status status={settings.data} />
           <AiSettingsForm status={settings.data} />
-          <Card>
-            <CardContent className="p-4">
-              <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                <Sparkles className="h-4 w-4 text-brand-600 dark:text-brand-400" />
-                {t('ai.features.title')}
-              </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{t('ai.features.assist')}</p>
-            </CardContent>
-          </Card>
+          <FeaturesCard status={settings.data} />
         </>
       )}
     </div>

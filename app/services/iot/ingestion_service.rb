@@ -28,6 +28,7 @@ module Iot
 
         broadcast_reading(sensor_reading)
         feed_meters(sensor_reading)
+        check_for_anomaly(sensor_reading)
 
         Array(Iot::RuleEvaluatorService.evaluate(asset, sensor_reading)).each do |alert|
           results[:alerts_triggered] += 1
@@ -102,6 +103,16 @@ module Iot
       end
     rescue StandardError => e
       Rails.logger.warn "[Iot::IngestionService] Could not update a meter from #{sensor_reading.metric_name}: #{e.message}"
+    end
+
+    # An unusual reading is flagged for a company that has AI on, unless it switched that off (see Iot::AnomalyCheckJob). A
+    # failure here must not stop the sensor data from being stored.
+    private_class_method def self.check_for_anomaly(sensor_reading)
+      return unless Ai::Client.config(sensor_reading.asset.organization).feature?(:anomalies)
+
+      Iot::AnomalyCheckJob.perform_later(sensor_reading.id)
+    rescue StandardError => e
+      Rails.logger.warn "[Iot::IngestionService] Could not check #{sensor_reading.metric_name} for an unusual reading: #{e.message}"
     end
 
     private_class_method def self.broadcast_reading(sensor_reading)

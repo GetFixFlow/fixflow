@@ -53,9 +53,13 @@ export const handlers = [
   http.get('/api/v1/ai/config', () => {
     return HttpResponse.json({
       success: true,
-      data: { enabled: true, model: 'claude-sonnet-5-5', provider: 'anthropic', source: 'app' },
+      data: { enabled: true, model: 'claude-sonnet-5-5', provider: 'anthropic', source: 'app', features: { priority: true, anomalies: true } },
       meta: { request_id: 'test-req-id', timestamp: new Date().toISOString() },
     })
+  }),
+
+  http.get('/api/v1/sensor_anomalies', () => {
+    return HttpResponse.json({ success: true, sensor_anomalies: [], meta: { request_id: 'test-req-id', timestamp: new Date().toISOString() } })
   }),
 
   http.get('/api/v1/dashboard', () => {

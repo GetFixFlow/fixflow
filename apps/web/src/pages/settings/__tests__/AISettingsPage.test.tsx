@@ -19,7 +19,8 @@ const providers = (over: Record<string, unknown> = {}) => ({
 })
 
 const off = (over: Record<string, unknown> = {}) => ({
-  provider: 'none', enabled: false, source: null, where: null, environment_configured: false, providers: providers(), ...over,
+  provider: 'none', enabled: false, source: null, where: null, environment_configured: false, providers: providers(),
+  features: { priority: true, anomalies: true }, ...over,
 })
 
 const local = (over: Record<string, unknown> = {}) =>
@@ -313,6 +314,56 @@ describe('AISettingsPage', () => {
 
     expect(await screen.findByText('The AI settings could not be loaded.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument()
+  })
+
+  describe('what the AI does', () => {
+    it('lists each feature as a switch that is on, and says what the priority one sends and where', async () => {
+      serve(local())
+      renderPage()
+
+      const priority = await screen.findByRole('checkbox', { name: 'Suggest a priority for new work orders' })
+      const anomalies = screen.getByRole('checkbox', { name: 'Flag unusual sensor readings' })
+      expect(priority).toBeChecked()
+      expect(anomalies).toBeChecked()
+      expect(priority).toHaveAccessibleDescription(/sends the title, the description and what is open on the asset to model\.lan/)
+      expect(anomalies).toHaveAccessibleDescription(/nothing is sent to the provider/)
+    })
+
+    it('switches one off on its own, sending only that and nothing about the provider', async () => {
+      const user = userEvent.setup()
+      const sent = serve(local())
+      renderPage()
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Flag unusual sensor readings' }))
+
+      await waitFor(() => expect(sent.saved).toEqual({ features: { anomalies: false } }))
+    })
+
+    it('shows one that was switched off as off, and cannot be changed while AI is off', async () => {
+      serve(local({ features: { priority: false, anomalies: true } }))
+      renderPage()
+
+      expect(await screen.findByRole('checkbox', { name: 'Suggest a priority for new work orders' })).not.toBeChecked()
+    })
+
+    it('is disabled, with a word on why, when no provider is chosen', async () => {
+      serve(off())
+      renderPage()
+
+      expect(await screen.findByRole('checkbox', { name: 'Flag unusual sensor readings' })).toBeDisabled()
+      expect(screen.getByText('Choose a provider above to use these.')).toBeInTheDocument()
+    })
+
+    it('says when a switch could not be saved', async () => {
+      const user = userEvent.setup()
+      serve(local(), { save: () => HttpResponse.json({ error: { message: 'Nope.' } }, { status: 422 }) as unknown as Response })
+      renderPage()
+
+      await user.click(await screen.findByRole('checkbox', { name: 'Flag unusual sensor readings' }))
+
+      const { toast } = await import('sonner')
+      await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Nope.'))
+    })
   })
 
   it('reads in Spanish', async () => {
