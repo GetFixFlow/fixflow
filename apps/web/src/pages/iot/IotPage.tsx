@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/Skeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Button } from '@/components/ui/Button'
 import { UnusualReadings } from '@/components/iot/UnusualReadings'
+import { HeadingForLimit } from '@/components/iot/HeadingForLimit'
 import { formatDistanceToNow } from 'date-fns'
 
 export function IotPage() {
@@ -24,6 +25,8 @@ export function IotPage() {
         title="IoT Alerts"
         description="Monitor sensor alerts from your assets"
       />
+
+      <HeadingForLimit />
 
       <UnusualReadings />
 

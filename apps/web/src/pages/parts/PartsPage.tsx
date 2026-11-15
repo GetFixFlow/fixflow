@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { PartFormModal } from '@/components/parts/PartFormModal'
 import { StockAdjustModal } from '@/components/parts/StockAdjustModal'
+import { PartsForecast } from '@/components/parts/PartsForecast'
 import { PurchaseRequestModal } from '@/components/purchasing/PurchaseRequestModal'
 import { useCatalog, useDebouncedValue, useDeletePart } from '@/hooks/useParts'
 import { useAuthStore } from '@/stores/authStore'
@@ -67,6 +68,8 @@ export function PartsPage() {
           )
         }
       />
+
+      <PartsForecast />
 
       <div className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
         <div className="relative min-w-[220px] flex-1">

@@ -5,7 +5,7 @@ export type AiProvider = 'none' | 'anthropic' | 'openai_compatible' | 'local'
 export type AiChoice = Exclude<AiProvider, 'none'>
 
 /** What the AI does, each of which an administrator can switch off. */
-export type AiFeature = 'priority' | 'anomalies'
+export type AiFeature = 'priority' | 'anomalies' | 'limits' | 'parts'
 export type AiFeatures = Record<AiFeature, boolean>
 
 export interface AIConfig {
@@ -81,6 +81,43 @@ export interface SensorAnomaly {
   acknowledged_by: { id: number; full_name: string } | null
 }
 
+/** A sensor on course to reach a limit set on an alert rule, with the range the data allow. */
+export interface LimitForecast {
+  rule: { id: number; name: string }
+  asset: { id: number; name: string; asset_tag: string | null; location_path: string | null }
+  metric_name: string
+  unit: string | null
+  limit: number
+  current: number
+  /** How much it moves a day (negative when it is falling). */
+  slope_per_day: number
+  days_left: number
+  days_soonest: number
+  days_latest: number
+  /** The date it reaches the limit at this rate. */
+  reaches_on: string
+  r2: number
+  days_of_history: number
+  points: number
+}
+
+/** What is expected of a part over the next 30 days, and whether what is held and on order covers it. */
+export interface PartForecast {
+  part: { id: number; name: string; sku: string | null; unit: string | null }
+  status: 'short' | 'tight' | 'ok'
+  used_last_30_days: number
+  expected: number
+  low: number
+  high: number
+  on_hand: number
+  on_order: number
+  days_of_stock: number | null
+  suggested_quantity: number
+  /** How many 30-day periods of use it rests on, and how many times the part was logged in them. */
+  periods: number
+  uses: number
+}
+
 export const aiApi = {
   config: {
     get: () => apiClient.get<{ data: AIConfig }>('/ai/config'),
@@ -88,6 +125,10 @@ export const aiApi = {
   /** Asks the AI for a priority. Saves nothing. */
   suggestPriority: (body: { title: string; description?: string; asset_id?: number }) =>
     apiClient.post<{ data: PrioritySuggestion }>('/ai/priority', body),
+  forecasts: {
+    limits: () => apiClient.get<{ data: LimitForecast[] }>('/ai/forecasts/limits'),
+    parts: () => apiClient.get<{ data: PartForecast[] }>('/ai/forecasts/parts'),
+  },
   anomalies: {
     list: (params?: { status?: SensorAnomaly['status']; asset_id?: number }) =>
       apiClient.get<{ sensor_anomalies: SensorAnomaly[] }>('/sensor_anomalies', { params }),

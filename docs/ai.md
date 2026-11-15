@@ -1,6 +1,6 @@
 # AI: choosing a provider, and what it does
 
-FixFlow can use AI to help: the **FixFlow Assist** chat on a work order answers from the asset's history and the text of its manuals, a new work order can **suggest a priority**, and the sensor screens **flag unusual readings**. **AI is off until an administrator picks a provider.** Nothing is sent anywhere before that.
+FixFlow can use AI to help: the **FixFlow Assist** chat on a work order answers from the asset's history and the text of its manuals, a new work order can **suggest a priority**, the sensor screens **flag unusual readings** and **warn when a sensor is heading for its limit**, and the Parts page **forecasts parts that may run short**. **AI is off until an administrator picks a provider.** Nothing is sent anywhere before that.
 
 [What it does](#what-it-does) lists each feature and how to switch it off.
 
@@ -17,13 +17,15 @@ Under the choice, the page says in words where the data goes. Use **Try it** to 
 
 ## What it does
 
-Once a provider is chosen, three things are available. Under the provider on **Settings → AI**, a switch for each of the last two lets an administrator turn it off on its own, without losing the provider's settings. They are all on until switched off, and none work while AI is off.
+Once a provider is chosen, five things are available. Under the provider on **Settings → AI**, a switch for each of the last four lets an administrator turn it off on its own, without losing the provider's settings. They are all on until switched off, and none work while AI is off.
 
 | | What it does | Needs the provider? |
 |---|---|---|
 | **FixFlow Assist** | A chat on each work order that answers from the asset's history and manuals | Yes |
 | **Suggest a priority for new work orders** | A **Suggest a priority** button on the new work order form, once the title is five characters or more. It shows a priority (critical, high, medium or low) with one sentence on why, and a **Use** button. **It never changes the priority by itself**: the person decides | Yes |
 | **Flag unusual sensor readings** | A reading far outside what that sensor usually reads is listed on the **IoT Alerts** page, under **Unusual readings**, with what is usual for it. A manager marks it **It's real** or **It's nothing** | **No**: it is arithmetic done on this server |
+| **Warn when a sensor is heading for its limit** | A sensor that has been steadily rising or falling towards a limit set on an alert rule is listed on the **IoT Alerts** page, under **Heading for a limit**, with about when it gets there and a range | **No**: arithmetic done on this server |
+| **Forecast parts that may run short** | The **Parts** page lists the parts that may not last the next 30 days, with what is expected, what is held and on order, and how many to consider ordering | **No**: arithmetic done on this server |
 
 ### Suggested priority
 
@@ -48,11 +50,38 @@ It does not use the provider, so it works the same with a local model or a hoste
 
 Technicians and above can see the flags (`GET /api/v1/sensor_anomalies`) and a manager can answer them (`PATCH /api/v1/sensor_anomalies/:id/acknowledge` and `/dismiss`); see [the endpoint list](api-endpoints.md).
 
+### Heading for a limit
+
+A forecast of when a sensor reaches **a limit the company already set** on an alert rule ([IoT alerts and rules](iot.md#iot-alerts-and-rules)): FixFlow does not invent limits. For each active rule, the last 30 days of the sensor's good readings are taken a day at a time (the **median** of each day, so a daily cycle and a few spikes do not bend it) and a straight line is fitted through those days. It says something only when:
+
+- there are **at least 14 days with at least three good readings each**;
+- the line explains **at least half** of the movement (R²), which over 14 or more days puts the slope well clear of zero, so a sensor that only wobbles is left alone however it leans;
+- the sensor is moving **towards** the limit and has **not reached it** (one that has is an alert's business);
+- the limit is **within 90 days** at this rate.
+
+The range is the same line with its slope as steep, and as shallow, as the data allow (two standard errors each way). Each line says how many days of readings it rests on. A rule with the **equals** operator has no side to approach and is skipped; a rule for a range uses the end the sensor is heading for. Rules that are paused or archived are not looked at.
+
+This is a straight line. A sensor that is about to fail suddenly, or whose trend bends, will be missed or mis-timed. It is not a prediction of failure, only of when a measurement will reach a number somebody chose, if it carries on as it has.
+
+### Parts that may run short
+
+For each part, use is counted in **30-day periods** (up to six) from the parts logged on work orders. The expected use over the next 30 days is a **weighted average** of those periods (the latest counts most), and the **range** is what an ordinary swing from period to period allows (80%: the average plus and minus 1.28 standard deviations, never less than the swing that purely random use would have). Against that, **what is in stock plus what is on order and not yet received** (orders that are placed or partly received, not ones only requested):
+
+| | When |
+|---|---|
+| **May run short** | stock and orders do not cover the expected use |
+| **Tight** | they cover it, but not the top of the range |
+| Not listed | they cover the top of the range too (`GET /api/v1/ai/forecasts/parts?all=true` lists these as well) |
+
+It says nothing about any part until the company's parts have been logged for **at least 90 days**, and nothing about a part used **fewer than three times** in the periods it can see. A preventive maintenance schedule does not say which parts it will need, so **planned work that is not yet logged is not in these numbers**: a job due next month that needs a part nobody has used lately will not show.
+
+Both forecasts are arithmetic on this server. They make no call to the provider, so nothing leaves, and they are not counted against the model-call limit. They are still part of AI: with AI off they are off. They are answered at `GET /api/v1/ai/forecasts/limits` and `/parts` for technicians and above; see [the endpoint list](api-endpoints.md).
+
 ## What is sent
 
 When someone uses the assistant, FixFlow sends the model that work order's title, description, priority and checklist, the asset's name, tag, location and serial number, the notes of its last five finished work orders, and the text of the first two PDF manuals kept with the asset ([Asset documents](asset-documents.md)), along with what the person has typed in the chat so far. It does not send people's emails, passwords or any key.
 
-When someone asks for a **suggested priority**, FixFlow sends the title and description typed so far (each cut at 1,500 characters), the asset's name, tag and status, and counts of what is open on that asset: work orders by priority, sensor alerts by severity, and unusual readings. No names of people, no email addresses, no costs, and none of the asset's notes or manuals. The unusual-readings feature sends nothing.
+When someone asks for a **suggested priority**, FixFlow sends the title and description typed so far (each cut at 1,500 characters), the asset's name, tag and status, and counts of what is open on that asset: work orders by priority, sensor alerts by severity, and unusual readings. No names of people, no email addresses, no costs, and none of the asset's notes or manuals. The unusual-readings, heading-for-a-limit and parts forecasts send nothing.
 
 ## Anthropic (Claude)
 

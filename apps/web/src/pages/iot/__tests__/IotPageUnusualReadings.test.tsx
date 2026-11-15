@@ -17,6 +17,20 @@ function renderPage() {
 }
 
 describe('IotPage', () => {
+  it('has the sensors heading for a limit above the unusual readings', async () => {
+    server.use(
+      http.get('/api/v1/iot_alerts', () => HttpResponse.json({ iot_alerts: [], meta: {} })),
+      http.get('/api/v1/ai/forecasts/limits', () => HttpResponse.json({ data: [{
+        rule: { id: 3, name: 'Pump too hot' }, asset: { id: 5, name: 'Pump 3', asset_tag: null, location_path: null }, metric_name: 'temperature', unit: '°C',
+        limit: 85, current: 75, slope_per_day: 0.5, days_left: 20, days_soonest: 15, days_latest: 26, reaches_on: '2026-12-04', r2: 0.9, days_of_history: 29, points: 30,
+      }] })),
+    )
+    renderPage()
+
+    expect(await screen.findByRole('heading', { name: 'Heading for a limit' })).toBeInTheDocument()
+    expect(await screen.findByText(/temperature is 75 °C and rising by 0.5 °C a day/)).toBeInTheDocument()
+  })
+
   it('lists the unusual readings on the page people reach from the menu, even when there are no alerts', async () => {
     server.use(
       http.get('/api/v1/iot_alerts', () => HttpResponse.json({ iot_alerts: [], meta: {} })),

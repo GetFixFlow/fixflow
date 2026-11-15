@@ -328,6 +328,8 @@ Rails.application.routes.draw do
         get "config", to: "config#show"
         post "assist", to: "assist#create"
         post "priority", to: "priority#create"
+        get "forecasts/limits", to: "forecasts#limits"
+        get "forecasts/parts", to: "forecasts#parts"
       end
 
       # Sensor readings flagged as unusual without any limit being set (see Iot::AnomalyDetector)

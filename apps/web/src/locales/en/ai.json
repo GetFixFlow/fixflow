@@ -77,11 +77,15 @@
       "needs_ai": "Choose a provider above to use these.",
       "label": {
         "priority": "Suggest a priority for new work orders",
-        "anomalies": "Flag unusual sensor readings"
+        "anomalies": "Flag unusual sensor readings",
+        "limits": "Warn when a sensor is heading for its limit",
+        "parts": "Forecast parts that may run short"
       },
       "help": {
         "priority": "Adds a button to the new work order form that suggests a priority and says why. The person decides. It sends the title, the description and what is open on the asset to {{where}}.",
-        "anomalies": "Flags a reading far outside what that sensor usually reads, learned from the sensor's own last two weeks, with no limits to set. It is worked out on this server: nothing is sent to the provider."
+        "anomalies": "Flags a reading far outside what that sensor usually reads, learned from the sensor's own last two weeks, with no limits to set. It is worked out on this server: nothing is sent to the provider.",
+        "limits": "For a sensor that has been steadily rising or falling towards a limit set on an alert rule, says about when it will get there, with a range. Worked out on this server from the last 30 days: nothing is sent to the provider.",
+        "parts": "Says which parts may not last the next 30 days, from how much was used in the last months and what is in stock and on order. Worked out on this server: nothing is sent to the provider."
       }
     },
     "priority": {
@@ -108,6 +112,31 @@
       "acknowledge_done": "Marked as real.",
       "dismiss_done": "Dismissed.",
       "action_failed": "Could not update it. Try again."
+    },
+    "forecast": {
+      "limits": {
+        "title": "Heading for a limit",
+        "intro": "Sensors on course to reach a limit set on an alert rule, from how they moved over the last 30 days. A forecast, not a promise: it only says something when the movement is clear.",
+        "none": "No sensor is clearly heading for a limit.",
+        "rising": "{{metric}} is {{current}} and rising by {{rate}} a day",
+        "falling": "{{metric}} is {{current}} and falling by {{rate}} a day",
+        "reaches": "Reaches {{limit}} {{when}}, around {{date}}",
+        "range": "Between {{soonest}} and {{latest}} days",
+        "basis": "from {{history}} days of readings ({{points}} days used), rule: {{rule}}",
+        "range_narrow": "A narrow range: the readings follow the line closely"
+      },
+      "parts": {
+        "title": "Parts that may run short",
+        "intro": "What is expected to be used over the next 30 days, from the last months of use, against what is in stock and on order. A forecast, not a promise. Work that is planned but not yet logged is not in it.",
+        "none": "No part is expected to run short.",
+        "short": "May run short",
+        "tight": "Tight",
+        "expected": "Expected use over the next 30 days: {{expected}} {{unit}} (likely {{low}} to {{high}})",
+        "held": "In stock {{on_hand}}, on order {{on_order}}",
+        "days": "about {{days}} days of stock",
+        "suggest": "consider ordering {{quantity}}",
+        "basis": "from {{periods}} months of use, logged {{uses}} times"
+      }
     }
   }
 }
