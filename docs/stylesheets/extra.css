@@ -1,0 +1,24 @@
+/* Makes the docs look like the website (website/src/styles/global.css): the same blue, the same navy, the same type. */
+:root {
+  --md-text-font: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: #0e1626;
+  --md-primary-fg-color--light: #1d2a44;
+  --md-primary-fg-color--dark: #0a101c;
+  --md-accent-fg-color: #1257d6;
+  --md-typeset-a-color: #1257d6;
+  --md-default-bg-color: #ffffff;
+}
+[data-md-color-scheme="slate"] {
+  --md-hue: 222;
+  --md-primary-fg-color: #0a1020;
+  --md-primary-fg-color--light: #17233d;
+  --md-primary-fg-color--dark: #060b17;
+  --md-accent-fg-color: #7fabff;
+  --md-typeset-a-color: #7fabff;
+  --md-default-bg-color: #0a1020;
+  --md-default-bg-color--light: #111a2e;
+}
+.md-typeset h1, .md-typeset h2, .md-typeset h3 { letter-spacing: -0.02em; font-weight: 700; }
+.md-header__button.md-logo img { height: 1.9rem; }

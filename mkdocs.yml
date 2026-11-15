@@ -3,7 +3,9 @@
 # .github/workflows/release.yml and CONTRIBUTING.md, "Making a release").
 site_name: FixFlow documentation
 site_description: Install, configure, upgrade, back up and use FixFlow, the self-hosted maintenance management system.
-site_url: https://getfixflow.github.io/fixflow/
+# DOCS_SITE_URL and SITE_HOME are set by bin/build_website, which publishes these pages under /docs/ of the website
+# (website/README.md). Without them this is the GitHub Pages site that the release workflow publishes with mike.
+site_url: !ENV [DOCS_SITE_URL, "https://getfixflow.github.io/fixflow/"]
 repo_url: https://github.com/GetFixFlow/fixflow
 repo_name: GetFixFlow/fixflow
 edit_uri: edit/main/docs/
@@ -18,8 +20,9 @@ hooks:
 
 theme:
   name: material
-  logo: logo.png
+  logo: stylesheets/mark.png
   favicon: logo.png
+  font: false
   features:
     - navigation.sections
     - navigation.top
@@ -43,7 +46,11 @@ plugins:
       alias_type: redirect
       canonical_version: latest
 
+extra_css:
+  - stylesheets/extra.css
+
 extra:
+  homepage: !ENV [SITE_HOME, ""]
   version:
     provider: mike
 

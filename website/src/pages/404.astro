@@ -1,0 +1,14 @@
+---
+import Base from '../layouts/Base.astro';
+import { docs } from '../data/site';
+---
+<Base title="Page not found">
+  <section>
+    <div class="wrap narrow" style="margin-left:auto;margin-right:auto">
+      <p class="eyebrow">404</p>
+      <h1>That page is not here</h1>
+      <p class="lede" style="margin-top:18px">It may have moved. Try the documentation’s search, or go back to the start.</p>
+      <div class="btn-row" style="margin-top:28px"><a class="btn btn-primary" href="/">Home</a><a class="btn btn-ghost" href={docs}>Documentation</a></div>
+    </div>
+  </section>
+</Base>

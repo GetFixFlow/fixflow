@@ -1,0 +1,95 @@
+---
+import Base from '../layouts/Base.astro';
+import Code from '../components/Code.astro';
+import { doc, links, repo } from '../data/site';
+---
+<Base title="Install" description="Install FixFlow on your own server with one script or four commands: Docker on Linux, a lite install for 2 GB, or Kubernetes.">
+  <div class="page-head">
+    <div class="wrap narrow" style="margin-left:auto;margin-right:auto">
+      <p class="eyebrow">Install</p>
+      <h1>Install FixFlow on your own server</h1>
+      <p class="lede">You need a Linux or macOS machine with Docker and Docker Compose v2, about 2 GB of memory and a few GB of disk. The database, Redis, the file storage and the sensor broker all run in containers, so nothing else is installed.</p>
+    </div>
+  </div>
+
+  <section>
+    <div class="wrap narrow" style="margin-left:auto;margin-right:auto">
+      <h2 style="margin-bottom:28px">Install in four steps</h2>
+      <ol class="steps">
+        <li>
+          <div>
+            <h3>Run the installer on a fresh Ubuntu or Debian server</h3>
+            <p>It checks the system and that ports 80 and 443 are free before changing anything, installs Docker and FixFlow, and never overwrites an existing install. Give it a name that already points at the server and it turns on HTTPS with a free Let’s Encrypt certificate.</p>
+            <Code id="install-script" caption="one command, as root"><span class="c"># download the installer, then run it</span>
+curl -fsSLO https://raw.githubusercontent.com/GetFixFlow/fixflow/main/deploy/install.sh
+sudo sh install.sh --domain fixflow.example.com --email you@example.com</Code>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Or install it by hand, with four commands</h3>
+            <p>Use the newest release tag from <a href={links.releases} rel="noopener">the releases page</a>. Fill in the “Required” block of <code>.env</code>: each line has the command beside it that makes its value.</p>
+            <Code id="install-manual" caption="by hand">git clone {repo}.git
+cd fixflow
+git checkout v0.2.0     <span class="c"># replace with the newest release</span>
+cp .env.example .env    <span class="c"># fill in the Required block</span>
+make prod</Code>
+            <p style="margin-top:12px">On a release the first start pulls the published images (a few minutes); on anything else it builds them (5 to 10 minutes).</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Open the address and create your company</h3>
+            <p>A new install shows <strong>Set up FixFlow</strong>: your company and the first administrator. Then invite your team and bring in your places, assets and parts from a spreadsheet.</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Set up backups before you rely on it</h3>
+            <p>Until you do, the backups are on the same disk as the data. Keep a copy of your <code>.env</code> somewhere safe too.</p>
+          </div>
+        </li>
+      </ol>
+
+      <div class="note" style="margin-top:44px">
+        <p><strong>Honest status.</strong> The install has been checked on Docker Desktop and in automated tests, not yet on a fresh server by someone outside the project. If anything in the guide was missing, wrong or confusing, <a href={links.issues} rel="noopener">tell us</a>: that is the most useful thing you can do.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Other ways to run it</p>
+        <h2>Pick the size that fits</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col">Install</th><th scope="col">Good for</th><th scope="col">Guide</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Full</th><td>A team that wants photos and documents in a storage server, and sensors over MQTT. About 2 GB of memory.</td><td><a href={doc('install')}>Install on a server</a></td></tr>
+            <tr><th scope="row">Lite</th><td>A small team on one small server (2 GB is enough): no storage server and no sensor broker; sensors over HTTP.</td><td><a href={doc('lite')}>Lite install</a></td></tr>
+            <tr><th scope="row">Kubernetes</th><td>A cluster: a Helm chart with two copies of the web app and API, and a guide to what to run underneath so it stays up.</td><td><a href={doc('kubernetes')}>Install on Kubernetes</a>, <a href={doc('high-availability')}>Staying up</a></td></tr>
+            <tr><th scope="row">AWS, DigitalOcean, your own network</th><td>Step-by-step server guides.</td><td><a href={doc('server-aws')}>AWS</a>, <a href={doc('server-digitalocean')}>DigitalOcean</a>, <a href={doc('server-company-network')}>company network</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap narrow" style="margin-left:auto;margin-right:auto">
+      <div class="head">
+        <p class="eyebrow">After the install</p>
+        <h2>Keeping it running</h2>
+      </div>
+      <ul class="tick-list">
+        <li><a href={doc('https')}>Turn on HTTPS</a> (needed for the phone app to work offline).</li>
+        <li><a href={doc('configuration')}>Configure</a> email, branding and the settings in <code>.env</code>.</li>
+        <li><a href={doc('upgrading')}>Upgrade</a> with <code>make upgrade TO=v…</code>, and go back if you need to. Each release’s notes say <em>Before you upgrade</em> first.</li>
+        <li><a href={doc('monitoring')}>Watch the install</a> on the System Health page.</li>
+        <li><a href={doc('troubleshooting')}>Troubleshoot</a>: most start-up and upgrade problems are listed there.</li>
+      </ul>
+    </div>
+  </section>
+</Base>

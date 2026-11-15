@@ -1,0 +1,9 @@
+---
+// A code block with a copy button. `id` must be unique on the page.
+interface Props { id: string; caption?: string; }
+const { id, caption } = Astro.props;
+---
+<div class="code">
+  <div class="cap"><span>{caption ?? 'shell'}</span><button type="button" data-copy={id} hidden>Copy</button></div>
+  <pre id={id} tabindex="0" aria-label={`Code: ${caption ?? 'shell'}`}><code><slot /></code></pre>
+</div>

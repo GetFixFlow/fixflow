@@ -1,0 +1,90 @@
+---
+import Base from '../layouts/Base.astro';
+import { doc } from '../data/site';
+
+// Every line links to the docs page that explains it, so a claim here can be checked there.
+const groups = [
+  { title: 'Doing the work', intro: 'From a reported problem to a verified repair.', items: [
+    ['Work orders', 'Open, assigned, in progress, on hold, waiting for parts, completed, verified. Only someone other than the person who did the work can verify.', 'work-orders'],
+    ['Checklists, photos and documents', 'Steps to tick, pictures and files on the job, and labour cost from the hours recorded.', 'work-orders'],
+    ['Approval for costly work', 'Set a limit; work expected to cost more waits for a manager before it starts.', 'work-orders'],
+    ['Problem reports without an account', 'Anyone can scan a QR label and report what is wrong.', 'work-orders'],
+    ['Working offline', 'Starting, holding, completing, comments and photos are saved on the phone and sent when the signal returns.', 'work-orders'],
+    ['Schedule and workload', 'See who is busy on which day, and move work by dragging it.', 'schedule'],
+  ]},
+  { title: 'Preventive maintenance', intro: 'Service machines before they stop.', items: [
+    ['Calendar schedules', 'Work orders made on a schedule, each with its checklist.', 'work-orders'],
+    ['Usage-based schedules', 'Count running hours, kilometres or anything else with a meter, and service by the count.', 'meters'],
+    ['Warranty and documents', 'Keep manuals and nameplate photos with the machine, and get a warning 30 days before a warranty ends.', 'asset-documents'],
+  ]},
+  { title: 'Assets, places and parts', intro: 'Know what you have and where it is.', items: [
+    ['Assets and places', 'A tree of places with the machines in them, a history of every job, and import from a spreadsheet.', 'import'],
+    ['Downtime and availability', 'Record when a machine stopped and ran again, and see its availability.', 'downtime'],
+    ['QR labels and barcodes', 'Print sheets of labels in three sizes, and scan with a phone camera or a handheld scanner (QR, Code 128 and common product codes).', 'scanning-and-labels'],
+    ['Parts and purchasing', 'Stock and low-stock warnings, purchase requests that are approved, ordered and received, and stock that updates on receipt.', 'purchasing'],
+    ['Vendors and contractors', 'A list of the outside companies, the people to call, and what they charged on each job.', 'vendors'],
+    ['Custom fields', 'Add your own fields to work orders and parts.', 'custom-fields'],
+  ]},
+  { title: 'Sensors and reports', intro: 'Let the machines and the numbers tell you.', items: [
+    ['Sensors over REST or MQTT', 'Send readings, set alert rules, and get a work order when a limit is passed.', 'iot'],
+    ['Reports and the dashboard', 'Cost, downtime, asset health, PM compliance and technician performance.', 'reports'],
+    ['Saved and scheduled reports', 'Keep a report’s filters under a name and have it emailed as a PDF every week.', 'reports'],
+    ['Notifications', 'Email, phone notifications, and messages in Slack or Microsoft Teams.', 'notifications'],
+  ]},
+  { title: 'People and security', intro: 'Let the right people in, and nobody else.', items: [
+    ['Roles', 'Administrator, manager, technician and requester, each seeing and doing what that job needs.', 'users'],
+    ['Sign in with your company account', 'OpenID Connect and LDAP, with roles that follow groups. Two-factor sign-in for password accounts.', 'directory-sign-in'],
+    ['Several sites in one install', 'A company with more than one place that does maintenance can keep them apart in one FixFlow.', 'sites'],
+    ['A security review', 'What an in-house review found and fixed before 1.0, the limits that remain, and the brief for an independent reviewer.', 'security-review'],
+  ]},
+  { title: 'Connecting and extending', intro: 'Make it part of your other systems.', items: [
+    ['Public API', 'Read and change work orders and assets from a script, with scoped keys. Described as OpenAPI 3.', 'public-api'],
+    ['Webhooks', 'FixFlow calls an address you give it when something happens, with each message signed.', 'public-api'],
+    ['Plugins', 'Add a report or a notification channel by adding a folder.', 'plugins'],
+    ['AI, if you want it', 'Ask about a machine, a suggested priority, unusual sensor readings, forecasts, and work orders from a sentence. Off until you choose a provider, and a local model keeps data on your network.', 'ai'],
+  ]},
+  { title: 'Languages and access', intro: 'For everyone who has to use it.', items: [
+    ['English and Spanish', 'Screens and all emails. Adding a language needs files, not code.', 'translating'],
+    ['Keyboard and screen readers', 'Checked with an accessibility checker across 35 screens, in light and dark. No real screen reader has been used yet, and the page says so.', 'accessibility'],
+  ]},
+  { title: 'Running it', intro: 'What the person who looks after the server needs.', items: [
+    ['Docker, lite and Kubernetes', 'A one-script install, a lite install for 2 GB, a Helm chart, and a guide to staying up with several servers.', 'install'],
+    ['Backups and restoring', 'Nightly backups of the database and the uploaded files, to the server or another storage.', 'backups'],
+    ['Upgrading and rolling back', 'One command to move to a new version, and the way back.', 'upgrading'],
+    ['Watching the install', 'A System Health page and the checks to run.', 'monitoring'],
+  ]},
+];
+---
+<Base title="Features" description="Everything FixFlow does: work orders, preventive maintenance, assets, parts, sensors, reports, sign-in, a public API, plugins and optional AI.">
+  <div class="page-head">
+    <div class="wrap">
+      <p class="eyebrow">Features</p>
+      <h1>What FixFlow does</h1>
+      <p class="lede">Grouped by what you want to get done. Each item links to the page in the documentation that explains it, including what it does not do yet.</p>
+    </div>
+  </div>
+  <section style="padding-top:24px">
+    <div class="wrap">
+      {groups.map((g) => (
+        <div class="group">
+          <div>
+            <h2>{g.title}</h2>
+            <p class="intro">{g.intro}</p>
+          </div>
+          <ul>
+            {g.items.map(([title, text, page]) => (
+              <li><b><a href={doc(page)}>{title}</a></b><span>{text}</span></li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </section>
+  <section class="band cta">
+    <div class="wrap">
+      <h2>Missing something?</h2>
+      <p>Say what you need in Discussions. A company that needs it sooner can pay for it to be built, in the open, for everyone.</p>
+      <div class="btn-row"><a class="btn btn-primary" href="/install/">Install FixFlow</a><a class="btn btn-ghost" href="/support/">How support works</a></div>
+    </div>
+  </section>
+</Base>
