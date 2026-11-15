@@ -228,8 +228,17 @@ stop_probe
 [ "$(wc -l < "$PROBE")" -ge 20 ] || fail "too few answers were asked for during the upgrade"
 [ "$(longest_failure)" -le "$MOST" ] || fail "the API stopped answering for $(longest_failure) checks in a row during the upgrade"
 ok "a rolling upgrade: at most $(longest_failure) checks in a row went unanswered, of $(wc -l < "$PROBE")"
-kubectl -n "$NS" exec "$(kubectl -n "$NS" get pod -l app.kubernetes.io/component=api -o name | head -1)" -- printenv CHECK_ROLLOUT | grep -q upgraded \
-  || fail "the new setting did not reach the new pods"
+# An old pod may still be shutting down (and still listed) for a while after the upgrade: wait until both API pods are new ones.
+UPGRADED=0
+for _ in $(seq 1 30); do
+  UPGRADED=0
+  for pod in $(kubectl -n "$NS" get pods -l app.kubernetes.io/component=api -o name); do
+    kubectl -n "$NS" exec "$pod" -- printenv CHECK_ROLLOUT 2>/dev/null | grep -q upgraded && UPGRADED=$((UPGRADED + 1))
+  done
+  [ "$UPGRADED" -ge 2 ] && break
+  sleep 3
+done
+[ "$UPGRADED" -ge 2 ] || fail "the new setting reached $UPGRADED of the 2 API pods"
 [ "$(kubectl -n "$NS" get pods -l app.kubernetes.io/component=sidekiq-iot --no-headers | wc -l)" = "1" ] \
   || fail "there must be exactly one listening worker after an upgrade"
 ok "the new setting reached the new pods, and there is still one listening worker"
@@ -260,8 +269,14 @@ kubectl -n "$NS" scale "deploy/$REL-sidekiq-iot" --replicas=1 >/dev/null
 helm upgrade "$REL" "$CHART" --namespace "$NS" $ARGS --wait --timeout 12m >/dev/null || fail "opening the front door again"
 [ "$(api_exec bundle exec rails runner 'print User.find_by(email: "admin@check.test").first_name' 2>/dev/null)" = "Check" ] \
   || fail "the restore did not bring back the data as it was at the backup"
-TOKEN=$(c -D - -o /dev/null -X POST "$URL/api/v1/auth/sign_in" -H "$JSON" \
-  -d '{"user":{"email":"admin@check.test","password":"Blue-Ladder-4721-Kite"}}' | grep -i '^authorization:' | sed 's/^[Aa]uthorization: //' | tr -d '\r')
+# The Ingress has just been made again: the controller may take a few seconds to route it.
+TOKEN=""
+for _ in $(seq 1 20); do
+  TOKEN=$(c -D - -o /dev/null -X POST "$URL/api/v1/auth/sign_in" -H "$JSON" \
+    -d '{"user":{"email":"admin@check.test","password":"Blue-Ladder-4721-Kite"}}' | grep -i '^authorization:' | sed 's/^[Aa]uthorization: //' | tr -d '\r')
+  [ -n "$TOKEN" ] && break
+  sleep 3
+done
 [ -n "$TOKEN" ] || fail "signing in after the restore"
 ok "a change made after a backup was undone by the restore, and everything started again"
 
