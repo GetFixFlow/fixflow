@@ -1,5 +1,11 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Ask a question, or talk an idea over
+    url: https://github.com/GetFixFlow/fixflow/discussions
+    about: How do I...? What do others do? Discussions are the place for questions; issues are for bugs and feature requests.
+  - name: Paid support, setup help, sponsored features
+    url: https://getfixflow.github.io/fixflow/latest/support/
+    about: Support contracts, help setting up, paying for a feature you need, and when new versions come out.
   - name: Report a security problem (private)
     url: https://github.com/GetFixFlow/fixflow/security/advisories/new
     about: Please do not open a public issue for a vulnerability. This form is visible only to the maintainers.
