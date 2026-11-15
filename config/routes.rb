@@ -285,6 +285,7 @@ Rails.application.routes.draw do
 
       # ── Reports ───────────────────────────────────────────────────────────
       namespace :reports do
+        get "sites", to: "sites#show"
         get "work_orders/summary",                to: "work_orders#summary"
         get "work_orders/mttr",                   to: "work_orders#mttr"
         get "work_orders/backlog",                to: "work_orders#backlog"
@@ -331,6 +332,12 @@ Rails.application.routes.draw do
         post "work_order_draft", to: "drafts#create"
         get "forecasts/limits", to: "forecasts#limits"
         get "forecasts/parts", to: "forecasts#parts"
+      end
+
+      # Several sites in one install: a site is a top-level location of type site (see SiteAccess)
+      resources :sites, only: %i[index create update] do
+        member { put :people }
+        put :enabled, on: :collection
       end
 
       # Sensor readings flagged as unusual without any limit being set (see Iot::AnomalyDetector)

@@ -19,7 +19,7 @@ module Api
       # POST /api/v1/work_orders/:work_order_id/parts  { part: { part_id, quantity_used, unit_cost } }
       def create
         attrs = params.expect(part: %i[part_id quantity_used unit_cost])
-        part  = current_organization.parts.find(attrs[:part_id])
+        part  = current_organization.parts.at_my_sites.find(attrs[:part_id])
         line  = nil
 
         ActiveRecord::Base.transaction do

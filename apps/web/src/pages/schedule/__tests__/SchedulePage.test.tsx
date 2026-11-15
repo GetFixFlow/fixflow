@@ -289,4 +289,41 @@ describe('the schedule', () => {
       await waitFor(() => expect(moves[0].body).toEqual({ assignee_id: null }))
     })
   })
+
+  describe('with several sites', () => {
+    const sitesAre = (enabled: boolean, names: string[]) =>
+      server.use(http.get('/api/v1/sites', () => HttpResponse.json({
+        enabled, my_site_ids: [], company: { timezone: 'UTC', work_hours: { start: '08:00', end: '17:00' }, work_days: [1, 2, 3, 4, 5], holidays: [] },
+        sites: names.map((name, index) => ({ id: index + 1, name, settings: {}, effective: {}, assets: 0, open_work_orders: 0, places: 0, people: [] })),
+      })))
+
+    it('offers a site to look at, and asks the server for that site\'s calendar and work', async () => {
+      const { asked } = serve()
+      sitesAre(true, ['North', 'South'])
+      renderPage()
+
+      await userEvent.selectOptions(await screen.findByLabelText('Site'), 'South')
+
+      await waitFor(() => expect(last(asked).searchParams.get('site_id')).toBe('2'))
+      expect(asked[0].searchParams.get('site_id')).toBeNull()
+      await userEvent.selectOptions(screen.getByLabelText('Site'), 'All sites')
+      await waitFor(() => expect(last(asked).searchParams.get('site_id')).toBeNull())
+    })
+
+    it('offers nothing to choose when sites are off, or there is only one', async () => {
+      serve()
+      sitesAre(false, ['North', 'South'])
+      renderPage()
+      await screen.findByText(/Job on Pump/)
+      expect(screen.queryByLabelText('Site')).not.toBeInTheDocument()
+    })
+
+    it('offers nothing to choose when the person sees only one site', async () => {
+      serve()
+      sitesAre(true, ['North'])
+      renderPage()
+      await screen.findByText(/Job on Pump/)
+      expect(screen.queryByLabelText('Site')).not.toBeInTheDocument()
+    })
+  })
 })

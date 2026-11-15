@@ -1,4 +1,7 @@
 class PreventiveMaintenance < ApplicationRecord
+  include SiteScoped
+
+  hidden_by_site by: :asset
   include Auditable
 
   acts_as_tenant :organization

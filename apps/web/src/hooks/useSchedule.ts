@@ -9,10 +9,10 @@ import type { RescheduleInput } from '@/types/schedule'
 export const SCHEDULE_KEY = 'schedule'
 
 /** Who has what work on which day, from `from` to `to` (YYYY-MM-DD). */
-export function useSchedule(from: string, to: string) {
+export function useSchedule(from: string, to: string, siteId?: number | null) {
   return useQuery({
-    queryKey: [SCHEDULE_KEY, from, to],
-    queryFn: () => scheduleApi.get(from, to).then((r) => r.data.data),
+    queryKey: [SCHEDULE_KEY, from, to, siteId ?? null],
+    queryFn: () => scheduleApi.get(from, to, siteId).then((r) => r.data.data),
     placeholderData: keepPreviousData,
   })
 }

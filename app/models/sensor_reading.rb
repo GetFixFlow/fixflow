@@ -1,4 +1,7 @@
 class SensorReading < ApplicationRecord
+  include SiteScoped
+
+  hidden_by_site by: :asset
   # ─── Enums ─────────────────────────────────────────────────────────────────
 
   enum :source,  { mqtt: 0, rest_api: 1, manual: 2 }, default: :rest_api

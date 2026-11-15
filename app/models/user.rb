@@ -25,6 +25,8 @@ class User < ApplicationRecord
   normalizes :locale, with: ->(code) { code.to_s.strip.presence }
   validate :locale_is_offered
   belongs_to :invited_by, class_name: "User", optional: true
+  has_many :site_memberships, dependent: :delete_all
+  has_many :sites, through: :site_memberships
   has_many :assigned_work_orders,  class_name: "WorkOrder", foreign_key: :assignee_id,   dependent: :nullify
   has_many :requested_work_orders, class_name: "WorkOrder", foreign_key: :requester_id, dependent: :nullify
   has_many :verified_work_orders,  class_name: "WorkOrder", foreign_key: :verified_by_id, dependent: :nullify

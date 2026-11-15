@@ -3,6 +3,9 @@
 # An asset whose status is "down" has an open one. It is opened and closed by the status (see Asset), or by hand for
 # a stop that nobody recorded at the time; the dates can be corrected afterwards.
 class AssetDowntime < ApplicationRecord
+  include SiteScoped
+
+  hidden_by_site by: :asset
   include Auditable
 
   acts_as_tenant :organization

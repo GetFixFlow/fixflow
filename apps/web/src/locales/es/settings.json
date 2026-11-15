@@ -21,7 +21,8 @@
       "data_retention": "Conservación de datos",
       "audit_log": "Registro de auditoría",
       "system_health": "Estado del sistema",
-      "advanced": "Configuración avanzada"
+      "advanced": "Configuración avanzada",
+      "sites": "Sedes"
     },
     "sections": {
       "account": "Cuenta",

@@ -5,6 +5,9 @@
 # as an hour, and the answer says which were guessed. A day is overloaded when the hours on it are more than the hours
 # of a working day, or when there are any on a day off. Work still open from before the period is not hidden: it is
 # counted as "earlier", on the person it is with.
+#
+# For one site (site:) the calendar is the site's own (see SiteSettings), the work is the site's, and the people are those who work
+# at the site and those who work at none (across all of them).
 class TeamSchedule
   MAX_DAYS = 14
   DEFAULT_HOURS = 1.0
@@ -12,8 +15,9 @@ class TeamSchedule
   EARLIER_LIMIT = 200
   HOURS_SQL = "SUM(COALESCE(estimated_hours, #{DEFAULT_HOURS}))".freeze
 
-  def initialize(organization, from:, to:, today: Time.zone.today)
+  def initialize(organization, from:, to:, today: Time.zone.today, site: nil)
     @organization = organization
+    @site = site
     @from = from
     @to = to
     @today = today
@@ -35,7 +39,7 @@ class TeamSchedule
 
   private
 
-  def settings = @settings ||= @organization.settings_with_defaults
+  def settings = @settings ||= (@site ? SiteSettings.for(@site) : @organization.settings_with_defaults)
 
   # Each day of the period with the hours it can hold: none on a day off or a holiday.
   def days
@@ -56,7 +60,10 @@ class TeamSchedule
     ((finish - start) / 60.0).round(2)
   end
 
-  def open_work = @organization.work_orders.open.includes(:asset)
+  def open_work
+    work = @organization.work_orders.open.includes(:asset)
+    @site ? work.where(asset_id: Asset.where(location_id: @site.subtree_ids).select(:id)) : work
+  end
 
   def period_orders
     @period_orders ||= open_work.where(due_date: @from.in_time_zone.beginning_of_day..@to.in_time_zone.end_of_day)
@@ -81,8 +88,15 @@ class TeamSchedule
   # Every technician, and anyone else who has work.
   def people(shown)
     others = shown.filter_map(&:assignee_id).uniq + earlier_totals.keys.compact
-    @organization.users.active.where(role: "technician").or(@organization.users.active.where(id: others))
-                 .order(:first_name, :last_name).to_a
+    technicians = @organization.users.active.where(role: "technician")
+    technicians = technicians.where(at_this_site_or_none, @site.id) if @site
+    technicians.or(@organization.users.active.where(id: others)).order(:first_name, :last_name).to_a
+  end
+
+  # Someone who works at this site, or at no site (so at all of them).
+  def at_this_site_or_none
+    "EXISTS (SELECT 1 FROM site_memberships here WHERE here.user_id = users.id AND here.site_id = ?) " \
+      "OR NOT EXISTS (SELECT 1 FROM site_memberships any_site WHERE any_site.user_id = users.id)"
   end
 
   def row(person, in_period, earlier)

@@ -1,4 +1,7 @@
 class IotRule < ApplicationRecord
+  include SiteScoped
+
+  hidden_by_site by: :asset
   include Auditable
 
   # The counters and times the system keeps up to date as the rule fires are not edits.

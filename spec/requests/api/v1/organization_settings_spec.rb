@@ -9,6 +9,19 @@ RSpec.describe "Api::V1::OrganizationSettings", type: :request do
     patch "/api/v1/organization_settings", params: { organization: changes }, headers: auth_headers_for(as_user), as: :json
   end
 
+  describe "sites" do
+    it "are not switched on or off from here, only from the Sites screen, and saving other settings keeps them as they are" do
+      save_settings(sites_enabled: true)
+      expect(org.reload.sites_enabled?).to be(false)
+
+      org.update!(settings: org.settings.merge("sites_enabled" => true))
+      save_settings(wo_number_prefix: "MX")
+
+      expect(org.reload.sites_enabled?).to be(true)
+      expect(org.settings["wo_number_prefix"]).to eq("MX")
+    end
+  end
+
   describe "GET /api/v1/organization_settings" do
     it "returns the name, slug and every setting with its default" do
       get "/api/v1/organization_settings", headers: auth_headers_for(manager)

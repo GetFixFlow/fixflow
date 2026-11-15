@@ -18,6 +18,7 @@ AllCops:
     - "script/public_api_live/**/*"
     - "script/plugins_live/**/*"
     - "script/ai_live/**/*"
+    - "script/live/**/*"
     - "vendor/**/*"
 
 Style/Documentation:

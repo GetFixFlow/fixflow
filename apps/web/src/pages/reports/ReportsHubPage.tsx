@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Activity, Bookmark, Wrench, ClipboardCheck, Wifi, Users, DollarSign, Timer } from 'lucide-react'
+import { Activity, Bookmark, Building2, Wrench, ClipboardCheck, Wifi, Users, DollarSign, Timer } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -15,6 +15,7 @@ const REPORT_SECTIONS = [
   { title: 'PM Compliance', icon: ClipboardCheck, href: '/reports/pm-compliance', description: 'Compliance trends, upcoming forecast, missed PMs, frequency analysis', color: 'bg-purple-500', kpis: ['Compliance Rate', 'Scheduled', 'Completed', 'Missed'] },
   { title: 'IoT Analytics', icon: Wifi, href: '/reports/iot', description: 'Alert trends, sensor comparisons, rule effectiveness, auto-resolve rate', color: 'bg-amber-500', kpis: ['Open Alerts', 'Critical Alerts', 'Auto-Resolved', 'Active Rules'] },
   { title: 'Technician Performance', icon: Users, href: '/reports/technicians', description: 'Scorecards, workload heatmap, comparison charts, first-time fix rate', color: 'bg-teal-500', kpis: ['Top Performer', 'Avg Resolution', 'First-Fix Rate', 'Overdue Rate'] },
+  { title: 'Sites', icon: Building2, href: '/reports/sites', description: 'The sites side by side: assets, open and overdue work, finished work and its cost, availability', color: 'bg-indigo-500', kpis: ['Open Work', 'Overdue', 'Cost', 'Availability'] },
   { title: 'Cost Analysis', icon: DollarSign, href: '/reports/costs', description: 'Cost trends, treemap by asset, labor vs parts split, location breakdown', color: 'bg-orange-500', kpis: ['Total Cost', 'Labor Costs', 'Parts Costs', 'Cost per WO'] },
 ] as const
 

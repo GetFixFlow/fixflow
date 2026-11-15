@@ -74,6 +74,7 @@ module Api
         Current.user       = current_user
         Current.request_ip = request.remote_ip
         ActsAsTenant.current_tenant = current_organization
+        Current.hidden_location_ids = SiteAccess.hidden_location_ids(current_user)
       end
 
       # What the server words for a person (emails sent while they act, messages it writes) comes in their language.
@@ -84,7 +85,7 @@ module Api
       # Dates the client sends without an offset (report ranges, filters) mean the
       # company's local time, not the server's.
       def use_organization_time_zone(&)
-        Time.use_zone(current_organization&.timezone_or_default || "UTC", &)
+        Time.use_zone(SiteAccess.time_zone(current_user), &)
       end
 
       def current_organization

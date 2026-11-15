@@ -1,6 +1,9 @@
 # A running-hours counter, odometer or cycle count on an asset. Its reading is entered by hand or fed by a sensor, and
 # a preventive maintenance schedule can fall due when the reading passes a limit (see PmMeterService).
 class Meter < ApplicationRecord
+  include SiteScoped
+
+  hidden_by_site by: :asset
   include Auditable
 
   acts_as_tenant :organization

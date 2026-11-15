@@ -74,6 +74,8 @@ const DirectorySettingsPage = lazy(() => import('@/pages/settings/DirectorySetti
 const PluginsPage = lazy(() => import('@/pages/settings/PluginsPage').then(m => ({ default: m.PluginsPage })))
 const PluginReportPage = lazy(() => import('@/pages/reports/PluginReportPage').then(m => ({ default: m.PluginReportPage })))
 const WebhooksPage = lazy(() => import('@/pages/settings/WebhooksPage').then(m => ({ default: m.WebhooksPage })))
+const SitesPage = lazy(() => import('@/pages/settings/SitesPage').then(m => ({ default: m.SitesPage })))
+const SitesReportPage = lazy(() => import('@/pages/reports/SitesReportPage').then(m => ({ default: m.SitesReportPage })))
 const AISettingsPage = lazy(() => import('@/pages/settings/AISettingsPage').then(m => ({ default: m.AISettingsPage })))
 
 function Lazy({ children }: { children: React.ReactNode }) {
@@ -138,6 +140,7 @@ export const router = createBrowserRouter([
               { path: '/reports/assets', element: <Lazy><AssetHealthReportPage /></Lazy> },
               { path: '/reports/downtime', element: <Lazy><DowntimeReportPage /></Lazy> },
               { path: '/reports/pm-compliance', element: <Lazy><PMComplianceReportPage /></Lazy> },
+              { path: '/reports/sites', element: <Lazy><SitesReportPage /></Lazy> },
               { path: '/reports/iot', element: <Lazy><IoTAnalyticsReportPage /></Lazy> },
               { path: '/reports/technicians', element: <Lazy><TechnicianPerformancePage /></Lazy> },
               { path: '/reports/costs', element: <Lazy><CostAnalysisPage /></Lazy> },
@@ -180,6 +183,7 @@ export const router = createBrowserRouter([
                       { path: 'system-health', element: <Lazy><SystemHealthPage /></Lazy> },
                       { path: 'advanced', element: <Lazy><AdvancedSettingsPage /></Lazy> },
                       { path: 'ai', element: <Lazy><AISettingsPage /></Lazy> },
+                      { path: 'sites', element: <Lazy><SitesPage /></Lazy> },
                       { path: 'chat', element: <Lazy><ChatSettingsPage /></Lazy> },
                       { path: 'webhooks', element: <Lazy><WebhooksPage /></Lazy> },
                       { path: 'plugins', element: <Lazy><PluginsPage /></Lazy> },

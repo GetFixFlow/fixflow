@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_124400) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_124500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -237,6 +237,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_124400) do
     t.string "location_type", default: "site", null: false
     t.string "name", null: false
     t.bigint "organization_id", null: false
+    t.jsonb "settings", default: {}, null: false
     t.datetime "updated_at", null: false
     t.index ["ancestry"], name: "index_locations_on_ancestry"
     t.index ["organization_id", "name"], name: "index_locations_on_organization_id_and_name"
@@ -496,6 +497,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_124400) do
     t.index ["organization_id", "recorded_at"], name: "index_sensor_readings_on_organization_id_and_recorded_at"
     t.index ["organization_id"], name: "index_sensor_readings_on_organization_id"
     t.index ["recorded_at"], name: "index_sensor_readings_on_recorded_at"
+  end
+
+  create_table "site_memberships", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "site_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["site_id"], name: "index_site_memberships_on_site_id"
+    t.index ["user_id", "site_id"], name: "index_site_memberships_on_user_id_and_site_id", unique: true
+    t.index ["user_id"], name: "index_site_memberships_on_user_id"
   end
 
   create_table "user_sessions", force: :cascade do |t|
@@ -770,6 +781,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_124400) do
   add_foreign_key "sensor_anomalies", "users", column: "acknowledged_by_id"
   add_foreign_key "sensor_readings", "assets"
   add_foreign_key "sensor_readings", "organizations"
+  add_foreign_key "site_memberships", "locations", column: "site_id"
+  add_foreign_key "site_memberships", "users"
   add_foreign_key "user_sessions", "users"
   add_foreign_key "users", "organizations"
   add_foreign_key "users", "users", column: "invited_by_id"

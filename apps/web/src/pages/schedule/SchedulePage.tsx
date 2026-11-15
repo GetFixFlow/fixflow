@@ -9,6 +9,7 @@ import { ScheduleGrid } from '@/components/schedule/ScheduleGrid'
 import { MoveModal } from '@/components/schedule/MoveModal'
 import { OverloadSummary } from '@/components/schedule/OverloadSummary'
 import { useReschedule, useSchedule } from '@/hooks/useSchedule'
+import { useSites } from '@/hooks/useSites'
 import { formatDate, weekStartsOn } from '@/lib/localeFormat'
 import { moveRequest, rangeFor, step, type ViewMode } from '@/lib/scheduleView'
 import type { ScheduledOrder } from '@/types/schedule'
@@ -22,7 +23,9 @@ export function SchedulePage() {
   const [anchor, setAnchor] = useState(() => new Date())
   const [picked, setPicked] = useState<ScheduledOrder | null>(null)
   const { from, to } = rangeFor(mode, anchor, weekStartsOn())
-  const { data: schedule, isLoading, isError } = useSchedule(from, to)
+  const sites = useSites()
+  const [siteId, setSiteId] = useState<number | null>(null)
+  const { data: schedule, isLoading, isError } = useSchedule(from, to, siteId)
   const reschedule = useReschedule()
 
   const move = (order: ScheduledOrder, personId: number | null, day: string) => {
@@ -47,6 +50,16 @@ export function SchedulePage() {
             {from === to ? formatDate(parseISO(from)) : `${formatDate(parseISO(from))} – ${formatDate(parseISO(to))}`}
           </h2>
         </div>
+        {sites.data?.enabled && sites.data.sites.length > 1 && (
+          <div className="flex items-center gap-2">
+            <label htmlFor="schedule-site" className="text-sm text-gray-700 dark:text-gray-300">{t('sites.schedule.label')}</label>
+            <select id="schedule-site" value={siteId ?? ''} onChange={(event) => setSiteId(event.target.value ? Number(event.target.value) : null)}
+                    className="rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+              <option value="">{t('sites.schedule.all')}</option>
+              {sites.data.sites.map((site) => <option key={site.id} value={site.id}>{site.name}</option>)}
+            </select>
+          </div>
+        )}
         <div className="flex gap-1" role="group" aria-label={t('schedule.view')}>
           {MODES.map((id) => (
             <Button key={id} size="sm" variant={mode === id ? 'secondary' : 'ghost'} aria-pressed={mode === id} onClick={() => setMode(id)}>

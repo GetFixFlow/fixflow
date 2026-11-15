@@ -1,5 +1,8 @@
 class Asset < ApplicationRecord
   include Discard::Model
+  include SiteScoped
+
+  hidden_by_site by: :location
   include Auditable
   include SameCompanyReferences
   acts_as_tenant :organization

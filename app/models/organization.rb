@@ -51,6 +51,10 @@ class Organization < ApplicationRecord
   # Where chat messages go (Slack, Teams...), or an empty one.
   def chat_config = ChatConfig.load(self)
 
+  # Whether the company works as several sites (Settings, Sites; see SiteAccess). Off until an administrator switches it on. Kept in
+  # the settings, but not among the company settings keys: only the Sites screen changes it.
+  def sites_enabled? = (settings || {})["sites_enabled"] == true
+
   # The AI provider chosen (none until an administrator picks one), as saved.
   def ai_config = AiConfig.load(self)
 

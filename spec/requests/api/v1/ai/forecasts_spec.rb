@@ -139,6 +139,18 @@ RSpec.describe "Api::V1::Ai::Forecasts", type: :request do
       expect(data.pluck("part").pluck("name")).to eq(%w[Belt Plenty])
     end
 
+    it "shows a person who works at one site only the parts stocked there or nowhere" do
+      north = create(:location, organization: organization, name: "North", location_type: "site")
+      south = create(:location, organization: organization, name: "South", location_type: "site")
+      organization.update!(settings: organization.settings.merge("sites_enabled" => true))
+      SiteMembership.create!(user: user, site: north)
+      Part.find_by!(name: "Belt").update!(location: south)
+
+      get_forecast("parts", all: "true")
+
+      expect(data.pluck("part").pluck("name")).to eq(%w[Plenty])
+    end
+
     it "does not show another company's parts" do
       other_part = create(:part, name: "Theirs", quantity_on_hand: 0)
       other_order = create(:work_order, organization: other_part.organization)

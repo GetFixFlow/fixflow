@@ -21,7 +21,8 @@ module Api
 
         # GET /api/v1/ai/forecasts/parts: the parts worth a word, the ones that may run short first
         def parts
-          rows = ::Forecast::PartsDemand.for(current_organization)
+          visible = current_organization.parts.at_my_sites.pluck(:id)
+          rows = ::Forecast::PartsDemand.for(current_organization).select { |row| visible.include?(row.part.id) }
           rows = rows.reject { |row| row.status == "ok" } unless params[:all] == "true"
           render json: { data: rows.map { |row| PartForecastBlueprint.render_as_hash(row) } }
         end

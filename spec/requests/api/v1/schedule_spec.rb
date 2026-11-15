@@ -100,6 +100,28 @@ RSpec.describe "Api::V1::Schedule", type: :request do
       expect(order.reload.due_date).to eq(Time.utc(2026, 10, 15, 17, 0))
     end
 
+    it "gives work at a site the end of that site's working day, not the company's" do
+      site = create(:location, organization: org, location_type: "site",
+settings: { "work_hours" => { "start" => "06:00", "end" => "14:30" } })
+      hall = create(:location, organization: org, location_type: "building", parent: site)
+      order.update!(asset: create(:asset, organization: org, location: hall))
+      order.update_columns(due_date: nil) # rubocop:disable Rails/SkipsModelValidations
+
+      reschedule(due_on: "2026-10-15")
+
+      expect(order.reload.due_date).to eq(Time.utc(2026, 10, 15, 14, 30))
+    end
+
+    it "uses the company's hours for work at a site that sets none of its own" do
+      site = create(:location, organization: org, location_type: "site")
+      order.update!(asset: create(:asset, organization: org, location: site))
+      order.update_columns(due_date: nil) # rubocop:disable Rails/SkipsModelValidations
+
+      reschedule(due_on: "2026-10-15")
+
+      expect(order.reload.due_date).to eq(Time.utc(2026, 10, 15, 17, 0))
+    end
+
     it "hands assigned work to someone else, keeps its status, tells them, and logs it" do
       other_tech
       expect { reschedule(assignee_id: other_tech.id) }

@@ -21,7 +21,8 @@
       "data_retention": "Data Retention",
       "audit_log": "Audit Log",
       "system_health": "System Health",
-      "advanced": "Advanced Settings"
+      "advanced": "Advanced Settings",
+      "sites": "Sites"
     },
     "sections": {
       "account": "Account",

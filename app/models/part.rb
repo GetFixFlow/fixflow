@@ -22,6 +22,16 @@ class Part < ApplicationRecord
   validates :reorder_point, numericality: { greater_than_or_equal_to: 0 }
 
   scope :low_stock, -> { where("quantity_on_hand <= reorder_point") }
+  # What a person who works at some sites only (see SiteAccess) may see and use: the stock of their sites, and stock kept in no site.
+  # A scope, not a default scope: records of other kinds point at parts (a work order's parts, a purchase order's lines), and a part
+  # hidden from them would leave a hole in what they show.
+  scope :at_my_sites, lambda {
+    hidden = Current.hidden_location_ids
+    hidden.blank? ? all : where("parts.location_id IS NULL OR parts.location_id NOT IN (?)", hidden)
+  }
+  validate(if: -> { Current.hidden_location_ids.present? && location_id.present? && will_save_change_to_location_id? }) do
+    errors.add(:location, "is not at one of your sites") unless Location.exists?(location_id)
+  end
   scope :out_of_stock, -> { where(quantity_on_hand: 0) }
 
   def low_stock?

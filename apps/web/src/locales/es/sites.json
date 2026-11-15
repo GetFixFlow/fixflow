@@ -1,0 +1,83 @@
+{
+  "sites": {
+    "page": {
+      "title": "Sedes",
+      "description": "Trabaje con varias sedes en una instalación: cada sede tiene su propio personal y calendario, y los informes pueden compararlas.",
+      "denied": "Acceso denegado. Solo los administradores pueden gestionar las sedes.",
+      "load_failed": "No se pudieron cargar las sedes.",
+      "try_again": "Reintentar"
+    },
+    "enable": {
+      "label": "Trabajar con varias sedes",
+      "help": "Una sede es una ubicación de nivel superior de tipo sede (vea Configuración, Ubicaciones). Con esto activado, quien esté asignado a una o más sedes ve solo los lugares, activos, órdenes de trabajo, mantenimiento preventivo y sensores de esas sedes, más lo que no esté en ninguna sede. Los administradores, y quienes no están asignados a ninguna sede, lo ven todo. Los proveedores y las personas son comunes a todas las sedes.",
+      "confirm_on": "¿Activar las sedes? Las ubicaciones de nivel superior de tipo sede cuentan como sedes, y a quien asigne a sedes solo verá esas. Quienes no estén asignados a ninguna sede siguen viéndolo todo.",
+      "confirm_off": "¿Desactivar las sedes? Todos volverán a verlo todo. Quién trabaja dónde y el calendario de cada sede se conservan para cuando las active de nuevo.",
+      "on_note": "Las sedes están activadas.",
+      "off_note": "Las sedes están desactivadas: todos lo ven todo, diga lo que diga lo de abajo."
+    },
+    "add": {
+      "title": "Añadir una sede",
+      "name": "Nombre de la sede",
+      "button": "Añadir sede",
+      "adding": "Añadiendo…",
+      "none": "Aún no hay sedes. Añada una, o convierta una ubicación de nivel superior en sede en Configuración, Ubicaciones (una ubicación sin padre, de tipo sede)."
+    },
+    "card": {
+      "stats": "{{assets}} activos · {{open}} órdenes de trabajo abiertas · {{places}} lugares dentro",
+      "calendar": "Calendario",
+      "calendar_help": "Lo que difiere de la empresa. Una línea en «igual que la empresa» la sigue.",
+      "people": "Personas",
+      "people_help": "Quién trabaja en esta sede. Quien no está en ninguna sede trabaja en todas. Los administradores siempre.",
+      "no_people": "Aún no hay nadie a quien asignar.",
+      "save_calendar": "Guardar calendario",
+      "save_people": "Guardar personas",
+      "saving": "Guardando…"
+    },
+    "calendar": {
+      "same": "Igual que la empresa ({{value}})",
+      "timezone": "Zona horaria",
+      "hours": "Horario de trabajo",
+      "hours_start": "Inicio",
+      "hours_end": "Fin",
+      "days": "Días de trabajo",
+      "holidays": "Festivos",
+      "holiday_date": "Fecha",
+      "holiday_name": "Nombre",
+      "holiday_repeats": "Cada año",
+      "holiday_add": "Añadir festivo",
+      "holiday_remove": "Quitar {{name}}",
+      "holidays_none": "Sin festivos",
+      "holidays_same": "{{count}} de la empresa",
+      "holidays_help": "La lista propia de una sede sustituye a la de la empresa."
+    },
+    "report": {
+      "title": "Sedes",
+      "description": "Las sedes lado a lado",
+      "site": "Sede",
+      "assets": "Activos",
+      "open": "Órdenes abiertas",
+      "overdue": "Vencidas",
+      "finished": "Terminadas",
+      "cost": "Coste del trabajo terminado",
+      "availability": "Disponibilidad",
+      "downtime": "Parada (h)",
+      "failures": "Fallos",
+      "people": "Personas",
+      "shared": "En ninguna sede",
+      "total": "Todas las sedes",
+      "load_failed": "No se pudo cargar el informe.",
+      "empty": "Aún no hay sedes. Añádalas en Configuración, Sedes.",
+      "shared_note": "Los activos que no están en ninguna sede y el trabajo sin activo son comunes a todas las sedes."
+    },
+    "schedule": {
+      "label": "Sede",
+      "all": "Todas las sedes"
+    },
+    "toast": {
+      "created": "Sede añadida",
+      "saved": "Sede guardada",
+      "people": "Personas guardadas"
+    },
+    "save_failed": "No se pudo guardar."
+  }
+}
