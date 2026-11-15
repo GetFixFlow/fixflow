@@ -51,7 +51,7 @@
       "openai_compatible": "Los detalles de las órdenes de trabajo se envían por internet al servicio en {{where}} cuando alguien usa el asistente. Lea los términos de ese servicio para ver cómo los trata.",
       "local": "Los detalles de las órdenes de trabajo se envían solo a {{where}}, que FixFlow ha comprobado que está en este servidor o en una red privada. FixFlow no puede ver qué hace esa máquina con ellos.",
       "sent_title": "Datos enviados",
-      "sent": "Nombres de activos, descripciones de órdenes de trabajo, listas de verificación, notas de trabajos anteriores, texto de manuales adjuntos",
+      "sent": "Nombres de activos, títulos y descripciones de órdenes de trabajo, listas de verificación, notas de trabajos anteriores, texto de los manuales adjuntos y recuentos de lo que está abierto en un activo (órdenes de trabajo, alertas de sensores, lecturas inusuales)",
       "not_sent_title": "Datos que NO se envían",
       "not_sent": "Correos de usuarios, contraseñas, claves de API"
     },
@@ -73,7 +73,41 @@
     },
     "features": {
       "title": "Qué impulsa",
-      "assist": "FixFlow Assist: un chat en cada orden de trabajo que responde con el historial y los manuales del activo"
+      "assist": "FixFlow Assist: un chat en cada orden de trabajo que responde con el historial y los manuales del activo",
+      "needs_ai": "Elija un proveedor arriba para usarlas.",
+      "label": {
+        "priority": "Sugerir una prioridad para las órdenes de trabajo nuevas",
+        "anomalies": "Señalar lecturas inusuales de sensores"
+      },
+      "help": {
+        "priority": "Añade un botón al formulario de orden de trabajo nueva que sugiere una prioridad y explica por qué. Decide la persona. Envía el título, la descripción y lo que está abierto en el activo a {{where}}.",
+        "anomalies": "Señala una lectura muy fuera de lo que ese sensor suele leer, aprendido de las últimas dos semanas del propio sensor, sin límites que configurar. Se calcula en este servidor: no se envía nada al proveedor."
+      }
+    },
+    "priority": {
+      "suggest": "Sugerir una prioridad",
+      "asking": "Consultando…",
+      "suggests": "Prioridad sugerida: {{priority}}",
+      "use": "Usar {{priority}}",
+      "same": "Es la prioridad que eligió.",
+      "failed": "No se pudo sugerir una prioridad.",
+      "note": {
+        "anthropic": "El título, la descripción y los datos del activo se envían a Anthropic. Usted elige la prioridad.",
+        "openai_compatible": "El título, la descripción y los datos del activo se envían a su servicio de IA. Usted elige la prioridad.",
+        "local": "El título, la descripción y los datos del activo se envían a su propio modelo. Usted elige la prioridad."
+      }
+    },
+    "anomalies": {
+      "title": "Lecturas inusuales",
+      "intro": "Lecturas muy fuera de lo que ese sensor suele leer, según sus últimas dos semanas. No se fijó ningún límite.",
+      "none": "Nada inusual por ahora.",
+      "reads": "{{metric}} marca {{value}}",
+      "usual": "Suele estar entre {{low}} y {{high}}, según {{readings}} lecturas",
+      "acknowledge": "Es real",
+      "dismiss": "No es nada",
+      "acknowledge_done": "Marcada como real.",
+      "dismiss_done": "Descartada.",
+      "action_failed": "No se pudo actualizar. Inténtelo de nuevo."
     }
   }
 }

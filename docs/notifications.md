@@ -19,6 +19,7 @@ A push notification is a message that appears on a phone or computer even when F
 | A scheduled (preventive maintenance) work order is created for you | the technician |
 | Work is finished and needs verifying | managers and administrators |
 | Someone reports a problem from a QR label | managers and administrators |
+| A sensor reads far outside what is usual for it (when AI is on) | "Unusual sensor reading: Pump 3" and what was read and what is usual ([Unusual sensor readings](ai.md#unusual-sensor-readings)) |
 | A part is running low or out | managers and administrators |
 | Someone asks for parts to be bought | managers and administrators |
 | A work order is over the approval limit and needs approving ([Approval of costly work](work-orders.md#approval-of-costly-work)) | managers and administrators, other than the person doing the work |

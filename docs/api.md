@@ -97,7 +97,7 @@ Limits are counted per address (per API key for sensor readings) and answer `429
 | `POST /auth/sign_in`, and `POST /auth/two_factor` | 10 per minute per address |
 | Forgot password: asking for a link, and using one | 5 and 10 per minute per address |
 | `PATCH /profile/password` | 5 per minute per signed-in token |
-| The AI assistant, and the AI settings' test button | 5 per minute per token |
+| The AI assistant, a suggested priority, and the AI settings' test button | 5 per minute per token, together |
 | `POST /iot/ingest` | 1,000 per minute per API key |
 | The public request form (`POST /work_requests`) | 5 per 10 minutes and 20 per day per address, 60 per hour from everyone |
 | Looking up a public request link or asset code | 60 per 5 minutes per address |

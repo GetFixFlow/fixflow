@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_124300) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_124400) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -451,6 +451,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_124300) do
     t.index ["asset_id"], name: "index_sensor_aggregates_on_asset_id"
   end
 
+  create_table "sensor_anomalies", force: :cascade do |t|
+    t.datetime "acknowledged_at"
+    t.bigint "acknowledged_by_id"
+    t.bigint "asset_id", null: false
+    t.integer "baseline_count", null: false
+    t.datetime "created_at", null: false
+    t.string "metric_name", null: false
+    t.text "notes"
+    t.bigint "organization_id", null: false
+    t.datetime "recorded_at", null: false
+    t.decimal "score", precision: 10, scale: 2, null: false
+    t.integer "status", default: 0, null: false
+    t.string "unit"
+    t.datetime "updated_at", null: false
+    t.decimal "usual_high", precision: 15, scale: 6, null: false
+    t.decimal "usual_low", precision: 15, scale: 6, null: false
+    t.decimal "usual_middle", precision: 15, scale: 6, null: false
+    t.decimal "value", precision: 15, scale: 6, null: false
+    t.index ["acknowledged_by_id"], name: "index_sensor_anomalies_on_acknowledged_by_id"
+    t.index ["asset_id", "metric_name", "created_at"], name: "idx_sensor_anomalies_sensor"
+    t.index ["asset_id"], name: "index_sensor_anomalies_on_asset_id"
+    t.index ["organization_id", "status", "created_at"], name: "idx_sensor_anomalies_company_status"
+    t.index ["organization_id"], name: "index_sensor_anomalies_on_organization_id"
+  end
+
   create_table "sensor_readings", force: :cascade do |t|
     t.bigint "asset_id", null: false
     t.datetime "created_at", null: false
@@ -740,6 +765,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_124300) do
   add_foreign_key "saved_reports", "organizations"
   add_foreign_key "saved_reports", "users"
   add_foreign_key "sensor_aggregates", "assets"
+  add_foreign_key "sensor_anomalies", "assets"
+  add_foreign_key "sensor_anomalies", "organizations"
+  add_foreign_key "sensor_anomalies", "users", column: "acknowledged_by_id"
   add_foreign_key "sensor_readings", "assets"
   add_foreign_key "sensor_readings", "organizations"
   add_foreign_key "user_sessions", "users"

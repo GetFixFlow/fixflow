@@ -327,6 +327,15 @@ Rails.application.routes.draw do
       namespace :ai do
         get "config", to: "config#show"
         post "assist", to: "assist#create"
+        post "priority", to: "priority#create"
+      end
+
+      # Sensor readings flagged as unusual without any limit being set (see Iot::AnomalyDetector)
+      resources :sensor_anomalies, only: %i[index] do
+        member do
+          patch :acknowledge
+          patch :dismiss
+        end
       end
 
       # ── Activity logs ─────────────────────────────────────────────────────

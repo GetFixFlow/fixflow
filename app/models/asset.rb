@@ -16,6 +16,7 @@ class Asset < ApplicationRecord
   has_many :sensor_aggregates, dependent: :destroy
   has_many :iot_rules,         dependent: :destroy
   has_many :iot_alerts,        dependent: :destroy
+  has_many :sensor_anomalies,  dependent: :destroy
   has_many :downtimes, class_name: "AssetDowntime", dependent: :destroy
   has_many :documents, class_name: "AssetDocument", dependent: :destroy
 

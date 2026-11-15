@@ -161,6 +161,60 @@ RSpec.describe AiConfig do
     end
   end
 
+  describe "the features" do
+    it "are all on once AI is on, and off while it is off" do
+      expect(config.feature?(:priority)).to be(false)
+      pick(provider: "anthropic", api_key: "sk-ant-x")
+
+      expect(config.features).to eq("priority" => true, "anomalies" => true)
+      expect(config.feature?(:priority)).to be(true)
+      expect(config.feature?("anomalies")).to be(true)
+      pick(provider: "none")
+      expect(config.feature?(:anomalies)).to be(false)
+    end
+
+    it "start on for a configuration made without any saved switches" do
+      expect(described_class.new(provider: "anthropic").features).to eq("priority" => true, "anomalies" => true)
+    end
+
+    it "can be switched off one at a time, and the switch survives a change of provider" do
+      pick(provider: "anthropic", api_key: "sk-ant-x")
+      pick(features: { priority: false })
+
+      expect(config.feature?(:priority)).to be(false)
+      expect(config.feature?(:anomalies)).to be(true)
+      pick(provider: "anthropic", model: "claude-opus-5-5")
+      expect(config.feature?(:priority)).to be(false)
+      expect(config.api_key).to eq("sk-ant-x")
+    end
+
+    it "understand the words a form sends, and ignore a feature that does not exist" do
+      pick(provider: "anthropic", api_key: "sk-ant-x")
+      pick(features: { priority: "false", anomalies: "true", telepathy: false })
+
+      expect(config.features).to eq("priority" => false, "anomalies" => true)
+    end
+
+    it "can be saved on their own, so a server set up through its environment keeps using it" do
+      env = { "AI_ENABLED" => "true", "ANTHROPIC_API_KEY" => "sk-ant-ENV" }
+
+      pick(features: { anomalies: false })
+
+      expect(org.ai_settings).to eq("features" => { "priority" => true, "anomalies" => false })
+      expect(config.source).to be_nil
+      effective = described_class.effective(org, env: env)
+      expect(effective).to have_attributes(provider: "anthropic", source: "environment")
+      expect(effective.feature?(:priority)).to be(true)
+      expect(effective.feature?(:anomalies)).to be(false)
+    end
+
+    it "do not save a provider that was never chosen" do
+      pick(features: { priority: false })
+
+      expect(org.ai_settings).not_to have_key("provider")
+    end
+  end
+
   describe "where the data goes" do
     it "names the host, never anything secret" do
       pick(provider: "openai_compatible", base_url: "https://api.example.com/v1", model: "m", api_key: "sk-oa-SECRET")

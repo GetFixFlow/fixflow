@@ -12,6 +12,7 @@ class ChatConfig
     "wo_assigned" => "A work order is assigned",
     "wo_needs_verification" => "Work is finished and needs verifying",
     "iot_alert" => "A critical or high sensor alert is raised",
+    "sensor_anomaly" => "A sensor reads far outside what is usual for it (when AI is on)",
     "part_low_stock" => "A part is running low or out",
     "po_requested" => "Someone asks for parts to be bought",
     "warranty_expiring" => "A warranty ends within 30 days",

@@ -12,8 +12,9 @@ module Api
         render json: { ai: payload }
       end
 
-      # PATCH /api/v1/ai_settings  { ai: { provider, model, base_url, api_key } }
-      # The fields are the chosen provider's own. A blank key keeps the saved one, unless the address changed.
+      # PATCH /api/v1/ai_settings  { ai: { provider, model, base_url, api_key, features: { priority, anomalies } } }
+      # The fields are the chosen provider's own. A blank key keeps the saved one, unless the address changed. A request with
+      # only `features` switches those on or off and leaves the provider as it is.
       def update
         config = current_organization.ai_config.assign(ai_params)
         return render_invalid(config) unless config.valid?
@@ -21,7 +22,8 @@ module Api
         config.save_to(current_organization)
         model = config.model unless config.provider == "none"
         ActivityLogService.log(action: "ai_settings.updated", resource: current_organization,
-                               metadata: { provider: config.provider, model: model, host: config.where })
+                               metadata: { provider: config.provider, model: model, host: config.where,
+                                           features: config.features })
         render json: { ai: payload }
       end
 
@@ -52,7 +54,7 @@ module Api
       private
 
       def ai_params
-        params.expect(ai: %i[provider model base_url api_key])
+        params.expect(ai: [:provider, :model, :base_url, :api_key, { features: ::AiConfig::FEATURES }])
       end
 
       def test_params
@@ -68,6 +70,7 @@ module Api
         config = ::AiConfig.effective(current_organization)
         {
           provider: config.provider, enabled: config.active?, source: config.source, where: config.where,
+          features: ::AiConfig::FEATURES.index_with { |name| config.features.fetch(name) },
           environment_configured: ::AiConfig.effective(nil).source == "environment",
           providers: ::AiConfig::FIELDS.keys.index_with { |kind| provider_payload(config, kind) }
         }

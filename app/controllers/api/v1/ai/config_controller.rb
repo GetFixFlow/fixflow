@@ -7,7 +7,8 @@ module Api
       class ConfigController < Api::V1::BaseController
         def show
           config = ::Ai::Client.config(current_organization)
-          render_success({ enabled: config.active?, model: config.model, provider: config.provider, source: config.source })
+          render_success({ enabled: config.active?, model: config.model, provider: config.provider, source: config.source,
+                          features: ::AiConfig::FEATURES.index_with { |name| config.feature?(name) } })
         end
       end
     end

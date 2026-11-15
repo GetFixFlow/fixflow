@@ -15,6 +15,41 @@ RSpec.describe Iot::IngestionService do
       }.to change(SensorReading, :count).by(1)
     end
 
+    describe "looking for an unusual reading" do
+      include ActiveJob::TestHelper
+
+      let(:ai_on) { { "provider" => "local", "providers" => { "local" => { "base_url" => "http://192.168.1.20:11434/v1", "model" => "llama3" } } } }
+
+      it "queues a look at each stored reading when the company has AI on" do
+        org.update!(ai_settings: ai_on)
+
+        expect { described_class.ingest(asset, [reading_data, reading_data.merge("value" => 73.0)], source: :rest_api) }
+          .to have_enqueued_job(Iot::AnomalyCheckJob).exactly(2).times
+      end
+
+      it "queues nothing while AI is off, or once the company switched this feature off, or for a reading that was not stored" do
+        org.update!(ai_settings: { "provider" => "none" })
+        expect { described_class.ingest(asset, [reading_data], source: :rest_api) }.not_to have_enqueued_job(Iot::AnomalyCheckJob)
+
+        org.update!(ai_settings: ai_on.merge("features" => { "anomalies" => false }))
+        expect { described_class.ingest(asset, [reading_data], source: :rest_api) }.not_to have_enqueued_job(Iot::AnomalyCheckJob)
+
+        org.update!(ai_settings: ai_on)
+        expect { described_class.ingest(asset, [{ "metric" => "", "value" => nil }], source: :rest_api) }
+          .not_to have_enqueued_job(Iot::AnomalyCheckJob)
+      end
+
+      it "still stores the reading when the check cannot be queued" do
+        org.update!(ai_settings: ai_on)
+        allow(Iot::AnomalyCheckJob).to receive(:perform_later).and_raise(Redis::CannotConnectError)
+
+        result = described_class.ingest(asset, [reading_data], source: :rest_api)
+
+        expect(result).to include(processed: 1, errors: [])
+        expect(SensorReading.count).to eq(1)
+      end
+    end
+
     it "returns a summary with received and processed counts" do
       result = described_class.ingest(asset, [reading_data], source: :rest_api)
       expect(result[:received]).to eq(1)

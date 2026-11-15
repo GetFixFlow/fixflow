@@ -6,7 +6,7 @@ the like stand for a value, and `:format` is left out. Live updates are a WebSoc
 holds the standard routes of the sign-in library that nothing uses (`sign_up/edit` and the like): the ones to use are
 `sign_in`, `sign_out`, `two_factor`, `password` and `me`; `sign_up` works only until the first company exists.
 
-There are 285 endpoints in 51 groups: [activity_logs](#activity-logs), [ai](#ai), [ai_settings](#ai-settings), [api_keys](#api-keys), [asset_documents](#asset-documents), [assets](#assets), [auth](#auth), [backups](#backups), [branding](#branding), [chat_settings](#chat-settings), [custom_fields](#custom-fields), [dashboard](#dashboard), [data_usage](#data-usage), [directory_settings](#directory-settings), [downtimes](#downtimes), [email_settings](#email-settings), [getting_started](#getting-started), [health](#health), [imports](#imports), [invitations](#invitations), [iot](#iot), [iot_alerts](#iot-alerts), [iot_rules](#iot-rules), [localization_settings](#localization-settings), [locations](#locations), [meters](#meters), [notification_preferences](#notification-preferences), [open](#open), [organization_settings](#organization-settings), [parts](#parts), [plugin_reports](#plugin-reports), [plugins](#plugins), [preventive_maintenances](#preventive-maintenances), [profile](#profile), [public_assets](#public-assets), [public_request_form](#public-request-form), [purchase_orders](#purchase-orders), [push_subscriptions](#push-subscriptions), [reports](#reports), [sample_data](#sample-data), [saved_reports](#saved-reports), [schedule](#schedule), [sessions](#sessions), [setup](#setup), [storage](#storage), [system_health](#system-health), [users](#users), [vendors](#vendors), [webhooks](#webhooks), [work_orders](#work-orders), [work_requests](#work-requests).
+There are 289 endpoints in 52 groups: [activity_logs](#activity-logs), [ai](#ai), [ai_settings](#ai-settings), [api_keys](#api-keys), [asset_documents](#asset-documents), [assets](#assets), [auth](#auth), [backups](#backups), [branding](#branding), [chat_settings](#chat-settings), [custom_fields](#custom-fields), [dashboard](#dashboard), [data_usage](#data-usage), [directory_settings](#directory-settings), [downtimes](#downtimes), [email_settings](#email-settings), [getting_started](#getting-started), [health](#health), [imports](#imports), [invitations](#invitations), [iot](#iot), [iot_alerts](#iot-alerts), [iot_rules](#iot-rules), [localization_settings](#localization-settings), [locations](#locations), [meters](#meters), [notification_preferences](#notification-preferences), [open](#open), [organization_settings](#organization-settings), [parts](#parts), [plugin_reports](#plugin-reports), [plugins](#plugins), [preventive_maintenances](#preventive-maintenances), [profile](#profile), [public_assets](#public-assets), [public_request_form](#public-request-form), [purchase_orders](#purchase-orders), [push_subscriptions](#push-subscriptions), [reports](#reports), [sample_data](#sample-data), [saved_reports](#saved-reports), [schedule](#schedule), [sensor_anomalies](#sensor-anomalies), [sessions](#sessions), [setup](#setup), [storage](#storage), [system_health](#system-health), [users](#users), [vendors](#vendors), [webhooks](#webhooks), [work_orders](#work-orders), [work_requests](#work-requests).
 
 ## activity-logs
 
@@ -20,6 +20,7 @@ There are 285 endpoints in 51 groups: [activity_logs](#activity-logs), [ai](#ai)
 | --- | --- | --- |
 | POST | `/api/v1/ai/assist` | `api/v1/ai/assist#create` |
 | GET | `/api/v1/ai/config` | `api/v1/ai/config#show` |
+| POST | `/api/v1/ai/priority` | `api/v1/ai/priority#create` |
 
 ## ai-settings
 
@@ -427,6 +428,14 @@ There are 285 endpoints in 51 groups: [activity_logs](#activity-logs), [ai](#ai)
 | Method | Path | Handled by |
 | --- | --- | --- |
 | GET | `/api/v1/schedule` | `api/v1/schedules#show` |
+
+## sensor-anomalies
+
+| Method | Path | Handled by |
+| --- | --- | --- |
+| GET | `/api/v1/sensor_anomalies` | `api/v1/sensor_anomalies#index` |
+| PATCH | `/api/v1/sensor_anomalies/:id/acknowledge` | `api/v1/sensor_anomalies#acknowledge` |
+| PATCH | `/api/v1/sensor_anomalies/:id/dismiss` | `api/v1/sensor_anomalies#dismiss` |
 
 ## sessions
 

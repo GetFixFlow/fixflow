@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/Card'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Button } from '@/components/ui/Button'
+import { UnusualReadings } from '@/components/iot/UnusualReadings'
 import { formatDistanceToNow } from 'date-fns'
 
 export function IotPage() {
@@ -23,6 +24,8 @@ export function IotPage() {
         title="IoT Alerts"
         description="Monitor sensor alerts from your assets"
       />
+
+      <UnusualReadings />
 
       {isLoading ? (
         <div className="space-y-3">

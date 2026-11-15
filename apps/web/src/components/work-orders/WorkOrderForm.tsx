@@ -1,5 +1,6 @@
 import { label } from '@/i18n'
 import { useTranslation } from 'react-i18next'
+import { Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -7,11 +8,12 @@ import { z } from 'zod'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { LocationSelect } from '@/components/shared/LocationSelect'
 import { AssetSelect } from '@/components/assets/AssetSelect'
 import { CustomFieldInputs } from '@/components/custom-fields/CustomFieldInputs'
 import { activeFields, useCustomFields } from '@/hooks/useCustomFields'
 import { missingRequired, toPayload } from '@/lib/customFields'
+import { apiErrorMessage } from '@/lib/apiError'
+import { useAI, useSuggestPriority } from '@/hooks/useAI'
 import type { Priority } from '@/types'
 
 const schema = z.object({
@@ -71,6 +73,13 @@ export function WorkOrderForm({
   })
 
   const priority = watch('priority')
+  const [title, description, assetId] = watch(['title', 'description', 'asset_id'])
+
+  // A new work order can ask the AI for a priority (when an administrator has it on). It only suggests: the person decides.
+  const { features, provider } = useAI()
+  const suggestion = useSuggestPriority()
+  const canSuggest = mode === 'create' && features.priority
+  const suggested = suggestion.data
 
   const { data: allFields } = useCustomFields('work_order')
   const customFields = activeFields(allFields)
@@ -146,6 +155,46 @@ export function WorkOrderForm({
               </button>
             ))}
           </div>
+          {canSuggest && (
+            <div className="mt-3 space-y-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={(title ?? '').trim().length < 5 || suggestion.isPending}
+                onClick={() => suggestion.mutate({ title: title ?? '', description: description || undefined, asset_id: assetId || lockedAssetId })}
+              >
+                <Sparkles className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                {suggestion.isPending ? t('ai.priority.asking') : t('ai.priority.suggest')}
+              </Button>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t(`ai.priority.note.${provider ?? 'anthropic'}`)}</p>
+              {suggested && (
+                <div role="status" className="rounded-md border border-brand-200 bg-brand-50 p-3 text-sm dark:border-brand-800 dark:bg-brand-900/10">
+                  <p className="font-medium text-gray-900 dark:text-gray-100">
+                    {t('ai.priority.suggests', { priority: label('priority', suggested.priority) })}
+                  </p>
+                  {suggested.reason && <p className="mt-0.5 text-gray-600 dark:text-gray-400">{suggested.reason}</p>}
+                  {suggested.priority === priority ? (
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{t('ai.priority.same')}</p>
+                  ) : (
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="mt-2"
+                      onClick={() => { setValue('priority', suggested.priority, { shouldDirty: true }); suggestion.reset() }}
+                    >
+                      {t('ai.priority.use', { priority: label('priority', suggested.priority) })}
+                    </Button>
+                  )}
+                </div>
+              )}
+              {suggestion.isError && (
+                <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+                  {apiErrorMessage(suggestion.error, t('ai.priority.failed'))}
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
