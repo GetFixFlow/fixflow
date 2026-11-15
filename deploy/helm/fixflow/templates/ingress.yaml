@@ -1,0 +1,37 @@
+{{- if .Values.ingress.enabled }}
+{{- $full := include "fixflow.fullname" . }}
+{{- $host := default (urlParse .Values.appUrl).hostname .Values.ingress.host }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $full }}
+  labels: {{ include "fixflow.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations: {{ toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ $host | quote }}
+      {{- with .Values.ingress.tls.secretName }}
+      secretName: {{ . }}
+      {{- end }}
+  {{- end }}
+  rules:
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend: { service: { name: {{ $full }}-api, port: { number: 3000 } } }
+          - path: /cable
+            pathType: Prefix
+            backend: { service: { name: {{ $full }}-api, port: { number: 3000 } } }
+          - path: /
+            pathType: Prefix
+            backend: { service: { name: {{ $full }}-web, port: { number: 80 } } }
+{{- end }}

@@ -1,0 +1,139 @@
+#!/bin/sh
+# Checks the Helm chart (deploy/helm/fixflow) without a cluster: it lints, renders it with the settings people really use and
+# checks the result is valid Kubernetes, and checks the things that would hurt an install if they went wrong:
+#
+#   - exactly one worker listens to the sensor broker, however many workers there are (two would store every reading twice);
+#   - no password or key is written into anything but the Secret;
+#   - a change to the settings or the secrets restarts the pods, and the images are the version of this chart;
+#   - an install that cannot work (no address, a missing secret, a password that would break the database address) is refused
+#     with a message that says what to set.
+#
+# It needs helm and kubeconform (https://kubeconform.mandragor.org). It reads the chart and starts nothing, so it takes seconds.
+# CI runs it (the helm job); bin/check_kubernetes then installs the chart on a real cluster.
+set -eu
+cd "$(dirname "$0")/.."
+
+CHART=deploy/helm/fixflow
+K8S=1.30.0
+
+for tool in helm kubeconform; do
+  command -v "$tool" >/dev/null 2>&1 || { echo "bin/check_helm: $tool is not installed." >&2; exit 2; }
+done
+
+fail() { echo "FAIL: $*" >&2; exit 1; }
+ok() { echo "ok:   $*"; }
+
+# Distinct values, so that finding one where it should not be is easy.
+KEYBASE=keybasemarker0123456789
+JWT=jwtmarker0123456789
+DBPASS=dbpassmarker0123456789
+REDISPASS=redispassmarker0123456789
+S3KEY=s3keymarker0123456789
+S3SECRET=s3secretmarker0123456789
+MQTTPASS=mqttpassmarker0123456789
+BASE="--set appUrl=https://fixflow.example.com --set secrets.secretKeyBase=$KEYBASE --set secrets.deviseJwtSecretKey=$JWT \
+--set secrets.dbPassword=$DBPASS --set secrets.redisPassword=$REDISPASS --set secrets.s3AccessKey=$S3KEY \
+--set secrets.s3SecretKey=$S3SECRET --set secrets.mqttPassword=$MQTTPASS"
+
+# shellcheck disable=SC2086  # BASE is a list of arguments on purpose
+render() { helm template fixflow "$CHART" --namespace fixflow $BASE "$@"; }
+
+# shellcheck disable=SC2086
+helm lint "$CHART" --strict $BASE >/dev/null || { helm lint "$CHART" --strict $BASE >&2; fail "helm lint"; }
+ok "helm lint --strict"
+
+# ── It renders valid Kubernetes, in the ways it is used ──
+valid() {
+  name=$1
+  shift
+  out=$(render "$@") || fail "$name: the chart did not render"
+  printf '%s\n' "$out" | kubeconform -strict -summary -kubernetes-version "$K8S" - >/dev/null 2>&1 \
+    || { printf '%s\n' "$out" | kubeconform -strict -summary -kubernetes-version "$K8S" - >&2; fail "$name: not valid Kubernetes"; }
+  ok "$name: renders, and is valid Kubernetes $K8S"
+}
+valid "the defaults (everything in the cluster)"
+valid "everything outside the cluster" --set postgresql.enabled=false --set secrets.databaseUrl=postgres://u:p@db.example:5432/fixflow \
+  --set redis.enabled=false --set secrets.redisUrl=redis://:p@redis.example:6379/0 --set s3.enabled=false \
+  --set storage.endpoint=https://s3.example.com --set mqtt.enabled=false --set mqtt.external.host=broker.example.com
+valid "scaled, with a Secret of its own, TLS, plugins and node choices" --set existingSecret=fixflow-secrets --set api.replicas=3 \
+  --set web.autoscaling.enabled=true --set api.autoscaling.enabled=true --set ingress.className=nginx \
+  --set ingress.tls.enabled=true --set ingress.tls.secretName=fixflow-tls --set plugins.existingClaim=fixflow-plugins \
+  --set nodeSelector.disktype=ssd --set mqtt.service.type=LoadBalancer
+valid "no sensor broker" --set mqtt.enabled=false
+valid "no Ingress" --set ingress.enabled=false
+
+# ── One worker listens to the sensor broker ──
+listeners() { render "$@" -s templates/sidekiq.yaml | grep -A1 'name: MQTT_SUBSCRIBER' | grep -c 'value: "true"' || true; }
+[ "$(listeners)" = "1" ] || fail "there must be exactly one worker that listens to the sensor broker"
+[ "$(listeners --set sidekiq.replicas=6)" = "1" ] || fail "more workers must not mean more listeners"
+[ "$(listeners --set mqtt.enabled=false --set mqtt.external.host=broker.example.com)" = "1" ] || fail "a broker outside the cluster is listened to once too"
+[ "$(listeners --set mqtt.enabled=false)" = "0" ] || fail "with no sensor broker nothing listens to one"
+LISTENER=$(render -s templates/sidekiq.yaml)
+printf '%s\n' "$LISTENER" | grep -q 'name: fixflow-sidekiq-iot$' || fail "the listening worker is not named sidekiq-iot"
+[ "$(printf '%s\n' "$LISTENER" | grep -c 'type: Recreate')" = "1" ] \
+  || fail "the listening worker must be replaced, not added to, when it is upgraded (strategy Recreate, and only for it)"
+ok "exactly one worker listens to the sensor broker, however many workers there are, and none when there is no broker"
+
+# ── Secrets stay in the Secret ──
+for template in api web sidekiq ingress postgresql redis s3 mqtt; do
+  for marker in $KEYBASE $JWT $DBPASS $REDISPASS $S3KEY $S3SECRET $MQTTPASS; do
+    if render -s "templates/$template.yaml" | grep -q "$marker"; then fail "a secret value is written into templates/$template.yaml"; fi
+  done
+done
+for marker in $KEYBASE $JWT $DBPASS $REDISPASS $S3KEY $S3SECRET $MQTTPASS; do
+  render -s templates/secret.yaml | grep -q "$marker" || fail "the Secret does not hold $marker"
+done
+[ "$(render --set existingSecret=mine | grep -c 'kind: Secret')" = "0" ] || fail "no Secret should be made when existingSecret names one"
+render --set existingSecret=mine | grep -q 'name: mine' || fail "existingSecret is not the Secret that is read"
+ok "secrets are in the Secret only, and existingSecret replaces it"
+
+# ── What the pods run, and when they restart ──
+VERSION=$(cat VERSION)
+render -s templates/api.yaml | grep -q "fixflow-api:$VERSION" || fail "the api image is not this release's ($VERSION)"
+render -s templates/web.yaml | grep -q "fixflow-web:$VERSION" || fail "the web image is not this release's ($VERSION)"
+render --set image.tag=9.9.9 --set image.repository=registry.example/mirror -s templates/api.yaml | grep -q 'registry.example/mirror/fixflow-api:9.9.9' \
+  || fail "image.repository and image.tag are not used"
+SUM_A=$(render -s templates/api.yaml | grep 'checksum/config')
+SUM_B=$(render --set env.SMTP_HOST=mail.example -s templates/api.yaml | grep 'checksum/config')
+[ "$SUM_A" != "$SUM_B" ] || fail "a change to the settings does not restart the API"
+SUM_C=$(render --set secrets.secretKeyBase=anotherkeymarker -s templates/api.yaml | grep 'checksum/config')
+[ "$SUM_A" != "$SUM_C" ] || fail "a change to a secret does not restart the API"
+render -s templates/api.yaml | grep -q 'allowPrivilegeEscalation: false' || fail "the API may gain privileges"
+render -s templates/api.yaml | grep -q 'runAsNonRoot: true' || fail "the API may run as root"
+render -s templates/api.yaml | grep -q 'maxUnavailable: 0' || fail "an upgrade may leave no API server answering"
+ok "the images are this release's, a change to settings or secrets restarts the pods, and the pods are not privileged"
+
+# ── Getting in, and Redis ──
+INGRESS=$(render -s templates/ingress.yaml)
+for path in /api /cable /; do
+  printf '%s\n' "$INGRESS" | grep -q "path: $path\$" || fail "the Ingress does not route $path"
+done
+printf '%s\n' "$INGRESS" | grep -A4 'path: /cable' | grep -q 'fixflow-api' || fail "/cable does not go to the API"
+printf '%s\n' "$INGRESS" | grep -A4 'path: /$' | grep -q 'fixflow-web' || fail "/ does not go to the web service"
+[ "$(render --set ingress.enabled=false | grep -c 'kind: Ingress')" = "0" ] || fail "ingress.enabled=false still makes an Ingress"
+render -s templates/redis.yaml | grep -q 'noeviction' || fail "Redis may throw away the background jobs it holds when it is full"
+ok "the Ingress sends /api and /cable to the API and the rest to the web service, and Redis keeps its jobs"
+
+# ── An install that cannot work is refused, in words ──
+refused() {
+  name=$1
+  expected=$2
+  shift 2
+  if message=$("$@" 2>&1); then fail "$name: the chart rendered, and should not have"; fi
+  printf '%s' "$message" | grep -q "$expected" || fail "$name: refused, but not with \"$expected\": $message"
+  ok "refused: $name"
+}
+# shellcheck disable=SC2086
+refused "no address" "appUrl is required" helm template fixflow "$CHART"
+# shellcheck disable=SC2086
+refused "an address with a slash at the end" "no slash or path" render --set appUrl=https://fixflow.example.com/
+refused "no signing key" "secrets.secretKeyBase is required" render --set secrets.secretKeyBase=
+refused "no database password" "secrets.dbPassword is required" render --set secrets.dbPassword=
+refused "a database password that breaks the address" "letters and digits only" render --set secrets.dbPassword=a/b
+refused "a Redis password that breaks the address" "letters and digits only" render --set secrets.redisPassword=a@b
+refused "an outside database with no address" "secrets.databaseUrl is required" render --set postgresql.enabled=false
+refused "an outside Redis with no address" "secrets.redisUrl is required" render --set redis.enabled=false
+refused "outside file storage with no address" "storage.endpoint is required" render --set s3.enabled=false
+refused "a sensor broker with no password" "secrets.mqttPassword is required" render --set secrets.mqttPassword=
+
+echo "All Helm chart checks passed."

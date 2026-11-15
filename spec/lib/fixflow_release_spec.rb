@@ -103,6 +103,20 @@ RSpec.describe FixflowRelease do
     end
   end
 
+  describe ".pin_chart" do
+    let(:chart) { "name: fixflow\nversion: 0.1.0\nappVersion: \"0.1.0\"\nkubeVersion: \">=1.25.0-0\"\n" }
+
+    it "moves the chart's version and the version of the images it installs, and nothing else" do
+      pinned = "name: fixflow\nversion: 1.3.0\nappVersion: \"1.3.0\"\nkubeVersion: \">=1.25.0-0\"\n"
+
+      expect(described_class.pin_chart(chart, "1.3.0")).to eq(pinned)
+    end
+
+    it "refuses what is not a version" do
+      expect { described_class.pin_chart(chart, "latest") }.to raise_error(FixflowRelease::Error)
+    end
+  end
+
   describe ".cut" do
     it "moves what is under [Unreleased] into a dated section and leaves [Unreleased] empty" do
       cut = described_class.cut(changelog, "1.3.0", date: Date.new(2026, 2, 3))
@@ -173,6 +187,8 @@ RSpec.describe FixflowRelease do
       File.write(File.join(work, "VERSION"), "1.2.0\n")
       File.write(File.join(work, "CHANGELOG.md"), changelog)
       FixflowRelease::COMPOSE_FILES.each { |file| File.write(File.join(work, File.basename(file)), "image: r/fixflow-api:${FIXFLOW_VERSION:-1.2.0}\n") }
+      FileUtils.mkdir_p(File.dirname(File.join(work, "deploy/helm/fixflow/Chart.yaml")))
+      File.write(File.join(work, "deploy/helm/fixflow/Chart.yaml"), "name: fixflow\nversion: 1.2.0\nappVersion: \"1.2.0\"\n")
       git(work, "add", ".")
       git(work, "commit", "-q", "-m", "start")
       git(work, "push", "-q", "-u", "origin", "main")
@@ -188,6 +204,8 @@ RSpec.describe FixflowRelease do
       expect(File.read(File.join(work, "VERSION"))).to eq("1.3.0\n")
       expect(File.read(File.join(work, "CHANGELOG.md"))).to include("## [1.3.0] - ")
       expect(File.read(File.join(work, "docker-compose.prod.yml"))).to eq("image: r/fixflow-api:${FIXFLOW_VERSION:-1.3.0}\n")
+      chart = File.read(File.join(work, "deploy/helm/fixflow/Chart.yaml"))
+      expect(chart).to eq("name: fixflow\nversion: 1.3.0\nappVersion: \"1.3.0\"\n")
       expect(git(work, "log", "-1", "--format=%s")).to eq("Release 1.3.0")
       expect(out).to include("git tag v1.3.0", "Reports changed shape. Run `rails db:migrate`")
       expect(git(work, "status", "--porcelain")).to be_empty

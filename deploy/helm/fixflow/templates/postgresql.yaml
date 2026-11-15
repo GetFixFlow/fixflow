@@ -1,0 +1,71 @@
+{{- if .Values.postgresql.enabled }}
+{{- $full := include "fixflow.fullname" . }}
+{{- $sel := dict "root" . "component" "postgresql" }}
+# ONE copy of PostgreSQL with its own disk. Enough to try FixFlow or to run a small install; not highly available (docs/high-availability.md).
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $full }}-postgresql
+  labels: {{ include "fixflow.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql
+spec:
+  serviceName: {{ $full }}-postgresql
+  replicas: 1
+  selector:
+    matchLabels: {{ include "fixflow.selectorLabels" $sel | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "fixflow.selectorLabels" $sel | nindent 8 }}
+    spec:
+      serviceAccountName: {{ $full }}
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: postgresql
+          image: {{ .Values.postgresql.image }}
+          ports:
+            - { name: postgresql, containerPort: 5432 }
+          env:
+            - { name: POSTGRES_DB, value: fixflow_production }
+            - { name: POSTGRES_USER, value: fixflow }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: {{ include "fixflow.secretName" . }}, key: DB_PASSWORD } }
+            # A folder inside the disk, because a new disk has a lost+found folder in it, which PostgreSQL refuses to start in.
+            - { name: PGDATA, value: /var/lib/postgresql/data/pgdata }
+          readinessProbe:
+            exec: { command: ["pg_isready", "-U", "fixflow", "-d", "fixflow_production"] }
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            exec: { command: ["pg_isready", "-U", "fixflow", "-d", "fixflow_production"] }
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 6
+          resources: {{ toYaml .Values.postgresql.resources | nindent 12 }}
+          volumeMounts:
+            - { name: data, mountPath: /var/lib/postgresql/data }
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- with .Values.postgresql.persistence.storageClass }}
+        storageClassName: {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.postgresql.persistence.size }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $full }}-postgresql
+  labels: {{ include "fixflow.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql
+spec:
+  selector: {{ include "fixflow.selectorLabels" $sel | nindent 4 }}
+  ports:
+    - { name: postgresql, port: 5432, targetPort: postgresql }
+{{- end }}

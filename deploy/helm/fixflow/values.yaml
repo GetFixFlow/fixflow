@@ -1,0 +1,166 @@
+# FixFlow on Kubernetes. docs/kubernetes.md explains every setting here; docs/high-availability.md says what to run for an
+# install that has to stay up when a server or a database copy is lost.
+#
+# Four things are needed to install: appUrl, the secrets (or existingSecret), an Ingress controller (or your own way of sending
+# /api and /cable to the API and everything else to the web service), and storage for the database. For example:
+#
+#   helm install fixflow ./deploy/helm/fixflow --namespace fixflow --create-namespace \
+#     --set appUrl=https://fixflow.example.com \
+#     --set secrets.secretKeyBase=$(openssl rand -hex 64) --set secrets.deviseJwtSecretKey=$(openssl rand -hex 48) \
+#     --set secrets.dbPassword=$(openssl rand -hex 24) --set secrets.redisPassword=$(openssl rand -hex 24) \
+#     --set secrets.s3AccessKey=$(openssl rand -hex 10) --set secrets.s3SecretKey=$(openssl rand -hex 24) \
+#     --set secrets.mqttPassword=$(openssl rand -hex 24)
+
+# The address people open FixFlow at, with no slash at the end (https://fixflow.example.com). Required.
+appUrl: ""
+# Other addresses allowed to call the API (a comma-separated list). Empty: appUrl only, which is right when the web app and the API
+# share one address, as they do here.
+allowedOrigins: ""
+
+image:
+  # The api and web images are named <repository>/fixflow-api and <repository>/fixflow-web. Set repository to use a mirror.
+  repository: ghcr.io/getfixflow
+  # Empty: the version of FixFlow this chart is (appVersion). Never "latest": an upgrade is a change of this chart's version.
+  tag: ""
+  pullPolicy: IfNotPresent
+imagePullSecrets: []
+
+# ── Secrets ──────────────────────────────────────────────────────────────────────────────────────────────────────
+# Either give the values here (the chart makes a Secret of them), or make a Secret yourself and name it in existingSecret. It
+# needs the keys SECRET_KEY_BASE, DEVISE_JWT_SECRET_KEY, MINIO_ACCESS_KEY and MINIO_SECRET_KEY; then DB_PASSWORD (with
+# postgresql.enabled) or DATABASE_URL; REDIS_PASSWORD (with redis.enabled) or REDIS_URL; and MQTT_PASSWORD when there is a broker.
+# A Secret that is not in the chart keeps passwords out of values files and out of Helm's release history.
+existingSecret: ""
+secrets:
+  secretKeyBase: ""          # openssl rand -hex 64
+  deviseJwtSecretKey: ""     # openssl rand -hex 48
+  dbPassword: ""             # the bundled database's password (letters and digits only: it goes into an address). openssl rand -hex 24
+  redisPassword: ""          # the bundled Redis's password (letters and digits only). openssl rand -hex 24
+  s3AccessKey: ""            # the file storage's login (the bundled one is given this login; for another S3, the login you have there)
+  s3SecretKey: ""
+  mqttPassword: ""           # the sensor broker's login (the bundled one is given it; for another broker, the one you have there)
+  databaseUrl: ""            # postgres://user:password@host:5432/dbname, when postgresql.enabled is false
+  redisUrl: ""               # redis://:password@host:6379/0, when redis.enabled is false
+
+# Any other setting from docs/configuration.md (SMTP_HOST, MAILER_FROM, AI_ENABLED...), as name: value. Passwords for these belong in
+# a Secret of your own, named in extraEnvFrom (the same way the Secret's keys are the setting names).
+env: {}
+extraEnvFrom: []
+#  - secretRef:
+#      name: fixflow-smtp
+
+# ── Getting in ───────────────────────────────────────────────────────────────────────────────────────────────────
+# What the web image's own nginx does for a Docker install, done by the Ingress here: /api and /cable (the live-updates WebSocket)
+# go to the API, everything else to the web service. The annotations are ingress-nginx's: a WebSocket needs a long read timeout
+# and an upload needs room. Another controller needs its own.
+ingress:
+  enabled: true
+  className: ""
+  host: ""                   # empty: the address in appUrl
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 50m
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  tls:
+    enabled: false
+    secretName: ""           # the Secret with the certificate (for cert-manager, the one it is asked to fill)
+
+# ── The application ───────────────────────────────────────────────────────────────────────────────────────────────
+# Two copies of the web and API servers by default, spread over nodes where there are several, so that a lost node or an upgrade
+# leaves one answering. replicas is ignored where autoscaling is on.
+web:
+  replicas: 2
+  resources:
+    requests: { cpu: 50m, memory: 64Mi }
+    limits: { memory: 128Mi }
+  autoscaling: { enabled: false, minReplicas: 2, maxReplicas: 6, targetCPUUtilizationPercentage: 70 }
+
+api:
+  replicas: 2
+  resources:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits: { memory: 1Gi }
+  autoscaling: { enabled: false, minReplicas: 2, maxReplicas: 8, targetCPUUtilizationPercentage: 70 }
+  # How long a starting server may take to answer (the database is migrated first): this many checks, five seconds apart.
+  startupFailureThreshold: 120
+
+# The background workers: email, preventive maintenance, the nightly backup, cleanups. Any number may run; each scheduled job is
+# queued once however many workers there are.
+sidekiq:
+  replicas: 2
+  resources:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits: { memory: 1Gi }
+
+# The one worker that also listens to the sensor broker. Every message goes to every listener, so a second one would store each
+# reading twice: there is exactly one (it is replaced, never added to, when it is upgraded). Off when there is no broker.
+iot:
+  subscriber:
+    resources:
+      requests: { cpu: 100m, memory: 512Mi }
+      limits: { memory: 1Gi }
+
+# Plugins (docs/plugins.md): a PersistentVolumeClaim whose files are the plugins folder, mounted read-only on the API and workers.
+plugins:
+  existingClaim: ""
+
+podDisruptionBudget:
+  enabled: true              # keeps one copy of each scaled service up while a node is drained (only where there are two or more)
+spread:
+  enabled: true              # prefer different nodes for the copies of the web, API and worker services
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# ── What FixFlow needs underneath ─────────────────────────────────────────────────────────────────────────────────
+# Each of these four is either run here, as ONE copy with its own disk (simple, and enough to try FixFlow or to run a small install,
+# but not highly available: losing it stops FixFlow until it is back), or switched off and pointed at one you run or rent.
+# docs/high-availability.md says what to use for each when the install has to stay up.
+
+# PostgreSQL. enabled: false needs secrets.databaseUrl (or DATABASE_URL in existingSecret), and nothing below.
+postgresql:
+  enabled: true
+  image: postgres:16.15-alpine
+  persistence: { size: 10Gi, storageClass: "" }
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { memory: 1Gi }
+
+# Redis (live updates, the background job queue, rate limits). enabled: false needs secrets.redisUrl (or REDIS_URL).
+redis:
+  enabled: true
+  image: redis:7.4.11-alpine
+  persistence: { size: 1Gi, storageClass: "" }
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits: { memory: 320Mi }
+
+# File storage (photos, documents and the nightly backups, in two buckets). The bundled one is SeaweedFS, as in the Docker install.
+# enabled: false needs storage.endpoint, the address of an S3-compatible service (AWS S3, a MinIO or Ceph you run...), with the
+# buckets made and the login in secrets.s3AccessKey and secrets.s3SecretKey.
+s3:
+  enabled: true
+  image: chrislusf/seaweedfs:4.48
+  persistence: { size: 10Gi, storageClass: "" }
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { memory: 1Gi }
+storage:
+  endpoint: ""
+  region: us-east-1
+  bucket: fixflow-uploads
+  backupBucket: fixflow-backups
+
+# The sensor broker (MQTT), which IoT devices connect to. The bundled one is Mosquitto, one copy. enabled: false with external.host set
+# uses a broker you run; with neither, there is no sensor broker (readings can still arrive over HTTP) and no listening worker.
+mqtt:
+  enabled: true
+  image: eclipse-mosquitto:2.1.2-alpine
+  username: fixflow
+  persistence: { size: 1Gi, storageClass: "" }
+  # Sensors outside the cluster connect to this service on port 1883: LoadBalancer or NodePort to let them in.
+  service: { type: ClusterIP, annotations: {} }
+  resources:
+    requests: { cpu: 25m, memory: 32Mi }
+    limits: { memory: 128Mi }
+  external: { host: "", port: 1883 }

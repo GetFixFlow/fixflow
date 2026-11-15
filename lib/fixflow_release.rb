@@ -11,6 +11,8 @@ module FixflowRelease
   CHANGELOG_FILE = File.join(ROOT, "CHANGELOG.md")
   # These name the release's images (ghcr.io/getfixflow/fixflow-api:<version>), so a release moves the default version in them.
   COMPOSE_FILES = %w[docker-compose.prod.yml docker-compose.lite.yml].map { |name| File.join(ROOT, name) }.freeze
+  # The Helm chart is the same number as the release: its version, and the version of the images it installs (appVersion).
+  CHART_FILE = File.join(ROOT, "deploy/helm/fixflow/Chart.yaml")
 
   SEMVER = /\A\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?\z/
   UNRELEASED = "## [Unreleased]".freeze
@@ -63,6 +65,13 @@ module FixflowRelease
   end
 
   # The "Upgrade:" notes of a release, each with the start of the bullet it came from.
+  # Chart.yaml with its version and appVersion set to this release's.
+  def self.pin_chart(chart, version)
+    raise Error, "#{version} is not a version number like 1.2.3." unless valid?(version)
+
+    chart.sub(/^version: .*$/, "version: #{version}").sub(/^appVersion: .*$/, %(appVersion: "#{version}"))
+  end
+
   def self.upgrade_notes(section_text)
     section_text.lines.filter_map do |line|
       note = line[UPGRADE_NOTE, 1] or next

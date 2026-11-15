@@ -1,0 +1,94 @@
+{{- if .Values.mqtt.enabled }}
+{{- $full := include "fixflow.fullname" . }}
+{{- $sel := dict "root" . "component" "mqtt" }}
+# ONE copy of the Mosquitto sensor broker. Sensors connect to this service on port 1883 with mqtt.username and secrets.mqttPassword.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $full }}-mqtt
+  labels: {{ include "fixflow.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mqtt
+data:
+  mosquitto.conf: |
+{{ .Files.Get "files/mosquitto.conf" | indent 4 }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $full }}-mqtt
+  labels: {{ include "fixflow.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mqtt
+spec:
+  serviceName: {{ $full }}-mqtt
+  replicas: 1
+  selector:
+    matchLabels: {{ include "fixflow.selectorLabels" $sel | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "fixflow.selectorLabels" $sel | nindent 8 }}
+      annotations:
+        checksum/config: {{ .Files.Get "files/mosquitto.conf" | sha256sum }}
+    spec:
+      serviceAccountName: {{ $full }}
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: mqtt
+          image: {{ .Values.mqtt.image }}
+          # The login file is written from the two settings each time the broker starts, as in the Docker install.
+          command: ["sh", "-c"]
+          args:
+            - >-
+              rm -f /mosquitto/passwd &&
+              mosquitto_passwd -b -c /mosquitto/passwd "$MQTT_USERNAME" "$MQTT_PASSWORD" &&
+              chown mosquitto:mosquitto /mosquitto/passwd &&
+              exec mosquitto -c /mosquitto/config/mosquitto.conf
+          ports:
+            - { name: mqtt, containerPort: 1883 }
+          env:
+            - { name: MQTT_USERNAME, value: {{ .Values.mqtt.username | quote }} }
+            - name: MQTT_PASSWORD
+              valueFrom: { secretKeyRef: { name: {{ include "fixflow.secretName" . }}, key: MQTT_PASSWORD } }
+          readinessProbe:
+            tcpSocket: { port: mqtt }
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket: { port: mqtt }
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            failureThreshold: 6
+          resources: {{ toYaml .Values.mqtt.resources | nindent 12 }}
+          volumeMounts:
+            - { name: config, mountPath: /mosquitto/config, readOnly: true }
+            - { name: data, mountPath: /mosquitto/data }
+      volumes:
+        - name: config
+          configMap: { name: {{ $full }}-mqtt }
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- with .Values.mqtt.persistence.storageClass }}
+        storageClassName: {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.mqtt.persistence.size }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $full }}-mqtt
+  labels: {{ include "fixflow.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mqtt
+  {{- with .Values.mqtt.service.annotations }}
+  annotations: {{ toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.mqtt.service.type }}
+  selector: {{ include "fixflow.selectorLabels" $sel | nindent 4 }}
+  ports:
+    - { name: mqtt, port: 1883, targetPort: mqtt }
+{{- end }}

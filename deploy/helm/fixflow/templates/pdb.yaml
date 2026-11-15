@@ -1,0 +1,22 @@
+{{- if .Values.podDisruptionBudget.enabled }}
+{{- $full := include "fixflow.fullname" . }}
+{{- range $part := list "web" "api" "sidekiq" }}
+{{- $conf := index $.Values $part }}
+{{- $copies := $conf.replicas }}
+{{- if and $conf.autoscaling $conf.autoscaling.enabled }}{{- $copies = $conf.autoscaling.minReplicas }}{{- end }}
+{{- /* With one copy a budget would stop a node from ever being drained. */}}
+{{- if gt (int $copies) 1 }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ $full }}-{{ $part }}
+  labels: {{ include "fixflow.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $part }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels: {{ include "fixflow.selectorLabels" (dict "root" $ "component" $part) | nindent 6 }}
+{{- end }}
+{{- end }}
+{{- end }}

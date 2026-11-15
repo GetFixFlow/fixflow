@@ -1,0 +1,75 @@
+{{- $full := include "fixflow.fullname" . -}}
+{{- $listens := include "fixflow.mqttHost" . -}}
+{{- /* The workers (any number), and, when there is a sensor broker, the one worker that also listens to it. They are two
+       Deployments of the same image: the first with the listening switched off, the second the only one with it on. */ -}}
+{{- range $part := list "sidekiq" "sidekiq-iot" }}
+{{- if or (eq $part "sidekiq") $listens }}
+{{- $iot := eq $part "sidekiq-iot" }}
+{{- $sel := dict "root" $ "component" $part }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $full }}-{{ $part }}
+  labels: {{ include "fixflow.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $part }}
+spec:
+  {{- if $iot }}
+  # Exactly one, and the old one is stopped before the new one starts: two listeners would store every reading twice.
+  replicas: 1
+  strategy:
+    type: Recreate
+  {{- else }}
+  replicas: {{ $.Values.sidekiq.replicas }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxSurge: 1, maxUnavailable: 0 }
+  {{- end }}
+  selector:
+    matchLabels: {{ include "fixflow.selectorLabels" $sel | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "fixflow.selectorLabels" $sel | nindent 8 }}
+      annotations:
+        checksum/config: {{ dict "env" $.Values.env "secrets" (ternary $.Values.secrets (dict) (not $.Values.existingSecret)) "plugins" $.Values.plugins | toJson | sha256sum }}
+    spec:
+      serviceAccountName: {{ $full }}
+      automountServiceAccountToken: false
+      # Sidekiq finishes the jobs it is running before it stops (up to 25 seconds), then puts back what is left.
+      terminationGracePeriodSeconds: 40
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile: { type: RuntimeDefault }
+      {{- include "fixflow.imagePullSecrets" $ | nindent 6 }}
+      {{- include "fixflow.placement" $sel | nindent 6 }}
+      containers:
+        - name: sidekiq
+          image: {{ include "fixflow.image" (dict "root" $ "name" "fixflow-api") }}
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          command: ["bundle", "exec", "sidekiq", "-C", "config/sidekiq.yml"]
+          env: {{ include "fixflow.env" (dict "root" $ "subscriber" (ternary "true" "false" $iot)) | nindent 12 }}
+          {{- with $.Values.extraEnvFrom }}
+          envFrom: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          # The image's own check asks the web server, which this container does not run.
+          livenessProbe:
+            exec: { command: ["sh", "-c", "pgrep -f sidekiq > /dev/null"] }
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources: {{ toYaml (ternary $.Values.iot.subscriber.resources $.Values.sidekiq.resources $iot) | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: ["ALL"] }
+          {{- if $.Values.plugins.existingClaim }}
+          volumeMounts: {{ include "fixflow.pluginsMount" $ | nindent 12 }}
+          {{- end }}
+      {{- if $.Values.plugins.existingClaim }}
+      volumes: {{ include "fixflow.pluginsVolume" $ | nindent 8 }}
+      {{- end }}
+{{- end }}
+{{- end }}
