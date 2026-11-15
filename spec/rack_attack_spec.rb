@@ -126,7 +126,7 @@ RSpec.describe Rack::Attack, type: :request do
     it "counts the assistant, a suggested priority and the AI settings' try-it button (each costs a model call), 5 a minute together" do
       allow(Ai::Client).to receive(:chat).and_return('{"priority":"low","reason":"x"}')
       5.times do |n|
-        path = %w[/api/v1/ai/priority /api/v1/ai_settings/test].fetch(n % 2)
+        path = %w[/api/v1/ai/priority /api/v1/ai/work_order_draft /api/v1/ai_settings/test].fetch(n % 3)
         post path, params: { ai: { provider: "none" }, title: "x" }, as: :json, headers: headers
         expect(response).not_to have_http_status(:too_many_requests)
       end
@@ -136,6 +136,13 @@ RSpec.describe Rack::Attack, type: :request do
       post "/api/v1/ai/priority", params: { title: "x" }, headers: headers
       expect(response).to have_http_status(:too_many_requests)
       post "/api/v1/ai/assist", params: { work_order_id: 0, message: "hi" }, headers: headers
+      expect(response).to have_http_status(:too_many_requests)
+    end
+
+    it "counts a draft work order too" do
+      5.times { post "/api/v1/ai/work_order_draft", params: { other: "x" }, headers: headers }
+
+      post "/api/v1/ai/work_order_draft", params: { text: "pump on line 3 is leaking oil" }, headers: headers
       expect(response).to have_http_status(:too_many_requests)
     end
 

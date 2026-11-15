@@ -53,7 +53,7 @@ export const handlers = [
   http.get('/api/v1/ai/config', () => {
     return HttpResponse.json({
       success: true,
-      data: { enabled: true, model: 'claude-sonnet-5-5', provider: 'anthropic', source: 'app', features: { priority: true, anomalies: true, limits: true, parts: true } },
+      data: { enabled: true, model: 'claude-sonnet-5-5', provider: 'anthropic', source: 'app', features: { priority: true, anomalies: true, limits: true, parts: true, draft: true } },
       meta: { request_id: 'test-req-id', timestamp: new Date().toISOString() },
     })
   }),

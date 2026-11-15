@@ -1,6 +1,6 @@
 # AI: choosing a provider, and what it does
 
-FixFlow can use AI to help: the **FixFlow Assist** chat on a work order answers from the asset's history and the text of its manuals, a new work order can **suggest a priority**, the sensor screens **flag unusual readings** and **warn when a sensor is heading for its limit**, and the Parts page **forecasts parts that may run short**. **AI is off until an administrator picks a provider.** Nothing is sent anywhere before that.
+FixFlow can use AI to help: the **FixFlow Assist** chat on a work order answers from the asset's history and the text of its manuals, a new work order can **suggest a priority** or be **drafted from a few plain words**, the sensor screens **flag unusual readings** and **warn when a sensor is heading for its limit**, and the Parts page **forecasts parts that may run short**. **AI is off until an administrator picks a provider.** Nothing is sent anywhere before that.
 
 [What it does](#what-it-does) lists each feature and how to switch it off.
 
@@ -17,15 +17,28 @@ Under the choice, the page says in words where the data goes. Use **Try it** to 
 
 ## What it does
 
-Once a provider is chosen, five things are available. Under the provider on **Settings → AI**, a switch for each of the last four lets an administrator turn it off on its own, without losing the provider's settings. They are all on until switched off, and none work while AI is off.
+Once a provider is chosen, six things are available. Under the provider on **Settings → AI**, a switch for each of the last five lets an administrator turn it off on its own, without losing the provider's settings. They are all on until switched off, and none work while AI is off.
 
 | | What it does | Needs the provider? |
 |---|---|---|
 | **FixFlow Assist** | A chat on each work order that answers from the asset's history and manuals | Yes |
 | **Suggest a priority for new work orders** | A **Suggest a priority** button on the new work order form, once the title is five characters or more. It shows a priority (critical, high, medium or low) with one sentence on why, and a **Use** button. **It never changes the priority by itself**: the person decides | Yes |
+| **Draft a work order from a few plain words** | A box on the new work order page: someone writes (or dictates) "pump on line 3 is leaking oil" and the form is filled in with a draft title, description, priority and asset to check. Nothing is saved until they create the work order | Yes |
 | **Flag unusual sensor readings** | A reading far outside what that sensor usually reads is listed on the **IoT Alerts** page, under **Unusual readings**, with what is usual for it. A manager marks it **It's real** or **It's nothing** | **No**: it is arithmetic done on this server |
 | **Warn when a sensor is heading for its limit** | A sensor that has been steadily rising or falling towards a limit set on an alert rule is listed on the **IoT Alerts** page, under **Heading for a limit**, with about when it gets there and a range | **No**: arithmetic done on this server |
 | **Forecast parts that may run short** | The **Parts** page lists the parts that may not last the next 30 days, with what is expected, what is held and on order, and how many to consider ordering | **No**: arithmetic done on this server |
+
+### Drafting a work order from plain words
+
+On the new work order page, under **Describe the problem in your own words**, a technician writes what is wrong (8 characters or more) and presses **Make a draft**. The form below is filled in with a title (at most 12 words, naming the machine and the fault), a description (what they said, tidied: the model is told to add no causes, parts or steps they did not give), a priority, and the asset when one clearly is it. They read it, change what is wrong, and create the work order as usual. **A draft is never a work order**: nothing is saved until they press **Create Work Order**.
+
+**Which asset.** FixFlow finds the company's assets whose name, tag or place has the most of the words (the start of a word, in English or Spanish; words like "the" or "la" are ignored) and shows the model **only the best ten**. The model can pick one of those or say none, never another: a number that is not on the list is dropped. When it picks none, the page offers the ten as buttons. When the page was opened from an asset, the asset is left as it is.
+
+**What is kept from the answer.** The asset is one of the ten, the priority one of the four, the title one line of at most 120 characters, the description at most 2,000. Anything else the model says is thrown away, and an answer that is not a work order (no title) is reported as such instead of guessed at. The person's words are marked to the model as a description of the problem and not as instructions, which makes it harder, not impossible, for words typed into the box to steer the draft: that is why the draft is something a person checks, and why it is only ever text in a form.
+
+**Language.** The model is told to write in the language the person wrote in.
+
+**Dictating.** There is no microphone button in FixFlow, on purpose: the speech services built into browsers send the audio to the browser's maker, which would break the promise that a local model keeps everything on your network. On a phone, **tap the microphone on the keyboard** (or on a computer, the operating system's dictation) and the words go into the box like typed ones; the operating system's own setting decides where the audio is processed.
 
 ### Suggested priority
 
@@ -83,6 +96,8 @@ When someone uses the assistant, FixFlow sends the model that work order's title
 
 When someone asks for a **suggested priority**, FixFlow sends the title and description typed so far (each cut at 1,500 characters), the asset's name, tag and status, and counts of what is open on that asset: work orders by priority, sensor alerts by severity, and unusual readings. No names of people, no email addresses, no costs, and none of the asset's notes or manuals. The unusual-readings, heading-for-a-limit and parts forecasts send nothing.
 
+When someone asks for a **draft work order**, FixFlow sends what they wrote (cut at 2,000 characters, spaces tidied) and, for the best ten matching assets, the number, name, tag and place. No names of people, no email addresses, no costs, no earlier work orders, and not the rest of the asset list.
+
 ## Anthropic (Claude)
 
 Choose **Anthropic**, paste a key from Anthropic's console, and leave **Model** blank to use the default (`claude-sonnet-5-5`) or type the name of another Claude model. The key is sent only to `api.anthropic.com`.
@@ -131,7 +146,7 @@ Before the provider could be chosen on this page, AI was switched on in the serv
 
 ## Limits and costs
 
-The assistant, **Suggest a priority** and the **Try it** button count together against a limit of 5 requests a minute for each signed-in person, since each is a call to the model. Asking whether AI is on, and reading and saving the settings, do not count. Unusual-readings checks make no call to the model and have no limit, but each costs a little database work: a sensor's baseline is worked out once and remembered for ten minutes. Claude and the OpenAI-compatible services charge for what they process; a local model costs only the machine it runs on.
+The assistant, **Suggest a priority**, **Make a draft** and the **Try it** button count together against a limit of 5 requests a minute for each signed-in person, since each is a call to the model. Asking whether AI is on, and reading and saving the settings, do not count. Unusual-readings checks make no call to the model and have no limit, but each costs a little database work: a sensor's baseline is worked out once and remembered for ten minutes. Claude and the OpenAI-compatible services charge for what they process; a local model costs only the machine it runs on.
 
 ## When something goes wrong
 

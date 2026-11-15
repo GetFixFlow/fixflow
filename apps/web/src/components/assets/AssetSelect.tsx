@@ -3,7 +3,7 @@ import { Search, X, ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { AssetStatusBadge } from './AssetStatusBadge'
 import { AssetHealthIndicator } from './AssetHealthIndicator'
-import { useAssets } from '@/hooks/useAssets'
+import { useAsset, useAssets } from '@/hooks/useAssets'
 import type { Asset } from '@/types'
 import { cn } from '@/lib/utils'
 
@@ -36,7 +36,11 @@ export function AssetSelect({
   )
   const assets = data?.assets ?? []
 
-  const selectedAsset = value != null ? assets.find((a) => a.id === value) : null
+  // The chosen asset may not be among the ones listed (only the first twenty are, or those that match a search): it is fetched, so
+  // what is chosen is always what is shown.
+  const listed = value != null ? assets.find((a) => a.id === value) : null
+  const { data: fetched } = useAsset(value != null && !listed && !isLoading ? value : 0)
+  const selectedAsset = listed ?? (value != null ? fetched : null)
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {

@@ -20,7 +20,7 @@ export function useAI() {
     provider: data?.provider,
     source: data?.source,
     /** A feature is on when AI is, and the administrator has not switched it off. */
-    features: data?.features ?? { priority: false, anomalies: false, limits: false, parts: false },
+    features: data?.features ?? { priority: false, anomalies: false, limits: false, parts: false, draft: false },
     isLoading,
   }
 }
@@ -94,4 +94,9 @@ export function useLimitForecasts(enabled: boolean) {
 /** The parts that may run short, the ones most likely to first. Only asked for when the feature is on. */
 export function usePartForecasts(enabled: boolean) {
   return useQuery({ queryKey: ['ai', 'forecasts', 'parts'], queryFn: () => aiApi.forecasts.parts().then((r) => r.data.data), enabled })
+}
+
+/** A draft work order from a few plain words. The caller shows the answer or the error beside the button. */
+export function useDraftWorkOrder() {
+  return useMutation({ mutationFn: (text: string) => aiApi.draftWorkOrder(text).then((r) => r.data.data) })
 }

@@ -51,9 +51,10 @@ class Rack::Attack
   # so distinct users behind the same IP get independent limits; falls back to
   # IP for unauthenticated requests (which will 401 anyway).
   throttle("api/ai", limit: 5, period: 1.minute) do |req|
-    # What costs a model call: the assistant, a suggested priority, and the AI settings' "try it" button. Asking whether AI is on,
+    # What costs a model call: the assistant, a suggested priority, a draft work order, and the AI settings' "try it" button.
+    # Asking whether AI is on,
     # and reading and saving the settings, cost nothing.
-    next unless %w[/api/v1/ai/assist /api/v1/ai/priority /api/v1/ai_settings/test].include?(req.path)
+    next unless %w[/api/v1/ai/assist /api/v1/ai/priority /api/v1/ai/work_order_draft /api/v1/ai_settings/test].include?(req.path)
 
     req.get_header("HTTP_AUTHORIZATION").presence || req.ip
   end
