@@ -6,7 +6,8 @@ module Api
       # that and hide AI UI accordingly.
       class ConfigController < Api::V1::BaseController
         def show
-          render_success({ enabled: ::Ai::Client.enabled?, model: ::Ai::Client.model })
+          config = ::Ai::Client.config(current_organization)
+          render_success({ enabled: config.active?, model: config.model, provider: config.provider, source: config.source })
         end
       end
     end

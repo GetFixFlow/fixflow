@@ -16,7 +16,7 @@ export function AIButton({ className, children, ...props }: ButtonProps) {
         'rounded-full border-blue-200 bg-white text-blue-600 font-medium shadow-sm hover:bg-blue-50 hover:border-blue-300 dark:border-blue-800 dark:bg-transparent dark:text-blue-400 dark:hover:bg-blue-900/20',
         className,
       )}
-      title="AI feature — requires API key in settings"
+      title="AI feature"
       {...props}
     >
       <Sparkles className="h-4 w-4 text-blue-600 dark:text-blue-400" />

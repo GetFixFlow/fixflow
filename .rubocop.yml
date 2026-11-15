@@ -17,6 +17,7 @@ AllCops:
     - "script/directory_live/**/*" # stand-alone checks that talk to real servers, run by hand
     - "script/public_api_live/**/*"
     - "script/plugins_live/**/*"
+    - "script/ai_live/**/*"
     - "vendor/**/*"
 
 Style/Documentation:

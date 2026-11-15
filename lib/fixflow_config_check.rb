@@ -184,7 +184,8 @@ class FixflowConfigCheck
     key = value("ANTHROPIC_API_KEY")
     if value("AI_ENABLED") == "true" && (key.empty? || self.class.placeholder?(key))
       found << problem(:warning, "ANTHROPIC_API_KEY", "is missing or the example value, so the AI assistant will not work " \
-                                                      "(set AI_ENABLED=false to hide it).")
+                                                      "from the environment (choose a provider under Settings, AI, " \
+                                                      "or set AI_ENABLED=false).")
     end
     found
   end

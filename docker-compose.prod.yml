@@ -89,6 +89,9 @@ services:
     restart: unless-stopped
     env_file: .env
     environment: *api-env
+    # So a model run on this machine (Ollama and the like) can be reached at host.docker.internal; see docs/ai.md. Docker Desktop has the name already; Linux needs this.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       # The plugins installed on this server (docs/plugins.md). Read-only: the server never changes them.
       - ./plugins:/app/plugins:ro
