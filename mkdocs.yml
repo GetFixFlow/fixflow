@@ -107,4 +107,5 @@ nav:
       - API: api.md
       - API endpoints: api-endpoints.md
       - Changelog: changelog.md
+  - Support and community: support.md
   - Development: development.md

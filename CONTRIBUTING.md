@@ -6,6 +6,7 @@ Everyone taking part is expected to follow the [Code of Conduct](CODE_OF_CONDUCT
 
 ## Ways to help
 
+- **Ask a question or talk an idea over** in [Discussions](https://github.com/GetFixFlow/fixflow/discussions), and answer other people's: that is help too. See [Support and community](docs/support.md).
 - **Report a bug** or **suggest a feature**: open an issue and pick a template. The more of "what I did, what I expected, what happened" you give, the quicker it is fixed.
 - **Try an install and write down every stumble.** The [install page](docs/install.md) is the install guide; anything that was missing, wrong or confusing is a valuable issue.
 - **Pick up an issue** labelled [`good first issue`](https://github.com/GetFixFlow/fixflow/labels/good%20first%20issue) or [`help wanted`](https://github.com/GetFixFlow/fixflow/labels/help%20wanted). Say in the issue that you are working on it, so two people do not do the same job.
@@ -71,6 +72,8 @@ FixFlow is released under the [AGPL-3.0](LICENSE). By submitting a pull request 
 A maintainer reviews every pull request. Expect questions, and expect to be asked to change things; that is how the code stays maintainable. If a review goes quiet for more than a week, a polite nudge on the pull request is welcome.
 
 ## Making a release
+
+FixFlow is released on the **first Tuesday of every month**, and that is a promise made to the people who run it ([Support and community](docs/support.md)). On that day the `Release reminder` workflow opens an issue, "Release for <month year>", with the steps below as a checklist; a security fix or a serious bug is released sooner, and a month with nothing worth releasing is skipped and said so in the next release's notes. Until 1.0 only the newest release gets fixes.
 
 For maintainers. A release is a version number in the `VERSION` file, a section for it in the [CHANGELOG](CHANGELOG.md), and a tag; the GitHub release page is made from those.
 

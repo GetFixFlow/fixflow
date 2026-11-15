@@ -21,6 +21,7 @@ These pages are for the person who **installs and looks after** a FixFlow server
 | See whether everything works | [Watching the install](monitoring.md) |
 | Fix something that is not working | [Troubleshooting](troubleshooting.md) |
 | Know what changed in a release | [Changelog](changelog.md) |
+| Ask for help, or pay for support, setup help or a feature | [Support and community](support.md) |
 
 ## Using FixFlow
 

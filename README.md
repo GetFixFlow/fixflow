@@ -77,6 +77,12 @@ Bug reports, ideas, documentation fixes and code are welcome: see [CONTRIBUTING.
 
 ---
 
+## Support and community
+
+Questions and ideas go in [GitHub Discussions](https://github.com/GetFixFlow/fixflow/discussions); bugs and feature requests are [issues](https://github.com/GetFixFlow/fixflow/issues/new/choose). New versions come out on the **first Tuesday of every month**. Support contracts, setup help, sponsored features and managed hosting are described on [Support and community](docs/support.md); nothing in FixFlow is held back for people who pay.
+
+---
+
 ## License
 
 AGPLv3 — see [LICENSE](LICENSE).
