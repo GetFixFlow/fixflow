@@ -79,13 +79,15 @@
         "priority": "Sugerir una prioridad para las órdenes de trabajo nuevas",
         "anomalies": "Señalar lecturas inusuales de sensores",
         "limits": "Avisar cuando un sensor se acerca a su límite",
-        "parts": "Prever repuestos que pueden agotarse"
+        "parts": "Prever repuestos que pueden agotarse",
+        "draft": "Redactar una orden de trabajo a partir de unas palabras"
       },
       "help": {
         "priority": "Añade un botón al formulario de orden de trabajo nueva que sugiere una prioridad y explica por qué. Decide la persona. Envía el título, la descripción y lo que está abierto en el activo a {{where}}.",
         "anomalies": "Señala una lectura muy fuera de lo que ese sensor suele leer, aprendido de las últimas dos semanas del propio sensor, sin límites que configurar. Se calcula en este servidor: no se envía nada al proveedor.",
         "limits": "Para un sensor que sube o baja de forma constante hacia un límite fijado en una regla de alerta, dice más o menos cuándo llegará, con un rango. Se calcula en este servidor con los últimos 30 días: no se envía nada al proveedor.",
-        "parts": "Dice qué repuestos pueden no alcanzar para los próximos 30 días, según lo usado en los últimos meses y lo que hay en existencia y pedido. Se calcula en este servidor: no se envía nada al proveedor."
+        "parts": "Dice qué repuestos pueden no alcanzar para los próximos 30 días, según lo usado en los últimos meses y lo que hay en existencia y pedido. Se calcula en este servidor: no se envía nada al proveedor.",
+        "draft": "Añade un cuadro a la página de orden de trabajo nueva donde alguien escribe o dicta qué falla, y recibe un borrador de título, descripción, prioridad y activo para revisar. Envía lo escrito, y los nombres, etiquetas y lugares de hasta diez activos que coinciden, a {{where}}. No se guarda nada hasta que la persona crea la orden de trabajo."
       }
     },
     "priority": {
@@ -137,6 +139,22 @@
         "suggest": "considere pedir {{quantity}}",
         "basis": "con {{periods}} meses de uso, registrado {{uses}} veces"
       }
+    },
+    "draft": {
+      "title": "Describa el problema con sus palabras",
+      "label": "¿Qué falla?",
+      "placeholder": "Por ejemplo: la bomba de la línea 3 pierde aceite",
+      "dictate": "Toque el micrófono del teclado para decirlo en lugar de escribirlo.",
+      "note": {
+        "anthropic": "Lo que escriba, y los nombres de los activos que coinciden, se envían a Anthropic. No se guarda nada hasta que cree la orden de trabajo.",
+        "openai_compatible": "Lo que escriba, y los nombres de los activos que coinciden, se envían a su servicio de IA. No se guarda nada hasta que cree la orden de trabajo.",
+        "local": "Lo que escriba, y los nombres de los activos que coinciden, se envían a su propio modelo. No se guarda nada hasta que cree la orden de trabajo."
+      },
+      "make": "Hacer un borrador",
+      "making": "Redactando…",
+      "done": "El borrador está rellenado abajo. Revise el título, la descripción, la prioridad y el activo, cambie lo que no sea correcto y cree la orden de trabajo.",
+      "which_asset": "¿Qué activo es?",
+      "failed": "No se pudo hacer un borrador."
     }
   }
 }

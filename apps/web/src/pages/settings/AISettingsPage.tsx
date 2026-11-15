@@ -260,7 +260,7 @@ function Status({ status }: { status: AiSettings }) {
   )
 }
 
-const FEATURES: AiFeature[] = ['priority', 'anomalies', 'limits', 'parts']
+const FEATURES: AiFeature[] = ['priority', 'anomalies', 'limits', 'parts', 'draft']
 
 /** What the AI does. Each can be switched off on its own; they are all on once AI is. */
 function FeaturesCard({ status }: { status: AiSettings }) {

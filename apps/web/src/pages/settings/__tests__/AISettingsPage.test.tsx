@@ -20,7 +20,7 @@ const providers = (over: Record<string, unknown> = {}) => ({
 
 const off = (over: Record<string, unknown> = {}) => ({
   provider: 'none', enabled: false, source: null, where: null, environment_configured: false, providers: providers(),
-  features: { priority: true, anomalies: true, limits: true, parts: true }, ...over,
+  features: { priority: true, anomalies: true, limits: true, parts: true, draft: true }, ...over,
 })
 
 const local = (over: Record<string, unknown> = {}) =>
@@ -339,6 +339,16 @@ describe('AISettingsPage', () => {
       expect(parts).toBeChecked()
       expect(limits).toHaveAccessibleDescription(/nothing is sent to the provider/)
       expect(parts).toHaveAccessibleDescription(/nothing is sent to the provider/)
+    })
+
+    it('offers drafting a work order, and says what it sends and where', async () => {
+      serve(local())
+      renderPage()
+
+      const draft = await screen.findByRole('checkbox', { name: 'Draft a work order from a few plain words' })
+
+      expect(draft).toBeChecked()
+      expect(draft).toHaveAccessibleDescription(/sends what they wrote, and the names, tags and places of up to ten matching assets, to model\.lan/)
     })
 
     it('switches a forecast off on its own', async () => {

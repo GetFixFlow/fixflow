@@ -328,6 +328,7 @@ Rails.application.routes.draw do
         get "config", to: "config#show"
         post "assist", to: "assist#create"
         post "priority", to: "priority#create"
+        post "work_order_draft", to: "drafts#create"
         get "forecasts/limits", to: "forecasts#limits"
         get "forecasts/parts", to: "forecasts#parts"
       end

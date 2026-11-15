@@ -79,13 +79,15 @@
         "priority": "Suggest a priority for new work orders",
         "anomalies": "Flag unusual sensor readings",
         "limits": "Warn when a sensor is heading for its limit",
-        "parts": "Forecast parts that may run short"
+        "parts": "Forecast parts that may run short",
+        "draft": "Draft a work order from a few plain words"
       },
       "help": {
         "priority": "Adds a button to the new work order form that suggests a priority and says why. The person decides. It sends the title, the description and what is open on the asset to {{where}}.",
         "anomalies": "Flags a reading far outside what that sensor usually reads, learned from the sensor's own last two weeks, with no limits to set. It is worked out on this server: nothing is sent to the provider.",
         "limits": "For a sensor that has been steadily rising or falling towards a limit set on an alert rule, says about when it will get there, with a range. Worked out on this server from the last 30 days: nothing is sent to the provider.",
-        "parts": "Says which parts may not last the next 30 days, from how much was used in the last months and what is in stock and on order. Worked out on this server: nothing is sent to the provider."
+        "parts": "Says which parts may not last the next 30 days, from how much was used in the last months and what is in stock and on order. Worked out on this server: nothing is sent to the provider.",
+        "draft": "Adds a box to the new work order page where someone writes or dictates what is wrong, and gets a draft title, description, priority and asset to check. It sends what they wrote, and the names, tags and places of up to ten matching assets, to {{where}}. Nothing is saved until the person creates the work order."
       }
     },
     "priority": {
@@ -137,6 +139,22 @@
         "suggest": "consider ordering {{quantity}}",
         "basis": "from {{periods}} months of use, logged {{uses}} times"
       }
+    },
+    "draft": {
+      "title": "Describe the problem in your own words",
+      "label": "What is wrong?",
+      "placeholder": "For example: pump on line 3 is leaking oil",
+      "dictate": "Tap the microphone on your keyboard to say it instead of typing.",
+      "note": {
+        "anthropic": "What you write, and the names of assets that match it, are sent to Anthropic. Nothing is saved until you create the work order.",
+        "openai_compatible": "What you write, and the names of assets that match it, are sent to your AI service. Nothing is saved until you create the work order.",
+        "local": "What you write, and the names of assets that match it, are sent to your own model. Nothing is saved until you create the work order."
+      },
+      "make": "Make a draft",
+      "making": "Drafting…",
+      "done": "The draft is filled in below. Check the title, description, priority and asset, change what is wrong, then create the work order.",
+      "which_asset": "Which asset is it?",
+      "failed": "A draft could not be made."
     }
   }
 }
