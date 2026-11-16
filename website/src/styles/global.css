@@ -2,8 +2,9 @@
 @import '@fontsource/ibm-plex-sans-condensed/600.css';
 @import '@fontsource/ibm-plex-sans-condensed/700.css';
 
-/* Colour: the logo's blue and its near-black navy, on a cool white. Light is the default; the dark set follows the
-   visitor's system. Every text/background pair below was checked for 4.5:1 (see website/README.md, "Contrast"). */
+/* Colour: amber (#F2B632) and a near-black navy, on a cool white. Amber is too light to read as text on white, so it is only ever a
+   fill (buttons, rules, badges, with navy text on it); text and links use a darker amber (--brand) in light mode and amber itself in dark. Light is the default; the dark set follows the
+   visitor's system. Every text/background pair below was checked for 4.5:1 (amber text pairs: dark amber #855700 on white is 5.9:1, amber #F2B632 on the dark background is 10.4:1, navy on amber is 9.9:1). */
 :root {
   --bg: #ffffff;
   --surface: #f4f7fc;
@@ -11,11 +12,13 @@
   --ink: #0e1626;
   --muted: #475670;
   --line: #d9e1ee;
-  --brand: #1257d6;          /* links, small accents */
-  --brand-strong: #0d44aa;   /* link hover */
-  --btn: #1257d6;            /* button background, white text */
-  --btn-hover: #0d44aa;
-  --brand-soft: #e4edff;
+  --accent: #F2B632;         /* the colour itself: fills only, never text on white */
+  --brand: #855700;          /* links and small accents: dark amber, 5.1:1 or better on every light surface */
+  --brand-strong: #5e3d00;   /* link hover */
+  --btn: #F2B632;            /* button background, navy text */
+  --btn-hover: #d99f1c;
+  --on-btn: #0e1626;
+  --brand-soft: #fdf3d9;
   --code-bg: #0e1626;
   --code-ink: #dbe6fa;
   --ok: #17703f;
@@ -38,11 +41,11 @@
     --ink: #e7edf8;
     --muted: #a3b1ca;
     --line: #22304d;
-    --brand: #7fabff;
-    --brand-strong: #a9c6ff;
-    --btn: #2b6cf0;
-    --btn-hover: #1f58d2;
-    --brand-soft: #14284d;
+    --brand: #F2B632;
+    --brand-strong: #ffd36e;
+    --btn: #F2B632;
+    --btn-hover: #ffc94d;
+    --brand-soft: #2e2410;
     --code-bg: #060b17;
     --code-ink: #dbe6fa;
     --ok: #62d296;
@@ -97,8 +100,8 @@ section { padding-block: clamp(56px, 8vw, 96px); }
   text-decoration: none; border: 1.5px solid transparent; cursor: pointer; line-height: 1.2;
   transition: background-color .15s, border-color .15s, transform .15s;
 }
-.btn-primary { background: var(--btn); color: #fff; }
-.btn-primary:hover { background: var(--btn-hover); color: #fff; }
+.btn-primary { background: var(--btn); color: var(--on-btn); }
+.btn-primary:hover { background: var(--btn-hover); color: var(--on-btn); }
 .btn-ghost { border-color: var(--line); color: var(--ink); background: var(--bg); }
 .btn-ghost:hover { border-color: var(--brand); color: var(--brand); }
 .btn:active { transform: translateY(1px); }
@@ -146,16 +149,16 @@ section { padding-block: clamp(56px, 8vw, 96px); }
 /* Hero */
 .hero { padding-block: clamp(44px, 7vw, 88px) clamp(44px, 6vw, 72px); border-bottom: 2px solid var(--ink); }
 .hero-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: clamp(32px, 5vw, 72px); align-items: center; }
-.hero h1 em { font-style: normal; color: var(--brand); }
+.hero h1 em { font-style: normal; color: inherit; background: linear-gradient(transparent 60%, var(--accent) 60%, var(--accent) 94%, transparent 94%); -webkit-box-decoration-break: clone; box-decoration-break: clone; padding: 0 0.06em; }
 .hero .lede { margin-top: 22px; }
 .hero .btn-row { margin-top: 32px; }
 .hero-facts { margin: 30px 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px 22px; color: var(--muted); font-size: 0.95rem; }
 .hero-facts li { display: inline-flex; gap: 8px; align-items: center; }
-.hero-facts li::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--brand); }
+.hero-facts li::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
 @media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; } }
 
 /* The work-order card in the hero */
-.wo { background: var(--bg); border: 1px solid var(--ink); border-top: 6px solid var(--brand); border-radius: 0; overflow: hidden; }
+.wo { background: var(--bg); border: 1px solid var(--ink); border-top: 6px solid var(--accent); border-radius: 0; overflow: hidden; }
 .wo-top { padding: 18px 22px; border-bottom: 1px solid var(--line); background: var(--surface); display: grid; gap: 4px; }
 .wo-top .tag { font-size: 0.78rem; font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 .wo-top .title { font-weight: 700; font-size: 1.15rem; letter-spacing: -0.015em; }
@@ -180,10 +183,10 @@ section { padding-block: clamp(56px, 8vw, 96px); }
 .wo-steps li:nth-child(3)::after { animation-name: wo-line-3; }
 .wo-steps li:nth-child(4)::after { animation-name: wo-line-4; }
 .wo-steps li.is-last::before { animation-name: wo-badge-5; }
-@keyframes wo-badge-1 { 0%, 94% { background: var(--btn); color: #fff; } 98%, 100% { background: var(--brand-soft); color: var(--brand); } }
-@keyframes wo-badge-2 { 0%, 17% { background: var(--brand-soft); color: var(--brand); } 20%, 94% { background: var(--btn); color: #fff; } 98%, 100% { background: var(--brand-soft); color: var(--brand); } }
-@keyframes wo-badge-3 { 0%, 35% { background: var(--brand-soft); color: var(--brand); } 38%, 94% { background: var(--btn); color: #fff; } 98%, 100% { background: var(--brand-soft); color: var(--brand); } }
-@keyframes wo-badge-4 { 0%, 53% { background: var(--brand-soft); color: var(--brand); } 56%, 94% { background: var(--btn); color: #fff; } 98%, 100% { background: var(--brand-soft); color: var(--brand); } }
+@keyframes wo-badge-1 { 0%, 94% { background: var(--btn); color: var(--on-btn); } 98%, 100% { background: var(--brand-soft); color: var(--brand); } }
+@keyframes wo-badge-2 { 0%, 17% { background: var(--brand-soft); color: var(--brand); } 20%, 94% { background: var(--btn); color: var(--on-btn); } 98%, 100% { background: var(--brand-soft); color: var(--brand); } }
+@keyframes wo-badge-3 { 0%, 35% { background: var(--brand-soft); color: var(--brand); } 38%, 94% { background: var(--btn); color: var(--on-btn); } 98%, 100% { background: var(--brand-soft); color: var(--brand); } }
+@keyframes wo-badge-4 { 0%, 53% { background: var(--brand-soft); color: var(--brand); } 56%, 94% { background: var(--btn); color: var(--on-btn); } 98%, 100% { background: var(--brand-soft); color: var(--brand); } }
 @keyframes wo-badge-5 { 0%, 71% { background: var(--ok-soft); color: var(--ok); } 74%, 94% { background: var(--ok); color: var(--bg); } 98%, 100% { background: var(--ok-soft); color: var(--ok); } }
 @keyframes wo-line-1 { 0%, 4% { background-size: 100% 0; } 16%, 94% { background-size: 100% 100%; } 98%, 100% { background-size: 100% 0; } }
 @keyframes wo-line-2 { 0%, 22% { background-size: 100% 0; } 34%, 94% { background-size: 100% 100%; } 98%, 100% { background-size: 100% 0; } }
@@ -228,7 +231,7 @@ section { padding-block: clamp(56px, 8vw, 96px); }
 .group .intro { color: var(--muted); margin-top: 10px; }
 .group ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; }
 .group li { display: grid; gap: 3px; padding-left: 20px; position: relative; }
-.group li::before { content: ''; position: absolute; left: 0; top: 0.72em; width: 8px; height: 2px; background: var(--brand); }
+.group li::before { content: ''; position: absolute; left: 0; top: 0.72em; width: 8px; height: 2px; background: var(--accent); }
 .group li b { font-weight: 660; }
 .group li span { color: var(--muted); font-size: 0.99rem; }
 @media (max-width: 760px) { .group { grid-template-columns: 1fr; } }
@@ -244,7 +247,7 @@ section { padding-block: clamp(56px, 8vw, 96px); }
 /* Steps */
 .steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 20px; counter-reset: n; }
 .steps > li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 18px; counter-increment: n; }
-.steps > li::before { content: counter(n); width: 36px; height: 36px; border-radius: 3px; display: grid; place-items: center; background: var(--btn); color: #fff; font-weight: 700; }
+.steps > li::before { content: counter(n); width: 36px; height: 36px; border-radius: 3px; display: grid; place-items: center; background: var(--btn); color: var(--on-btn); font-weight: 700; }
 .steps h3 { margin-bottom: 6px; }
 .steps p { color: var(--muted); }
 .steps .code { margin-top: 12px; }
@@ -257,7 +260,7 @@ th { background: var(--surface); font-weight: 650; font-size: 0.88rem; }
 tr:last-child td { border-bottom: 0; }
 
 /* Notes */
-.note { border-left: 4px solid var(--brand); background: var(--brand-soft); padding: 16px 20px; }
+.note { border-left: 4px solid var(--accent); background: var(--brand-soft); padding: 16px 20px; }
 .note p + p { margin-top: 8px; }
 .note.warn { border-left-color: #b45f06; background: color-mix(in srgb, #f5a524 16%, var(--bg)); }
 
@@ -266,7 +269,8 @@ tr:last-child td { border-bottom: 0; }
 .cta .wrap { display: grid; gap: 20px; justify-items: start; }
 .cta h2 { color: #fff; max-width: 18ch; }
 .cta p { color: #b9c6df; max-width: 52ch; font-size: 1.1rem; }
-.cta .btn-primary { background: #fff; color: var(--navy); }
+.cta .btn-primary { background: var(--accent); color: var(--navy); }
+.cta .btn-primary:hover { background: #ffd36e; color: var(--navy); }
 .cta .btn-primary:hover { background: #dbe6fa; color: var(--navy); }
 .cta .btn-ghost { background: transparent; color: #fff; border-color: #5f7194; }
 .cta .btn-ghost:hover { border-color: #fff; color: #fff; }
