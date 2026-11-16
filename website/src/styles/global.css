@@ -166,6 +166,30 @@ section { padding-block: clamp(56px, 8vw, 96px); }
 .wo-steps b { display: block; font-weight: 680; letter-spacing: -0.01em; }
 .wo-steps span { color: var(--muted); font-size: 0.95rem; line-height: 1.45; }
 .wo-steps li.is-last::before { background: var(--ok-soft); color: var(--ok); }
+/* The work-order card plays through its five steps: each connector fills, then the next number lights up. One 10 s loop, pure CSS,
+   and still (all steps shown plainly) for anyone who asks for less motion. */
+.wo-steps li::before { animation: 10s infinite; }
+.wo-steps li:not(:last-child)::after { background: linear-gradient(var(--btn), var(--btn)) top / 100% 0 no-repeat, var(--line); animation: 10s infinite; }
+.wo-steps li:nth-child(1)::before { animation-name: wo-badge-1; }
+.wo-steps li:nth-child(2)::before { animation-name: wo-badge-2; }
+.wo-steps li:nth-child(3)::before { animation-name: wo-badge-3; }
+.wo-steps li:nth-child(4)::before { animation-name: wo-badge-4; }
+.wo-steps li:nth-child(5)::before { animation-name: wo-badge-5; }
+.wo-steps li:nth-child(1)::after { animation-name: wo-line-1; }
+.wo-steps li:nth-child(2)::after { animation-name: wo-line-2; }
+.wo-steps li:nth-child(3)::after { animation-name: wo-line-3; }
+.wo-steps li:nth-child(4)::after { animation-name: wo-line-4; }
+.wo-steps li.is-last::before { animation-name: wo-badge-5; }
+@keyframes wo-badge-1 { 0%, 94% { background: var(--btn); color: #fff; } 98%, 100% { background: var(--brand-soft); color: var(--brand); } }
+@keyframes wo-badge-2 { 0%, 17% { background: var(--brand-soft); color: var(--brand); } 20%, 94% { background: var(--btn); color: #fff; } 98%, 100% { background: var(--brand-soft); color: var(--brand); } }
+@keyframes wo-badge-3 { 0%, 35% { background: var(--brand-soft); color: var(--brand); } 38%, 94% { background: var(--btn); color: #fff; } 98%, 100% { background: var(--brand-soft); color: var(--brand); } }
+@keyframes wo-badge-4 { 0%, 53% { background: var(--brand-soft); color: var(--brand); } 56%, 94% { background: var(--btn); color: #fff; } 98%, 100% { background: var(--brand-soft); color: var(--brand); } }
+@keyframes wo-badge-5 { 0%, 71% { background: var(--ok-soft); color: var(--ok); } 74%, 94% { background: var(--ok); color: var(--bg); } 98%, 100% { background: var(--ok-soft); color: var(--ok); } }
+@keyframes wo-line-1 { 0%, 4% { background-size: 100% 0; } 16%, 94% { background-size: 100% 100%; } 98%, 100% { background-size: 100% 0; } }
+@keyframes wo-line-2 { 0%, 22% { background-size: 100% 0; } 34%, 94% { background-size: 100% 100%; } 98%, 100% { background-size: 100% 0; } }
+@keyframes wo-line-3 { 0%, 40% { background-size: 100% 0; } 52%, 94% { background-size: 100% 100%; } 98%, 100% { background-size: 100% 0; } }
+@keyframes wo-line-4 { 0%, 58% { background-size: 100% 0; } 70%, 94% { background-size: 100% 100%; } 98%, 100% { background-size: 100% 0; } }
+@media (prefers-reduced-motion: reduce) { .wo-steps li::before, .wo-steps li::after { animation: none !important; } }
 .wo-foot { padding: 14px 22px; border-top: 1px solid var(--line); font-size: 0.88rem; color: var(--muted); background: var(--surface); }
 
 /* Cards and grids */
