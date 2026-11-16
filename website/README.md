@@ -47,6 +47,7 @@ The result is `website/dist/`: upload or serve that folder. `SITE_URL` (no trail
 | `src/data/site.ts` | Navigation and the addresses shared by the pages |
 | `src/styles/global.css` | All the styling: colour tokens (light and dark), type, layout |
 | `public/` | Logo mark and icons (cut from `docs/logo.png`), `robots.txt`, `_headers` |
+| `public/photos/` | The photos (none yet): see [PHOTOS.md](PHOTOS.md) for the slots, sizes and licence log |
 | `scripts/check-links.mjs` | The link check run by the build and CI |
 
 The docs are styled to match by `../docs/stylesheets/extra.css`.
@@ -55,6 +56,7 @@ The docs are styled to match by `../docs/stylesheets/extra.css`.
 
 - A claim on a page must be something the docs or the code back up, and each feature line links to the docs page that explains it.
 - Text colours must keep 4.5:1 against their background in both themes. After a visual change, run an accessibility checker (axe) over every page in light and dark, at desktop and phone width; the pages were clean when this was written.
+- The photo slots show placeholders until the real photos are in `public/photos/` (see [PHOTOS.md](PHOTOS.md)); do not publish with placeholders showing.
 - No screenshots yet: the product has none to show (the docs say so too). Add them to `public/` when there are real ones.
 
 ## Dependencies: a known advisory

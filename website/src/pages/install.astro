@@ -1,14 +1,18 @@
 ---
 import Base from '../layouts/Base.astro';
+import Photo from '../components/Photo.astro';
 import Code from '../components/Code.astro';
 import { doc, links, repo } from '../data/site';
 ---
 <Base title="Install" description="Install FixFlow on your own server with one script or four commands: Docker on Linux, a lite install for 2 GB, or Kubernetes.">
   <div class="page-head">
-    <div class="wrap narrow" style="margin-left:auto;margin-right:auto">
-      <p class="eyebrow">Install</p>
+    <div class="wrap split">
+      <div>
       <h1>Install FixFlow on your own server</h1>
       <p class="lede">You need a Linux or macOS machine with Docker and Docker Compose v2, about 2 GB of memory and a few GB of disk. The database, Redis, the file storage and the sensor broker all run in containers, so nothing else is installed.</p>
+      </div>
+      <Photo slug="install-server" ratio="4 / 3" size="1600 × 1200" title="a small server" alt="A small server in a rack or on a shelf"
+        brief="A single small server or mini PC on a shelf or in a rack, tidy cables, shallow focus. Nothing branded." />
     </div>
   </div>
 
@@ -60,7 +64,6 @@ make prod</Code>
   <section class="band">
     <div class="wrap">
       <div class="head">
-        <p class="eyebrow">Other ways to run it</p>
         <h2>Pick the size that fits</h2>
       </div>
       <div class="table-wrap">
@@ -80,7 +83,6 @@ make prod</Code>
   <section>
     <div class="wrap narrow" style="margin-left:auto;margin-right:auto">
       <div class="head">
-        <p class="eyebrow">After the install</p>
         <h2>Keeping it running</h2>
       </div>
       <ul class="tick-list">

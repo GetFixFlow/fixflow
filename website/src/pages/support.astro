@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import Photo from '../components/Photo.astro';
 import { doc, links, supportEmail } from '../data/site';
 
 const help = [
@@ -13,17 +14,19 @@ const help = [
 ---
 <Base title="Support and community" description="Free help in GitHub Discussions, a monthly release rhythm, and paid support, setup help and sponsored features for companies that want them.">
   <div class="page-head">
-    <div class="wrap">
-      <p class="eyebrow">Support and community</p>
+    <div class="wrap split">
+      <div>
       <h1>Getting help, and paying for it if you want to</h1>
       <p class="lede">Nothing on this page is a feature held back for people who pay. What can be paid for is people’s time: help, guarantees, and work on what you need.</p>
+      </div>
+      <Photo slug="support-team" ratio="4 / 3" size="1600 × 1200" title="two people at a desk" alt="Two people working through a problem at a desk"
+        brief="Two people, one laptop, a plant or office behind. Candid." />
     </div>
   </div>
 
   <section>
     <div class="wrap">
       <div class="head">
-        <p class="eyebrow">Free</p>
         <h2>Free help</h2>
         <p class="lede">Given by volunteers and the maintainers when they have time. <strong>There is no promised answer time.</strong></p>
       </div>
@@ -45,7 +48,6 @@ const help = [
   <section class="band">
     <div class="wrap grid grid-2" style="gap:clamp(28px,5vw,64px);align-items:start">
       <div class="prose">
-        <p class="eyebrow">Releases</p>
         <h2 style="margin-top:0">A new version on the first Tuesday</h2>
         <ul>
           <li>The notes put <strong>Before you upgrade</strong> first: anything you have to do is listed there, so a monthly upgrade is a short read, then <code>make upgrade</code>.</li>
@@ -56,7 +58,6 @@ const help = [
         <p><a href={links.releases} rel="noopener">Watch the repository for “Releases only”</a> to be told each time.</p>
       </div>
       <div class="prose">
-        <p class="eyebrow">Be part of it</p>
         <h2 style="margin-top:0">Community</h2>
         <p>Everyone taking part follows the <a href={links.conduct} rel="noopener">Code of Conduct</a>. You can help by answering questions, translating, writing plugins or docs, or just writing down what confused you. See <a href="/open-source/">Open source</a>.</p>
       </div>
@@ -66,7 +67,6 @@ const help = [
   <section>
     <div class="wrap">
       <div class="head">
-        <p class="eyebrow">Paid</p>
         <h2>Paid support, help and sponsored work</h2>
         <p class="lede">Each is agreed one company at a time, in writing, so this page describes them rather than prices them.</p>
       </div>

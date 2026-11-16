@@ -1,26 +1,26 @@
 ---
 import Base from '../layouts/Base.astro';
-import Icon from '../components/Icon.astro';
 import Code from '../components/Code.astro';
+import Photo from '../components/Photo.astro';
 import { doc, links, repo } from '../data/site';
 
 const features = [
-  { icon: 'work', title: 'Work orders', text: 'Report, assign, start, hold, complete and verify. Checklists, photos, parts, hours and approval for costly work.', href: doc('work-orders') },
-  { icon: 'calendar', title: 'Preventive maintenance', text: 'Service by the calendar or by the count: running hours, kilometres or any meter. Work orders appear by themselves.', href: doc('meters') },
-  { icon: 'asset', title: 'Assets and places', text: 'Every machine in its place, with manuals, warranty dates, downtime and a history of everything done to it.', href: doc('asset-documents') },
-  { icon: 'scan', title: 'QR labels and scanning', text: 'Print labels, scan a machine with a phone or a handheld scanner, and let anyone report a problem without an account.', href: doc('scanning-and-labels') },
-  { icon: 'parts', title: 'Parts and purchasing', text: 'Stock, low-stock warnings, purchase requests, approval, orders and receiving, and a list of vendors and contractors.', href: doc('purchasing') },
-  { icon: 'sensor', title: 'Sensors and alerts', text: 'Readings over REST or MQTT, alert rules, and work orders from what the machines tell you.', href: doc('iot') },
-  { icon: 'report', title: 'Reports', text: 'Cost, downtime, asset health and PM compliance, with PDF and CSV downloads, and saved reports emailed every week.', href: doc('reports') },
-  { icon: 'phone', title: 'Works on a phone', text: 'An installable web app. A technician who loses signal keeps working, and the changes are sent when the signal is back.', href: doc('technician') },
-  { icon: 'globe', title: 'English and Spanish', text: 'Screens and emails in the reader’s language. A language is a set of files, so adding one needs no code.', href: doc('translating') },
+  { title: 'Work orders', text: 'Report, assign, start, hold, complete and verify. Checklists, photos, parts, hours and approval for costly work.', href: doc('work-orders') },
+  { title: 'Preventive maintenance', text: 'Service by the calendar or by the count: running hours, kilometres or any meter. Work orders appear by themselves.', href: doc('meters') },
+  { title: 'Assets and places', text: 'Every machine in its place, with manuals, warranty dates, downtime and a history of everything done to it.', href: doc('asset-documents') },
+  { title: 'QR labels and scanning', text: 'Print labels, scan a machine with a phone or a handheld scanner, and let anyone report a problem without an account.', href: doc('scanning-and-labels') },
+  { title: 'Parts and purchasing', text: 'Stock, low-stock warnings, purchase requests, approval, orders and receiving, and a list of vendors and contractors.', href: doc('purchasing') },
+  { title: 'Sensors and alerts', text: 'Readings over REST or MQTT, alert rules, and work orders from what the machines tell you.', href: doc('iot') },
+  { title: 'Reports', text: 'Cost, downtime, asset health and PM compliance, with PDF and CSV downloads, and saved reports emailed every week.', href: doc('reports') },
+  { title: 'Works on a phone', text: 'An installable web app. A technician who loses signal keeps working, and the changes are sent when the signal is back.', href: doc('technician') },
+  { title: 'English and Spanish', text: 'Screens and emails in the reader’s language. A language is a set of files, so adding one needs no code.', href: doc('translating') },
 ];
 
 const ways = [
-  { icon: 'plug', title: 'A public API and webhooks', text: 'Scoped API keys, an OpenAPI description, and signed webhooks for n8n, Zapier or your own programs.', href: doc('public-api') },
-  { icon: 'shield', title: 'Your company’s sign-in', text: 'OpenID Connect (Keycloak, Microsoft Entra, Okta) and LDAP (Active Directory, OpenLDAP), with roles that follow groups.', href: doc('directory-sign-in') },
-  { icon: 'code', title: 'Plugins', text: 'Add a report or a notification channel by dropping a folder in. Two samples to start from.', href: doc('plugins') },
-  { icon: 'spark', title: 'AI, only if you choose', text: 'Off until an administrator picks Claude, an OpenAI-compatible service, or a model on your own network.', href: doc('ai') },
+  { title: 'A public API and webhooks', text: 'Scoped API keys, an OpenAPI description, and signed webhooks for n8n, Zapier or your own programs.', href: doc('public-api') },
+  { title: 'Your company’s sign-in', text: 'OpenID Connect (Keycloak, Microsoft Entra, Okta) and LDAP (Active Directory, OpenLDAP), with roles that follow groups.', href: doc('directory-sign-in') },
+  { title: 'Plugins', text: 'Add a report or a notification channel by dropping a folder in. Two samples to start from.', href: doc('plugins') },
+  { title: 'AI, only if you choose', text: 'Off until an administrator picks Claude, an OpenAI-compatible service, or a model on your own network.', href: doc('ai') },
 ];
 ---
 <Base>
@@ -58,22 +58,25 @@ const ways = [
     </div>
   </section>
 
+  <section class="photo-band" aria-label="On the plant floor">
+    <Photo slug="home-floor" ratio="21 / 8" size="2400 × 900" title="a technician at a machine" alt="A yellow industrial robot arm on a production line, with visitors watching behind it"
+      brief="Wide, daylight, a real plant or workshop: a technician with a phone or tablet beside a pump or motor. Avoid staged smiles and hard hats on a white background." />
+  </section>
+
   <section>
     <div class="wrap">
       <div class="head">
-        <p class="eyebrow">What is in it</p>
-        <h2>What a maintenance team reaches for, in one place</h2>
+        <h2>What a maintenance team reaches for</h2>
         <p class="lede">Each one links to the page in the documentation that explains it.</p>
       </div>
-      <div class="grid grid-3">
+      <ul class="rows">
         {features.map((f) => (
-          <article class="card link">
-            <Icon name={f.icon as any} />
+          <li>
             <h3><a href={f.href}>{f.title}</a></h3>
             <p>{f.text}</p>
-          </article>
+          </li>
         ))}
-      </div>
+      </ul>
       <p style="margin-top:28px"><a href="/features/"><strong>All features, grouped by what you want to do →</strong></a></p>
     </div>
   </section>
@@ -81,8 +84,7 @@ const ways = [
   <section class="band">
     <div class="wrap">
       <div class="head">
-        <p class="eyebrow">Yours to keep</p>
-        <h2>Software your company owns, not rents</h2>
+        <h2>Your company’s software, on your company’s server</h2>
       </div>
       <div class="principles">
         <div>
@@ -104,26 +106,23 @@ const ways = [
   <section>
     <div class="wrap">
       <div class="head">
-        <p class="eyebrow">Fits in with the rest</p>
-        <h2>Connect it to what you already use</h2>
+        <h2>Plugs into what you already run</h2>
       </div>
-      <div class="grid grid-2">
+      <ul class="rows">
         {ways.map((f) => (
-          <article class="card link">
-            <Icon name={f.icon as any} />
+          <li>
             <h3><a href={f.href}>{f.title}</a></h3>
             <p>{f.text}</p>
-          </article>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   </section>
 
   <section class="band">
     <div class="wrap grid grid-2" style="align-items:center;gap:clamp(28px,5vw,64px)">
       <div>
-        <p class="eyebrow">Install</p>
-        <h2>One script on a fresh server</h2>
+        <h2>Installing is one script</h2>
         <p class="lede" style="margin-top:16px">It installs Docker and FixFlow, starts it, and turns on HTTPS with a free certificate if you give it a name. The first page it opens creates your company and the first administrator.</p>
         <div class="btn-row" style="margin-top:26px">
           <a class="btn btn-primary" href="/install/">Read the install guide</a>
@@ -139,9 +138,10 @@ sudo sh install.sh --domain fixflow.example.com --email you@example.com</Code>
   <section>
     <div class="wrap grid grid-2" style="gap:clamp(28px,5vw,64px);align-items:start">
       <div>
-        <p class="eyebrow">Community</p>
-        <h2>A project people keep going together</h2>
+        <h2>Kept going by the people who use it</h2>
         <p class="lede" style="margin-top:16px">New versions come out on the first Tuesday of every month, with what you have to do before upgrading written first. Ask questions, show what you built, or pick up a small issue.</p>
+        <Photo class="photo-side" slug="home-team" ratio="3 / 2" size="1500 × 1000" title="a team at a workbench" alt="Three maintenance staff at a machine, one holding a tablet, looking at its control panel together"
+          brief="Two or three people in work clothes talking over a machine or a screen. Candid, not posed." />
       </div>
       <div class="grid">
         <article class="card link"><h3><a href={links.discussions} rel="noopener">Ask in Discussions</a></h3><p>Questions, ideas, and what other companies do.</p></article>
@@ -153,7 +153,7 @@ sudo sh install.sh --domain fixflow.example.com --email you@example.com</Code>
 
   <section class="band cta">
     <div class="wrap">
-      <h2>Try it on a server of your own</h2>
+      <h2>Put it on a server of your own</h2>
       <p>Free, with no sign-up. If something is missing, wrong or confusing, that is useful: tell the project.</p>
       <div class="btn-row">
         <a class="btn btn-primary" href="/install/">Install FixFlow</a>

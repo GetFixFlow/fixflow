@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import Photo from '../components/Photo.astro';
 import { doc } from '../data/site';
 
 // Every line links to the docs page that explains it, so a claim here can be checked there.
@@ -57,10 +58,13 @@ const groups = [
 ---
 <Base title="Features" description="Everything FixFlow does: work orders, preventive maintenance, assets, parts, sensors, reports, sign-in, a public API, plugins and optional AI.">
   <div class="page-head">
-    <div class="wrap">
-      <p class="eyebrow">Features</p>
+    <div class="wrap split">
+      <div>
       <h1>What FixFlow does</h1>
       <p class="lede">Grouped by what you want to get done. Each item links to the page in the documentation that explains it, including what it does not do yet.</p>
+      </div>
+      <Photo slug="features-phone" ratio="4 / 3" size="1600 × 1200" title="a phone in a technician’s hand" alt="A technician’s hands holding a handheld control unit beside a machine"
+        brief="Close, over the shoulder: a phone held in a gloved hand next to a machine. Screen not readable, so no fake interface." />
     </div>
   </div>
   <section style="padding-top:24px">
