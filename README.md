@@ -62,6 +62,12 @@ On a release the first start pulls the published images (a few minutes); on anyt
 
 ---
 
+## Website
+
+The public website (home, features, install, open source, support) is in [website/](website/): an Astro project that builds to static files, with the docs under `/docs/`. `SITE_URL=https://example.org bin/build_website` builds it all and checks every link; [website/README.md](website/README.md) says how to work on it and host it.
+
+---
+
 ## Development Roadmap
 
 - **v0.1** (current) — Core CMMS loop: assets, work orders, PM, IoT ingestion

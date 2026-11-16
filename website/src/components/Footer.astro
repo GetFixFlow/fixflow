@@ -1,0 +1,46 @@
+---
+import { repo, links, doc, docs } from '../data/site';
+---
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-about">
+        <a class="brand" href="/" aria-label="FixFlow, home"><img src="/mark.png" alt="" width="37" height="30" /> <span>Fix<b>Flow</b></span></a>
+        <p>Free, open-source maintenance management that you run on your own server.</p>
+      </div>
+      <div>
+        <h2>Product</h2>
+        <ul>
+          <li><a href="/features/">Features</a></li>
+          <li><a href="/install/">Install</a></li>
+          <li><a href={doc('upgrading')}>Upgrading</a></li>
+          <li><a href={links.releases} rel="noopener">Releases</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Learn</h2>
+        <ul>
+          <li><a href={docs}>Documentation</a></li>
+          <li><a href={doc('technician')}>Guide for technicians</a></li>
+          <li><a href={doc('administrator')}>Guide for administrators</a></li>
+          <li><a href={doc('public-api')}>Public API</a></li>
+          <li><a href={doc('troubleshooting')}>Troubleshooting</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Project</h2>
+        <ul>
+          <li><a href="/open-source/">Open source</a></li>
+          <li><a href="/support/">Support and community</a></li>
+          <li><a href={links.discussions} rel="noopener">Discussions</a></li>
+          <li><a href={repo} rel="noopener">GitHub</a></li>
+          <li><a href={links.security} rel="noopener">Report a security problem</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>FixFlow is free software under the <a href={links.license} rel="noopener">GNU AGPL-3.0</a>.</span>
+      <span>This site sets no cookies and has no analytics.</span>
+    </div>
+  </div>
+</footer>

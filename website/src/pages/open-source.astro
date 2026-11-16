@@ -1,0 +1,96 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import { doc, links, repo } from '../data/site';
+
+const ways = [
+  { icon: 'book', title: 'Try an install and write down every stumble', text: 'Anything missing, wrong or confusing in the install guide is a valuable issue.', href: links.issues },
+  { icon: 'globe', title: 'Translate it', text: 'A language is a set of files. Copy the English ones, translate them, and the tests tell you what is missing. The Spanish is a machine draft that needs a native speaker.', href: doc('translating') },
+  { icon: 'plug', title: 'Write a plugin', text: 'A report or a notification channel is a folder with one file. Two samples show the shape.', href: doc('plugins') },
+  { icon: 'code', title: 'Pick up an issue', text: 'Issues labelled good first issue or help wanted are the place to start. Say you are on one so two people do not do the same work.', href: links.goodFirstIssue },
+  { icon: 'heart', title: 'Answer a question', text: 'Helping someone in Discussions is help too.', href: links.discussionsQA },
+  { icon: 'shield', title: 'Review the security', text: 'An independent review is the thing 1.0 waits for. The brief for a reviewer is on the security review page.', href: doc('security-review') },
+];
+---
+<Base title="Open source" description="FixFlow is free software under the AGPL-3.0. Read the code, run it, change it, and help build it.">
+  <div class="page-head">
+    <div class="wrap">
+      <p class="eyebrow">Open source</p>
+      <h1>Free software, all of it</h1>
+      <p class="lede">FixFlow is released under the GNU Affero General Public License, version 3. Every feature is in the open code. What can be paid for is people’s time, never a feature held back.</p>
+      <div class="btn-row" style="margin-top:28px">
+        <a class="btn btn-primary" href={repo} rel="noopener">View the code on GitHub</a>
+        <a class="btn btn-ghost" href={links.contributing} rel="noopener">Read CONTRIBUTING</a>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <div class="wrap grid grid-2" style="gap:clamp(28px,5vw,64px);align-items:start">
+      <div class="prose">
+        <h2 style="margin-top:0">What the licence means for you</h2>
+        <p>You may run FixFlow for any purpose, read how it works, change it, and share it with or without changes. The AGPL adds one condition aimed at software run over a network: if you offer a <strong>modified</strong> FixFlow to other people to use, you must give them the source of your changes under the same licence.</p>
+        <p>Running an unmodified FixFlow inside your own company asks nothing of you. The full text is in <a href={links.license} rel="noopener">LICENSE</a>; if your use is unusual, read it or ask a lawyer, because this page is not legal advice.</p>
+      </div>
+      <div>
+        <h3 style="margin-bottom:14px">What it is built with</h3>
+        <div class="table-wrap">
+          <table>
+            <tbody>
+              <tr><th scope="row">API</th><td>Ruby on Rails 8, in API mode</td></tr>
+              <tr><th scope="row">Web app</th><td>React 18, TypeScript, Vite, Tailwind CSS, installable as a phone app</td></tr>
+              <tr><th scope="row">Data</th><td>PostgreSQL 16, Redis 7, Sidekiq for background work</td></tr>
+              <tr><th scope="row">Files</th><td>Any S3-compatible storage (SeaweedFS in the Docker install)</td></tr>
+              <tr><th scope="row">Sensors</th><td>REST and MQTT</td></tr>
+              <tr><th scope="row">Install</th><td>Docker Compose, or a Helm chart</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Take part</p>
+        <h2>Ways to help, from small to large</h2>
+        <p class="lede">You do not have to write code. For anything bigger than a small fix, open an issue first and say what you plan, so you do not spend a week on something that cannot be merged.</p>
+      </div>
+      <div class="grid grid-3">
+        {ways.map((w) => (
+          <article class="card link">
+            <Icon name={w.icon as any} />
+            <h3><a href={w.href} rel="noopener">{w.title}</a></h3>
+            <p>{w.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap grid grid-2" style="gap:clamp(28px,5vw,64px);align-items:start">
+      <div class="prose">
+        <h2 style="margin-top:0">What a pull request needs</h2>
+        <ul>
+          <li><strong>One change per pull request</strong>, branched from <code>main</code>.</li>
+          <li><strong>A test that fails without the change.</strong> A test that passes either way proves nothing.</li>
+          <li><strong>Documentation with the change.</strong> Wrong or missing documentation is a bug.</li>
+          <li><strong>The checks CI runs</strong>, and an honest list of what you did not try.</li>
+        </ul>
+        <p>The details are in <a href={links.contributing} rel="noopener">CONTRIBUTING.md</a>, and the way to run FixFlow from source is on the <a href={doc('development')}>Development</a> page.</p>
+      </div>
+      <div class="prose">
+        <h2 style="margin-top:0">How the project behaves</h2>
+        <ul>
+          <li>A release on the <strong>first Tuesday of every month</strong>, with “Before you upgrade” first in the notes.</li>
+          <li>Security problems are reported <strong>privately</strong>: see the <a href={links.security} rel="noopener">security policy</a>.</li>
+          <li>Everyone follows the <a href={links.conduct} rel="noopener">Code of Conduct</a>.</li>
+          <li>Before 1.0 only the newest release gets fixes. The promise for older versions comes with 1.0.</li>
+        </ul>
+        <p>Read the <a href="/support/">support and community</a> page for how help and paid work are arranged.</p>
+      </div>
+    </div>
+  </section>
+</Base>

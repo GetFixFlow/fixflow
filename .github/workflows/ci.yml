@@ -309,3 +309,35 @@ jobs:
 
       - name: Build the site
         run: mkdocs build --strict
+
+  # Builds the public website (website/) and the docs into one folder, and checks that every link and anchor in it resolves.
+  # See website/README.md.
+  website:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: deploy/docs/requirements.txt
+
+      - name: Install MkDocs
+        run: pip install -r deploy/docs/requirements.txt
+
+      - name: Type-check the pages
+        run: npm ci --no-audit --no-fund && npm run check
+        working-directory: website
+
+      - name: Build the site with the docs and check its links
+        run: SITE_URL=https://fixflow.example bin/build_website

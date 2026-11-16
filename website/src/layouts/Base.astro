@@ -1,0 +1,50 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props { title?: string; description?: string; }
+const { title, description = 'FixFlow is a free, open-source maintenance management system (CMMS) that you run on your own server: work orders, preventive maintenance, assets, parts, sensors and reports.' } = Astro.props;
+const full = title ? `${title} · FixFlow` : 'FixFlow: open-source maintenance management you run yourself';
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{full}</title>
+    <meta name="description" content={description} />
+    {canonical && <link rel="canonical" href={canonical} />}
+    <meta name="theme-color" content="#1257d6" />
+    <link rel="icon" type="image/png" href="/icon-512.png" sizes="512x512" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta property="og:site_name" content="FixFlow" />
+    <meta property="og:title" content={full} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    {canonical && <meta property="og:url" content={canonical} />}
+    {Astro.site && <meta property="og:image" content={new URL('/icon-512.png', Astro.site).href} />}
+    <meta name="twitter:card" content="summary" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to main content</a>
+    <Header />
+    <main id="main"><slot /></main>
+    <Footer />
+    <script is:inline>
+      // "Copy" buttons on code blocks. Without script they are hidden and the text can still be selected.
+      document.querySelectorAll('[data-copy]').forEach(function (b) {
+        b.hidden = false;
+        b.addEventListener('click', function () {
+          var t = document.getElementById(b.getAttribute('data-copy'));
+          if (!t || !navigator.clipboard) return;
+          navigator.clipboard.writeText(t.innerText).then(function () {
+            var old = b.textContent; b.textContent = 'Copied';
+            setTimeout(function () { b.textContent = old; }, 1600);
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

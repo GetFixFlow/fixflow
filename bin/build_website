@@ -1,0 +1,27 @@
+#!/bin/sh
+# Builds the whole public site into website/dist: the website (website/, Astro) with the product docs (docs/, MkDocs) under /docs/.
+# The result is plain files: put the folder on any static host (website/README.md).
+#
+#   bin/build_website                              for a look on your machine: cd website && npx astro preview
+#   SITE_URL=https://example.org bin/build_website  for publishing: canonical links, a sitemap, and robots.txt pointing at it
+#
+# It needs Node 22 (npm) and MkDocs with the pinned packages (pip install -r deploy/docs/requirements.txt).
+set -eu
+cd "$(dirname "$0")/.."
+
+command -v mkdocs >/dev/null 2>&1 || { echo "mkdocs is not installed: pip install -r deploy/docs/requirements.txt" >&2; exit 1; }
+site_url="${SITE_URL:-}"
+site_url="${site_url%/}"
+
+(cd website && npm ci --no-audit --no-fund && npm run build)
+
+# The docs go under /docs/ of the same site, and their logo leads back to the website.
+if [ -n "$site_url" ]; then
+  DOCS_SITE_URL="$site_url/docs/" SITE_HOME=/ mkdocs build --strict -q -d website/dist/docs
+  printf 'Sitemap: %s/sitemap-index.xml\nSitemap: %s/docs/sitemap.xml\n' "$site_url" "$site_url" >> website/dist/robots.txt
+else
+  DOCS_SITE_URL="" SITE_HOME=/ mkdocs build --strict -q -d website/dist/docs
+fi
+
+node website/scripts/check-links.mjs website/dist
+echo "Built website/dist"

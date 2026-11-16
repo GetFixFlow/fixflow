@@ -1,0 +1,87 @@
+---
+import Base from '../layouts/Base.astro';
+import { doc, links, supportEmail } from '../data/site';
+
+const help = [
+  ['Ask how something works, or what others do', 'GitHub Discussions, Q&A', links.discussionsQA],
+  ['Suggest an idea and talk it over', 'Discussions, Ideas', links.discussionsIdeas],
+  ['Show what you built, or how your company uses FixFlow', 'Discussions, Show and tell', links.discussionsShow],
+  ['Report something that is broken', 'An issue, with the bug template', links.issues],
+  ['Ask for a feature', 'An issue, with the feature template', links.issues],
+  ['Fix an install that will not start', 'Troubleshooting, in the docs', doc('troubleshooting')],
+];
+---
+<Base title="Support and community" description="Free help in GitHub Discussions, a monthly release rhythm, and paid support, setup help and sponsored features for companies that want them.">
+  <div class="page-head">
+    <div class="wrap">
+      <p class="eyebrow">Support and community</p>
+      <h1>Getting help, and paying for it if you want to</h1>
+      <p class="lede">Nothing on this page is a feature held back for people who pay. What can be paid for is people’s time: help, guarantees, and work on what you need.</p>
+    </div>
+  </div>
+
+  <section>
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Free</p>
+        <h2>Free help</h2>
+        <p class="lede">Given by volunteers and the maintainers when they have time. <strong>There is no promised answer time.</strong></p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col">I want to…</th><th scope="col">Go to</th></tr></thead>
+          <tbody>
+            {help.map(([want, where, href]) => <tr><td>{want}</td><td><a href={href} rel="noopener">{where}</a></td></tr>)}
+            <tr><td>Report a security problem</td><td><strong>Not in public.</strong> See the <a href={links.security} rel="noopener">security policy</a>.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose" style="margin-top:28px">
+        <p>A question gets a better answer when it says what you did, what you expected and what happened, with the version (Settings, System Health) and the relevant lines of <code>make logs</code>. <strong>Never paste passwords, tokens or customer data</strong> into a public place.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap grid grid-2" style="gap:clamp(28px,5vw,64px);align-items:start">
+      <div class="prose">
+        <p class="eyebrow">Releases</p>
+        <h2 style="margin-top:0">A new version on the first Tuesday</h2>
+        <ul>
+          <li>The notes put <strong>Before you upgrade</strong> first: anything you have to do is listed there, so a monthly upgrade is a short read, then <code>make upgrade</code>.</li>
+          <li>A month with nothing worth releasing is skipped, and the next release says so.</li>
+          <li>A <strong>security fix or serious bug</strong> is released when it is ready, not held for the first Tuesday.</li>
+          <li><strong>Until 1.0 only the newest release gets fixes.</strong> If you are on an older one, the answer to “is this fixed?” is to upgrade.</li>
+        </ul>
+        <p><a href={links.releases} rel="noopener">Watch the repository for “Releases only”</a> to be told each time.</p>
+      </div>
+      <div class="prose">
+        <p class="eyebrow">Be part of it</p>
+        <h2 style="margin-top:0">Community</h2>
+        <p>Everyone taking part follows the <a href={links.conduct} rel="noopener">Code of Conduct</a>. You can help by answering questions, translating, writing plugins or docs, or just writing down what confused you. See <a href="/open-source/">Open source</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Paid</p>
+        <h2>Paid support, help and sponsored work</h2>
+        <p class="lede">Each is agreed one company at a time, in writing, so this page describes them rather than prices them.</p>
+      </div>
+      <div class="grid grid-2">
+        <article class="card"><h3>Support contract</h3><p>For a company that runs FixFlow for its work and needs a guarantee: a named way to reach us, an agreed answer time, and help with upgrades and problems on your own install. What is covered, the times and the price are written down before you pay anything. It does not change what you may do with the software.</p></article>
+        <article class="card"><h3>Setup help</h3><p>We install and configure FixFlow for you or beside you, bring in your places, assets and parts from your spreadsheets, set up sign-in with your company directory, and train the first people, for a fixed fee agreed after we have seen what you have.</p></article>
+        <article class="card"><h3>Sponsored features</h3><p>Pay for something FixFlow does not do yet. It is built <strong>in the open</strong>, under the same licence, and <strong>everyone gets it</strong>: nobody buys an exclusive feature or a private version. The maintainers decide whether it fits, and a feature that does not fit is declined before money is taken.</p></article>
+        <article class="card"><h3>Managed hosting</h3><p>FixFlow run for you, with backups and upgrades done by us. It is <strong>not a product you can sign up for yet</strong>: tell us what you would need, and we will say honestly what is available and when. Your data stays exportable, and you can move to your own server at any time.</p></article>
+      </div>
+      <div class="note" style="margin-top:32px">
+        {supportEmail
+          ? <p>To ask about any of these, write to <a href={`mailto:${supportEmail}`}>{supportEmail}</a> and say which company you are, how many people use FixFlow and what you need.</p>
+          : <p>To ask about any of these, say which company you are, how many people use FixFlow and what you need. A contact address for paid support has not been published yet.</p>}
+      </div>
+      <p class="prose" style="margin-top:24px;color:var(--muted)">Why a page for this: the project is kept going by the people who use it. These are how the time to keep FixFlow secure, documented and released every month is paid for. If FixFlow saves your company money, this is the way to put some of it back.</p>
+    </div>
+  </section>
+</Base>
