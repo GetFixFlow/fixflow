@@ -1,0 +1,19 @@
+---
+// A photo slot. When public/photos/<slug>.jpg (or .webp, .png) exists it shows the picture; until then it shows a labelled
+// placeholder that says what to put there and at what size. website/PHOTOS.md lists every slot and records where each photo came from.
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+
+interface Props { slug: string; title: string; brief: string; alt: string; ratio?: string; size?: string; class?: string; }
+const { slug, title, brief, alt, ratio = '4 / 3', size = '1600 × 1200', class: extra = '' } = Astro.props;
+const ext = ['jpg', 'jpeg', 'webp', 'png'].find((e) => existsSync(join(process.cwd(), 'public', 'photos', `${slug}.${e}`)));
+---
+{ext ? (
+  <figure class={`photo ${extra}`} style={`aspect-ratio:${ratio}`}>
+    <img src={`/photos/${slug}.${ext}`} alt={alt} loading="lazy" decoding="async" />
+  </figure>
+) : (
+  <figure class={`photo ph ${extra}`} style={`aspect-ratio:${ratio}`} aria-hidden="true">
+    <div class="brief"><b>Photo to add: {title}</b>{brief}<br /><code>public/photos/{slug}.jpg · {size}</code></div>
+  </figure>
+)}

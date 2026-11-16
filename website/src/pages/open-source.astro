@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import Photo from '../components/Photo.astro';
 import Icon from '../components/Icon.astro';
 import { doc, links, repo } from '../data/site';
 
@@ -15,7 +16,6 @@ const ways = [
 <Base title="Open source" description="FixFlow is free software under the AGPL-3.0. Read the code, run it, change it, and help build it.">
   <div class="page-head">
     <div class="wrap">
-      <p class="eyebrow">Open source</p>
       <h1>Free software, all of it</h1>
       <p class="lede">FixFlow is released under the GNU Affero General Public License, version 3. Every feature is in the open code. What can be paid for is people’s time, never a feature held back.</p>
       <div class="btn-row" style="margin-top:28px">
@@ -53,7 +53,6 @@ const ways = [
   <section class="band">
     <div class="wrap">
       <div class="head">
-        <p class="eyebrow">Take part</p>
         <h2>Ways to help, from small to large</h2>
         <p class="lede">You do not have to write code. For anything bigger than a small fix, open an issue first and say what you plan, so you do not spend a week on something that cannot be merged.</p>
       </div>
