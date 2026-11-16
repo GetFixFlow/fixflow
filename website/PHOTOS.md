@@ -5,7 +5,7 @@ The pages have photo slots (`src/components/Photo.astro`). A slot shows a labell
 | Slot (file in `public/photos/`) | Where | Size | What to look for |
 | --- | --- | --- | --- |
 | `home-floor.jpg` (filled, Pexels) | Home, wide band under the first screen | 2400 × 900 | A technician with a phone or tablet beside a pump or motor, in daylight, in a real plant or workshop. Not staged smiles, not hard hats on white. |
-| `home-team.jpg` | Home, Community section | 1500 × 1000 | Two or three people in work clothes talking over a machine or a screen. Candid. |
+| `home-team.jpg` (filled, Pexels) | Home, Community section | 1500 × 1000 | Two or three people in work clothes talking over a machine or a screen. Candid. |
 | `features-phone.jpg` (filled, Pexels) | Features, top | 1600 × 1200 | Over the shoulder: a phone in a gloved hand next to a machine. Screen not readable (no fake interface). |
 | `install-server.jpg` | Install, top | 1600 × 1200 | A small server or mini PC on a shelf or in a rack, tidy cables. Nothing branded. |
 | `support-team.jpg` | Support, top | 1600 × 1200 | Two people, one laptop, a plant or office behind. Candid. |
@@ -26,3 +26,4 @@ Two slots are filled from [Pexels](https://www.pexels.com), whose licence allows
 | --- | --- | --- | --- | --- |
 | `home-floor.jpg` | [Pexels photo 35072831](https://www.pexels.com/photo/industrial-worker-operating-machinery-control-panel-35072831/), by bulat843 (name taken from the file name; Pexels does not show it on the result card). Cropped to a wide band. | [Pexels Licence](https://www.pexels.com/license/) | 2026-11-16 | Nothing to keep: free, no purchase. Re-check the licence page before publishing. |
 | `features-phone.jpg` | [Pexels photo 9242906](https://www.pexels.com/photo/close-up-photo-of-a-cnc-router-held-by-a-person-9242906/), by mikhail-nilov (from the file name). Cropped to 4:3. | [Pexels Licence](https://www.pexels.com/license/) | 2026-11-16 | As above. |
+| `home-team.jpg` | [Pexels photo 34054482](https://www.pexels.com/photo/team-collaboration-in-modern-manufacturing-facility-34054482/); photographer not recorded here, read it off the photo page. Cropped from a portrait original to 3:2. A little gold lettering on one shirt is cut off and unreadable. | [Pexels Licence](https://www.pexels.com/license/) | 2026-11-16 | As above. |
