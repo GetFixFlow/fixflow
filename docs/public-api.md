@@ -6,8 +6,8 @@ Connect FixFlow to your other systems: read and change work orders and assets fr
 - **The public API** (`/api/v1/open`) is the part of the API made for programs: a small, steady set of endpoints with simple answers.
 - **Webhooks** are FixFlow calling out: an address you give it, and the events you want sent there, each message signed so the receiver knows it is from you.
 
-!!! note "Before 1.0"
-    The public API is versioned by its address (`/api/v1/open`), and within a version a field is only ever **added** to an answer, never renamed or removed. FixFlow itself is before 1.0, so a breaking change would be a new version at a new address, announced in the [changelog](changelog.md). The rest of the API (the one the web app uses) can still change; use `/api/v1/open` for anything that must keep working.
+!!! note "What stays the same"
+    The public API is versioned by its address (`/api/v1/open`), and within a version a field is only ever **added** to an answer, never renamed or removed. A change that cannot be made by adding would be a new version at a new address (`/api/v2/open`), served beside this one, announced in the [changelog](changelog.md). FixFlow itself is **before 1.0**, so until it is released a minor version may still change this API, and the changelog says when. [Stability and the upgrade promise](stability.md) says exactly what 1.0 holds still, and a test already refuses a change that would break it. The rest of the API (the one the web app uses) can change in any release; use `/api/v1/open` for anything that must keep working.
 
 ## API keys and scopes
 

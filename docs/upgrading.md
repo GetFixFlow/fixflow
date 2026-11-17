@@ -2,7 +2,7 @@
 
 Move to a new version safely, and go back if it goes wrong.
 
-FixFlow is released as versions (`v0.2.0`, `v1.0.0`, ...; the [releases page](https://github.com/GetFixFlow/fixflow/releases) lists them, and Settings, System Health says when a newer one exists). Each release has notes with the list of changes and, at the top, a **Before you upgrade** list when there is something you must do. Read it first. Before 1.0, a new minor version (`0.2.0` to `0.3.0`) may change things that were working; the notes say what.
+FixFlow is released as versions (`v0.2.0`, `v1.0.0`, ...; the [releases page](https://github.com/GetFixFlow/fixflow/releases) lists them, and Settings, System Health says when a newer one exists). Each release has notes with the list of changes and, at the top, a **Before you upgrade** list when there is something you must do. Read it first. Before 1.0, a new minor version (`0.2.0` to `0.3.0`) may change things that were working; the notes say what. From 1.0 the public API, webhooks, sensor ingestion and the settings in `.env` only grow, and every upgrade within 1.x migrates your data by itself: see [Stability and the upgrade promise](stability.md).
 
 **To upgrade a Docker install** (the one from [Install on a server](install.md)), in the folder you run it from:
 

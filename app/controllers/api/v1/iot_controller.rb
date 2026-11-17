@@ -95,7 +95,7 @@ module Api
       end
 
       def find_asset_from_payload(organization, payload)
-        identifier = payload["asset_id"].to_s
+        identifier = (payload["asset_id"].presence || payload["asset_tag"]).to_s
         return nil if identifier.blank?
         organization.assets.find_by(id: identifier) ||
           organization.assets.find_by(asset_tag: identifier)
