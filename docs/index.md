@@ -17,6 +17,7 @@ These pages are for the person who **installs and looks after** a FixFlow server
 | I want to... | Read |
 | --- | --- |
 | Move to a new version, or go back | [Upgrading and rolling back](upgrading.md) |
+| Know what a program built on FixFlow can rely on, and which versions get fixes | [Stability and the upgrade promise](stability.md) |
 | Back up and restore | [Backups and restoring](backups.md) |
 | See whether everything works | [Watching the install](monitoring.md) |
 | Fix something that is not working | [Troubleshooting](troubleshooting.md) |

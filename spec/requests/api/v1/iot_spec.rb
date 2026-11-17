@@ -46,6 +46,36 @@ RSpec.describe "IoT Ingestion & Data API", type: :request do
       end
     end
 
+    # docs/iot.md: "`asset_tag` can be used instead of `asset_id`", in all three forms of a payload.
+    context "when the asset is named by its `asset_tag`" do
+      def send_readings(body)
+        post "/api/v1/iot/ingest", params: body.to_json, headers: { "Content-Type" => "application/json", "X-API-Key" => raw_key }
+      end
+
+      let(:tag) { asset.asset_tag }
+
+      it "works for one reading" do
+        expect { send_readings({ asset_tag: tag, metric: "temperature", value: 70 }) }.to change(asset.sensor_readings, :count).by(1)
+        expect(response).to have_http_status(:ok)
+      end
+
+      it "works for several readings from one device" do
+        readings = [{ metric: "temperature", value: 70 }, { metric: "vibration", value: 3 }]
+
+        expect { send_readings({ asset_tag: tag, device_id: "d1", readings: readings }) }.to change(asset.sensor_readings, :count).by(2)
+      end
+
+      it "works for a list of readings" do
+        expect { send_readings([{ asset_tag: tag, metric: "temperature", value: 70 }]) }.to change(asset.sensor_readings, :count).by(1)
+      end
+
+      it "still refuses an asset that is not there" do
+        send_readings({ asset_tag: "NOPE-1", metric: "temperature", value: 70 })
+
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+    end
+
     context "with invalid API key" do
       it "returns 401" do
         post "/api/v1/iot/ingest",

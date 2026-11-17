@@ -88,7 +88,7 @@ module Iot
     end
 
     private_class_method def self.find_asset(organization, data)
-      identifier = data["asset_id"].to_s
+      identifier = (data["asset_id"].presence || data["asset_tag"]).to_s # docs/iot.md: the tag can be sent as `asset_tag`
       return nil if identifier.blank?
 
       organization.assets.find_by(id: identifier) ||

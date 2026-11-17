@@ -4,8 +4,8 @@ FixFlow's web app is a client of this API, so everything a person can do on scre
 
 All endpoints are under `/api/v1/` and speak JSON: send `Content-Type: application/json` and a JSON body. Examples use `curl` against `https://fixflow.example.com`; replace it with your `APP_URL`.
 
-!!! note "The API is not yet stable"
-    FixFlow is before version 1.0. Endpoints and answers may change between minor versions; the [changelog](changelog.md) says when they do. A stable API with an upgrade promise is planned for 1.0.
+!!! note "Which parts are stable"
+    FixFlow is before version 1.0, so endpoints and answers may still change between minor versions; the [changelog](changelog.md) says when they do. From 1.0 the **public API** (`/api/v1/open`), sensor ingestion, webhooks and the health check only grow, and [API endpoints](api-endpoints.md) marks each endpoint **Stable** or **Web app**. The web app's own endpoints (everything else on this page, such as sign-in) change with the web app. [Stability and the upgrade promise](stability.md) has the rules.
 
 ## Signing in
 

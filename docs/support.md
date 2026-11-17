@@ -24,7 +24,7 @@ A version is released on the **first Tuesday of every month**, with the changes 
 
 - A month with nothing worth releasing is skipped, and the next release says so.
 - A **security fix or a serious bug** is not held for the first Tuesday: it is released when it is ready, and the release notes say why.
-- **Until version 1.0 only the newest release gets fixes.** If you are on an older one, the answer to "is this fixed?" is to upgrade. The promise for older versions from 1.0 on will be stated with 1.0.
+- **Only the newest release gets fixes**, before 1.0 and after it. If you are on an older one, the answer to "is this fixed?" is to upgrade. From 1.0 on every release is compatible with the one before and upgrades itself, and the last 1.x gets security fixes for a year after 2.0: see [Stability and the upgrade promise](stability.md#which-versions-get-fixes).
 
 [Watching](https://github.com/GetFixFlow/fixflow) the repository for **Releases only** tells you each time.
 
@@ -34,7 +34,7 @@ These are the ways to pay for people's time. They are agreed one company at a ti
 
 ### Support contract
 
-For a company that runs FixFlow for its work and needs a guarantee: a named way to reach us, an agreed time within which we answer, and help with upgrades and problems on your own install. What is covered, the answer times and the price are written down in the contract before you pay anything. A contract does not change what you may do with the software, or what the free version does.
+For a company that runs FixFlow for its work and needs a guarantee: a named way to reach us, an agreed time within which we answer, and help with upgrades and problems on your own install. What is covered, the answer times and the price are written down in the contract before you pay anything. It can also cover staying on an older version for a time, which the free project does not do ([Stability](stability.md#which-versions-get-fixes)). A contract does not change what you may do with the software, or what the free version does.
 
 ### Setup help
 

@@ -50,6 +50,7 @@ cd apps/web && npx vitest run          # web app
 
 ### Things that have bitten before
 
+- **The stable API is a promise.** The public API (`/api/v1/open`), sensor ingestion, webhooks, the health check and the settings in `.env.example` must not lose or change anything within 1.x ([docs/stability.md](docs/stability.md)). `spec/contracts/stable_api_spec.rb` fails when you remove or retype something it covers. Fix the change (keep the old, add the new), not the test; if you only added something, record it with `UPDATE_API_BASELINE=1 bundle exec rspec spec/contracts/stable_api_spec.rb`, which refuses to write when anything would be lost.
 - **Report and dashboard answers are checked from both ends.** If you change what a report endpoint sends, regenerate the saved answers and commit them with the web change: `UPDATE_REPORT_FIXTURES=1 bundle exec rspec spec/contracts/report_shapes_spec.rb`. The web tests load the same files into the types in `apps/web/src/types/reports.ts`.
 - **Do not commit a re-dumped `db/schema.rb`.** A migration run against an old development database rewrites the whole file in a different column order. Revert it and apply only your own lines (the version, your column, your index), or generate it from a fresh database.
 - **Grouping by an enum column gives its names** (`"completed"`), not its numbers. Money and averages from the database are `BigDecimal`, which JSON turns into text: convert with `.to_f` where the screens expect numbers.

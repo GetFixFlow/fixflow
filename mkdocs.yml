@@ -89,6 +89,7 @@ nav:
       - Importing data and sample data: import.md
   - Keep it running:
       - Upgrading and rolling back: upgrading.md
+      - Stability and the upgrade promise: stability.md
       - Backups and restoring: backups.md
       - Watching the install: monitoring.md
       - Troubleshooting: troubleshooting.md
