@@ -60,7 +60,7 @@ export function useAlertNotifications() {
         if (getShown().has(alert.id)) return
         markShown(alert.id)
         addAlert(alert)
-        const viewAlerts = { label: 'View', onClick: () => { window.location.href = '/iot/alerts' } }
+        const viewAlerts = { label: 'View', onClick: () => { window.location.href = '/iot' } }
         if (alert.severity === 'critical') {
           if (getSoundEnabled()) playAlertTone()
           toast.error(`Critical alert: ${alert.message}`, { duration: 10_000, action: viewAlerts })

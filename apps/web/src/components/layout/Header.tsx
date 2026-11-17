@@ -59,7 +59,7 @@ export function Header() {
           size="icon"
           className="relative"
           aria-label={newAlerts.length > 0 ? t('shell.header.notifications_new', { count: newAlerts.length }) : t('shell.header.notifications')}
-          onClick={() => { clearAlerts(); navigate('/iot/alerts') }}
+          onClick={() => { clearAlerts(); navigate('/iot') }}
         >
           <Bell className="h-4 w-4" />
           {newAlerts.length > 0 && (
