@@ -50,7 +50,7 @@ describe('the header bell', () => {
 
     await user.click(screen.getByRole('button', { name: /Notifications: 1 new alerts/ }))
 
-    expect(screen.getByTestId('where')).toHaveTextContent('/iot/alerts')
+    expect(screen.getByTestId('where')).toHaveTextContent(/^\/iot$/)
     expect(useRealtimeStore.getState().newAlerts).toEqual([])
     expect(screen.getByRole('button', { name: 'Notifications' })).toBeInTheDocument()
   })
